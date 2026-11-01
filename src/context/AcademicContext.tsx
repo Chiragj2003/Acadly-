@@ -163,6 +163,21 @@ export interface AcademicContextType {
   updateStudentRemarks: (studentId: string, remark: string) => void;
   updateStudentFeeStatus: (studentId: string, status: string) => void;
 
+  // Comparison & Assessment Benchmarking
+  comparisonChartData: {
+    testName: string;
+    studentScore: number;
+    batchAvg: number;
+    batchTopper: number;
+    maxScore: number;
+  }[];
+  recordTestMarks: (
+    testName: string,
+    subject: string,
+    maxScore: number,
+    marks: { studentId: string; score: number }[]
+  ) => Promise<void>;
+
   // Community Feed
   communityPosts: CommunityPost[];
   addCommunityPost: (title: string, content: string, subject: string, attachmentName?: string, attachmentUri?: string) => Promise<void>;
@@ -534,6 +549,20 @@ export const AcademicProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Student 360 Roster
   const [studentsRoster, setStudentsRoster] = useState<Student360Profile[]>(INITIAL_STUDENTS_ROSTER);
 
+  // Comparison & Benchmark Chart Data
+  const [comparisonChartData, setComparisonChartData] = useState<{
+    testName: string;
+    studentScore: number;
+    batchAvg: number;
+    batchTopper: number;
+    maxScore: number;
+  }[]>([
+    { testName: 'Unit 1 (Kinematics)', studentScore: 88, batchAvg: 68, batchTopper: 96, maxScore: 100 },
+    { testName: 'Mock 1 (Mechanics)', studentScore: 78, batchAvg: 64, batchTopper: 94, maxScore: 100 },
+    { testName: 'Unit 2 (Calculus)', studentScore: 92, batchAvg: 74, batchTopper: 98, maxScore: 100 },
+    { testName: 'Midterm JEE Prep', studentScore: 85, batchAvg: 70, batchTopper: 97, maxScore: 100 },
+  ]);
+
   // Community Feed
   const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>(INITIAL_COMMUNITY_POSTS);
 
@@ -559,6 +588,9 @@ export const AcademicProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
         const savedRoster = await AsyncStorage.getItem('@acadly_students_roster');
         if (savedRoster) setStudentsRoster(JSON.parse(savedRoster));
+
+        const savedChart = await AsyncStorage.getItem('@acadly_comparison_chart_data');
+        if (savedChart) setComparisonChartData(JSON.parse(savedChart));
       } catch (err) {
         console.warn('Could not restore academic local storage', err);
       }
@@ -774,6 +806,45 @@ export const AcademicProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     await AsyncStorage.setItem('@acadly_join_requests', JSON.stringify(updatedReqs));
     await AsyncStorage.setItem('@acadly_students_roster', JSON.stringify(updatedRoster));
     await AsyncStorage.setItem('@acadly_student_join_status', 'approved');
+
+    // 4. Automatically add student to Batch Group Chat and create 1-on-1 Direct Chat in AsyncStorage
+    try {
+      const storedRooms = await AsyncStorage.getItem('@acadly_chat_rooms_v1');
+      const existingRooms = storedRooms ? JSON.parse(storedRooms) : [];
+
+      const newDirectRoom = {
+        id: `direct-teacher-${newStudentProfile.id}`,
+        title: `${newStudentProfile.name}`,
+        subtitle: `${newStudentProfile.grade} • Direct Doubt`,
+        type: 'direct',
+        participantIds: ['prof-vikram', newStudentProfile.id],
+        avatarEmoji: '🌱',
+        unreadCount: 0,
+        lastMessage: {
+          text: 'Welcome to the batch! Feel free to ask any doubt here.',
+          senderName: teacherProfile.fullName,
+          timeFormatted: 'Just now',
+        },
+      };
+
+      const updatedChatRooms = existingRooms.map((rm: any) => {
+        if (rm.type === 'batch_group') {
+          return {
+            ...rm,
+            participantIds: [...(rm.participantIds || []), newStudentProfile.id],
+          };
+        }
+        return rm;
+      });
+
+      if (!updatedChatRooms.some((rm: any) => rm.id === newDirectRoom.id)) {
+        updatedChatRooms.push(newDirectRoom);
+      }
+
+      await AsyncStorage.setItem('@acadly_chat_rooms_v1', JSON.stringify(updatedChatRooms));
+    } catch (e) {
+      console.warn('Chat room auto-link notice:', e);
+    }
   };
 
   const rejectJoinRequest = async (requestId: string, _reason?: string) => {
@@ -875,6 +946,57 @@ export const AcademicProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     );
   };
 
+  const recordTestMarks = async (
+    testName: string,
+    subject: string,
+    maxScore: number,
+    marks: { studentId: string; score: number }[]
+  ) => {
+    if (marks.length === 0) return;
+    const scores = marks.map((m) => m.score);
+    const batchTopper = Math.max(...scores);
+    const batchAvg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+    const ameliaMark =
+      marks.find((m) => m.studentId === 'stud-amelia')?.score || marks[0]?.score || 85;
+
+    const newBenchmark = {
+      testName,
+      studentScore: ameliaMark,
+      batchAvg,
+      batchTopper,
+      maxScore,
+    };
+
+    const updatedChart = [...comparisonChartData, newBenchmark];
+    setComparisonChartData(updatedChart);
+
+    // Update Student 360 percentiles and ranks based on scores
+    const sortedMarks = [...marks].sort((a, b) => b.score - a.score);
+    setStudentsRoster((prev) =>
+      prev.map((student) => {
+        const foundIndex = sortedMarks.findIndex((m) => m.studentId === student.id);
+        if (foundIndex !== -1) {
+          const rank = foundIndex + 1;
+          const percentile = Math.round(
+            ((sortedMarks.length - rank + 1) / sortedMarks.length) * 100
+          );
+          return {
+            ...student,
+            rank,
+            percentile,
+            teacherRemarks: [
+              `Scored ${sortedMarks[foundIndex].score}/${maxScore} on ${testName} (Rank #${rank}).`,
+              ...student.teacherRemarks,
+            ],
+          };
+        }
+        return student;
+      })
+    );
+
+    await AsyncStorage.setItem('@acadly_comparison_chart_data', JSON.stringify(updatedChart));
+  };
+
   return (
     <AcademicContext.Provider
       value={{
@@ -910,6 +1032,8 @@ export const AcademicProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         getStudentById,
         updateStudentRemarks,
         updateStudentFeeStatus,
+        comparisonChartData,
+        recordTestMarks,
         communityPosts,
         addCommunityPost,
         upvoteCommunityPost,

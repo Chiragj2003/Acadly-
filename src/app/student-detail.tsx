@@ -43,6 +43,7 @@ export default function StudentDetailScreen() {
     getStudentById,
     updateStudentRemarks,
     updateStudentFeeStatus,
+    comparisonChartData,
   } = useAcademic();
 
   const [activeTab, setActiveTab] = useState<'analytics' | 'attendance' | 'bio'>('analytics');
@@ -198,7 +199,7 @@ export default function StudentDetailScreen() {
         {/* ================= TAB 1: ANALYTICS ================= */}
         {activeTab === 'analytics' && (
           <View className="gap-4">
-            <PerformanceComparisonChart />
+            <PerformanceComparisonChart data={comparisonChartData} />
             <SubjectRadarOrBarChart />
           </View>
         )}

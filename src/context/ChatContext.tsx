@@ -275,6 +275,39 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
         }
       })
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'chat_messages' },
+        (payload: any) => {
+          const row = payload.new;
+          if (row && (row.room_id === activeRoomId || row.roomId === activeRoomId)) {
+            const incomingMsg: ChatMessage = {
+              id: row.id,
+              roomId: row.room_id || row.roomId,
+              senderId: row.sender_id || row.senderId,
+              senderName: row.sender_role === 'teacher' ? 'Prof. Vikram Joshi ⚡' : 'Student',
+              senderRole: row.sender_role || 'student',
+              senderAvatarEmoji: row.sender_role === 'teacher' ? '👨‍🏫' : '🌸',
+              text: row.message_text || '',
+              createdAt: row.created_at || new Date().toISOString(),
+              timeFormatted: new Date(row.created_at || Date.now()).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              }),
+              attachmentName: row.attachment_url ? 'Attachment.pdf' : undefined,
+              attachmentType: row.attachment_type,
+              isPinned: row.is_pinned || false,
+            };
+            setMessagesMap((prev) => {
+              const list = prev[activeRoomId] || [];
+              if (list.some((m) => m.id === incomingMsg.id)) return prev;
+              const updated = { ...prev, [activeRoomId]: [...list, incomingMsg] };
+              persistState(rooms, updated);
+              return updated;
+            });
+          }
+        }
+      )
       .on('broadcast', { event: 'pin_message' }, (payload) => {
         const { messageId, roomId } = payload.payload;
         if (roomId === activeRoomId) {

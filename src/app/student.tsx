@@ -49,7 +49,7 @@ import { CUTE_SUBJECT_MASCOTS } from '@/components/ui/SubjectMascotCard';
 export default function CuteStudentScreen() {
   const router = useRouter();
   const { currentInstitute } = useInstitute();
-  const { lectures, openPlayer, teacherProfile } = useAcademic();
+  const { lectures, openPlayer, teacherProfile, comparisonChartData } = useAcademic();
   const { openNotificationDrawer, unreadCount } = useFeeNotification();
 
   const [activeTab, setActiveTab] = useState<'courses' | 'chat' | 'progress' | 'notes' | 'assignments'>('courses');
@@ -313,10 +313,10 @@ export default function CuteStudentScreen() {
           </View>
         )}
 
-        {/* ================= TAB 2: PROGRESS & CHARTS ================= */}
+        {/* ================= TAB 3: PROGRESS & CHARTS ================= */}
         {activeTab === 'progress' && (
           <View className="gap-4">
-            <PerformanceComparisonChart />
+            <PerformanceComparisonChart data={comparisonChartData} />
             <SubjectRadarOrBarChart />
             <AttendanceRingAndTrendChart percentage={96.4} />
 
