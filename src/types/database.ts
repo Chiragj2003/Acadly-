@@ -125,6 +125,7 @@ export interface Lecture {
   institute_id: string;
   batch_id: string;
   title: string;
+  description?: string;
   subject: string;
   provider: 'youtube' | 'direct' | 'bunny';
   video_id_or_url: string;
@@ -146,12 +147,18 @@ export interface Assignment {
   instructions: string;
   due_date: string;
   due_label: string;
+  due_date_formatted?: string;
   total_marks: number;
+  max_marks?: number;
   question_count: number;
   attachment_url?: string;
   created_by: string;
+  assigned_by_name?: string;
   created_at: string;
   submission_status?: 'pending' | 'submitted' | 'graded';
+  status?: 'pending' | 'submitted' | 'graded';
+  submission_count?: number;
+  total_students?: number;
 }
 
 export interface Submission {
@@ -166,6 +173,7 @@ export interface Submission {
   marks_obtained?: number;
   feedback?: string;
   submitted_at: string;
+  submitted_at_formatted?: string;
 }
 
 // ==============================================================================

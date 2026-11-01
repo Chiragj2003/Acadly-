@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  Modal,
+} from 'react-native';
 import {
   UserCheck,
   Check,
@@ -10,210 +17,334 @@ import {
   ArrowLeft,
   ChevronRight,
   Shield,
+  Phone,
+  School,
+  Award,
+  Layers,
+  HeartHandshake,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { ScreenWrapper, Badge } from '@/components/ui';
-import { useInstitute } from '@/context/InstituteContext';
+import { ScreenWrapper, Badge, Mascot } from '@/components/ui';
+import { useAcademic, JoinRequest } from '@/context/AcademicContext';
 
-export interface PendingStudentRequest {
-  id: string;
-  name: string;
-  email: string;
-  rollNumber: string;
-  targetExam: string;
-  grade: string;
-  school: string;
-  board: string;
-  previousScore: string;
-  weakSubjects: string[];
-  appliedTime: string;
-  codeUsed: string;
-}
+const BATCH_CHOICES = [
+  { id: 'Batch Sakura 🌸 (Medical & Adv)', name: 'Batch Sakura 🌸' },
+  { id: 'Batch Cosmos 🚀 (Foundation JEE)', name: 'Batch Cosmos 🚀' },
+  { id: 'Batch Spark ⚡ (Board Revision)', name: 'Batch Spark ⚡' },
+];
 
-const DEFAULT_PENDING: PendingStudentRequest[] = [
-  {
-    id: 'req-01',
-    name: 'Kabir Singhania 🌸',
-    email: 'kabir.s@gmail.com',
-    rollNumber: 'ADM-2026-118',
-    targetExam: 'IIT-JEE 2026',
-    grade: 'Class 11 Science',
-    school: 'Delhi Public School (R.K. Puram)',
-    board: 'CBSE',
-    previousScore: '94.2% in Class 10',
-    weakSubjects: ['Organic Chemistry', 'Rotational Mechanics'],
-    appliedTime: '15 mins ago',
-    codeUsed: 'SHARMA-MATH-89',
-  },
-  {
-    id: 'req-02',
-    name: 'Zoya Khan 🌿',
-    email: 'zoya.k@gmail.com',
-    rollNumber: 'ADM-2026-124',
-    targetExam: 'NEET Medical 2026',
-    grade: 'Class 11 Science',
-    school: 'St. Xavier High School',
-    board: 'ICSE',
-    previousScore: '91.8% in Class 10',
-    weakSubjects: ['Physics Numerical Problems'],
-    appliedTime: '1 hour ago',
-    codeUsed: 'BLOOM2026',
-  },
+const FEE_PLAN_CHOICES = [
+  'Standard Monthly (₹3,500/mo)',
+  'Quarterly Saver (₹9,500/qtr)',
+  'Annual Topper Scholarship (₹32,000/yr)',
 ];
 
 export default function VerifyStudentsScreen() {
   const router = useRouter();
-  const { currentInstitute } = useInstitute();
-  const [requests, setRequests] = useState<PendingStudentRequest[]>(DEFAULT_PENDING);
+  const {
+    joinRequests,
+    approveJoinRequest,
+    rejectJoinRequest,
+    submitJoinRequest,
+    teacherProfile,
+  } = useAcademic();
 
-  const handleApprove = (req: PendingStudentRequest) => {
-    Alert.alert(
-      'Approve & Assign Batch 🌸',
-      `Approve ${req.name} and enroll into Batch Sakura?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Approve & Enroll',
-          onPress: () => {
-            setRequests(prev => prev.filter(r => r.id !== req.id));
-            Alert.alert('Student Verified! 🎉', `${req.name} has been approved and notified.`);
-          },
-        },
-      ]
-    );
+  const [selectedRequest, setSelectedRequest] = useState<JoinRequest | null>(null);
+  const [selectedBatch, setSelectedBatch] = useState(BATCH_CHOICES[0].id);
+  const [selectedFeePlan, setSelectedFeePlan] = useState(FEE_PLAN_CHOICES[0]);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  // Filter pending requests
+  const pendingRequests = joinRequests.filter(r => r.status === 'pending');
+
+  const openApprovalModal = (req: JoinRequest) => {
+    setSelectedRequest(req);
+    setModalVisible(true);
   };
 
-  const handleReject = (req: PendingStudentRequest) => {
+  const confirmApprove = async () => {
+    if (!selectedRequest) return;
+    await approveJoinRequest(selectedRequest.id, selectedBatch, selectedFeePlan);
+    setModalVisible(false);
     Alert.alert(
-      'Decline Request',
-      `Are you sure you want to decline ${req.name}'s request?`,
+      'Student Verified & Enrolled! 🎉',
+      `${selectedRequest.studentDetails.fullName} has been successfully assigned to ${selectedBatch}. They now appear in your active class roster.`
+    );
+    setSelectedRequest(null);
+  };
+
+  const handleReject = (req: JoinRequest) => {
+    Alert.alert(
+      'Decline Join Request',
+      `Decline admission request for ${req.studentDetails.fullName}?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Decline',
           style: 'destructive',
-          onPress: () => {
-            setRequests(prev => prev.filter(r => r.id !== req.id));
+          onPress: async () => {
+            await rejectJoinRequest(req.id, 'Seat capacity full for current session');
+            Alert.alert('Request Declined', 'Student has been notified.');
           },
         },
       ]
     );
   };
 
+  // Add dummy test request
+  const handleAddDemoRequest = async () => {
+    const demoNames = ['Riya Patel 🌸', 'Dev Malhotra ⚡', 'Ananya Sen 🌿', 'Arjun Verma 🚀'];
+    const chosenName = demoNames[Math.floor(Math.random() * demoNames.length)];
+    await submitJoinRequest(
+      {
+        fullName: chosenName,
+        grade: 'Class 11 Science',
+        board: 'CBSE',
+        targetExam: 'IIT-JEE 2026',
+        school: 'St. Vincent High School',
+        previousPercentage: '94.8%',
+        weakSubjects: ['Optics', 'Thermodynamics'],
+        guardianName: 'Rajesh Patel',
+        guardianPhone: '+91 98221 55667',
+        bloodGroup: 'O+',
+      },
+      teacherProfile.teacherCode
+    );
+    Alert.alert('Demo Request Added 🌸', `${chosenName} submitted a join request.`);
+  };
+
   return (
     <ScreenWrapper
       headerProps={{
-        title: 'Verify Student Requests 📋',
-        instituteName: currentInstitute?.name || 'Bloom Academy',
+        title: 'Student Verification Queue 🍎',
         onBackPress: () => router.back(),
       }}
     >
-      {/* Overview Banner */}
-      <View className="bg-cute-peach-light border-2 border-cute-peach rounded-[28px] p-5 mb-4 shadow-xs">
-        <View className="flex-row items-center justify-between mb-2">
-          <View className="bg-white px-2.5 py-0.5 rounded-full border border-cute-peach flex-row items-center gap-1.5">
-            <Clock size={12} color="#ff7d6b" />
-            <Text className="text-[10px] font-bold text-cute-peach uppercase">Verification Queue</Text>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-4 pb-16">
+        {/* Header Banner */}
+        <View className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs">
+          <View className="flex-row items-center justify-between mb-2">
+            <View className="flex-row items-center gap-2">
+              <View className="w-10 h-10 rounded-2xl bg-cute-peach-light border border-cute-peach items-center justify-center">
+                <UserCheck size={18} color="#ff7d6b" />
+              </View>
+              <View>
+                <Text className="text-base font-black text-cute-cocoa">Pending Admissions</Text>
+                <Text className="text-xs text-cute-muted">
+                  Code: <Text className="font-bold text-cute-peach">{teacherProfile.teacherCode}</Text>
+                </Text>
+              </View>
+            </View>
+
+            <View className="bg-rose-50 border border-rose-200 px-3 py-1 rounded-full">
+              <Text className="text-xs font-black text-rose-800">
+                {pendingRequests.length} Pending
+              </Text>
+            </View>
           </View>
-          <Text className="text-xs font-bold text-cute-cocoa">{requests.length} Pending</Text>
-        </View>
-
-        <Text className="text-base font-black text-cute-cocoa leading-tight">
-          Teacher Code Gatekeeper 🛡️
-        </Text>
-        <Text className="text-xs text-cute-muted mt-1">
-          Review student extended bios before granting access to batch lectures, DPPs, and attendance rosters.
-        </Text>
-      </View>
-
-      {/* Empty State */}
-      {requests.length === 0 && (
-        <View className="bg-white border-2 border-cute-border rounded-[28px] p-8 items-center text-center my-6">
-          <Text className="text-4xl mb-2">🎉</Text>
-          <Text className="text-base font-black text-cute-cocoa">All Caught Up!</Text>
-          <Text className="text-xs text-cute-muted mt-1 text-center">
-            No pending student join requests at this moment.
+          <Text className="text-xs text-cute-muted leading-relaxed">
+            Review applicant backgrounds, assign their study batch, and confirm fee structures before granting classroom access.
           </Text>
-        </View>
-      )}
 
-      {/* Requests Feed */}
-      <View className="gap-3.5 mb-6">
-        {requests.map((req) => (
-          <View
-            key={req.id}
-            className="bg-white border-2 border-cute-border rounded-[28px] p-5 shadow-xs"
+          <TouchableOpacity
+            onPress={handleAddDemoRequest}
+            className="mt-3 bg-cute-cream border border-cute-border py-2 px-3 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-98"
           >
-            {/* Header */}
-            <View className="flex-row items-center justify-between mb-3">
-              <View className="flex-row items-center gap-2.5">
-                <View className="w-10 h-10 rounded-2xl bg-cute-cream border border-cute-border items-center justify-center">
-                  <GraduationCap size={18} color="#ff7d6b" />
-                </View>
-                <View>
-                  <Text className="text-sm font-black text-cute-cocoa">{req.name}</Text>
-                  <Text className="text-[10px] text-cute-muted">{req.email} • {req.appliedTime}</Text>
-                </View>
-              </View>
+            <Sparkles size={13} color="#ff7d6b" />
+            <Text className="text-xs font-bold text-cute-cocoa">
+              + Generate Test Applicant Request
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-              <View className="bg-cute-peach-light px-2.5 py-0.5 rounded-full border border-cute-peach">
-                <Text className="text-[10px] font-bold text-cute-peach">{req.targetExam}</Text>
-              </View>
-            </View>
-
-            {/* Extended Student Bio Details */}
-            <View className="bg-cute-cream/70 rounded-2xl p-3 border border-cute-border mb-3.5 gap-1.5">
-              <View className="flex-row justify-between">
-                <Text className="text-[11px] text-cute-muted">Class & Board:</Text>
-                <Text className="text-[11px] font-bold text-cute-cocoa">{req.grade} • {req.board}</Text>
-              </View>
-              <View className="flex-row justify-between">
-                <Text className="text-[11px] text-cute-muted">Current School:</Text>
-                <Text className="text-[11px] font-bold text-cute-cocoa">{req.school}</Text>
-              </View>
-              <View className="flex-row justify-between">
-                <Text className="text-[11px] text-cute-muted">Past Academic Percentage:</Text>
-                <Text className="text-[11px] font-bold text-cute-mint">{req.previousScore}</Text>
-              </View>
-              <View className="flex-row justify-between">
-                <Text className="text-[11px] text-cute-muted">Code Entered:</Text>
-                <Text className="text-[11px] font-bold text-cute-peach font-mono">{req.codeUsed}</Text>
-              </View>
-
-              {/* Weak Subjects Tags */}
-              <View className="mt-1 pt-1.5 border-t border-cute-border">
-                <Text className="text-[10px] font-bold text-cute-muted mb-1">Focus / Weak Areas:</Text>
-                <View className="flex-row flex-wrap gap-1">
-                  {req.weakSubjects.map((sub, i) => (
-                    <View key={i} className="bg-white px-2 py-0.5 rounded-md border border-cute-border">
-                      <Text className="text-[9px] font-bold text-cute-cocoa">{sub}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            </View>
-
-            {/* Approval / Rejection Action Buttons */}
-            <View className="flex-row gap-2">
-              <TouchableOpacity
-                onPress={() => handleReject(req)}
-                className="flex-1 py-2.5 rounded-xl border border-rose-300 bg-rose-50 items-center flex-row justify-center gap-1 active:scale-98"
-              >
-                <X size={14} color="#e11d48" />
-                <Text className="text-xs font-bold text-rose-700">Decline</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => handleApprove(req)}
-                className="flex-2 py-2.5 rounded-xl bg-cute-peach items-center flex-row justify-center gap-1.5 shadow-xs active:scale-98"
-              >
-                <Check size={14} color="#ffffff" />
-                <Text className="text-xs font-bold text-white">Approve & Assign Batch 🌸</Text>
-              </TouchableOpacity>
-            </View>
+        {/* Pending Requests List */}
+        {pendingRequests.length === 0 ? (
+          <View className="bg-white border-2 border-cute-border rounded-3xl p-8 items-center shadow-xs my-4">
+            <Mascot mood="celebrating" size="lg" />
+            <Text className="text-base font-black text-cute-cocoa mt-3 text-center">
+              All Students Verified! 🌸
+            </Text>
+            <Text className="text-xs text-cute-muted text-center mt-1 max-w-[240px]">
+              No pending admission requests in queue. Share your teacher code{' '}
+              <Text className="font-bold text-cute-peach">{teacherProfile.teacherCode}</Text> to invite students.
+            </Text>
           </View>
-        ))}
-      </View>
+        ) : (
+          pendingRequests.map(req => {
+            const d = req.studentDetails;
+            return (
+              <View
+                key={req.id}
+                className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs gap-3"
+              >
+                {/* Header */}
+                <View className="flex-row items-center justify-between">
+                  <View>
+                    <Text className="text-base font-black text-cute-cocoa">
+                      {d.fullName}
+                    </Text>
+                    <Text className="text-xs text-cute-muted">
+                      {d.grade} • {d.board}
+                    </Text>
+                  </View>
+                  <View className="bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
+                    <Text className="text-[10px] font-bold text-amber-800">
+                      Target: {d.targetExam}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Details Grid */}
+                <View className="bg-cute-cream rounded-2xl p-3 border border-cute-border gap-1.5">
+                  <View className="flex-row items-center justify-between">
+                    <Text className="text-[11px] text-cute-muted">School:</Text>
+                    <Text className="text-[11px] font-bold text-cute-cocoa">{d.school}</Text>
+                  </View>
+                  <View className="flex-row items-center justify-between">
+                    <Text className="text-[11px] text-cute-muted">Prior Performance:</Text>
+                    <Text className="text-[11px] font-bold text-cute-peach">{d.previousPercentage}</Text>
+                  </View>
+                  <View className="flex-row items-center justify-between">
+                    <Text className="text-[11px] text-cute-muted">Guardian Phone:</Text>
+                    <Text className="text-[11px] font-bold text-cute-cocoa">{d.guardianPhone}</Text>
+                  </View>
+                </View>
+
+                {/* Weak Subjects */}
+                {d.weakSubjects && d.weakSubjects.length > 0 && (
+                  <View>
+                    <Text className="text-[10px] font-black text-cute-muted uppercase tracking-wider mb-1.5">
+                      Requested Help in Focus Areas:
+                    </Text>
+                    <View className="flex-row flex-wrap gap-1.5">
+                      {d.weakSubjects.map((sub, i) => (
+                        <View
+                          key={i}
+                          className="bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md"
+                        >
+                          <Text className="text-[10px] font-bold text-rose-800">{sub}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                {/* Action Buttons */}
+                <View className="flex-row gap-2 pt-2 border-t border-cute-border">
+                  <TouchableOpacity
+                    activeOpacity={0.88}
+                    onPress={() => openApprovalModal(req)}
+                    className="flex-1 bg-emerald-500 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 shadow-xs active:scale-98"
+                  >
+                    <Check size={14} color="#ffffff" />
+                    <Text className="text-xs font-black text-white">
+                      Verify & Admit Student
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    activeOpacity={0.88}
+                    onPress={() => handleReject(req)}
+                    className="px-3.5 py-2.5 rounded-xl bg-cute-cream border border-cute-border items-center justify-center active:scale-98"
+                  >
+                    <X size={14} color="#a89993" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            );
+          })
+        )}
+      </ScrollView>
+
+      {/* ================= ASSIGN BATCH & APPROVE MODAL ================= */}
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View className="flex-1 bg-black/40 items-center justify-center p-5">
+          <View className="bg-white rounded-[32px] p-6 w-full max-w-sm border-2 border-cute-border shadow-lg">
+            <View className="flex-row items-center justify-between mb-3">
+              <View className="flex-row items-center gap-2">
+                <HeartHandshake size={18} color="#ff7d6b" />
+                <Text className="text-base font-black text-cute-cocoa">
+                  Admit Student
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <X size={18} color="#a89993" />
+              </TouchableOpacity>
+            </View>
+
+            <Text className="text-xs text-cute-muted mb-4">
+              Enrolling <Text className="font-bold text-cute-cocoa">{selectedRequest?.studentDetails.fullName}</Text>
+            </Text>
+
+            {/* Select Batch */}
+            <Text className="text-xs font-black text-cute-cocoa mb-1.5">
+              1. Select Batch
+            </Text>
+            <View className="gap-1.5 mb-4">
+              {BATCH_CHOICES.map(b => (
+                <TouchableOpacity
+                  key={b.id}
+                  onPress={() => setSelectedBatch(b.id)}
+                  className={`p-2.5 rounded-xl border ${
+                    selectedBatch === b.id
+                      ? 'bg-cute-peach-light border-cute-peach'
+                      : 'bg-cute-cream border-cute-border'
+                  }`}
+                >
+                  <Text
+                    className={`text-xs font-bold ${
+                      selectedBatch === b.id ? 'text-cute-peach' : 'text-cute-cocoa'
+                    }`}
+                  >
+                    {b.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Select Fee Plan */}
+            <Text className="text-xs font-black text-cute-cocoa mb-1.5">
+              2. Fee Plan Structure
+            </Text>
+            <View className="gap-1.5 mb-5">
+              {FEE_PLAN_CHOICES.map(plan => (
+                <TouchableOpacity
+                  key={plan}
+                  onPress={() => setSelectedFeePlan(plan)}
+                  className={`p-2.5 rounded-xl border ${
+                    selectedFeePlan === plan
+                      ? 'bg-cute-peach-light border-cute-peach'
+                      : 'bg-cute-cream border-cute-border'
+                  }`}
+                >
+                  <Text
+                    className={`text-xs font-bold ${
+                      selectedFeePlan === plan ? 'text-cute-peach' : 'text-cute-cocoa'
+                    }`}
+                  >
+                    {plan}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Confirm Button */}
+            <TouchableOpacity
+              onPress={confirmApprove}
+              className="bg-cute-peach py-3 rounded-2xl items-center shadow-xs active:scale-98"
+            >
+              <Text className="text-xs font-black text-white">
+                Confirm Admission & Notify Student 🌸
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScreenWrapper>
   );
 }

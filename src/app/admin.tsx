@@ -21,6 +21,7 @@ import {
 } from 'lucide-react-native';
 import { useAuth } from '@/context/AuthContext';
 import { useFeeNotification } from '@/context/FeeNotificationContext';
+import { useAcademic } from '@/context/AcademicContext';
 import {
   ScreenWrapper,
   MetricCard,
@@ -39,6 +40,8 @@ import {
 export default function AdminDashboardScreen() {
   const router = useRouter();
   const { activeInstitute, batches, createBatch } = useAuth();
+  const { joinRequests, coachingProfile } = useAcademic();
+  const pendingJoinCount = joinRequests.filter(r => r.status === 'pending').length;
   const {
     analytics,
     openNotificationDrawer,
@@ -145,8 +148,8 @@ export default function AdminDashboardScreen() {
             onPress={() => router.push('/verify-students')}
             className="flex-1 bg-white border border-cute-peach p-2 rounded-xl flex-row items-center justify-center gap-1.5 shadow-xs"
           >
-            <View className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-            <Text className="text-[11px] font-bold text-cute-peach">Verify Join (2)</Text>
+            {pendingJoinCount > 0 && <View className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />}
+            <Text className="text-[11px] font-bold text-cute-peach">Verify Join ({pendingJoinCount})</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -192,39 +195,6 @@ export default function AdminDashboardScreen() {
             }`}
           >
             Revenue & Growth 📈
-          </Text>
-        </Pressable>
-      </View>
-      <View className="flex-row items-center gap-2">
-        <Pressable
-          onPress={() => setActiveTab('dashboard')}
-          className={`flex-1 py-2 rounded-xl flex-row items-center justify-center gap-1.5 ${
-            activeTab === 'dashboard' ? 'bg-primary' : 'bg-surface-container'
-          }`}
-        >
-          <LayoutDashboard size={14} color={activeTab === 'dashboard' ? '#ffffff' : '#45464d'} />
-          <Text
-            className={`text-xs font-semibold ${
-              activeTab === 'dashboard' ? 'text-on-primary' : 'text-on-surface-variant'
-            }`}
-          >
-            Command Hub
-          </Text>
-        </Pressable>
-
-        <Pressable
-          onPress={() => setActiveTab('analytics')}
-          className={`flex-1 py-2 rounded-xl flex-row items-center justify-center gap-1.5 ${
-            activeTab === 'analytics' ? 'bg-primary' : 'bg-surface-container'
-          }`}
-        >
-          <BarChart3 size={14} color={activeTab === 'analytics' ? '#ffffff' : '#45464d'} />
-          <Text
-            className={`text-xs font-semibold ${
-              activeTab === 'analytics' ? 'text-on-primary' : 'text-on-surface-variant'
-            }`}
-          >
-            Analytics & Reports
           </Text>
         </Pressable>
       </View>

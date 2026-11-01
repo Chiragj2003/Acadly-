@@ -4,6 +4,7 @@ import Svg, { Circle, Line, Polyline, Text as SvgText } from 'react-native-svg';
 
 interface AttendanceRingAndTrendChartProps {
   presentRate?: number;
+  percentage?: number;
   totalClasses?: number;
   presentCount?: number;
   absentCount?: number;
@@ -11,16 +12,18 @@ interface AttendanceRingAndTrendChartProps {
 }
 
 export const AttendanceRingAndTrendChart: React.FC<AttendanceRingAndTrendChartProps> = ({
-  presentRate = 96.4,
+  presentRate,
+  percentage,
   totalClasses = 96,
   presentCount = 92,
   absentCount = 1,
   lateCount = 3,
 }) => {
+  const effectiveRate = percentage ?? presentRate ?? 96.4;
   const radius = 42;
   const strokeWidth = 10;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (presentRate / 100) * circumference;
+  const strokeDashoffset = circumference - (effectiveRate / 100) * circumference;
 
   const trendPoints = "10,50 35,45 60,30 85,38 110,22 135,15";
 
@@ -64,7 +67,7 @@ export const AttendanceRingAndTrendChart: React.FC<AttendanceRingAndTrendChartPr
             />
           </Svg>
           <View className="absolute items-center">
-            <Text className="text-xl font-black text-cute-cocoa">{presentRate}%</Text>
+            <Text className="text-xl font-black text-cute-cocoa">{effectiveRate}%</Text>
             <Text className="text-[9px] font-bold text-cute-muted uppercase">Rate</Text>
           </View>
         </View>

@@ -44,7 +44,11 @@ export default function TeacherScreen() {
     markBatchAllPresent,
     addLecture,
     openPlayer,
+    joinRequests,
+    teacherProfile,
   } = useAcademic();
+
+  const pendingJoinCount = joinRequests.filter(r => r.status === 'pending').length;
 
   const [activeTab, setActiveTab] = useState<'attendance' | 'assignments' | 'notes'>('attendance');
   const [waParentPing, setWaParentPing] = useState(true);
@@ -128,10 +132,10 @@ export default function TeacherScreen() {
           </View>
           <View className="flex-1 min-w-0">
             <Text className="text-lg font-black text-cute-cocoa" numberOfLines={1}>
-              Prof. Vikram Joshi ⚡
+              {teacherProfile.fullName}
             </Text>
             <Text className="text-xs text-cute-muted" numberOfLines={1}>
-              Senior Physics & Electromagnetism Faculty
+              Code: {teacherProfile.teacherCode} • {teacherProfile.qualification}
             </Text>
           </View>
         </View>
@@ -142,8 +146,8 @@ export default function TeacherScreen() {
             onPress={() => router.push('/verify-students')}
             className="flex-1 bg-white border border-cute-peach p-2 rounded-xl flex-row items-center justify-center gap-1.5 shadow-xs"
           >
-            <View className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-            <Text className="text-[11px] font-bold text-cute-peach">Verify Join (2)</Text>
+            {pendingJoinCount > 0 && <View className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />}
+            <Text className="text-[11px] font-bold text-cute-peach">Verify Join ({pendingJoinCount})</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -321,7 +325,7 @@ export default function TeacherScreen() {
                   className="p-3 rounded-xl bg-surface-container-low flex-row items-center justify-between gap-2"
                 >
                   <Pressable
-                    onPress={() => setSelectedRecordForCorrection(record)}
+                    onPress={() => router.push({ pathname: '/student-detail', params: { studentId: record.student_id } })}
                     className="flex-row items-center gap-2.5 flex-1 min-w-0"
                   >
                     <View className="w-8 h-8 rounded-full bg-surface-container-highest items-center justify-center shrink-0">
@@ -332,10 +336,15 @@ export default function TeacherScreen() {
                         <Text className="text-xs font-bold text-on-surface" numberOfLines={1}>
                           {record.student_name}
                         </Text>
-                        <Edit2 size={12} color="#76777d" />
+                        <TouchableOpacity
+                          onPress={() => setSelectedRecordForCorrection(record)}
+                          hitSlop={8}
+                        >
+                          <Edit2 size={12} color="#76777d" />
+                        </TouchableOpacity>
                       </View>
                       <Text className="text-[11px] text-on-surface-variant" numberOfLines={1}>
-                        {record.remarks || 'No remarks logged'}
+                        {record.remarks || 'Tap to view 360° profile'}
                       </Text>
                     </View>
                   </Pressable>

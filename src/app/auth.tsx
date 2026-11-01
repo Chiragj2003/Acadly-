@@ -12,8 +12,6 @@ import {
 import { useRouter } from 'expo-router';
 import {
   Sparkles,
-  Mail,
-  Lock,
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
@@ -22,10 +20,18 @@ import {
   Users,
   Home,
   UserCheck,
+  Briefcase,
+  BookOpen,
+  Award,
+  Hash,
+  MapPin,
+  Phone,
+  DollarSign,
 } from 'lucide-react-native';
 
 import { useAuth } from '@/context/AuthContext';
 import { useInstitute } from '@/context/InstituteContext';
+import { useAcademic } from '@/context/AcademicContext';
 import { Mascot } from '@/components/ui/Mascot';
 import { UserRole } from '@/types/database';
 
@@ -33,14 +39,30 @@ export default function CleanAuthScreen() {
   const router = useRouter();
   const { signIn, signInWithGoogle, signUp, switchRole, loading } = useAuth();
   const { currentInstitute } = useInstitute();
+  const { teacherProfile, setTeacherProfile, coachingProfile, setCoachingProfile } = useAcademic();
 
   const [selectedRole, setSelectedRole] = useState<UserRole>('student');
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+
+  // Common credentials
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
 
-  // Handle direct navigation to the role's screen
+  // Solo Teacher specific fields
+  const [teacherQualification, setTeacherQualification] = useState('M.Sc Physics (IIT Bombay)');
+  const [teacherSubjects, setTeacherSubjects] = useState('Physics, Mechanics, Calculus');
+  const [teacherExperience, setTeacherExperience] = useState('10');
+  const [teacherBio, setTeacherBio] = useState('Passionate about simplified conceptual problem solving.');
+  const [teacherFeeRate, setTeacherFeeRate] = useState('3500');
+
+  // Coaching Center / Admin specific fields
+  const [instituteName, setInstituteName] = useState('Bloom Science Academy');
+  const [instituteCity, setInstituteCity] = useState('Pune');
+  const [instituteSubjects, setInstituteSubjects] = useState('Physics, Chemistry, Maths, Biology');
+  const [directorPhone, setDirectorPhone] = useState('+91 98230 11223');
+
+  // Direct role screen navigation
   const navigateToRoleScreen = (role: UserRole) => {
     switch (role) {
       case 'student':
@@ -68,7 +90,7 @@ export default function CleanAuthScreen() {
     }
   };
 
-  // Email / Password submission
+  // Submission handler
   const handleSubmit = async () => {
     if (authMode === 'signup' && !fullName.trim()) {
       Alert.alert('Validation Error', 'Please enter your full name.');
@@ -86,14 +108,69 @@ export default function CleanAuthScreen() {
     }
 
     if (authMode === 'signup') {
+      // If Individual Tuition Teacher, configure the solo teacher profile & code
+      if (selectedRole === 'teacher') {
+        const generatedCode = `${fullName.split(' ')[0].toUpperCase()}-TUTOR-${Math.floor(10 + Math.random() * 90)}`;
+        setTeacherProfile({
+          fullName,
+          qualification: teacherQualification,
+          specializationSubjects: teacherSubjects.split(',').map(s => s.trim()),
+          experienceYears: parseFloat(teacherExperience) || 5,
+          bio: teacherBio,
+          achievements: 'State & National Olympiad Mentorship',
+          monthlyFeeRate: parseInt(teacherFeeRate, 10) || 3000,
+          teacherCode: generatedCode,
+        });
+
+        Alert.alert(
+          'Solo Teacher Account Ready! 🍎',
+          `Your shareable Teacher Code is: ${generatedCode}\nStudents can join your batches with this code.`,
+          [{ text: 'Open Teacher Desk', onPress: () => navigateToRoleScreen('teacher') }]
+        );
+        return;
+      }
+
+      // If Coaching Center / Admin
+      if (selectedRole === 'admin') {
+        const generatedInvite = `${instituteName.substring(0, 4).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+        setCoachingProfile({
+          name: instituteName,
+          city: instituteCity,
+          subjectsOffered: instituteSubjects.split(',').map(s => s.trim()),
+          directorName: fullName,
+          phone: directorPhone,
+          inviteCode: generatedInvite,
+        });
+
+        Alert.alert(
+          'Coaching Center Created! 🏫',
+          `Your Institute Invite Code is: ${generatedInvite}\nTeachers & Students can join under this code.`,
+          [{ text: 'Open Admin Command', onPress: () => navigateToRoleScreen('admin') }]
+        );
+        return;
+      }
+
+      // If Student
+      if (selectedRole === 'student') {
+        const res = await signUp(fullName, email, selectedRole);
+        if (res.success) {
+          Alert.alert(
+            'Student Account Created! 🌸',
+            'Now enter your Teacher Code to connect with your tuition or coaching batch.',
+            [{ text: 'Connect Code', onPress: () => router.push('/join-institute') }]
+          );
+        }
+        return;
+      }
+
+      // Parent
       const res = await signUp(fullName, email, selectedRole);
       if (res.success) {
-        Alert.alert('Account Created! 🌸', `Welcome to Acadly, ${fullName}!`);
-        navigateToRoleScreen(selectedRole);
-      } else {
-        Alert.alert('Registration Failed', res.error || 'Please try again.');
+        Alert.alert('Parent Account Ready! 🏡', `Welcome, ${fullName}!`);
+        navigateToRoleScreen('parent');
       }
     } else {
+      // Sign-in
       const res = await signIn(email, selectedRole);
       if (res.success) {
         navigateToRoleScreen(selectedRole);
@@ -122,7 +199,7 @@ export default function CleanAuthScreen() {
     {
       id: 'student',
       title: 'Student 🌸',
-      subtitle: 'Watch lectures, solve daily DPPs & view notes',
+      subtitle: 'Watch lectures, solve DPPs & access PDF notes',
       emoji: '🌱',
       badge: 'Learner',
       bgColor: 'bg-emerald-50',
@@ -130,30 +207,30 @@ export default function CleanAuthScreen() {
     },
     {
       id: 'teacher',
-      title: 'Teacher / Faculty 🍎',
-      subtitle: 'Mark roll call, publish video classes & grade homework',
+      title: 'Solo Tuition Teacher 🍎',
+      subtitle: 'Teach individual batches, verify students & collect fees',
       emoji: '👨‍🏫',
-      badge: 'Faculty',
+      badge: 'Solo Educator',
       bgColor: 'bg-rose-50',
       borderColor: 'border-rose-300',
     },
     {
+      id: 'admin',
+      title: 'Coaching Center / Academy 🏫',
+      subtitle: 'Multi-teacher institute, branches, staff & admissions',
+      emoji: '🏫',
+      badge: 'Institute Director',
+      bgColor: 'bg-indigo-50',
+      borderColor: 'border-indigo-300',
+    },
+    {
       id: 'parent',
       title: 'Parent / Guardian 🏡',
-      subtitle: 'Monitor child attendance, report cards & pay fees via UPI',
+      subtitle: 'Monitor attendance, report cards & pay fees via UPI',
       emoji: '🏡',
       badge: 'Family',
       bgColor: 'bg-amber-50',
       borderColor: 'border-amber-300',
-    },
-    {
-      id: 'admin',
-      title: 'Director / Admin 🏫',
-      subtitle: 'Manage academy batches, faculty schedules & admissions',
-      emoji: '🏫',
-      badge: 'Director',
-      bgColor: 'bg-indigo-50',
-      borderColor: 'border-indigo-300',
     },
   ];
 
@@ -163,33 +240,33 @@ export default function CleanAuthScreen() {
       className="flex-1 bg-cute-cream"
     >
       <ScrollView
-        contentContainerClassName="p-5 pt-12 pb-16"
+        contentContainerClassName="p-5 pt-12 pb-20"
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* 1. Header with Mascot Pip */}
+        {/* 1. Header with Cute SVG Pip Mascot */}
         <View className="items-center mb-6">
           <Mascot
             mood="happy"
-            size="md"
+            size="lg"
             showSpeechBubble
             speechText={`Hi! Welcome to ${currentInstitute?.name || 'Acadly'} 🌸`}
           />
-          <Text className="text-3xl font-black text-cute-cocoa tracking-tight mt-2 text-center">
-            Acadly Learning
+          <Text className="text-3xl font-black text-cute-cocoa tracking-tight mt-3 text-center">
+            Acadly
           </Text>
-          <Text className="text-xs font-semibold text-cute-muted text-center mt-1">
-            Tuition & Coaching Management Hub
+          <Text className="text-xs font-bold text-cute-muted text-center mt-1">
+            Tuition & Coaching Made Adorable 🌸
           </Text>
         </View>
 
         {/* 2. Step 1: Select Your Role */}
         <View className="mb-5">
           <View className="flex-row items-center justify-between mb-2.5 px-1">
-            <Text className="text-xs font-extrabold text-cute-cocoa uppercase tracking-wider">
-              Step 1: Who are you joining as?
+            <Text className="text-xs font-black text-cute-cocoa uppercase tracking-wider">
+              Step 1: Choose Your Account Mode
             </Text>
-            <View className="bg-cute-peach-light px-2 py-0.5 rounded-full border border-cute-peach">
+            <View className="bg-cute-peach-light px-2.5 py-0.5 rounded-full border border-cute-peach">
               <Text className="text-[10px] font-bold text-cute-peach">Required</Text>
             </View>
           </View>
@@ -279,6 +356,23 @@ export default function CleanAuthScreen() {
             </TouchableOpacity>
           </View>
 
+          {/* Quick Connect link for Students */}
+          {selectedRole === 'student' && authMode === 'signup' && (
+            <TouchableOpacity
+              onPress={() => router.push('/join-institute')}
+              className="bg-cute-peach-light border border-cute-peach p-3 rounded-2xl flex-row items-center justify-between mb-4 shadow-xs"
+            >
+              <View className="flex-row items-center gap-2">
+                <Text className="text-base">🎫</Text>
+                <View>
+                  <Text className="text-xs font-bold text-cute-cocoa">Have a Teacher Code?</Text>
+                  <Text className="text-[10px] text-cute-muted">Join your teacher or coaching center directly</Text>
+                </View>
+              </View>
+              <ArrowRight size={14} color="#ff7d6b" />
+            </TouchableOpacity>
+          )}
+
           {/* Google OAuth Button */}
           <TouchableOpacity
             activeOpacity={0.88}
@@ -301,14 +395,147 @@ export default function CleanAuthScreen() {
           <View className="gap-3 mt-1">
             {authMode === 'signup' && (
               <View>
-                <Text className="text-xs font-bold text-cute-cocoa mb-1">Full Name</Text>
+                <Text className="text-xs font-bold text-cute-cocoa mb-1">
+                  {selectedRole === 'admin' ? 'Director / Head Name' : 'Full Name'}
+                </Text>
                 <TextInput
-                  placeholder="e.g. Amelia Sharma"
+                  placeholder={selectedRole === 'teacher' ? 'e.g. Prof. Vikram Joshi' : 'e.g. Amelia Sharma'}
                   placeholderTextColor="#a89993"
                   value={fullName}
                   onChangeText={setFullName}
                   className="bg-cute-cream border border-cute-border rounded-2xl px-4 py-2.5 text-xs text-cute-cocoa font-medium"
                 />
+              </View>
+            )}
+
+            {/* Solo Teacher Specific Registration Details */}
+            {authMode === 'signup' && selectedRole === 'teacher' && (
+              <View className="gap-3 bg-rose-50/50 p-3.5 rounded-2xl border border-rose-200">
+                <View className="flex-row items-center gap-1.5 mb-0.5">
+                  <Briefcase size={14} color="#e11d48" />
+                  <Text className="text-xs font-black text-rose-800">Solo Teacher Profile Details</Text>
+                </View>
+
+                <View>
+                  <Text className="text-[11px] font-bold text-cute-cocoa mb-1">Qualification & Background</Text>
+                  <TextInput
+                    placeholder="e.g. M.Sc Math (IIT Delhi), B.Ed"
+                    placeholderTextColor="#a89993"
+                    value={teacherQualification}
+                    onChangeText={setTeacherQualification}
+                    className="bg-white border border-rose-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                  />
+                </View>
+
+                <View>
+                  <Text className="text-[11px] font-bold text-cute-cocoa mb-1">Subjects & Specialization</Text>
+                  <TextInput
+                    placeholder="e.g. Advanced Calculus, Physics, Vectors"
+                    placeholderTextColor="#a89993"
+                    value={teacherSubjects}
+                    onChangeText={setTeacherSubjects}
+                    className="bg-white border border-rose-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                  />
+                </View>
+
+                <View className="flex-row gap-2">
+                  <View className="flex-1">
+                    <Text className="text-[11px] font-bold text-cute-cocoa mb-1">Experience (Years)</Text>
+                    <TextInput
+                      placeholder="e.g. 10"
+                      placeholderTextColor="#a89993"
+                      keyboardType="numeric"
+                      value={teacherExperience}
+                      onChangeText={setTeacherExperience}
+                      className="bg-white border border-rose-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                    />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-[11px] font-bold text-cute-cocoa mb-1">Monthly Fee (₹/mo)</Text>
+                    <TextInput
+                      placeholder="e.g. 3500"
+                      placeholderTextColor="#a89993"
+                      keyboardType="numeric"
+                      value={teacherFeeRate}
+                      onChangeText={setTeacherFeeRate}
+                      className="bg-white border border-rose-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                    />
+                  </View>
+                </View>
+
+                <View>
+                  <Text className="text-[11px] font-bold text-cute-cocoa mb-1">Teaching Bio / Philosophy</Text>
+                  <TextInput
+                    placeholder="Short bio shown to students..."
+                    placeholderTextColor="#a89993"
+                    multiline
+                    value={teacherBio}
+                    onChangeText={setTeacherBio}
+                    className="bg-white border border-rose-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa min-h-[50px]"
+                  />
+                </View>
+
+                <View className="bg-rose-100/70 p-2.5 rounded-xl flex-row items-center gap-2">
+                  <Hash size={14} color="#e11d48" />
+                  <Text className="text-[10px] font-bold text-rose-900 flex-1">
+                    A unique Teacher Code will be generated automatically for your students to join.
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Coaching Center Specific Registration Details */}
+            {authMode === 'signup' && selectedRole === 'admin' && (
+              <View className="gap-3 bg-indigo-50/50 p-3.5 rounded-2xl border border-indigo-200">
+                <View className="flex-row items-center gap-1.5 mb-0.5">
+                  <Building size={14} color="#4f46e5" />
+                  <Text className="text-xs font-black text-indigo-900">Coaching Center Details</Text>
+                </View>
+
+                <View>
+                  <Text className="text-[11px] font-bold text-cute-cocoa mb-1">Institute / Coaching Name</Text>
+                  <TextInput
+                    placeholder="e.g. Apex Science Academy"
+                    placeholderTextColor="#a89993"
+                    value={instituteName}
+                    onChangeText={setInstituteName}
+                    className="bg-white border border-indigo-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                  />
+                </View>
+
+                <View className="flex-row gap-2">
+                  <View className="flex-1">
+                    <Text className="text-[11px] font-bold text-cute-cocoa mb-1">City / Branch</Text>
+                    <TextInput
+                      placeholder="e.g. Pune, Kothrud"
+                      placeholderTextColor="#a89993"
+                      value={instituteCity}
+                      onChangeText={setInstituteCity}
+                      className="bg-white border border-indigo-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                    />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-[11px] font-bold text-cute-cocoa mb-1">Phone Number</Text>
+                    <TextInput
+                      placeholder="e.g. +91 98230 11223"
+                      placeholderTextColor="#a89993"
+                      value={directorPhone}
+                      onChangeText={setDirectorPhone}
+                      className="bg-white border border-indigo-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                    />
+                  </View>
+                </View>
+
+                <View>
+                  <Text className="text-[11px] font-bold text-cute-cocoa mb-1">Subjects & Courses Offered</Text>
+                  <TextInput
+                    placeholder="e.g. Physics, Chemistry, Maths, NEET"
+                    placeholderTextColor="#a89993"
+                    value={instituteSubjects}
+                    onChangeText={setInstituteSubjects}
+                    className="bg-white border border-indigo-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                  />
+                </View>
               </View>
             )}
 
@@ -341,13 +568,17 @@ export default function CleanAuthScreen() {
               activeOpacity={0.88}
               onPress={handleSubmit}
               disabled={loading}
-              className="bg-cute-peach py-3 rounded-2xl items-center mt-2 shadow-xs active:scale-98"
+              className="bg-cute-peach py-3.5 rounded-2xl items-center mt-2 shadow-xs active:scale-98"
             >
-              <Text className="text-xs font-extrabold text-white">
+              <Text className="text-xs font-extrabold text-white tracking-wide">
                 {loading
                   ? 'Please wait...'
                   : authMode === 'signup'
-                  ? `Create ${selectedRole.toUpperCase()} Account 🌸`
+                  ? selectedRole === 'teacher'
+                    ? 'Launch Solo Teacher Desk 🍎'
+                    : selectedRole === 'admin'
+                    ? 'Register Coaching Center 🏫'
+                    : `Create ${selectedRole.toUpperCase()} Account 🌸`
                   : `Sign In as ${selectedRole.toUpperCase()} →`}
               </Text>
             </TouchableOpacity>
@@ -355,58 +586,70 @@ export default function CleanAuthScreen() {
         </View>
 
         {/* 4. Instant 1-Tap Quick Test Logins */}
-        <View className="bg-cute-cream border-2 border-cute-border rounded-3xl p-4 shadow-xs">
-          <View className="flex-row items-center gap-1.5 mb-2.5">
+        <View className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs">
+          <View className="flex-row items-center gap-1.5 mb-1.5">
             <Sparkles size={16} color="#ff7d6b" />
-            <Text className="text-xs font-extrabold text-cute-cocoa uppercase tracking-wider">
+            <Text className="text-xs font-black text-cute-cocoa uppercase tracking-wider">
               Instant 1-Click Testing (Demo Mode)
             </Text>
           </View>
           <Text className="text-[11px] text-cute-muted mb-3 leading-snug">
-            Jump straight into each role's distinct mobile experience without typing passwords:
+            Jump straight into each role's tailored mobile experience instantly:
           </Text>
 
           <View className="gap-2">
             <TouchableOpacity
               onPress={() => handleQuickDemo('student')}
-              className="bg-white border border-cute-border py-2.5 px-3 rounded-2xl flex-row items-center justify-between"
+              className="bg-cute-cream border border-cute-border py-2.5 px-3.5 rounded-2xl flex-row items-center justify-between active:scale-98"
             >
-              <View className="flex-row items-center gap-2">
-                <Text className="text-lg">🌱</Text>
-                <Text className="text-xs font-bold text-cute-cocoa">Enter as Student (Amelia Sharma)</Text>
+              <View className="flex-row items-center gap-2.5">
+                <Text className="text-lg">🌸</Text>
+                <View>
+                  <Text className="text-xs font-bold text-cute-cocoa">Student: Amelia Sharma</Text>
+                  <Text className="text-[10px] text-cute-muted">Batch Sakura • JEE & Board Prep</Text>
+                </View>
               </View>
               <Text className="text-xs font-bold text-cute-peach">→</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => handleQuickDemo('teacher')}
-              className="bg-white border border-cute-border py-2.5 px-3 rounded-2xl flex-row items-center justify-between"
+              className="bg-cute-cream border border-cute-border py-2.5 px-3.5 rounded-2xl flex-row items-center justify-between active:scale-98"
             >
-              <View className="flex-row items-center gap-2">
+              <View className="flex-row items-center gap-2.5">
                 <Text className="text-lg">🍎</Text>
-                <Text className="text-xs font-bold text-cute-cocoa">Enter as Teacher (Prof. Vikram)</Text>
-              </View>
-              <Text className="text-xs font-bold text-cute-peach">→</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => handleQuickDemo('parent')}
-              className="bg-white border border-cute-border py-2.5 px-3 rounded-2xl flex-row items-center justify-between"
-            >
-              <View className="flex-row items-center gap-2">
-                <Text className="text-lg">🏡</Text>
-                <Text className="text-xs font-bold text-cute-cocoa">Enter as Parent (Sunita Sharma)</Text>
+                <View>
+                  <Text className="text-xs font-bold text-cute-cocoa">Solo Teacher: Prof. Vikram Joshi</Text>
+                  <Text className="text-[10px] text-cute-muted">Code: SHARMA-MATH-89 • Attendance & Notes</Text>
+                </View>
               </View>
               <Text className="text-xs font-bold text-cute-peach">→</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => handleQuickDemo('admin')}
-              className="bg-white border border-cute-border py-2.5 px-3 rounded-2xl flex-row items-center justify-between"
+              className="bg-cute-cream border border-cute-border py-2.5 px-3.5 rounded-2xl flex-row items-center justify-between active:scale-98"
             >
-              <View className="flex-row items-center gap-2">
+              <View className="flex-row items-center gap-2.5">
                 <Text className="text-lg">🏫</Text>
-                <Text className="text-xs font-bold text-cute-cocoa">Enter as Director (Dr. Sharma)</Text>
+                <View>
+                  <Text className="text-xs font-bold text-cute-cocoa">Coaching Director: Bloom Academy</Text>
+                  <Text className="text-[10px] text-cute-muted">Multi-Teacher Roster • Admissions & Fees</Text>
+                </View>
+              </View>
+              <Text className="text-xs font-bold text-cute-peach">→</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => handleQuickDemo('parent')}
+              className="bg-cute-cream border border-cute-border py-2.5 px-3.5 rounded-2xl flex-row items-center justify-between active:scale-98"
+            >
+              <View className="flex-row items-center gap-2.5">
+                <Text className="text-lg">🏡</Text>
+                <View>
+                  <Text className="text-xs font-bold text-cute-cocoa">Parent: Sunita Sharma</Text>
+                  <Text className="text-[10px] text-cute-muted">Child Attendance • Report Card & Fee Pay</Text>
+                </View>
               </View>
               <Text className="text-xs font-bold text-cute-peach">→</Text>
             </TouchableOpacity>
