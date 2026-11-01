@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, Alert, Switch, Modal } from 'react-native';
+import { View, Text, Pressable, TouchableOpacity, Alert, Switch, Modal } from 'react-native';
 import {
   BookOpen,
   Users,
@@ -15,6 +15,7 @@ import {
   X,
   Plus,
 } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { useAcademic } from '@/context/AcademicContext';
 import {
@@ -35,6 +36,7 @@ import {
 import { type AttendanceRecord } from '@/types/database';
 
 export default function TeacherScreen() {
+  const router = useRouter();
   const { activeInstitute } = useAuth();
   const {
     attendanceRecords,
@@ -132,6 +134,33 @@ export default function TeacherScreen() {
               Senior Physics & Electromagnetism Faculty
             </Text>
           </View>
+        </View>
+
+        {/* Action Strip: Verify Requests, Community, 360 Student View */}
+        <View className="flex-row gap-2 mt-4 pt-3 border-t border-cute-peach/20">
+          <TouchableOpacity
+            onPress={() => router.push('/verify-students')}
+            className="flex-1 bg-white border border-cute-peach p-2 rounded-xl flex-row items-center justify-center gap-1.5 shadow-xs"
+          >
+            <View className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            <Text className="text-[11px] font-bold text-cute-peach">Verify Join (2)</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push('/community')}
+            className="flex-1 bg-white border border-cute-border p-2 rounded-xl flex-row items-center justify-center gap-1.5 shadow-xs"
+          >
+            <Text className="text-xs">💬</Text>
+            <Text className="text-[11px] font-bold text-cute-cocoa">Doubts</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push('/student-detail')}
+            className="flex-1 bg-white border border-cute-border p-2 rounded-xl flex-row items-center justify-center gap-1.5 shadow-xs"
+          >
+            <Text className="text-xs">🔍</Text>
+            <Text className="text-[11px] font-bold text-cute-cocoa">Student 360°</Text>
+          </TouchableOpacity>
         </View>
       </View>
 

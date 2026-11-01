@@ -27,6 +27,10 @@ export default function RootLayout() {
                 <Stack.Screen name="teacher" />
                 <Stack.Screen name="parent" />
                 <Stack.Screen name="admin" />
+                <Stack.Screen name="community" />
+                <Stack.Screen name="verify-students" />
+                <Stack.Screen name="student-detail" />
+                <Stack.Screen name="join-institute" />
               </Stack>
             </FeeNotificationProvider>
           </AcademicProvider>

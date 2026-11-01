@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, Alert, Modal } from 'react-native';
+import { View, Text, Pressable, TouchableOpacity, Alert, Modal } from 'react-native';
+import { useRouter } from 'expo-router';
+import { FeeCollectionBarChart } from '@/components/charts';
 import {
   Users,
   BookOpen,
@@ -35,6 +37,7 @@ import {
 } from '@/components/finance';
 
 export default function AdminDashboardScreen() {
+  const router = useRouter();
   const { activeInstitute, batches, createBatch } = useAuth();
   const {
     analytics,
@@ -134,6 +137,25 @@ export default function AdminDashboardScreen() {
               {batches.length} Active Batches • 842 Enrolled Students
             </Text>
           </View>
+        </View>
+
+        {/* Admin Action Strip */}
+        <View className="flex-row gap-2 mt-4 pt-3 border-t border-cute-peach/20">
+          <TouchableOpacity
+            onPress={() => router.push('/verify-students')}
+            className="flex-1 bg-white border border-cute-peach p-2 rounded-xl flex-row items-center justify-center gap-1.5 shadow-xs"
+          >
+            <View className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            <Text className="text-[11px] font-bold text-cute-peach">Verify Join (2)</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push('/student-detail')}
+            className="flex-1 bg-white border border-cute-border p-2 rounded-xl flex-row items-center justify-center gap-1.5 shadow-xs"
+          >
+            <Text className="text-xs">🔍</Text>
+            <Text className="text-[11px] font-bold text-cute-cocoa">Student 360°</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -388,7 +410,12 @@ export default function AdminDashboardScreen() {
       )}
 
       {/* TAB 2: ANALYTICS & REPORTS */}
-      {activeTab === 'analytics' && <AdminAnalyticsView />}
+      {activeTab === 'analytics' && (
+        <View className="gap-4">
+          <FeeCollectionBarChart />
+          <AdminAnalyticsView />
+        </View>
+      )}
 
       {/* CREATE BATCH MODAL */}
       <Modal visible={isCreateBatchModalOpen} transparent animationType="slide">

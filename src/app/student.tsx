@@ -14,6 +14,7 @@ import {
   Sparkles,
   Smile,
 } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { useInstitute } from '@/context/InstituteContext';
 import { useAcademic } from '@/context/AcademicContext';
@@ -38,6 +39,7 @@ import { CUTE_SUBJECT_MASCOTS, SubjectMascot } from '@/components/ui/SubjectMasc
 import { CUTE_STUDY_NOTES } from '@/data/dummyAcademicData';
 
 export default function CuteStudentScreen() {
+  const router = useRouter();
   const { currentInstitute } = useInstitute();
   const { lectures, openPlayer } = useAcademic();
   const { openNotificationDrawer, unreadCount } = useFeeNotification();
@@ -82,6 +84,33 @@ export default function CuteStudentScreen() {
         >
           <Text className="text-[10px] font-bold text-cute-mint uppercase">Attendance</Text>
           <Text className="text-xs font-black text-cute-cocoa">96.4%</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Quick Action Navigation Strip (Community, 360 Analytics, Teacher Code) */}
+      <View className="flex-row gap-2 mb-4">
+        <TouchableOpacity
+          onPress={() => router.push('/community')}
+          className="flex-1 bg-white border border-cute-border p-2.5 rounded-2xl flex-row items-center justify-center gap-1.5 shadow-xs"
+        >
+          <Text className="text-xs">💬</Text>
+          <Text className="text-[11px] font-bold text-cute-cocoa">Community</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => router.push('/student-detail')}
+          className="flex-1 bg-white border border-cute-border p-2.5 rounded-2xl flex-row items-center justify-center gap-1.5 shadow-xs"
+        >
+          <Text className="text-xs">📊</Text>
+          <Text className="text-[11px] font-bold text-cute-cocoa">My 360° Stats</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => router.push('/join-institute')}
+          className="flex-1 bg-cute-peach-light border border-cute-peach p-2.5 rounded-2xl flex-row items-center justify-center gap-1.5 shadow-xs"
+        >
+          <Text className="text-xs">🔑</Text>
+          <Text className="text-[11px] font-bold text-cute-peach">Teacher Code</Text>
         </TouchableOpacity>
       </View>
 
