@@ -45,18 +45,43 @@ import {
   NotificationDrawer,
 } from '@/components/finance';
 import { CUTE_SUBJECT_MASCOTS } from '@/components/ui/SubjectMascotCard';
+import { DAILY_AFFIRMATIONS, DAILY_MOODS } from '@/data/dummyAcademicData';
 
 export default function CuteStudentScreen() {
   const router = useRouter();
+  const { user, signOut } = useAuth();
   const { currentInstitute } = useInstitute();
   const { lectures, openPlayer, teacherProfile, comparisonChartData } = useAcademic();
   const { openNotificationDrawer, unreadCount } = useFeeNotification();
 
   const [activeTab, setActiveTab] = useState<'courses' | 'chat' | 'progress' | 'notes' | 'assignments'>('courses');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [activeDayIndex, setActiveDayIndex] = useState(2); // Tuesday default
+  const [selectedMood, setSelectedMood] = useState('focus');
+
+  const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   const liveLecture = lectures.find((l) => l.is_live) || lectures[0];
   const categories = ['All', 'Math 📐', 'Physics ⚡', 'Biology 🌿', 'Chemistry 🧪'];
+
+  const handleProfilePress = () => {
+    Alert.alert(
+      user?.full_name || 'Amelia Sharma 🌸',
+      'Batch Sakura • Class 11 Science • JEE 2026\nRoll No: #07\nAttendance: 96.4%',
+      [
+        {
+          text: 'Sign Out 🚪',
+          style: 'destructive',
+          onPress: async () => {
+            await signOut();
+            router.replace('/auth');
+          },
+        },
+        { text: 'Close', style: 'cancel' },
+      ]
+    );
+  };
 
   return (
     <ScreenWrapper
@@ -64,7 +89,7 @@ export default function CuteStudentScreen() {
         title: 'Student Hub 🌸',
         instituteName: currentInstitute?.name || 'Bloom Academy',
         onNotificationPress: openNotificationDrawer,
-        onProfilePress: () => Alert.alert('Amelia Sharma 🌸', 'Class 11 Science • Batch Sakura • Roll #07'),
+        onProfilePress: handleProfilePress,
         hasUnreadNotifications: unreadCount > 0,
       }}
     >
@@ -75,7 +100,7 @@ export default function CuteStudentScreen() {
             <Mascot mood="happy" size="sm" />
             <View>
               <View className="flex-row items-center gap-1.5">
-                <Text className="text-base font-black text-cute-cocoa">Hello, Amelia! 🌸</Text>
+                <Text className="text-base font-black text-cute-cocoa">{user?.full_name || 'Amelia Sharma'} 🌸</Text>
                 <View className="bg-cute-peach-light px-2 py-0.5 rounded-full border border-cute-peach">
                   <Text className="text-[10px] font-bold text-cute-peach">AIR #14 ⭐</Text>
                 </View>
@@ -95,7 +120,120 @@ export default function CuteStudentScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* 2. Connected Tuition / Solo Teacher Card */}
+        {/* 2. 6-Day Streak Banner (Aptivo & Moodpress Inspired) */}
+        <View className="bg-cute-peach-light border-2 border-cute-peach rounded-3xl p-3.5 flex-row items-center justify-between shadow-xs">
+          <View className="flex-row items-center gap-2.5 flex-1 pr-2">
+            <Mascot mood="streak" size="sm" />
+            <View className="flex-1">
+              <View className="flex-row items-center gap-1.5">
+                <Text className="text-xs font-black text-cute-cocoa">6 Day Study Streak! 🔥</Text>
+                <View className="bg-amber-100 px-1.5 py-0.5 rounded-full border border-amber-300">
+                  <Text className="text-[9px] font-bold text-amber-700">+100 XP</Text>
+                </View>
+              </View>
+              <Text className="text-[11px] text-cute-muted mt-0.5">
+                {DAILY_AFFIRMATIONS[activeDayIndex % DAILY_AFFIRMATIONS.length]}
+              </Text>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            onPress={() => Alert.alert('Streak Rewards 🏆', 'You are on a 6-day consistency streak! Maintain 7 days to unlock the Grand Topper Badge.')}
+            className="bg-cute-peach px-3 py-1.5 rounded-xl active:scale-95 shadow-xs"
+          >
+            <Text className="text-[10px] font-extrabold text-white">Details</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* 3. Study Rhythm Weekday Strip & Mood Check-in (Mind&Me Inspired) */}
+        <View className="bg-white border-2 border-cute-border rounded-3xl p-4 shadow-xs">
+          <View className="flex-row items-center justify-between mb-2">
+            <Text className="text-xs font-black text-cute-cocoa uppercase tracking-wider">
+              Study Rhythm ({dayNames[activeDayIndex]})
+            </Text>
+            <Text className="text-xs text-cute-muted font-bold">Week 14</Text>
+          </View>
+
+          {/* Days Strip */}
+          <View className="flex-row justify-between mb-3">
+            {daysOfWeek.map((day, idx) => {
+              const isSelected = activeDayIndex === idx;
+              return (
+                <TouchableOpacity
+                  key={`day-${idx}`}
+                  activeOpacity={0.8}
+                  onPress={() => setActiveDayIndex(idx)}
+                  className={`w-10 h-12 rounded-2xl items-center justify-center border ${
+                    isSelected
+                      ? 'bg-cute-peach border-cute-peach shadow-xs'
+                      : 'bg-cute-cream border-cute-border'
+                  }`}
+                >
+                  <Text className={`text-[11px] font-black ${isSelected ? 'text-white' : 'text-cute-cocoa'}`}>
+                    {day}
+                  </Text>
+                  <View className={`w-1.5 h-1.5 rounded-full mt-1 ${isSelected ? 'bg-white' : 'bg-cute-muted/40'}`} />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {/* Daily Feeling Check-in */}
+          <View className="pt-2.5 border-t border-cute-border">
+            <Text className="text-[11px] font-bold text-cute-muted mb-2">
+              How are you feeling today?
+            </Text>
+            <View className="flex-row justify-between gap-1.5">
+              {[
+                { id: 'happy', emoji: '🌸', label: 'Ready' },
+                { id: 'focus', emoji: '☕', label: 'Focused' },
+                { id: 'neutral', emoji: '☁️', label: 'Steady' },
+                { id: 'tired', emoji: '🌙', label: 'Relaxed' },
+              ].map((m) => {
+                const isSelected = selectedMood === m.id;
+                return (
+                  <TouchableOpacity
+                    key={m.id}
+                    onPress={() => setSelectedMood(m.id)}
+                    className={`flex-1 py-1.5 px-1 rounded-xl items-center border ${
+                      isSelected
+                        ? 'bg-cute-peach-light border-cute-peach'
+                        : 'bg-cute-cream border-cute-border'
+                    }`}
+                  >
+                    <Text className="text-base">{m.emoji}</Text>
+                    <Text className={`text-[10px] font-bold mt-0.5 ${isSelected ? 'text-cute-peach' : 'text-cute-muted'}`}>
+                      {m.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+
+        {/* 4. Dual Stat Squircles (Image 4 Olympiad Dashboard Inspired) */}
+        <View className="flex-row gap-3">
+          <View className="flex-1 bg-white border-2 border-cute-border rounded-3xl p-3.5 shadow-xs">
+            <View className="w-8 h-8 rounded-xl bg-cute-peach-light border border-cute-peach items-center justify-center mb-1.5">
+              <BookOpen size={16} color="#ff7d6b" />
+            </View>
+            <Text className="text-[11px] font-bold text-cute-muted">Completed</Text>
+            <Text className="text-2xl font-black text-cute-cocoa mt-0.5">78</Text>
+            <Text className="text-[10px] text-cute-peach font-bold mt-0.5">Lessons mastered 🎓</Text>
+          </View>
+
+          <View className="flex-1 bg-white border-2 border-cute-border rounded-3xl p-3.5 shadow-xs">
+            <View className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 items-center justify-center mb-1.5">
+              <Clock size={16} color="#6366f1" />
+            </View>
+            <Text className="text-[11px] font-bold text-cute-muted">Active Time</Text>
+            <Text className="text-2xl font-black text-cute-cocoa mt-0.5">12h</Text>
+            <Text className="text-[10px] text-indigo-600 font-bold mt-0.5">Study hours this week ⚡</Text>
+          </View>
+        </View>
+
+        {/* 5. Connected Tuition / Solo Teacher Card */}
         <View className="bg-white border-2 border-cute-border rounded-3xl p-4 shadow-xs">
           <View className="flex-row items-center justify-between mb-2">
             <View className="flex-row items-center gap-2">

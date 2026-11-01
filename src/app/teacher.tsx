@@ -55,7 +55,7 @@ import { type AttendanceRecord } from '@/types/database';
 
 export default function TeacherScreen() {
   const router = useRouter();
-  const { activeInstitute } = useAuth();
+  const { activeInstitute, signOut } = useAuth();
   const {
     attendanceRecords,
     markAttendance,
@@ -221,7 +221,23 @@ export default function TeacherScreen() {
         title: 'Teacher Desk 🍎',
         instituteName: activeInstitute?.name || 'Bloom Academy 🌸',
         onNotificationPress: () => Alert.alert('Faculty Notices', 'Monthly mock test review by 6 PM.'),
-        onProfilePress: () => Alert.alert('Faculty Profile', `${teacherProfile.fullName} • ${teacherProfile.qualification}`),
+        onProfilePress: () => {
+          Alert.alert(
+            teacherProfile.fullName,
+            `${teacherProfile.qualification}\nTeacher Code: ${teacherProfile.teacherCode}`,
+            [
+              {
+                text: 'Sign Out 🚪',
+                style: 'destructive',
+                onPress: async () => {
+                  await signOut();
+                  router.replace('/auth');
+                },
+              },
+              { text: 'Close', style: 'cancel' },
+            ]
+          );
+        },
       }}
     >
       <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-3 pb-16">

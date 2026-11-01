@@ -2,6 +2,7 @@ import '../global.css';
 import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
 
 import { AuthProvider } from '@/context/AuthContext';
 import { InstituteProvider } from '@/context/InstituteContext';
@@ -9,6 +10,16 @@ import { ChildProvider } from '@/context/ChildContext';
 import { AcademicProvider } from '@/context/AcademicContext';
 import { FeeNotificationProvider } from '@/context/FeeNotificationContext';
 import { ChatProvider } from '@/context/ChatContext';
+
+// Disable strict mode warning for third-party libraries accessing .value during render
+try {
+  configureReanimatedLogger({
+    level: ReanimatedLogLevel.warn,
+    strict: false,
+  });
+} catch {
+  // Graceful fallback if unsupported
+}
 
 export default function RootLayout() {
   useEffect(() => {

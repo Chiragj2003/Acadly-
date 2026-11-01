@@ -39,7 +39,7 @@ import {
 
 export default function AdminDashboardScreen() {
   const router = useRouter();
-  const { activeInstitute, batches, createBatch } = useAuth();
+  const { activeInstitute, batches, createBatch, signOut } = useAuth();
   const { joinRequests, coachingProfile } = useAcademic();
   const pendingJoinCount = joinRequests.filter(r => r.status === 'pending').length;
   const {
@@ -112,7 +112,23 @@ export default function AdminDashboardScreen() {
         title: 'Admin Dashboard',
         instituteName: activeInstitute?.name,
         onNotificationPress: openNotificationDrawer,
-        onProfilePress: () => Alert.alert('Director Profile', 'Director Sharma - Apex Kota Super-Admin'),
+        onProfilePress: () => {
+          Alert.alert(
+            'Director Sharma 🌸',
+            'Apex Kota Super-Admin & Center Lead',
+            [
+              {
+                text: 'Sign Out 🚪',
+                style: 'destructive',
+                onPress: async () => {
+                  await signOut();
+                  router.replace('/auth');
+                },
+              },
+              { text: 'Close', style: 'cancel' },
+            ]
+          );
+        },
         hasUnreadNotifications: unreadCount > 0,
       }}
     >

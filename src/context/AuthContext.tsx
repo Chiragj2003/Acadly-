@@ -134,24 +134,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [userRole, setUserRole] = useState<UserRole>('student');
-  const [user, setUser] = useState<Profile | null>(ROLE_PROFILES.student);
+  const [user, setUser] = useState<Profile | null>(null);
   const [activeInstitute, setActiveInstitute] = useState<Institute | null>(DEFAULT_INSTITUTES[0]);
   const [institutes, setInstitutes] = useState<Institute[]>(DEFAULT_INSTITUTES);
   const [batches, setBatches] = useState<Batch[]>(INITIAL_BATCHES);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Restore saved role and institute if present
+    // Restore saved role and user session if present
     (async () => {
       try {
+        const isAuth = await AsyncStorage.getItem('@acadly_authenticated');
         const savedRole = await AsyncStorage.getItem('@acadly_role');
-        if (savedRole && ['admin', 'teacher', 'student', 'parent'].includes(savedRole)) {
+        if (isAuth === 'true' && savedRole && ['admin', 'teacher', 'student', 'parent'].includes(savedRole)) {
           const role = savedRole as UserRole;
           setUserRole(role);
           setUser(ROLE_PROFILES[role]);
+        } else {
+          setUser(null);
         }
       } catch {
-        // use default state
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
     })();
   }, []);
@@ -160,6 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUserRole(role);
     setUser(ROLE_PROFILES[role]);
     await AsyncStorage.setItem('@acadly_role', role);
+    await AsyncStorage.setItem('@acadly_authenticated', 'true');
   };
 
   const switchInstitute = (instituteId: string) => {
@@ -241,6 +247,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(newProfile);
       setUserRole(role);
       await AsyncStorage.setItem('@acadly_role', role);
+      await AsyncStorage.setItem('@acadly_authenticated', 'true');
       return { success: true };
     } catch (e: any) {
       return { success: false, error: e.message || 'Failed to register' };
@@ -255,6 +262,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setUser(null);
     await AsyncStorage.removeItem('@acadly_role');
+    await AsyncStorage.removeItem('@acadly_authenticated');
   };
 
   const createInstitute = async (name: string, centerCode: string, city: string) => {

@@ -245,7 +245,7 @@ export default function CleanAuthScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* 1. Header with Cute SVG Pip Mascot */}
-        <View className="items-center mb-6">
+        <View className="items-center mb-5">
           <Mascot
             mood="happy"
             size="lg"
@@ -258,6 +258,30 @@ export default function CleanAuthScreen() {
           <Text className="text-xs font-bold text-cute-muted text-center mt-1">
             Tuition & Coaching Made Adorable 🌸
           </Text>
+        </View>
+
+        {/* Quick 1-Tap Demo Jump for Instant Review */}
+        <View className="bg-white border-2 border-cute-border rounded-2xl p-2.5 mb-5 flex-row items-center justify-between shadow-xs">
+          <View className="flex-row items-center gap-1.5 pl-1">
+            <Sparkles size={13} color="#ff7d6b" />
+            <Text className="text-[11px] font-black text-cute-cocoa">Demo Mode:</Text>
+          </View>
+          <View className="flex-row gap-1.5">
+            {[
+              { role: 'student', label: '🌸 Student' },
+              { role: 'teacher', label: '🍎 Teacher' },
+              { role: 'admin', label: '🏫 Admin' },
+              { role: 'parent', label: '🏡 Parent' },
+            ].map((item) => (
+              <TouchableOpacity
+                key={item.role}
+                onPress={() => handleQuickDemo(item.role as UserRole)}
+                className="bg-cute-peach-light border border-cute-peach px-2 py-1 rounded-xl active:scale-95"
+              >
+                <Text className="text-[10px] font-black text-cute-peach">{item.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
 
         {/* 2. Step 1: Select Your Role */}

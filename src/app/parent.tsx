@@ -13,6 +13,7 @@ import {
   Heart,
   CheckCircle2,
 } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { useInstitute } from '@/context/InstituteContext';
 import { useChild } from '@/context/ChildContext';
@@ -29,6 +30,8 @@ import {
 } from '@/components/finance';
 
 export default function CuteParentScreen() {
+  const router = useRouter();
+  const { signOut } = useAuth();
   const { currentInstitute } = useInstitute();
   const { selectedChild, childrenList, selectChild } = useChild();
   const {
@@ -49,7 +52,23 @@ export default function CuteParentScreen() {
         title: 'Parent Corner 🏡',
         instituteName: currentInstitute?.name || 'Bloom Academy',
         onNotificationPress: openNotificationDrawer,
-        onProfilePress: () => Alert.alert('Guardian Profile', 'Sunita Sharma • Primary Guardian'),
+        onProfilePress: () => {
+          Alert.alert(
+            'Sunita Sharma 🏡',
+            'Primary Guardian • Enrolled: Amelia Sharma',
+            [
+              {
+                text: 'Sign Out 🚪',
+                style: 'destructive',
+                onPress: async () => {
+                  await signOut();
+                  router.replace('/auth');
+                },
+              },
+              { text: 'Close', style: 'cancel' },
+            ]
+          );
+        },
         hasUnreadNotifications: unreadCount > 0,
       }}
     >
