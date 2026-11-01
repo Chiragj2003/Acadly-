@@ -52,7 +52,7 @@ export default function CuteStudentScreen() {
   const { lectures, openPlayer, teacherProfile } = useAcademic();
   const { openNotificationDrawer, unreadCount } = useFeeNotification();
 
-  const [activeTab, setActiveTab] = useState<'courses' | 'progress' | 'notes' | 'assignments'>('courses');
+  const [activeTab, setActiveTab] = useState<'courses' | 'chat' | 'progress' | 'notes' | 'assignments'>('courses');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   const liveLecture = lectures.find((l) => l.is_live) || lectures[0];
@@ -131,11 +131,19 @@ export default function CuteStudentScreen() {
           {/* Quick Action Navigation Strip */}
           <View className="flex-row gap-2 mt-3 pt-2.5 border-t border-cute-border">
             <TouchableOpacity
+              onPress={() => router.push('/chat')}
+              className="flex-1 bg-cute-peach-light border border-cute-peach py-2 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95 shadow-xs"
+            >
+              <MessageSquare size={12} color="#ff7d6b" />
+              <Text className="text-[11px] font-black text-cute-peach">Class Chat & Doubts 💬</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
               onPress={() => router.push('/community')}
               className="flex-1 bg-cute-cream border border-cute-border py-2 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95"
             >
-              <MessageSquare size={12} color="#ff7d6b" />
-              <Text className="text-[11px] font-bold text-cute-cocoa">Community & Doubts</Text>
+              <Text className="text-xs">📚</Text>
+              <Text className="text-[11px] font-bold text-cute-cocoa">Resources</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -143,41 +151,44 @@ export default function CuteStudentScreen() {
               className="flex-1 bg-cute-cream border border-cute-border py-2 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95"
             >
               <BarChart3 size={12} color="#ff7d6b" />
-              <Text className="text-[11px] font-bold text-cute-cocoa">My 360° Report</Text>
+              <Text className="text-[11px] font-bold text-cute-cocoa">360° Stats</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* 3. Horizontal Pill Tab Navigator */}
-        <View className="flex-row gap-1.5">
-          {[
-            { key: 'courses', label: 'My Subjects 📚' },
-            { key: 'progress', label: 'Analytics 📈' },
-            { key: 'notes', label: 'PDF Notes 🌸' },
-            { key: 'assignments', label: 'Daily DPP ✏️' },
-          ].map((tab) => {
-            const isSelected = activeTab === tab.key;
-            return (
-              <TouchableOpacity
-                key={tab.key}
-                onPress={() => setActiveTab(tab.key as any)}
-                className={`flex-1 py-2.5 rounded-2xl items-center border ${
-                  isSelected
-                    ? 'bg-cute-peach border-cute-cocoa/20 shadow-xs'
-                    : 'bg-white border-cute-border'
-                }`}
-              >
-                <Text
-                  className={`text-xs font-bold ${
-                    isSelected ? 'text-white' : 'text-cute-muted'
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-1 px-1">
+          <View className="flex-row gap-1.5">
+            {[
+              { key: 'courses', label: 'My Subjects 📚' },
+              { key: 'chat', label: 'Chat & Doubts 💬' },
+              { key: 'progress', label: 'Analytics 📈' },
+              { key: 'notes', label: 'PDF Notes 🌸' },
+              { key: 'assignments', label: 'Daily DPP ✏️' },
+            ].map((tab) => {
+              const isSelected = activeTab === tab.key;
+              return (
+                <TouchableOpacity
+                  key={tab.key}
+                  onPress={() => setActiveTab(tab.key as any)}
+                  className={`px-3 py-2 rounded-2xl items-center border ${
+                    isSelected
+                      ? 'bg-cute-peach border-cute-cocoa/20 shadow-xs'
+                      : 'bg-white border-cute-border'
                   }`}
                 >
-                  {tab.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+                  <Text
+                    className={`text-xs font-bold ${
+                      isSelected ? 'text-white' : 'text-cute-muted'
+                    }`}
+                  >
+                    {tab.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </ScrollView>
 
         {/* ================= TAB 1: COURSES ================= */}
         {activeTab === 'courses' && (
@@ -225,6 +236,79 @@ export default function CuteStudentScreen() {
                   onPlayPress={() => liveLecture && openPlayer(liveLecture)}
                 />
               ))}
+            </View>
+          </View>
+        )}
+
+        {/* ================= TAB 2: LIVE CHAT & DOUBTS ================= */}
+        {activeTab === 'chat' && (
+          <View className="gap-4">
+            {/* Batch Sakura Group Card */}
+            <View className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs gap-3">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2.5">
+                  <View className="w-10 h-10 rounded-2xl bg-cute-peach-light border border-cute-peach items-center justify-center">
+                    <Text className="text-lg">🌸</Text>
+                  </View>
+                  <View>
+                    <Text className="text-sm font-black text-cute-cocoa">Batch Sakura 🌸 Group</Text>
+                    <Text className="text-xs text-cute-muted">Teacher & 28 Verified Classmates</Text>
+                  </View>
+                </View>
+
+                <View className="bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                  <Text className="text-[10px] font-bold text-emerald-800">Live Realtime ⚡</Text>
+                </View>
+              </View>
+
+              <View className="bg-cute-cream p-3 rounded-2xl border border-cute-border gap-1">
+                <Text className="text-[10px] font-black text-cute-muted uppercase tracking-wider">
+                  Pinned Announcement:
+                </Text>
+                <Text className="text-xs text-cute-cocoa font-bold">
+                  📌 Physics masterclass on Rotational Dynamics is live at 04:30 PM. Keep your formula cheat-sheets ready!
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => router.push('/chat')}
+                className="w-full bg-cute-peach py-3 rounded-2xl items-center flex-row justify-center gap-2 shadow-xs active:scale-98"
+              >
+                <MessageSquare size={14} color="#ffffff" />
+                <Text className="text-xs font-black text-white">
+                  Open Batch Group Chat (Live Room) →
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Direct Teacher Chat Card */}
+            <View className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs gap-3">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2.5">
+                  <View className="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-200 items-center justify-center">
+                    <Text className="text-lg">🍎</Text>
+                  </View>
+                  <View>
+                    <Text className="text-sm font-black text-cute-cocoa">Prof. Vikram Joshi ⚡</Text>
+                    <Text className="text-xs text-cute-muted">Physics Faculty • 1-on-1 Direct</Text>
+                  </View>
+                </View>
+
+                <View className="bg-cute-peach-light border border-cute-peach px-2 py-0.5 rounded-full">
+                  <Text className="text-[10px] font-bold text-cute-peach">Direct</Text>
+                </View>
+              </View>
+
+              <Text className="text-xs text-cute-muted leading-relaxed">
+                Have private questions about test marks, doubt clarification, or attendance excuses? Message your teacher directly.
+              </Text>
+
+              <TouchableOpacity
+                onPress={() => router.push('/chat')}
+                className="w-full bg-cute-cream border border-cute-border py-2.5 rounded-2xl items-center flex-row justify-center gap-1.5 active:scale-98"
+              >
+                <Text className="text-xs font-bold text-cute-cocoa">Message Prof. Vikram Privately ✉️</Text>
+              </TouchableOpacity>
             </View>
           </View>
         )}

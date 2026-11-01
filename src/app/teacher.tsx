@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, TouchableOpacity, Alert, Switch, Modal } from 'react-native';
+import { View, Text, Pressable, TouchableOpacity, Alert, Switch, Modal, ScrollView } from 'react-native';
 import {
   BookOpen,
   Users,
@@ -50,7 +50,7 @@ export default function TeacherScreen() {
 
   const pendingJoinCount = joinRequests.filter(r => r.status === 'pending').length;
 
-  const [activeTab, setActiveTab] = useState<'attendance' | 'assignments' | 'notes'>('attendance');
+  const [activeTab, setActiveTab] = useState<'attendance' | 'chat' | 'assignments' | 'notes'>('attendance');
   const [waParentPing, setWaParentPing] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [selectedRecordForCorrection, setSelectedRecordForCorrection] = useState<AttendanceRecord | null>(null);
@@ -140,22 +140,22 @@ export default function TeacherScreen() {
           </View>
         </View>
 
-        {/* Action Strip: Verify Requests, Community, 360 Student View */}
+        {/* Action Strip: Live Chat, Verify Requests, Doubts, 360 Student View */}
         <View className="flex-row gap-2 mt-4 pt-3 border-t border-cute-peach/20">
           <TouchableOpacity
-            onPress={() => router.push('/verify-students')}
-            className="flex-1 bg-white border border-cute-peach p-2 rounded-xl flex-row items-center justify-center gap-1.5 shadow-xs"
+            onPress={() => router.push('/chat')}
+            className="flex-1 bg-white border border-cute-peach p-2 rounded-xl flex-row items-center justify-center gap-1.5 shadow-xs active:scale-95"
           >
-            {pendingJoinCount > 0 && <View className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />}
-            <Text className="text-[11px] font-bold text-cute-peach">Verify Join ({pendingJoinCount})</Text>
+            <MessageSquare size={13} color="#ff7d6b" />
+            <Text className="text-[11px] font-black text-cute-peach">Live Chat 💬</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => router.push('/community')}
+            onPress={() => router.push('/verify-students')}
             className="flex-1 bg-white border border-cute-border p-2 rounded-xl flex-row items-center justify-center gap-1.5 shadow-xs"
           >
-            <Text className="text-xs">💬</Text>
-            <Text className="text-[11px] font-bold text-cute-cocoa">Doubts</Text>
+            {pendingJoinCount > 0 && <View className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />}
+            <Text className="text-[11px] font-bold text-cute-cocoa">Verify ({pendingJoinCount})</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -169,58 +169,37 @@ export default function TeacherScreen() {
       </View>
 
       {/* Navigation Sub-Tabs (Cute Pills) */}
-      <View className="flex-row items-center gap-2 mb-3">
-        <Pressable
-          onPress={() => setActiveTab('attendance')}
-          className={`flex-1 py-2.5 rounded-2xl items-center border ${
-            activeTab === 'attendance'
-              ? 'bg-cute-peach border-cute-cocoa/20 shadow-xs'
-              : 'bg-white border-cute-border'
-          }`}
-        >
-          <Text
-            className={`text-xs font-bold ${
-              activeTab === 'attendance' ? 'text-white' : 'text-cute-muted'
-            }`}
-          >
-            Daily Roll Call 📋
-          </Text>
-        </Pressable>
-
-        <Pressable
-          onPress={() => setActiveTab('assignments')}
-          className={`flex-1 py-2.5 rounded-2xl items-center border ${
-            activeTab === 'assignments'
-              ? 'bg-cute-peach border-cute-cocoa/20 shadow-xs'
-              : 'bg-white border-cute-border'
-          }`}
-        >
-          <Text
-            className={`text-xs font-bold ${
-              activeTab === 'assignments' ? 'text-white' : 'text-cute-muted'
-            }`}
-          >
-            Assignments & DPP ✏️
-          </Text>
-        </Pressable>
-
-        <Pressable
-          onPress={() => setActiveTab('notes')}
-          className={`flex-1 py-2.5 rounded-2xl items-center border ${
-            activeTab === 'notes'
-              ? 'bg-cute-peach border-cute-cocoa/20 shadow-xs'
-              : 'bg-white border-cute-border'
-          }`}
-        >
-          <Text
-            className={`text-xs font-bold ${
-              activeTab === 'notes' ? 'text-white' : 'text-cute-muted'
-            }`}
-          >
-            Notes & Media 🌸
-          </Text>
-        </Pressable>
-      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-3 -mx-1 px-1">
+        <View className="flex-row items-center gap-1.5">
+          {[
+            { key: 'attendance', label: 'Daily Roll Call 📋' },
+            { key: 'chat', label: 'Batch Chat & Doubts 💬' },
+            { key: 'assignments', label: 'Assignments & DPP ✏️' },
+            { key: 'notes', label: 'Notes & Media 🌸' },
+          ].map((tab) => {
+            const isSelected = activeTab === tab.key;
+            return (
+              <Pressable
+                key={tab.key}
+                onPress={() => setActiveTab(tab.key as any)}
+                className={`px-3 py-2 rounded-2xl items-center border ${
+                  isSelected
+                    ? 'bg-cute-peach border-cute-cocoa/20 shadow-xs'
+                    : 'bg-white border-cute-border'
+                }`}
+              >
+                <Text
+                  className={`text-xs font-bold ${
+                    isSelected ? 'text-white' : 'text-cute-muted'
+                  }`}
+                >
+                  {tab.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </ScrollView>
 
       {/* TAB 1: ATTENDANCE & SCHEDULE */}
       {activeTab === 'attendance' && (
@@ -401,6 +380,109 @@ export default function TeacherScreen() {
                 </View>
               </Pressable>
             </View>
+          </View>
+        </View>
+      )}
+
+      {/* TAB: BATCH CHAT & DOUBTS */}
+      {activeTab === 'chat' && (
+        <View className="gap-4">
+          {/* Batch Group Chat Card */}
+          <View className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs gap-3">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2.5">
+                <View className="w-10 h-10 rounded-2xl bg-cute-peach-light border border-cute-peach items-center justify-center">
+                  <Text className="text-lg">🌸</Text>
+                </View>
+                <View>
+                  <Text className="text-sm font-black text-cute-cocoa">Batch Sakura 🌸 Group Room</Text>
+                  <Text className="text-xs text-cute-muted">Teacher + 28 Enrolled Students</Text>
+                </View>
+              </View>
+
+              <View className="bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                <Text className="text-[10px] font-bold text-emerald-800">Realtime Active</Text>
+              </View>
+            </View>
+
+            <View className="bg-cute-cream p-3 rounded-2xl border border-cute-border">
+              <Text className="text-[10px] font-black text-cute-muted uppercase tracking-wider mb-1">
+                Current Class Pinned Announcement:
+              </Text>
+              <Text className="text-xs text-cute-cocoa font-bold">
+                📌 Physics masterclass on Rotational Dynamics is live at 04:30 PM. Keep your formula cheat-sheets ready!
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              onPress={() => router.push('/chat')}
+              className="w-full bg-cute-peach py-3 rounded-2xl items-center flex-row justify-center gap-2 shadow-xs active:scale-98"
+            >
+              <MessageSquare size={14} color="#ffffff" />
+              <Text className="text-xs font-black text-white">
+                Open Real-Time Class Room (Broadcast & Pin) →
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Student 1-on-1 Doubts Inbox */}
+          <View className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs gap-3">
+            <View className="flex-row items-center justify-between mb-1">
+              <View className="flex-row items-center gap-2">
+                <View className="w-8 h-8 rounded-xl bg-cute-cream border border-cute-border items-center justify-center">
+                  <Text className="text-sm">💬</Text>
+                </View>
+                <View>
+                  <Text className="text-sm font-black text-cute-cocoa">Direct Student Messages</Text>
+                  <Text className="text-[10px] text-cute-muted">Private queries from enrolled pupils</Text>
+                </View>
+              </View>
+
+              <View className="bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full">
+                <Text className="text-[10px] font-bold text-rose-800">1 Unread</Text>
+              </View>
+            </View>
+
+            {/* Direct messages preview list */}
+            {[
+              {
+                name: 'Amelia Sharma 🌸',
+                roll: 'Roll #07',
+                time: 'Yesterday',
+                preview: 'Sir, I have submitted my assignment for Definite Integrals...',
+                hasPdf: true,
+              },
+              {
+                name: 'Kabir Singhania 🌱',
+                roll: 'Roll #08',
+                time: '11:20 AM',
+                preview: 'Sir, which reference book should I solve for Rotational Mechanics?',
+                hasPdf: false,
+              },
+            ].map((dm, idx) => (
+              <TouchableOpacity
+                key={idx}
+                onPress={() => router.push('/chat')}
+                className="p-3 rounded-2xl bg-cute-cream border border-cute-border flex-row items-center justify-between active:scale-98"
+              >
+                <View className="flex-1 pr-2">
+                  <View className="flex-row items-center gap-2 mb-0.5">
+                    <Text className="text-xs font-black text-cute-cocoa">{dm.name}</Text>
+                    <Text className="text-[10px] text-cute-muted">{dm.roll}</Text>
+                    {dm.hasPdf && (
+                      <View className="bg-rose-100 px-1.5 py-0.2 rounded border border-rose-200">
+                        <Text className="text-[9px] font-bold text-rose-800">PDF Doubt</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text className="text-xs text-cute-muted" numberOfLines={1}>
+                    {dm.preview}
+                  </Text>
+                </View>
+
+                <Text className="text-[10px] font-bold text-cute-peach">{dm.time}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
       )}

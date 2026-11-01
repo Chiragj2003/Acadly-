@@ -8,6 +8,7 @@ import { InstituteProvider } from '@/context/InstituteContext';
 import { ChildProvider } from '@/context/ChildContext';
 import { AcademicProvider } from '@/context/AcademicContext';
 import { FeeNotificationProvider } from '@/context/FeeNotificationContext';
+import { ChatProvider } from '@/context/ChatContext';
 
 export default function RootLayout() {
   useEffect(() => {
@@ -20,18 +21,21 @@ export default function RootLayout() {
         <ChildProvider>
           <AcademicProvider>
             <FeeNotificationProvider>
-              <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
-                <Stack.Screen name="index" />
-                <Stack.Screen name="auth" />
-                <Stack.Screen name="student" />
-                <Stack.Screen name="teacher" />
-                <Stack.Screen name="parent" />
-                <Stack.Screen name="admin" />
-                <Stack.Screen name="community" />
-                <Stack.Screen name="verify-students" />
-                <Stack.Screen name="student-detail" />
-                <Stack.Screen name="join-institute" />
-              </Stack>
+              <ChatProvider>
+                <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
+                  <Stack.Screen name="index" />
+                  <Stack.Screen name="auth" />
+                  <Stack.Screen name="student" />
+                  <Stack.Screen name="teacher" />
+                  <Stack.Screen name="parent" />
+                  <Stack.Screen name="admin" />
+                  <Stack.Screen name="community" />
+                  <Stack.Screen name="chat" />
+                  <Stack.Screen name="verify-students" />
+                  <Stack.Screen name="student-detail" />
+                  <Stack.Screen name="join-institute" />
+                </Stack>
+              </ChatProvider>
             </FeeNotificationProvider>
           </AcademicProvider>
         </ChildProvider>
