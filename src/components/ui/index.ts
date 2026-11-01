@@ -7,3 +7,6 @@ export * from './RoleCard';
 export * from './MetricCard';
 export * from './HeaderBar';
 export * from './ScreenWrapper';
+export * from './Mascot';
+export * from './SubjectMascotCard';
+export * from './CuteProgressChart';

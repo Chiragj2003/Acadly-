@@ -110,34 +110,69 @@ export default function AdminDashboardScreen() {
         hasUnreadNotifications: unreadCount > 0,
       }}
     >
-      {/* Greeting Banner with Live Accent */}
-      <Card elevation="low" className="p-4 gap-1.5 overflow-hidden">
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center gap-1.5">
-            <View className="w-2 h-2 rounded-full bg-on-tertiary-container" />
-            <Text className="text-xs font-bold text-secondary uppercase tracking-wider">
-              Live Institute Feed
-            </Text>
+      {/* Greeting Banner with Live Accent (Cute & Friendly) */}
+      <View className="bg-cute-peach-light border-2 border-cute-peach rounded-[28px] p-5 shadow-xs mb-3">
+        <View className="flex-row items-center justify-between mb-2">
+          <View className="bg-white px-2.5 py-0.5 rounded-full border border-cute-peach flex-row items-center gap-1.5">
+            <View className="w-2 h-2 rounded-full bg-emerald-500" />
+            <Text className="text-[10px] font-bold text-cute-peach uppercase">Command Desk</Text>
           </View>
-          <View className="flex-row items-center gap-1">
-            <Sparkles size={14} color="#0051d5" />
-            <Text className="text-xs text-on-surface-variant font-medium">
-              {activeInstitute?.city} Campus
+          <Text className="text-xs font-semibold text-cute-muted">
+            {activeInstitute?.name || 'Bloom Academy 🌸'}
+          </Text>
+        </View>
+
+        <View className="flex-row items-center gap-3">
+          <View className="w-13 h-13 rounded-2xl bg-white border border-cute-border items-center justify-center shadow-xs">
+            <Text className="text-3xl">🏫</Text>
+          </View>
+          <View className="flex-1 min-w-0">
+            <Text className="text-lg font-black text-cute-cocoa" numberOfLines={1}>
+              Director Sharma 🌸
+            </Text>
+            <Text className="text-xs text-cute-muted mt-0.5" numberOfLines={1}>
+              {batches.length} Active Batches • 842 Enrolled Students
             </Text>
           </View>
         </View>
+      </View>
 
-        <View className="mt-1">
-          <Text className="text-xl font-bold text-on-surface tracking-tight">
-            Good Morning, Director Sharma
+      {/* Admin Sub-Tabs (Cute Pills) */}
+      <View className="flex-row items-center gap-2 mb-3">
+        <Pressable
+          onPress={() => setActiveTab('dashboard')}
+          className={`flex-1 py-2.5 rounded-2xl items-center border ${
+            activeTab === 'dashboard'
+              ? 'bg-cute-peach border-cute-cocoa/20 shadow-xs'
+              : 'bg-white border-cute-border'
+          }`}
+        >
+          <Text
+            className={`text-xs font-bold ${
+              activeTab === 'dashboard' ? 'text-white' : 'text-cute-muted'
+            }`}
+          >
+            Academy Overview 📊
           </Text>
-          <Text className="text-xs text-on-surface-variant mt-0.5">
-            {activeInstitute?.name} • {batches.length} Batches in Session
-          </Text>
-        </View>
-      </Card>
+        </Pressable>
 
-      {/* Admin Sub-Tabs */}
+        <Pressable
+          onPress={() => setActiveTab('analytics')}
+          className={`flex-1 py-2.5 rounded-2xl items-center border ${
+            activeTab === 'analytics'
+              ? 'bg-cute-peach border-cute-cocoa/20 shadow-xs'
+              : 'bg-white border-cute-border'
+          }`}
+        >
+          <Text
+            className={`text-xs font-bold ${
+              activeTab === 'analytics' ? 'text-white' : 'text-cute-muted'
+            }`}
+          >
+            Revenue & Growth 📈
+          </Text>
+        </Pressable>
+      </View>
       <View className="flex-row items-center gap-2">
         <Pressable
           onPress={() => setActiveTab('dashboard')}

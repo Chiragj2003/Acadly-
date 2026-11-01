@@ -110,72 +110,81 @@ export default function TeacherScreen() {
         onProfilePress: () => Alert.alert('Faculty Profile', 'Er. Rakesh Verma • Senior Physics Faculty'),
       }}
     >
-      {/* Teacher Profile Banner */}
-      <Card elevation="hero" className="border-0">
+      {/* Teacher Profile Banner (Warm & Friendly) */}
+      <View className="bg-cute-peach-light border-2 border-cute-peach rounded-[28px] p-5 shadow-xs mb-3">
         <View className="flex-row items-center justify-between mb-2">
-          <Badge label="Academic Duty • Live" variant="pro" showDot />
-          <Text className="text-xs text-on-primary-container">Today, Live Session</Text>
+          <View className="bg-white px-2.5 py-0.5 rounded-full border border-cute-peach flex-row items-center gap-1.5">
+            <View className="w-2 h-2 rounded-full bg-emerald-500" />
+            <Text className="text-[10px] font-bold text-cute-peach uppercase">Faculty Studio</Text>
+          </View>
+          <Text className="text-xs font-semibold text-cute-muted">Batch Sakura 🌸 • Room 204</Text>
         </View>
 
         <View className="flex-row items-center gap-3">
-          <View className="w-12 h-12 rounded-full bg-secondary items-center justify-center border-2 border-white/20">
-            <Text className="text-base font-bold text-white">RV</Text>
+          <View className="w-13 h-13 rounded-2xl bg-white border border-cute-border items-center justify-center shadow-xs">
+            <Text className="text-3xl">👨‍🏫</Text>
           </View>
           <View className="flex-1 min-w-0">
-            <Text className="text-lg font-bold text-on-primary" numberOfLines={1}>
-              Er. Rakesh Verma
+            <Text className="text-lg font-black text-cute-cocoa" numberOfLines={1}>
+              Prof. Vikram Joshi ⚡
             </Text>
-            <Text className="text-xs text-on-primary-container" numberOfLines={1}>
-              Senior Physics Faculty • Dept. Head
+            <Text className="text-xs text-cute-muted" numberOfLines={1}>
+              Senior Physics & Electromagnetism Faculty
             </Text>
           </View>
         </View>
-      </Card>
+      </View>
 
-      {/* Navigation Sub-Tabs */}
-      <View className="flex-row items-center gap-2">
+      {/* Navigation Sub-Tabs (Cute Pills) */}
+      <View className="flex-row items-center gap-2 mb-3">
         <Pressable
           onPress={() => setActiveTab('attendance')}
-          className={`flex-1 py-2 rounded-xl items-center ${
-            activeTab === 'attendance' ? 'bg-primary' : 'bg-surface-container'
+          className={`flex-1 py-2.5 rounded-2xl items-center border ${
+            activeTab === 'attendance'
+              ? 'bg-cute-peach border-cute-cocoa/20 shadow-xs'
+              : 'bg-white border-cute-border'
           }`}
         >
           <Text
-            className={`text-xs font-semibold ${
-              activeTab === 'attendance' ? 'text-on-primary' : 'text-on-surface-variant'
+            className={`text-xs font-bold ${
+              activeTab === 'attendance' ? 'text-white' : 'text-cute-muted'
             }`}
           >
-            Roll Call & Schedule
+            Daily Roll Call 📋
           </Text>
         </Pressable>
 
         <Pressable
           onPress={() => setActiveTab('assignments')}
-          className={`flex-1 py-2 rounded-xl items-center ${
-            activeTab === 'assignments' ? 'bg-primary' : 'bg-surface-container'
+          className={`flex-1 py-2.5 rounded-2xl items-center border ${
+            activeTab === 'assignments'
+              ? 'bg-cute-peach border-cute-cocoa/20 shadow-xs'
+              : 'bg-white border-cute-border'
           }`}
         >
           <Text
-            className={`text-xs font-semibold ${
-              activeTab === 'assignments' ? 'text-on-primary' : 'text-on-surface-variant'
+            className={`text-xs font-bold ${
+              activeTab === 'assignments' ? 'text-white' : 'text-cute-muted'
             }`}
           >
-            Assignments & Grade
+            Assignments & DPP ✏️
           </Text>
         </Pressable>
 
         <Pressable
           onPress={() => setActiveTab('notes')}
-          className={`flex-1 py-2 rounded-xl items-center ${
-            activeTab === 'notes' ? 'bg-primary' : 'bg-surface-container'
+          className={`flex-1 py-2.5 rounded-2xl items-center border ${
+            activeTab === 'notes'
+              ? 'bg-cute-peach border-cute-cocoa/20 shadow-xs'
+              : 'bg-white border-cute-border'
           }`}
         >
           <Text
-            className={`text-xs font-semibold ${
-              activeTab === 'notes' ? 'text-on-primary' : 'text-on-surface-variant'
+            className={`text-xs font-bold ${
+              activeTab === 'notes' ? 'text-white' : 'text-cute-muted'
             }`}
           >
-            Study Notes
+            Notes & Media 🌸
           </Text>
         </Pressable>
       </View>

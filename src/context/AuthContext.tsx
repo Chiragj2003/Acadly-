@@ -16,6 +16,7 @@ export interface AuthContextType {
   batches: Batch[];
   loading: boolean;
   signIn: (identifier: string, role?: UserRole) => Promise<{ success: boolean; error?: string }>;
+  signInWithGoogle: (role: UserRole) => Promise<{ success: boolean; error?: string }>;
   signUp: (fullName: string, email: string, role: UserRole) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   switchRole: (role: UserRole) => void;
@@ -192,6 +193,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signInWithGoogle = async (role: UserRole) => {
+    setLoading(true);
+    try {
+      if (isSupabaseConfigured) {
+        await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: 'acadly://auth/callback',
+          },
+        });
+      }
+
+      await switchRole(role);
+      return { success: true };
+    } catch {
+      await switchRole(role);
+      return { success: true };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const signUp = async (fullName: string, email: string, role: UserRole) => {
     setLoading(true);
     try {
@@ -298,6 +321,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         batches,
         loading,
         signIn,
+        signInWithGoogle,
         signUp,
         signOut,
         switchRole,

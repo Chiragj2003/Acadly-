@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { Bell, ChevronDown, ArrowLeft, User } from 'lucide-react-native';
+import { Bell, ChevronDown, ArrowLeft, User, Sparkles } from 'lucide-react-native';
 
 export interface HeaderBarProps {
   title: string;
@@ -15,7 +15,7 @@ export interface HeaderBarProps {
 
 export const HeaderBar: React.FC<HeaderBarProps> = ({
   title,
-  instituteName = 'Apex IIT-JEE Academy',
+  instituteName = 'Bloom Academy 🌸',
   onInstitutePress,
   onNotificationPress,
   onProfilePress,
@@ -25,7 +25,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 }) => {
   return (
     <View
-      className={`h-16 px-4 flex-row items-center justify-between bg-surface/90 border-b border-black/5 ${className}`}
+      className={`h-16 px-4 flex-row items-center justify-between bg-cute-cream/95 border-b border-cute-border ${className}`}
     >
       <View className="flex-row items-center gap-2.5 flex-1 min-w-0">
         {onBackPress && (
@@ -33,9 +33,9 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             accessibilityRole="button"
             accessibilityLabel="Go back"
             onPress={onBackPress}
-            className="w-9 h-9 rounded-full bg-surface-container items-center justify-center active:bg-surface-container-high"
+            className="w-9 h-9 rounded-2xl bg-white border border-cute-border items-center justify-center active:scale-95 shadow-xs"
           >
-            <ArrowLeft size={18} color="#0b1c30" />
+            <ArrowLeft size={18} color="#2e2421" />
           </Pressable>
         )}
 
@@ -46,17 +46,17 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
               className="flex-row items-center gap-1 self-start"
             >
               <Text
-                className="text-xs font-semibold text-secondary"
+                className="text-xs font-bold text-cute-peach"
                 numberOfLines={1}
               >
                 {instituteName}
               </Text>
-              <ChevronDown size={14} color="#0051d5" />
+              <ChevronDown size={12} color="#ff7d6b" />
             </Pressable>
           )}
 
           <Text
-            className="text-lg font-bold text-on-surface tracking-tight"
+            className="text-lg font-black text-cute-cocoa tracking-tight"
             numberOfLines={1}
           >
             {title}
@@ -69,11 +69,11 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           accessibilityRole="button"
           accessibilityLabel="Notifications"
           onPress={onNotificationPress}
-          className="w-10 h-10 rounded-full items-center justify-center relative active:bg-surface-container"
+          className="w-10 h-10 rounded-2xl bg-white border border-cute-border items-center justify-center relative active:scale-95 shadow-xs"
         >
-          <Bell size={20} color="#45464d" />
+          <Bell size={18} color="#7d6f6a" />
           {hasUnreadNotifications && (
-            <View className="absolute top-2 right-2 w-2 h-2 rounded-full bg-error ring-2 ring-white" />
+            <View className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
           )}
         </Pressable>
 
@@ -81,9 +81,9 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           accessibilityRole="button"
           accessibilityLabel="User profile"
           onPress={onProfilePress}
-          className="w-8 h-8 rounded-full bg-primary items-center justify-center shadow-sm active:scale-95"
+          className="w-9 h-9 rounded-2xl bg-cute-peach-light border border-cute-peach items-center justify-center shadow-xs active:scale-95"
         >
-          <User size={16} color="#ffffff" />
+          <Text className="text-sm">🌸</Text>
         </Pressable>
       </View>
     </View>

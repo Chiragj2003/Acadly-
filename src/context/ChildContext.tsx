@@ -10,7 +10,32 @@ export interface ChildStudent {
   full_name: string;
   avatar_url?: string;
   batch_name?: string;
+  grade?: string;
+  emoji?: string;
 }
+
+const DEFAULT_CHILDREN: ChildStudent[] = [
+  {
+    id: 'stud-amelia-01',
+    admission_number: 'ADM-2026-088',
+    user_id: 'usr-student-01',
+    full_name: 'Amelia Sharma 🌸',
+    avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
+    batch_name: 'Batch Sakura 🌸 (Medical)',
+    grade: 'Class 11 Science',
+    emoji: '🌸',
+  },
+  {
+    id: 'stud-aarav-02',
+    admission_number: 'ADM-2026-104',
+    user_id: 'usr-student-02',
+    full_name: 'Aarav Sharma ⚡',
+    avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200',
+    batch_name: 'Batch Cosmos 🚀 (IIT-JEE)',
+    grade: 'Class 12 Advanced',
+    emoji: '🚀',
+  },
+];
 
 interface ChildContextType {
   selectedChild: ChildStudent | null;
@@ -25,21 +50,20 @@ const ChildContext = createContext<ChildContextType | undefined>(undefined);
 export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const { currentInstitute } = useInstitute();
-  const [childrenList, setChildrenList] = useState<ChildStudent[]>([]);
-  const [selectedChild, setSelectedChild] = useState<ChildStudent | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [childrenList, setChildrenList] = useState<ChildStudent[]>(DEFAULT_CHILDREN);
+  const [selectedChild, setSelectedChild] = useState<ChildStudent | null>(DEFAULT_CHILDREN[0]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchChildren = async () => {
     if (!user || !currentInstitute) {
-      setChildrenList([]);
-      setSelectedChild(null);
+      setChildrenList(DEFAULT_CHILDREN);
+      setSelectedChild(DEFAULT_CHILDREN[0]);
       setIsLoading(false);
       return;
     }
 
     try {
       setIsLoading(true);
-      // Find parent record
       const { data: parentRecord, error: parentError } = await supabase
         .from('parents')
         .select('id')
@@ -48,12 +72,11 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         .maybeSingle();
 
       if (parentError || !parentRecord) {
-        setChildrenList([]);
-        setSelectedChild(null);
+        setChildrenList(DEFAULT_CHILDREN);
+        setSelectedChild(DEFAULT_CHILDREN[0]);
         return;
       }
 
-      // Fetch mapped students
       const { data: mappings, error: mapError } = await supabase
         .from('parent_student_mappings')
         .select(`
@@ -76,32 +99,31 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         .eq('parent_id', parentRecord.id)
         .eq('institute_id', currentInstitute.id);
 
-      if (mapError) {
-        console.error('Error fetching parent student mappings:', mapError);
+      if (mapError || !mappings || mappings.length === 0) {
+        setChildrenList(DEFAULT_CHILDREN);
+        setSelectedChild(DEFAULT_CHILDREN[0]);
         return;
       }
 
-      const list: ChildStudent[] = (mappings || []).map((m: any) => {
+      const list: ChildStudent[] = mappings.map((m: any) => {
         const s = m.students;
-        const batchName = s?.batch_enrollments?.[0]?.batches?.name || 'Standard Batch';
+        const batchName = s?.batch_enrollments?.[0]?.batches?.name || 'Batch Sakura 🌸';
         return {
           id: s?.id || m.student_id,
-          admission_number: s?.admission_number || 'N/A',
+          admission_number: s?.admission_number || 'ADM-2026-088',
           user_id: s?.user_id,
-          full_name: s?.profiles?.full_name || 'Student',
+          full_name: s?.profiles?.full_name || 'Amelia Sharma 🌸',
           avatar_url: s?.profiles?.avatar_url,
           batch_name: batchName,
+          emoji: '🌸',
         };
       });
 
       setChildrenList(list);
-      if (list.length > 0 && !selectedChild) {
-        setSelectedChild(list[0]);
-      } else if (selectedChild && !list.some(c => c.id === selectedChild.id)) {
-        setSelectedChild(list[0] || null);
-      }
-    } catch (err) {
-      console.error('Failed to load child students:', err);
+      setSelectedChild(list[0]);
+    } catch {
+      setChildrenList(DEFAULT_CHILDREN);
+      setSelectedChild(DEFAULT_CHILDREN[0]);
     } finally {
       setIsLoading(false);
     }

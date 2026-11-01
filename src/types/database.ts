@@ -6,11 +6,21 @@ export interface Institute {
   code: string;
   center_code: string;
   city: string;
-  campus_name: string;
+  campus_name?: string;
+  tagline?: string;
+  slug?: string;
+  join_code?: string;
+  address?: string;
+  state?: string;
+  pincode?: string;
+  is_active?: boolean;
+  contact_email?: string;
+  contact_phone?: string;
   logo_url?: string;
   phone?: string;
   email?: string;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface Profile {

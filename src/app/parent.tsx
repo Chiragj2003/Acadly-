@@ -1,24 +1,26 @@
-import React, { useState } from 'react';
-import { View, Text, Pressable, Alert } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import {
   Users,
   CalendarCheck,
   Trophy,
   Wallet,
-  MessageSquare,
   ShieldCheck,
   ChevronRight,
   CreditCard,
   FileText,
+  Sparkles,
+  Heart,
+  CheckCircle2,
 } from 'lucide-react-native';
 import { useAuth } from '@/context/AuthContext';
+import { useInstitute } from '@/context/InstituteContext';
+import { useChild } from '@/context/ChildContext';
 import { useFeeNotification } from '@/context/FeeNotificationContext';
 import {
   ScreenWrapper,
-  MetricCard,
-  Button,
   Badge,
-  Card,
+  Mascot,
 } from '@/components/ui';
 import {
   RazorpayCheckoutModal,
@@ -26,8 +28,9 @@ import {
   NotificationDrawer,
 } from '@/components/finance';
 
-export default function ParentScreen() {
-  const { activeInstitute } = useAuth();
+export default function CuteParentScreen() {
+  const { currentInstitute } = useInstitute();
+  const { selectedChild, childrenList, selectChild } = useChild();
   const {
     studentFees,
     payments,
@@ -37,163 +40,166 @@ export default function ParentScreen() {
     unreadCount,
   } = useFeeNotification();
 
-  const [selectedChild, setSelectedChild] = useState('Aryan Kapoor');
-
-  const currentFee = studentFees.find((f) => f.student_name.includes('Aryan')) || studentFees[0];
+  const currentFee = studentFees[0];
   const lastPayment = payments[0];
 
   return (
     <ScreenWrapper
       headerProps={{
-        title: 'Parent Desk',
-        instituteName: activeInstitute?.name,
+        title: 'Parent Corner 🏡',
+        instituteName: currentInstitute?.name || 'Bloom Academy',
         onNotificationPress: openNotificationDrawer,
-        onProfilePress: () => Alert.alert('Parent Profile', 'Suresh Kapoor • Guardian'),
+        onProfilePress: () => Alert.alert('Guardian Profile', 'Sunita Sharma • Primary Guardian'),
         hasUnreadNotifications: unreadCount > 0,
       }}
     >
-      {/* Linked Child Snapshot */}
-      <Card elevation="low" className="p-3.5 flex-row items-center justify-between">
-        <View className="flex-row items-center gap-3 flex-1 min-w-0">
-          <View className="w-12 h-12 rounded-full bg-secondary/10 items-center justify-center">
-            <Users size={22} color="#0051d5" />
-          </View>
-          <View className="flex-1 min-w-0">
-            <View className="flex-row items-center gap-1.5">
-              <Text className="text-base font-bold text-on-surface" numberOfLines={1}>
-                {selectedChild}
-              </Text>
-              <Badge label="Class 12 Science" variant="info" />
-            </View>
-            <Text className="text-xs text-on-surface-variant mt-0.5" numberOfLines={1}>
-              Roll #JEE-2025-104 • Center: {activeInstitute?.name}
+      {/* 1. Child Switcher with Cute Avatars */}
+      <View className="bg-white border-2 border-cute-border rounded-[28px] p-4 mb-4 shadow-xs">
+        <View className="flex-row items-center justify-between mb-3">
+          <View className="flex-row items-center gap-1.5">
+            <Heart size={16} color="#ff7d6b" fill="#ff7d6b" />
+            <Text className="text-xs font-bold text-cute-cocoa uppercase tracking-wider">
+              Your Enrolled Children
             </Text>
           </View>
+          <Text className="text-[11px] font-semibold text-cute-peach">Tap to switch</Text>
         </View>
-
-        <Pressable
-          onPress={() => Alert.alert('Linked Children', '1. Aryan Kapoor (Class 12)\n2. Ria Kapoor (Class 9)')}
-          className="px-2.5 py-1 rounded-lg bg-surface-container"
-        >
-          <Text className="text-xs font-semibold text-secondary">Switch</Text>
-        </Pressable>
-      </Card>
-
-      {/* Child Academic & Attendance Vitals */}
-      <View className="gap-2">
-        <Text className="text-xs font-bold text-on-surface-variant uppercase tracking-wider px-1">
-          Child Progress & Vitals
-        </Text>
 
         <View className="flex-row gap-2.5">
-          <View className="flex-1">
-            <MetricCard
-              title="Attendance Rate"
-              value="96.4%"
-              trendText="Present Today"
-              trendDirection="positive"
-              icon={<CalendarCheck size={16} color="#069669" />}
-            />
-          </View>
-          <View className="flex-1">
-            <MetricCard
-              title="Latest Mock Test"
-              value="248"
-              subValue="/300"
-              trendText="Rank AIR 142"
-              trendDirection="positive"
-              icon={<Trophy size={16} color="#0051d5" />}
-            />
-          </View>
+          {childrenList.map((c) => {
+            const isSelected = selectedChild?.id === c.id;
+            return (
+              <TouchableOpacity
+                key={c.id}
+                onPress={() => selectChild(c.id)}
+                className={`flex-1 p-3 rounded-2xl flex-row items-center gap-2.5 border-2 ${
+                  isSelected
+                    ? 'bg-cute-peach-light border-cute-peach shadow-xs'
+                    : 'bg-cute-cream border-cute-border'
+                }`}
+              >
+                <View className="w-10 h-10 rounded-full bg-white border border-black/10 items-center justify-center">
+                  <Text className="text-xl">{c.emoji || '🌸'}</Text>
+                </View>
+                <View className="flex-1 min-w-0">
+                  <Text className="text-xs font-black text-cute-cocoa" numberOfLines={1}>
+                    {c.full_name}
+                  </Text>
+                  <Text className="text-[10px] text-cute-muted" numberOfLines={1}>
+                    {c.batch_name}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </View>
 
-      {/* Fee Payment Status & Quick Pay with Razorpay */}
-      <Card elevation="lowest" className="gap-3">
-        <View className="flex-row items-center justify-between">
+      {/* 2. Selected Child Attendance & Progress Summary */}
+      <View className="bg-white border-2 border-cute-border rounded-[28px] p-5 mb-4 shadow-xs">
+        <View className="flex-row items-center justify-between mb-3">
           <View className="flex-row items-center gap-2">
-            <View className="w-8 h-8 rounded-full bg-surface-container items-center justify-center">
-              <Wallet size={16} color="#0051d5" />
-            </View>
+            <Mascot mood="celebrating" size="sm" />
             <View>
-              <Text className="text-xs font-bold text-on-surface">{currentFee.title}</Text>
-              <Text className="text-[11px] text-on-surface-variant">{currentFee.due_label}</Text>
-            </View>
-          </View>
-
-          <Badge
-            label={currentFee.status === 'paid' ? 'Paid in Full' : 'Due in 14 Days'}
-            variant={currentFee.status === 'paid' ? 'success' : 'warning'}
-          />
-        </View>
-
-        <View className="flex-row items-baseline justify-between pt-1">
-          <Text className="text-xs text-on-surface-variant">Amount Payable:</Text>
-          <Text className="text-xl font-bold text-on-surface">
-            ₹{currentFee.pending_amount.toLocaleString('en-IN')}
-          </Text>
-        </View>
-
-        <View className="flex-row gap-2 pt-1 border-t border-black/5">
-          <View className="flex-1">
-            <Button
-              size="sm"
-              variant={currentFee.status === 'paid' ? 'surface' : 'primary'}
-              title={currentFee.status === 'paid' ? 'Paid' : 'Pay via Razorpay / UPI'}
-              leftIcon={<CreditCard size={14} color={currentFee.status === 'paid' ? '#069669' : '#ffffff'} />}
-              disabled={currentFee.status === 'paid'}
-              fullWidth
-              onPress={() => openRazorpayCheckout(currentFee)}
-            />
-          </View>
-          <Button
-            size="sm"
-            variant="surface"
-            title="Receipt"
-            leftIcon={<FileText size={14} color="#0b1c30" />}
-            onPress={() => lastPayment && openReceipt(lastPayment)}
-          />
-        </View>
-      </Card>
-
-      {/* Academy Communications & Broadcast Log */}
-      <View className="gap-2">
-        <Text className="text-xs font-bold text-on-surface-variant uppercase tracking-wider px-1">
-          SMS & WhatsApp Alerts
-        </Text>
-
-        <Card elevation="lowest" className="p-0 overflow-hidden divide-y divide-black/5">
-          <View className="p-3 flex-row items-start gap-3">
-            <View className="w-8 h-8 rounded-full bg-on-tertiary-container/10 items-center justify-center shrink-0">
-              <MessageSquare size={16} color="#069669" />
-            </View>
-            <View className="flex-1 min-w-0">
-              <View className="flex-row items-center justify-between">
-                <Text className="text-xs font-bold text-on-surface">Arrival Confirmed</Text>
-                <Text className="text-[11px] text-on-surface-variant">Today 09:58 AM</Text>
-              </View>
-              <Text className="text-xs text-on-surface mt-0.5">
-                Aryan entered Kota Campus for Physics Class 12-A.
+              <Text className="text-base font-extrabold text-cute-cocoa">
+                {selectedChild?.full_name}'s Progress 🌟
               </Text>
+              <Text className="text-xs text-cute-muted">Weekly attendance & test performance</Text>
             </View>
+          </View>
+          <View className="bg-cute-mint-light px-2.5 py-1 rounded-full border border-cute-mint">
+            <Text className="text-[11px] font-bold text-cute-mint">96.4% Regular</Text>
+          </View>
+        </View>
+
+        <View className="flex-row gap-2.5 mt-2">
+          <View className="flex-1 bg-cute-cream border border-cute-border rounded-2xl p-3 items-center">
+            <CalendarCheck size={18} color="#52b788" />
+            <Text className="text-xs font-semibold text-cute-muted mt-1">Present</Text>
+            <Text className="text-lg font-black text-cute-cocoa">26 Days</Text>
           </View>
 
-          <View className="p-3 flex-row items-start gap-3">
-            <View className="w-8 h-8 rounded-full bg-surface-container items-center justify-center shrink-0">
-              <ShieldCheck size={16} color="#0051d5" />
-            </View>
-            <View className="flex-1 min-w-0">
-              <View className="flex-row items-center justify-between">
-                <Text className="text-xs font-bold text-on-surface">Exam Result Published</Text>
-                <Text className="text-[11px] text-on-surface-variant">Yesterday</Text>
-              </View>
-              <Text className="text-xs text-on-surface mt-0.5">
-                JEE Mock Test 04 scores are now available. Score: 248/300.
-              </Text>
-            </View>
+          <View className="flex-1 bg-cute-cream border border-cute-border rounded-2xl p-3 items-center">
+            <Trophy size={18} color="#f59e0b" />
+            <Text className="text-xs font-semibold text-cute-muted mt-1">Batch Rank</Text>
+            <Text className="text-lg font-black text-cute-cocoa">#01 / 28</Text>
           </View>
-        </Card>
+
+          <View className="flex-1 bg-cute-cream border border-cute-border rounded-2xl p-3 items-center">
+            <Sparkles size={18} color="#ff7d6b" />
+            <Text className="text-xs font-semibold text-cute-muted mt-1">Homework</Text>
+            <Text className="text-lg font-black text-cute-cocoa">100% Done</Text>
+          </View>
+        </View>
       </View>
+
+      {/* 3. Tuition Fee Ledger Card */}
+      <View className="bg-white border-2 border-cute-border rounded-[28px] p-5 mb-4 shadow-xs">
+        <View className="flex-row items-center justify-between mb-3">
+          <View className="flex-row items-center gap-2">
+            <Wallet size={18} color="#ff7d6b" />
+            <Text className="text-base font-extrabold text-cute-cocoa">Tuition Fee Ledger 💳</Text>
+          </View>
+          <Badge label="Due in 12 Days" variant="warning" />
+        </View>
+
+        <View className="bg-cute-cream p-4 rounded-2xl border border-cute-border mb-4">
+          <View className="flex-row justify-between mb-1.5">
+            <Text className="text-xs text-cute-muted">Course Term Plan</Text>
+            <Text className="text-xs font-bold text-cute-cocoa">Class 11 Full Academic Year</Text>
+          </View>
+          <View className="flex-row justify-between mb-1.5">
+            <Text className="text-xs text-cute-muted">Total Term Fee (incl. 18% GST)</Text>
+            <Text className="text-xs font-bold text-cute-cocoa">₹45,000</Text>
+          </View>
+          <View className="flex-row justify-between mb-2">
+            <Text className="text-xs text-cute-muted">Scholarship Discount</Text>
+            <Text className="text-xs font-bold text-cute-mint">- ₹5,000</Text>
+          </View>
+
+          <View className="pt-2 border-t border-cute-border flex-row justify-between items-center">
+            <Text className="text-sm font-extrabold text-cute-cocoa">Remaining Due Balance</Text>
+            <Text className="text-xl font-black text-cute-peach">₹15,000</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          onPress={() => currentFee && openRazorpayCheckout(currentFee)}
+          className="bg-cute-peach py-3 rounded-2xl flex-row items-center justify-center gap-2 shadow-xs active:scale-98"
+        >
+          <CreditCard size={16} color="#ffffff" />
+          <Text className="text-sm font-bold text-white">Pay Online via UPI / Card (Razorpay)</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* 4. Recent Payment Receipts */}
+      {lastPayment && (
+        <View className="bg-white border-2 border-cute-border rounded-[28px] p-5 shadow-xs mb-6">
+          <View className="flex-row items-center justify-between mb-3">
+            <View className="flex-row items-center gap-2">
+              <CheckCircle2 size={18} color="#52b788" />
+              <Text className="text-base font-extrabold text-cute-cocoa">Recent Receipts 📄</Text>
+            </View>
+            <Text className="text-xs text-cute-muted">Official GST Invoice</Text>
+          </View>
+
+          <TouchableOpacity
+            onPress={() => openReceipt(lastPayment)}
+            className="bg-cute-cream border border-cute-border rounded-2xl p-3.5 flex-row items-center justify-between"
+          >
+            <View className="flex-row items-center gap-3">
+              <View className="w-10 h-10 rounded-xl bg-white border border-cute-border items-center justify-center">
+                <FileText size={18} color="#ff7d6b" />
+              </View>
+              <View>
+                <Text className="text-xs font-black text-cute-cocoa">{lastPayment.receipt_number}</Text>
+                <Text className="text-[11px] text-cute-muted">Paid ₹{lastPayment.amount.toLocaleString()} • Razorpay UPI</Text>
+              </View>
+            </View>
+            <Text className="text-xs font-bold text-cute-peach">View & Share →</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Modals */}
       <RazorpayCheckoutModal />

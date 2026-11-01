@@ -21,26 +21,26 @@ export const AttendanceToggle: React.FC<AttendanceToggleProps> = ({
 
     if (!isSelected) {
       return {
-        container: 'bg-surface-container active:bg-surface-container-high',
-        text: 'text-on-surface-variant font-semibold',
+        container: 'bg-cute-cream border border-cute-border',
+        text: 'text-cute-muted font-bold',
       };
     }
 
     switch (status) {
       case 'P':
         return {
-          container: 'bg-tertiary-fixed shadow-xs',
-          text: 'text-on-tertiary-fixed font-bold',
+          container: 'bg-emerald-100 border-2 border-emerald-500 shadow-xs',
+          text: 'text-emerald-900 font-black',
         };
       case 'A':
         return {
-          container: 'bg-error-container shadow-xs',
-          text: 'text-on-error-container font-bold',
+          container: 'bg-rose-100 border-2 border-rose-500 shadow-xs',
+          text: 'text-rose-900 font-black',
         };
       case 'L':
         return {
-          container: 'bg-secondary-fixed shadow-xs',
-          text: 'text-on-secondary-fixed font-bold',
+          container: 'bg-amber-100 border-2 border-amber-500 shadow-xs',
+          text: 'text-amber-900 font-black',
         };
     }
   };
@@ -63,7 +63,7 @@ export const AttendanceToggle: React.FC<AttendanceToggleProps> = ({
             accessibilityState={{ selected: isSelected, disabled }}
             disabled={disabled}
             onPress={() => onChange(status)}
-            className={`min-w-[32px] h-8 items-center justify-center px-2.5 rounded-lg ${
+            className={`min-w-[34px] h-8 items-center justify-center px-2.5 rounded-xl ${
               style.container
             } ${disabled ? 'opacity-50' : 'active:scale-95 transition-transform'}`}
           >
