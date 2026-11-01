@@ -38,6 +38,9 @@ yarn-error.*
 .env.test.local
 .env.production.local
 
+# Agent local credentials
+.agents/
+
 # typescript
 *.tsbuildinfo
 
