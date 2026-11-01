@@ -10,13 +10,15 @@ import {
   ClipboardCheck,
   PlusSquare,
   IndianRupee,
-  ChevronRight,
   Clock,
   Sparkles,
   X,
   Plus,
+  BarChart3,
+  LayoutDashboard,
 } from 'lucide-react-native';
 import { useAuth } from '@/context/AuthContext';
+import { useFeeNotification } from '@/context/FeeNotificationContext';
 import {
   ScreenWrapper,
   MetricCard,
@@ -25,9 +27,23 @@ import {
   Badge,
   Card,
 } from '@/components/ui';
+import {
+  RazorpayCheckoutModal,
+  FeeReceiptModal,
+  NotificationDrawer,
+  AdminAnalyticsView,
+} from '@/components/finance';
 
 export default function AdminDashboardScreen() {
   const { activeInstitute, batches, createBatch } = useAuth();
+  const {
+    analytics,
+    openNotificationDrawer,
+    unreadCount,
+    sendNotification,
+  } = useFeeNotification();
+
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'analytics'>('dashboard');
 
   // Create Batch Modal State
   const [isCreateBatchModalOpen, setIsCreateBatchModalOpen] = useState(false);
@@ -61,10 +77,23 @@ export default function AdminDashboardScreen() {
     setBatchRoom('');
     setBatchTeacher('');
 
+    await sendNotification(
+      'all',
+      'New Batch Scheduled',
+      `Batch "${batchName}" launched in ${activeInstitute?.name}. Enrollment is now open.`,
+      'broadcast'
+    );
+
     Alert.alert('Batch Created', `Batch "${batchName}" is now active in ${activeInstitute?.name}`);
   };
 
-  const handleWhatsAppNudge = () => {
+  const handleWhatsAppNudge = async () => {
+    await sendNotification(
+      'parent',
+      'Fee Cycle Reminder Dispatched',
+      'Queued WhatsApp templates for 34 overdue accounts via WhatsApp Business API.',
+      'fee'
+    );
     Alert.alert(
       'WhatsApp Fee Automation',
       'Dispatched 34 fee overdue reminder templates to registered parents via WhatsApp Business API.'
@@ -76,11 +105,12 @@ export default function AdminDashboardScreen() {
       headerProps={{
         title: 'Admin Dashboard',
         instituteName: activeInstitute?.name,
-        onNotificationPress: () => Alert.alert('Notifications', 'Fee summary ready for review.'),
+        onNotificationPress: openNotificationDrawer,
         onProfilePress: () => Alert.alert('Director Profile', 'Director Sharma - Apex Kota Super-Admin'),
+        hasUnreadNotifications: unreadCount > 0,
       }}
     >
-      {/* Greeting Banner with Live Accent (from Stitch Admin design) */}
+      {/* Greeting Banner with Live Accent */}
       <Card elevation="low" className="p-4 gap-1.5 overflow-hidden">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-1.5">
@@ -107,224 +137,223 @@ export default function AdminDashboardScreen() {
         </View>
       </Card>
 
-      {/* 2x2 Metric Cards Grid */}
-      <View className="gap-2.5">
-        <View className="flex-row gap-2.5">
-          <View className="flex-1">
-            <MetricCard
-              title="Enrolled Students"
-              value="842"
-              trendText="+12% this mo"
-              trendDirection="positive"
-              icon={<Users size={16} color="#0051d5" />}
-            />
-          </View>
-          <View className="flex-1">
-            <MetricCard
-              title="Active Batches"
-              value={batches.length.toString()}
-              trendText="All Running"
-              trendDirection="info"
-              icon={<BookOpen size={16} color="#0051d5" />}
-            />
-          </View>
-        </View>
-
-        <View className="flex-row gap-2.5">
-          <View className="flex-1">
-            <MetricCard
-              title="Today's Roll Call"
-              value="94.2%"
-              trendText="793 P • 49 A"
-              trendDirection="neutral"
-              icon={<CalendarCheck size={16} color="#0051d5" />}
-            />
-          </View>
-          <View className="flex-1">
-            <MetricCard
-              title="Pending Dues"
-              value="₹4,85,000"
-              trendText="34 Students"
-              trendDirection="negative"
-              icon={<Wallet size={16} color="#ba1a1a" />}
-            />
-          </View>
-        </View>
-
-        {/* WhatsApp Nudge Action Bar */}
-        <Card elevation="container" className="p-3 flex-row items-center justify-between">
-          <View className="flex-row items-center gap-2 flex-1 min-w-0 mr-2">
-            <View className="w-8 h-8 rounded-full bg-on-tertiary-container/10 items-center justify-center shrink-0">
-              <MessageSquare size={16} color="#069669" />
-            </View>
-            <View className="flex-col min-w-0 flex-1">
-              <Text className="text-xs font-bold text-on-surface" numberOfLines={1}>
-                Batch Fee Cycle Overdue
-              </Text>
-              <Text className="text-[11px] text-on-surface-variant" numberOfLines={1}>
-                34 parents pending reminders
-              </Text>
-            </View>
-          </View>
-
-          <Button
-            size="sm"
-            variant="primary"
-            title="Send WhatsApp"
-            onPress={handleWhatsAppNudge}
-          />
-        </Card>
-      </View>
-
-      {/* Quick Admin Actions Panel */}
-      <View className="gap-2">
-        <View className="flex-row items-center justify-between px-1">
-          <Text className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-            Quick Admin Actions
+      {/* Admin Sub-Tabs */}
+      <View className="flex-row items-center gap-2">
+        <Pressable
+          onPress={() => setActiveTab('dashboard')}
+          className={`flex-1 py-2 rounded-xl flex-row items-center justify-center gap-1.5 ${
+            activeTab === 'dashboard' ? 'bg-primary' : 'bg-surface-container'
+          }`}
+        >
+          <LayoutDashboard size={14} color={activeTab === 'dashboard' ? '#ffffff' : '#45464d'} />
+          <Text
+            className={`text-xs font-semibold ${
+              activeTab === 'dashboard' ? 'text-on-primary' : 'text-on-surface-variant'
+            }`}
+          >
+            Command Hub
           </Text>
-          <Text className="text-xs font-semibold text-secondary">ERP Controls</Text>
-        </View>
+        </Pressable>
 
-        <View className="flex-row gap-2">
-          <Pressable
-            onPress={() => Alert.alert('New Admission', 'Opening student enrollment form...')}
-            className="flex-1 bg-surface-container-lowest p-3 rounded-2xl items-center gap-1.5 shadow-sm active:bg-surface-container-high"
+        <Pressable
+          onPress={() => setActiveTab('analytics')}
+          className={`flex-1 py-2 rounded-xl flex-row items-center justify-center gap-1.5 ${
+            activeTab === 'analytics' ? 'bg-primary' : 'bg-surface-container'
+          }`}
+        >
+          <BarChart3 size={14} color={activeTab === 'analytics' ? '#ffffff' : '#45464d'} />
+          <Text
+            className={`text-xs font-semibold ${
+              activeTab === 'analytics' ? 'text-on-primary' : 'text-on-surface-variant'
+            }`}
           >
-            <View className="w-10 h-10 rounded-full bg-secondary/10 items-center justify-center">
-              <UserPlus size={18} color="#0051d5" />
-            </View>
-            <Text className="text-[11px] font-semibold text-on-surface text-center">New Admission</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => Alert.alert('Roll Call', 'Opening daily faculty roll call tracker...')}
-            className="flex-1 bg-surface-container-lowest p-3 rounded-2xl items-center gap-1.5 shadow-sm active:bg-surface-container-high"
-          >
-            <View className="w-10 h-10 rounded-full bg-on-tertiary-container/10 items-center justify-center">
-              <ClipboardCheck size={18} color="#069669" />
-            </View>
-            <Text className="text-[11px] font-semibold text-on-surface text-center">Mark Roll</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => setIsCreateBatchModalOpen(true)}
-            className="flex-1 bg-surface-container-lowest p-3 rounded-2xl items-center gap-1.5 shadow-sm active:bg-surface-container-high"
-          >
-            <View className="w-10 h-10 rounded-full bg-surface-container-highest items-center justify-center">
-              <PlusSquare size={18} color="#0051d5" />
-            </View>
-            <Text className="text-[11px] font-semibold text-on-surface text-center">Create Batch</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => Alert.alert('Fee Collection', 'Opening UPI / Cash fee POS...')}
-            className="flex-1 bg-surface-container-lowest p-3 rounded-2xl items-center gap-1.5 shadow-sm active:bg-surface-container-high"
-          >
-            <View className="w-10 h-10 rounded-full bg-primary-container items-center justify-center">
-              <IndianRupee size={18} color="#ffffff" />
-            </View>
-            <Text className="text-[11px] font-semibold text-on-surface text-center">Collect Fee</Text>
-          </Pressable>
-        </View>
+            Analytics & Reports
+          </Text>
+        </Pressable>
       </View>
 
-      {/* Live Active Batches Status */}
-      <View className="gap-2.5">
-        <View className="flex-row items-center justify-between px-1">
-          <View className="flex-row items-center gap-2">
-            <Text className="text-sm font-bold text-on-surface">Live Classrooms</Text>
-            <Badge label={`${batches.length} Active`} variant="info" />
-          </View>
-          <Pressable
-            onPress={() => setIsCreateBatchModalOpen(true)}
-            className="flex-row items-center gap-0.5"
-          >
-            <Plus size={14} color="#0051d5" />
-            <Text className="text-xs font-semibold text-secondary">Add Batch</Text>
-          </Pressable>
-        </View>
+      {/* TAB 1: COMMAND DASHBOARD */}
+      {activeTab === 'dashboard' && (
+        <View className="gap-4">
+          {/* 2x2 Metric Cards Grid */}
+          <View className="gap-2.5">
+            <View className="flex-row gap-2.5">
+              <View className="flex-1">
+                <MetricCard
+                  title="Enrolled Students"
+                  value={analytics.enrolled_students.toString()}
+                  trendText="+12% this mo"
+                  trendDirection="positive"
+                  icon={<Users size={16} color="#0051d5" />}
+                />
+              </View>
+              <View className="flex-1">
+                <MetricCard
+                  title="Active Batches"
+                  value={batches.length.toString()}
+                  trendText="All Running"
+                  trendDirection="info"
+                  icon={<BookOpen size={16} color="#0051d5" />}
+                />
+              </View>
+            </View>
 
-        {batches.map((batch) => (
-          <Card key={batch.id} elevation="lowest" className="gap-2.5">
-            <View className="flex-row items-start justify-between gap-2">
-              <View className="flex-1 min-w-0">
-                <View className="flex-row items-center gap-1.5 mb-1">
-                  <Badge
-                    label={batch.status === 'in_progress' ? 'In Progress' : 'Scheduled'}
-                    variant={batch.status === 'in_progress' ? 'active' : 'info'}
-                    showDot={batch.status === 'in_progress'}
-                  />
-                  <Badge label={batch.room_number || 'Room 101'} variant="neutral" />
+            <View className="flex-row gap-2.5">
+              <View className="flex-1">
+                <MetricCard
+                  title="Today's Roll Call"
+                  value={`${analytics.today_attendance_rate}%`}
+                  trendText={`${analytics.present_count} P • ${analytics.absent_count} A`}
+                  trendDirection="neutral"
+                  icon={<CalendarCheck size={16} color="#0051d5" />}
+                />
+              </View>
+              <View className="flex-1">
+                <MetricCard
+                  title="Pending Dues"
+                  value={`₹${(analytics.total_pending_dues / 100000).toFixed(2)}L`}
+                  trendText={`${analytics.overdue_students_count} Students`}
+                  trendDirection="negative"
+                  icon={<Wallet size={16} color="#ba1a1a" />}
+                />
+              </View>
+            </View>
+
+            {/* WhatsApp Nudge Action Bar */}
+            <Card elevation="container" className="p-3 flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2 flex-1 min-w-0 mr-2">
+                <View className="w-8 h-8 rounded-full bg-on-tertiary-container/10 items-center justify-center shrink-0">
+                  <MessageSquare size={16} color="#069669" />
                 </View>
-                <Text className="text-base font-bold text-on-surface" numberOfLines={1}>
-                  {batch.name}
-                </Text>
-                <Text className="text-xs text-on-surface-variant mt-0.5" numberOfLines={1}>
-                  {batch.subject} • {batch.assigned_teacher_name}
-                </Text>
-              </View>
-            </View>
-
-            <View className="flex-row items-center justify-between pt-2 border-t border-black/5">
-              <View className="flex-row items-center gap-1.5">
-                <Clock size={14} color="#76777d" />
-                <Text className="text-xs text-on-surface-variant font-medium">
-                  {batch.start_time} - {batch.end_time}
-                </Text>
+                <View className="flex-col min-w-0 flex-1">
+                  <Text className="text-xs font-bold text-on-surface" numberOfLines={1}>
+                    Batch Fee Cycle Overdue
+                  </Text>
+                  <Text className="text-[11px] text-on-surface-variant" numberOfLines={1}>
+                    {analytics.overdue_students_count} parents pending reminders
+                  </Text>
+                </View>
               </View>
 
-              <Badge
-                label={`${batch.present_count || batch.student_count || 45} Present`}
-                variant="success"
+              <Button
+                size="sm"
+                variant="primary"
+                title="Send WhatsApp"
+                onPress={handleWhatsAppNudge}
               />
-            </View>
-          </Card>
-        ))}
-      </View>
+            </Card>
+          </View>
 
-      {/* Operational Activity Stream */}
-      <View className="gap-2">
-        <View className="flex-row items-center justify-between px-1">
-          <Text className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-            Operational Activity
-          </Text>
-          <Text className="text-xs text-on-surface-variant">Today</Text>
+          {/* Quick Admin Actions Panel */}
+          <View className="gap-2">
+            <View className="flex-row items-center justify-between px-1">
+              <Text className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+                Quick Admin Actions
+              </Text>
+              <Text className="text-xs font-semibold text-secondary">ERP Controls</Text>
+            </View>
+
+            <View className="flex-row gap-2">
+              <Pressable
+                onPress={() => Alert.alert('New Admission', 'Opening student enrollment form...')}
+                className="flex-1 bg-surface-container-lowest p-3 rounded-2xl items-center gap-1.5 shadow-sm active:bg-surface-container-high"
+              >
+                <View className="w-10 h-10 rounded-full bg-secondary/10 items-center justify-center">
+                  <UserPlus size={18} color="#0051d5" />
+                </View>
+                <Text className="text-[11px] font-semibold text-on-surface text-center">New Admission</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => Alert.alert('Roll Call', 'Opening daily faculty roll call tracker...')}
+                className="flex-1 bg-surface-container-lowest p-3 rounded-2xl items-center gap-1.5 shadow-sm active:bg-surface-container-high"
+              >
+                <View className="w-10 h-10 rounded-full bg-on-tertiary-container/10 items-center justify-center">
+                  <ClipboardCheck size={18} color="#069669" />
+                </View>
+                <Text className="text-[11px] font-semibold text-on-surface text-center">Mark Roll</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => setIsCreateBatchModalOpen(true)}
+                className="flex-1 bg-surface-container-lowest p-3 rounded-2xl items-center gap-1.5 shadow-sm active:bg-surface-container-high"
+              >
+                <View className="w-10 h-10 rounded-full bg-surface-container-highest items-center justify-center">
+                  <PlusSquare size={18} color="#0051d5" />
+                </View>
+                <Text className="text-[11px] font-semibold text-on-surface text-center">Create Batch</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => Alert.alert('Fee Collection', 'Opening UPI / Cash fee POS...')}
+                className="flex-1 bg-surface-container-lowest p-3 rounded-2xl items-center gap-1.5 shadow-sm active:bg-surface-container-high"
+              >
+                <View className="w-10 h-10 rounded-full bg-primary-container items-center justify-center">
+                  <IndianRupee size={18} color="#ffffff" />
+                </View>
+                <Text className="text-[11px] font-semibold text-on-surface text-center">Collect Fee</Text>
+              </Pressable>
+            </View>
+          </View>
+
+          {/* Live Active Batches Status */}
+          <View className="gap-2.5">
+            <View className="flex-row items-center justify-between px-1">
+              <View className="flex-row items-center gap-2">
+                <Text className="text-sm font-bold text-on-surface">Live Classrooms</Text>
+                <Badge label={`${batches.length} Active`} variant="info" />
+              </View>
+              <Pressable
+                onPress={() => setIsCreateBatchModalOpen(true)}
+                className="flex-row items-center gap-0.5"
+              >
+                <Plus size={14} color="#0051d5" />
+                <Text className="text-xs font-semibold text-secondary">Add Batch</Text>
+              </Pressable>
+            </View>
+
+            {batches.map((batch) => (
+              <Card key={batch.id} elevation="lowest" className="gap-2.5">
+                <View className="flex-row items-start justify-between gap-2">
+                  <View className="flex-1 min-w-0">
+                    <View className="flex-row items-center gap-1.5 mb-1">
+                      <Badge
+                        label={batch.status === 'in_progress' ? 'In Progress' : 'Scheduled'}
+                        variant={batch.status === 'in_progress' ? 'active' : 'info'}
+                        showDot={batch.status === 'in_progress'}
+                      />
+                      <Badge label={batch.room_number || 'Room 101'} variant="neutral" />
+                    </View>
+                    <Text className="text-base font-bold text-on-surface" numberOfLines={1}>
+                      {batch.name}
+                    </Text>
+                    <Text className="text-xs text-on-surface-variant mt-0.5" numberOfLines={1}>
+                      {batch.subject} • {batch.assigned_teacher_name}
+                    </Text>
+                  </View>
+                </View>
+
+                <View className="flex-row items-center justify-between pt-2 border-t border-black/5">
+                  <View className="flex-row items-center gap-1.5">
+                    <Clock size={14} color="#76777d" />
+                    <Text className="text-xs text-on-surface-variant font-medium">
+                      {batch.start_time} - {batch.end_time}
+                    </Text>
+                  </View>
+
+                  <Badge
+                    label={`${batch.present_count || batch.student_count || 45} Present`}
+                    variant="success"
+                  />
+                </View>
+              </Card>
+            ))}
+          </View>
         </View>
+      )}
 
-        <Card elevation="lowest" className="p-0 overflow-hidden divide-y divide-black/5">
-          <View className="p-3 flex-row items-start gap-3">
-            <View className="w-8 h-8 rounded-full bg-on-tertiary-container/10 items-center justify-center shrink-0">
-              <IndianRupee size={16} color="#069669" />
-            </View>
-            <View className="flex-1 min-w-0">
-              <View className="flex-row items-center justify-between">
-                <Text className="text-xs font-bold text-on-surface">Fee Collected</Text>
-                <Text className="text-[11px] text-on-surface-variant">2m ago</Text>
-              </View>
-              <Text className="text-xs text-on-surface mt-0.5">
-                Aarav Patel paid <Text className="font-bold text-on-tertiary-container">₹25,000</Text> via UPI
-              </Text>
-              <Text className="text-[11px] text-on-surface-variant">Batch: Foundation Class 11</Text>
-            </View>
-          </View>
-
-          <View className="p-3 flex-row items-start gap-3">
-            <View className="w-8 h-8 rounded-full bg-surface-container items-center justify-center shrink-0">
-              <CalendarCheck size={16} color="#0051d5" />
-            </View>
-            <View className="flex-1 min-w-0">
-              <View className="flex-row items-center justify-between">
-                <Text className="text-xs font-bold text-on-surface">Roll Call Completed</Text>
-                <Text className="text-[11px] text-on-surface-variant">18m ago</Text>
-              </View>
-              <Text className="text-xs text-on-surface mt-0.5">
-                Er. Rakesh Verma marked Class 12-A Physics
-              </Text>
-              <Text className="text-[11px] text-on-tertiary-container font-semibold">96% Present (48/50)</Text>
-            </View>
-          </View>
-        </Card>
-      </View>
+      {/* TAB 2: ANALYTICS & REPORTS */}
+      {activeTab === 'analytics' && <AdminAnalyticsView />}
 
       {/* CREATE BATCH MODAL */}
       <Modal visible={isCreateBatchModalOpen} transparent animationType="slide">
@@ -381,6 +410,11 @@ export default function AdminDashboardScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Modals */}
+      <RazorpayCheckoutModal />
+      <FeeReceiptModal />
+      <NotificationDrawer />
     </ScreenWrapper>
   );
 }

@@ -12,6 +12,7 @@ import {
   FileText,
 } from 'lucide-react-native';
 import { useAuth } from '@/context/AuthContext';
+import { useFeeNotification } from '@/context/FeeNotificationContext';
 import {
   ScreenWrapper,
   MetricCard,
@@ -19,18 +20,36 @@ import {
   Badge,
   Card,
 } from '@/components/ui';
+import {
+  RazorpayCheckoutModal,
+  FeeReceiptModal,
+  NotificationDrawer,
+} from '@/components/finance';
 
 export default function ParentScreen() {
   const { activeInstitute } = useAuth();
+  const {
+    studentFees,
+    payments,
+    openRazorpayCheckout,
+    openReceipt,
+    openNotificationDrawer,
+    unreadCount,
+  } = useFeeNotification();
+
   const [selectedChild, setSelectedChild] = useState('Aryan Kapoor');
+
+  const currentFee = studentFees.find((f) => f.student_name.includes('Aryan')) || studentFees[0];
+  const lastPayment = payments[0];
 
   return (
     <ScreenWrapper
       headerProps={{
         title: 'Parent Desk',
         instituteName: activeInstitute?.name,
-        onNotificationPress: () => Alert.alert('Parent Notices', 'Monthly parent-teacher meeting on Saturday.'),
+        onNotificationPress: openNotificationDrawer,
         onProfilePress: () => Alert.alert('Parent Profile', 'Suresh Kapoor • Guardian'),
+        hasUnreadNotifications: unreadCount > 0,
       }}
     >
       {/* Linked Child Snapshot */}
@@ -89,7 +108,7 @@ export default function ParentScreen() {
         </View>
       </View>
 
-      {/* Fee Payment Status & Quick Pay */}
+      {/* Fee Payment Status & Quick Pay with Razorpay */}
       <Card elevation="lowest" className="gap-3">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
@@ -97,36 +116,42 @@ export default function ParentScreen() {
               <Wallet size={16} color="#0051d5" />
             </View>
             <View>
-              <Text className="text-xs font-bold text-on-surface">Term 2 Tuition Fee</Text>
-              <Text className="text-[11px] text-on-surface-variant">Due Date: 15 Nov 2025</Text>
+              <Text className="text-xs font-bold text-on-surface">{currentFee.title}</Text>
+              <Text className="text-[11px] text-on-surface-variant">{currentFee.due_label}</Text>
             </View>
           </View>
 
-          <Badge label="Due in 14 Days" variant="warning" />
+          <Badge
+            label={currentFee.status === 'paid' ? 'Paid in Full' : 'Due in 14 Days'}
+            variant={currentFee.status === 'paid' ? 'success' : 'warning'}
+          />
         </View>
 
         <View className="flex-row items-baseline justify-between pt-1">
           <Text className="text-xs text-on-surface-variant">Amount Payable:</Text>
-          <Text className="text-xl font-bold text-on-surface">₹15,000</Text>
+          <Text className="text-xl font-bold text-on-surface">
+            ₹{currentFee.pending_amount.toLocaleString('en-IN')}
+          </Text>
         </View>
 
         <View className="flex-row gap-2 pt-1 border-t border-black/5">
           <View className="flex-1">
             <Button
               size="sm"
-              variant="primary"
-              title="Pay Now (UPI / Card)"
-              leftIcon={<CreditCard size={14} color="#ffffff" />}
+              variant={currentFee.status === 'paid' ? 'surface' : 'primary'}
+              title={currentFee.status === 'paid' ? 'Paid' : 'Pay via Razorpay / UPI'}
+              leftIcon={<CreditCard size={14} color={currentFee.status === 'paid' ? '#069669' : '#ffffff'} />}
+              disabled={currentFee.status === 'paid'}
               fullWidth
-              onPress={() => Alert.alert('Online Payment', 'Opening Razorpay / UPI gateway for ₹15,000...')}
+              onPress={() => openRazorpayCheckout(currentFee)}
             />
           </View>
           <Button
             size="sm"
             variant="surface"
-            title="Past Receipts"
+            title="Receipt"
             leftIcon={<FileText size={14} color="#0b1c30" />}
-            onPress={() => Alert.alert('Receipts', 'Downloading all previous fee receipts...')}
+            onPress={() => lastPayment && openReceipt(lastPayment)}
           />
         </View>
       </Card>
@@ -169,6 +194,11 @@ export default function ParentScreen() {
           </View>
         </Card>
       </View>
+
+      {/* Modals */}
+      <RazorpayCheckoutModal />
+      <FeeReceiptModal />
+      <NotificationDrawer />
     </ScreenWrapper>
   );
 }

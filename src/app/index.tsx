@@ -24,10 +24,13 @@ import {
   type AttendanceStatus,
 } from '@/components/ui';
 import { useAcademic } from '@/context/AcademicContext';
+import { useFeeNotification } from '@/context/FeeNotificationContext';
 import { VideoPlayerModal } from '@/components/academic';
+import { NotificationDrawer, RazorpayCheckoutModal, FeeReceiptModal } from '@/components/finance';
 
 export default function HomeScreen() {
   const { lectures, openPlayer } = useAcademic();
+  const { openNotificationDrawer, unreadCount } = useFeeNotification();
   const [selectedRole, setSelectedRole] = useState<UserRoleType>('student');
   const [attendance, setAttendance] = useState<AttendanceStatus>('P');
   const [mobileNumber, setMobileNumber] = useState('98290 41208');
@@ -40,8 +43,9 @@ export default function HomeScreen() {
         title: 'Acadly Hub',
         instituteName: 'Apex IIT-JEE Academy (Kota)',
         onInstitutePress: () => Alert.alert('Institute Switcher', 'Switch active institute campus'),
-        onNotificationPress: () => Alert.alert('Notifications', 'No unread notifications'),
+        onNotificationPress: openNotificationDrawer,
         onProfilePress: () => Alert.alert('Profile', `Signed in as ${selectedRole.toUpperCase()}`),
+        hasUnreadNotifications: unreadCount > 0,
       }}
     >
       {/* Hero Live Class Banner (from Stitch Student Hub) */}
@@ -226,6 +230,9 @@ export default function HomeScreen() {
       </View>
 
       <VideoPlayerModal />
+      <RazorpayCheckoutModal />
+      <FeeReceiptModal />
+      <NotificationDrawer />
     </ScreenWrapper>
   );
 }

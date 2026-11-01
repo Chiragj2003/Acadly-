@@ -7,6 +7,7 @@ import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
 import { AuthProvider } from '@/context/AuthContext';
 import { AcademicProvider } from '@/context/AcademicContext';
+import { FeeNotificationProvider } from '@/context/FeeNotificationContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -15,10 +16,12 @@ export default function TabLayout() {
   return (
     <AuthProvider>
       <AcademicProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <AnimatedSplashOverlay />
-          <AppTabs />
-        </ThemeProvider>
+        <FeeNotificationProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <AnimatedSplashOverlay />
+            <AppTabs />
+          </ThemeProvider>
+        </FeeNotificationProvider>
       </AcademicProvider>
     </AuthProvider>
   );

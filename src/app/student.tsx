@@ -15,6 +15,7 @@ import {
 } from 'lucide-react-native';
 import { useAuth } from '@/context/AuthContext';
 import { useAcademic } from '@/context/AcademicContext';
+import { useFeeNotification } from '@/context/FeeNotificationContext';
 import {
   ScreenWrapper,
   MetricCard,
@@ -27,21 +28,28 @@ import {
   StudyMaterialsViewer,
   AssignmentsModule,
 } from '@/components/academic';
+import {
+  FeeReceiptModal,
+  NotificationDrawer,
+} from '@/components/finance';
 
 export default function StudentScreen() {
   const { activeInstitute } = useAuth();
   const { lectures, openPlayer, offlineLectureIds, toggleOfflineDownload } = useAcademic();
+  const { payments, openReceipt, openNotificationDrawer, unreadCount } = useFeeNotification();
   const [activeSection, setActiveSection] = useState<'hub' | 'notes' | 'assignments'>('hub');
 
   const liveLecture = lectures.find((l) => l.is_live) || lectures[0];
+  const lastPayment = payments[0];
 
   return (
     <ScreenWrapper
       headerProps={{
         title: 'Student Hub',
         instituteName: activeInstitute?.name,
-        onNotificationPress: () => Alert.alert('Student Notices', 'Rotational Dynamics DPP due tomorrow!'),
+        onNotificationPress: openNotificationDrawer,
         onProfilePress: () => Alert.alert('Student Profile', 'Aryan Kapoor • Class 12 Science'),
+        hasUnreadNotifications: unreadCount > 0,
       }}
     >
       {/* Student Profile Snapshot Card */}
@@ -209,7 +217,7 @@ export default function StudentScreen() {
               size="sm"
               variant="surface"
               title="Receipt"
-              onPress={() => Alert.alert('Fee Receipt', 'Receipt #APX-REC-892 downloaded as PDF')}
+              onPress={() => lastPayment && openReceipt(lastPayment)}
             />
           </Card>
 
@@ -277,6 +285,8 @@ export default function StudentScreen() {
 
       {/* Modal Video Player */}
       <VideoPlayerModal />
+      <FeeReceiptModal />
+      <NotificationDrawer />
     </ScreenWrapper>
   );
 }
