@@ -171,7 +171,8 @@ export default function PinterestStudentScreen() {
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerClassName="p-5 pb-24 gap-5"
+          contentContainerStyle={{ paddingBottom: 120 }}
+          contentContainerClassName="p-5 gap-5"
         >
           {/* ======================================================== */}
           {/* TAB 1: HOME (BENTO EDITORIAL DASHBOARD)                  */}
@@ -461,15 +462,15 @@ export default function PinterestStudentScreen() {
                 <View className="flex-row items-center justify-between mb-3">
                   <View className="flex-row items-center gap-2">
                     <Trophy size={18} color="#F59E0B" />
-                    <Text className="text-base font-black text-slate-800">Batch Sakura Leaderboard</Text>
+                    <Text className="text-base font-black text-slate-800">Class 12 Leaderboard</Text>
                   </View>
                   <Text className="text-xs font-bold text-blue-600">Top 5% Cohort</Text>
                 </View>
 
                 {[
-                  { rank: '#01', name: 'Amelia Sharma (You!) 🌸', score: '294/300', tag: 'Top 1% 🔥' },
-                  { rank: '#02', name: 'Kabir Singhania 🚀', score: '288/300', tag: 'Fast Solver ⚡' },
-                  { rank: '#03', name: 'Zoya Khan 🌿', score: '282/300', tag: '100% Attendance ⭐' },
+                  { rank: '#01', name: 'Amelia Sharma (You!)', score: '294/300', tag: 'Top 1% Ranker' },
+                  { rank: '#02', name: 'Kabir Singhania', score: '288/300', tag: 'High Accuracy' },
+                  { rank: '#03', name: 'Zoya Khan', score: '282/300', tag: '100% Attendance' },
                 ].map((item, idx) => (
                   <View
                     key={idx}
@@ -505,10 +506,10 @@ export default function PinterestStudentScreen() {
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center gap-2.5">
                     <View className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
-                      <Text className="text-lg">🌸</Text>
+                      <Text className="text-lg">📚</Text>
                     </View>
                     <View>
-                      <Text className="text-sm font-black text-slate-800">Batch Sakura Class Chat</Text>
+                      <Text className="text-sm font-black text-slate-800">Class 12 • JEE Advanced Chat</Text>
                       <Text className="text-xs text-slate-500">Teacher & 28 Verified Classmates</Text>
                     </View>
                   </View>

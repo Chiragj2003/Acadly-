@@ -110,7 +110,7 @@ export default function StudentDetailScreen() {
         onBackPress: () => router.back(),
       }}
     >
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-3.5 pb-16">
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }} contentContainerClassName="gap-3.5">
         {/* 1. 360 Profile Diagnostic Header Card */}
         <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs">
           <View className="flex-row items-center justify-between mb-3">

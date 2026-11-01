@@ -111,7 +111,7 @@ export default function PinterestChatScreen() {
   const handlePin = (msg: ChatMessage) => {
     if (!isTeacher) return;
     Alert.alert(
-      'Pin Message 📌',
+      'Pin Announcement',
       `Pin this message to the top of ${activeRoom?.title}?`,
       [
         { text: 'Cancel', style: 'cancel' },
@@ -126,9 +126,9 @@ export default function PinterestChatScreen() {
   // Quick Chips
   const quickDoubtChips = isTeacher
     ? [
-        '📌 DPP solutions uploaded',
-        '📢 Class starts in 15 mins',
-        '⭐ Great test performance!',
+        'DPP solutions uploaded',
+        'Class starts in 15 mins',
+        'Important formula sheet shared',
       ]
     : [
         'Could you review question 3?',
@@ -146,6 +146,7 @@ export default function PinterestChatScreen() {
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
         className="flex-1"
       >
         {/* ================= ROOM SELECTOR TABS ================= */}
@@ -154,6 +155,11 @@ export default function PinterestChatScreen() {
             <View className="flex-row gap-2 px-1">
               {rooms.map((room) => {
                 const isSelected = activeRoomId === room.id;
+                const displayTitle =
+                  room.type === 'batch_group'
+                    ? (room.title.includes(' • ') ? room.title.split(' • ')[1] : room.title)
+                    : room.title.replace('Doubt Room: ', '');
+
                 return (
                   <TouchableOpacity
                     key={room.id}
@@ -170,7 +176,7 @@ export default function PinterestChatScreen() {
                         isSelected ? 'text-white' : 'text-slate-800'
                       }`}
                     >
-                      {room.type === 'batch_group' ? 'Batch Sakura 🌸' : room.title.split(' ')[0]}
+                      {displayTitle}
                     </Text>
 
                     {room.unreadCount > 0 && !isSelected && (
@@ -287,7 +293,7 @@ export default function PinterestChatScreen() {
                               msg.senderRole === 'teacher' ? 'text-blue-800' : 'text-emerald-800'
                             }`}
                           >
-                            {msg.senderRole === 'teacher' ? 'Faculty 🍎' : 'Student 🎓'}
+                            {msg.senderRole === 'teacher' ? 'Faculty' : 'Student'}
                           </Text>
                         </View>
                       </View>

@@ -180,7 +180,7 @@ export default function PinterestParentScreen() {
         hasUnreadNotifications: unreadCount > 0,
       }}
     >
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-3.5 pb-20">
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }} contentContainerClassName="gap-3.5">
         {/* Child Selector Strip */}
         <View className="bg-white border border-slate-200/90 rounded-3xl p-4 shadow-xs">
           <View className="flex-row items-center justify-between mb-2.5">
@@ -245,7 +245,7 @@ export default function PinterestParentScreen() {
                     {selectedChild?.full_name} checked in at 09:28 AM
                   </Text>
                   <Text className="text-[11px] text-slate-500 mt-0.5">
-                    Batch Sakura • Physics Class • Roll No: 08
+                    Class 12 • JEE Advanced (Morning) • Roll No: 08
                   </Text>
                 </View>
                 <View className="bg-emerald-100 px-2.5 py-1 rounded-full border border-emerald-200">

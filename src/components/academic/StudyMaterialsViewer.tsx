@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, Modal, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, Alert, ScrollView, TextInput } from 'react-native';
 import {
   FileText,
   Download,
@@ -8,10 +8,13 @@ import {
   Plus,
   BookOpen,
   CheckCircle,
+  Share2,
 } from 'lucide-react-native';
 import { useAcademic } from '@/context/AcademicContext';
 import { useAuth } from '@/context/AuthContext';
-import { Card, Button, Input, Badge } from '@/components/ui';
+import { Badge } from '@/components/ui';
+import { generateAndSharePDF, DUMMY_PDF_CATALOG, type PDFDocumentContent } from '@/services/dummyPdfService';
+import { type StudyMaterial } from '@/types/database';
 
 export const StudyMaterialsViewer: React.FC = () => {
   const { materials, uploadMaterial } = useAcademic();
@@ -32,16 +35,35 @@ export const StudyMaterialsViewer: React.FC = () => {
     ? materials
     : materials.filter((m) => m.subject.toLowerCase() === selectedSubject.toLowerCase());
 
-  const handleDownload = (id: string, title: string) => {
-    if (downloadedIds.includes(id)) {
-      Alert.alert('File Ready', `"${title}" is already stored in your offline library.`);
-      return;
+  const handleDownload = async (item: StudyMaterial) => {
+    try {
+      const matched = DUMMY_PDF_CATALOG.find(
+        (d) => d.subject.toLowerCase() === item.subject.toLowerCase()
+      );
+      const doc: PDFDocumentContent = matched || {
+        id: item.id,
+        title: item.title,
+        subtitle: item.description || 'Verified Classroom Reference Document',
+        subject: item.subject,
+        author: item.uploaded_by,
+        category: 'notes',
+        date: 'Class 12 • JEE Advanced 2026',
+        sections: [
+          {
+            heading: 'Key Conceptual Summaries',
+            items: [
+              'Fundamental derivations and vector formulations.',
+              'Standard properties, limits, and boundary conditions.',
+              'Worked example problems from recent national test series.',
+            ],
+          },
+        ],
+      };
+      await generateAndSharePDF(doc);
+      setDownloadedIds((prev) => [...prev, item.id]);
+    } catch {
+      Alert.alert('PDF Viewer', 'Could not open document preview.');
     }
-    Alert.alert('Downloading PDF', `Downloading "${title}"...`);
-    setTimeout(() => {
-      setDownloadedIds((prev) => [...prev, id]);
-      Alert.alert('Download Complete', 'PDF saved to device.');
-    }, 1000);
   };
 
   const handleUpload = async () => {
@@ -56,144 +78,155 @@ export const StudyMaterialsViewer: React.FC = () => {
       description,
       file_url: 'https://example.com/notes.pdf',
       file_type: 'pdf',
-      file_size_formatted: '5.4 MB',
-      page_count: 28,
-      uploaded_by: userRole === 'teacher' ? 'Er. Rakesh Verma' : 'Director Sharma',
+      file_size_formatted: '3.2 MB',
+      page_count: 24,
+      uploaded_by: userRole === 'teacher' ? 'Prof. Vikram Joshi' : 'Director Sharma',
     });
 
     setIsUploadOpen(false);
     setTitle('');
     setDescription('');
-    Alert.alert('Uploaded', 'Study material published to enrolled batches.');
+    Alert.alert('Published! 📄', 'Study material is now accessible to all enrolled batches.');
   };
 
   return (
     <View className="gap-3">
       {/* Subject Filter Pills & Upload Action */}
       <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center gap-1.5 flex-1 overflow-hidden">
-          {subjects.map((sub) => (
-            <Pressable
-              key={sub}
-              onPress={() => setSelectedSubject(sub)}
-              className={`px-3 py-1.5 rounded-xl ${
-                selectedSubject === sub
-                  ? 'bg-secondary'
-                  : 'bg-surface-container active:bg-surface-container-high'
-              }`}
-            >
-              <Text
-                className={`text-xs font-semibold ${
-                  selectedSubject === sub ? 'text-on-secondary' : 'text-on-surface-variant'
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-1 mr-2">
+          <View className="flex-row gap-1.5">
+            {subjects.map((sub) => (
+              <TouchableOpacity
+                key={sub}
+                onPress={() => setSelectedSubject(sub)}
+                className={`px-3 py-1.5 rounded-xl border ${
+                  selectedSubject === sub
+                    ? 'bg-blue-600 border-blue-600'
+                    : 'bg-white border-slate-200'
                 }`}
               >
-                {sub}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+                <Text
+                  className={`text-xs font-bold ${
+                    selectedSubject === sub ? 'text-white' : 'text-slate-600'
+                  }`}
+                >
+                  {sub}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
 
         {(userRole === 'admin' || userRole === 'teacher') && (
-          <Button
-            size="sm"
-            variant="surface"
-            title="+ Upload"
+          <TouchableOpacity
             onPress={() => setIsUploadOpen(true)}
-          />
+            className="bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl flex-row items-center gap-1 active:scale-95"
+          >
+            <Plus size={13} color="#2563EB" />
+            <Text className="text-xs font-bold text-blue-600">Upload Note</Text>
+          </TouchableOpacity>
         )}
       </View>
 
       {/* Material List */}
       <View className="gap-2.5">
         {filtered.map((item) => (
-          <Card key={item.id} elevation="lowest" className="gap-2.5">
+          <View
+            key={item.id}
+            className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs gap-3"
+          >
             <View className="flex-row items-start justify-between gap-2">
-              <View className="w-10 h-10 rounded-xl bg-secondary/10 items-center justify-center shrink-0">
-                <FileText size={20} color="#0051d5" />
+              <View className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 items-center justify-center shrink-0">
+                <FileText size={18} color="#2563EB" />
               </View>
 
               <View className="flex-1 min-w-0">
-                <View className="flex-row items-center gap-1.5 mb-0.5">
+                <View className="flex-row items-center gap-1.5 mb-1">
                   <Badge label={item.subject} variant="info" />
-                  <Text className="text-[11px] text-on-surface-variant">
+                  <Text className="text-[11px] text-slate-400">
                     {item.file_size_formatted} • {item.page_count} Pages
                   </Text>
                 </View>
-                <Text className="text-sm font-bold text-on-surface leading-snug">
+                <Text className="text-sm font-bold text-slate-900 leading-snug">
                   {item.title}
                 </Text>
                 {item.description && (
-                  <Text className="text-xs text-on-surface-variant mt-1" numberOfLines={2}>
+                  <Text className="text-xs text-slate-500 mt-1" numberOfLines={2}>
                     {item.description}
                   </Text>
                 )}
               </View>
             </View>
 
-            <View className="flex-row items-center justify-between pt-2 border-t border-black/5">
-              <Text className="text-[11px] text-on-surface-variant">
-                By {item.uploaded_by}
+            <View className="flex-row items-center justify-between pt-2.5 border-t border-slate-100">
+              <Text className="text-[11px] text-slate-400">
+                Faculty: {item.uploaded_by}
               </Text>
 
-              <Button
-                size="sm"
-                variant={downloadedIds.includes(item.id) ? 'surface' : 'primary'}
-                title={downloadedIds.includes(item.id) ? 'Downloaded' : 'Download PDF'}
-                leftIcon={
-                  downloadedIds.includes(item.id) ? (
-                    <CheckCircle size={14} color="#069669" />
-                  ) : (
-                    <Download size={14} color="#ffffff" />
-                  )
-                }
-                onPress={() => handleDownload(item.id, item.title)}
-              />
+              <TouchableOpacity
+                onPress={() => handleDownload(item)}
+                className="bg-blue-600 px-3 py-1.5 rounded-xl flex-row items-center gap-1.5 active:scale-95 shadow-xs"
+              >
+                <Download size={13} color="#ffffff" />
+                <Text className="text-xs font-bold text-white">View & Share PDF</Text>
+              </TouchableOpacity>
             </View>
-          </Card>
+          </View>
         ))}
       </View>
 
       {/* UPLOAD MATERIAL MODAL */}
       <Modal visible={isUploadOpen} transparent animationType="slide">
         <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-surface rounded-t-3xl p-5 gap-3 max-h-[85%]">
+          <View className="bg-white rounded-t-3xl p-6 gap-3.5 max-h-[85%] border-t border-slate-200">
             <View className="flex-row items-center justify-between">
-              <Text className="text-lg font-bold text-on-surface">Upload Study Material</Text>
-              <Pressable onPress={() => setIsUploadOpen(false)}>
-                <X size={20} color="#0b1c30" />
-              </Pressable>
+              <Text className="text-base font-extrabold text-slate-900">Upload Study Material</Text>
+              <TouchableOpacity onPress={() => setIsUploadOpen(false)}>
+                <X size={20} color="#64748B" />
+              </TouchableOpacity>
             </View>
 
-            <Input
-              label="Document Title"
-              placeholder="e.g. Thermodynamics Chapter Notes & Formula Sheet"
-              value={title}
-              onChangeText={setTitle}
-            />
+            <View>
+              <Text className="text-xs font-bold text-slate-700 mb-1">Document Title</Text>
+              <TextInput
+                placeholder="e.g. Thermodynamics Chapter Notes & Formula Sheet"
+                placeholderTextColor="#94a3b8"
+                value={title}
+                onChangeText={setTitle}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
+              />
+            </View>
 
-            <Input
-              label="Subject Domain"
-              placeholder="Physics / Chemistry / Mathematics"
-              value={subject}
-              onChangeText={setSubject}
-            />
+            <View>
+              <Text className="text-xs font-bold text-slate-700 mb-1">Subject Domain</Text>
+              <TextInput
+                placeholder="Physics / Chemistry / Mathematics"
+                placeholderTextColor="#94a3b8"
+                value={subject}
+                onChangeText={setSubject}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
+              />
+            </View>
 
-            <Input
-              label="Description / Syllabus Coverage"
-              placeholder="e.g. Derivations, summary notes, and 2024 questions"
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              numberOfLines={3}
-            />
+            <View>
+              <Text className="text-xs font-bold text-slate-700 mb-1">Description / Syllabus Coverage</Text>
+              <TextInput
+                placeholder="e.g. Derivations, summary notes, and 2024 questions"
+                placeholderTextColor="#94a3b8"
+                value={description}
+                onChangeText={setDescription}
+                multiline
+                numberOfLines={3}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 min-h-[70px]"
+              />
+            </View>
 
-            <Button
-              variant="primary"
-              title="Publish PDF Document"
-              leftIcon={<Upload size={16} color="#ffffff" />}
-              fullWidth
+            <TouchableOpacity
               onPress={handleUpload}
-            />
+              className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-1 active:scale-98"
+            >
+              <Text className="text-xs font-bold text-white">Publish PDF Document</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>

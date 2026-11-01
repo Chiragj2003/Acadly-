@@ -20,23 +20,23 @@ const DEFAULT_CHILDREN: ChildStudent[] = [
     id: 'stud-amelia-01',
     admission_number: 'ADM-2026-088',
     user_id: 'usr-student-01',
-    full_name: 'Amelia Sharma 🌸',
+    full_name: 'Amelia Sharma',
     avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
-    batch_name: 'Batch Sakura 🌸 (Medical)',
+    batch_name: 'Class 12 • JEE Advanced (Morning)',
     grade: 'Class 11 Science',
     parent_code: 'STU-AMELIA-902',
-    emoji: '🌸',
+    emoji: '🎓',
   },
   {
     id: 'stud-aarav-02',
     admission_number: 'ADM-2026-104',
     user_id: 'usr-student-02',
-    full_name: 'Aarav Sharma ⚡',
+    full_name: 'Aarav Sharma',
     avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200',
-    batch_name: 'Batch Cosmos 🚀 (IIT-JEE)',
+    batch_name: 'Class 11 • Physics & Calculus Mastery',
     grade: 'Class 12 Advanced',
     parent_code: 'STU-AARAV-104',
-    emoji: '🚀',
+    emoji: '📐',
   },
 ];
 
@@ -126,17 +126,17 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       const list: ChildStudent[] = mappings.map((m: any) => {
         const s = m.students;
-        const batchName = s?.batch_enrollments?.[0]?.batches?.name || 'Batch Sakura 🌸';
+        const batchName = s?.batch_enrollments?.[0]?.batches?.name || 'Class 12 • JEE Advanced (Morning)';
         return {
           id: s?.id || m.student_id,
           admission_number: s?.admission_number || 'ADM-2026-088',
           user_id: s?.user_id,
-          full_name: s?.profiles?.full_name || 'Amelia Sharma 🌸',
+          full_name: s?.profiles?.full_name || 'Amelia Sharma',
           avatar_url: s?.profiles?.avatar_url,
           batch_name: batchName,
           grade: 'Class 11 Science',
           parent_code: 'STU-AMELIA-902',
-          emoji: '🌸',
+          emoji: '🎓',
         };
       });
 
@@ -175,34 +175,34 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         id: 'stud-amelia-01',
         admission_number: 'ADM-2026-088',
         user_id: 'usr-student-01',
-        full_name: 'Amelia Sharma 🌸',
+        full_name: 'Amelia Sharma',
         avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
-        batch_name: 'Batch Sakura 🌸 (Medical)',
+        batch_name: 'Class 12 • JEE Advanced (Morning)',
         grade: 'Class 11 Science',
         parent_code: 'STU-AMELIA-902',
-        emoji: '🌸',
+        emoji: '🎓',
       },
       'STU-AARAV-104': {
         id: 'stud-aarav-02',
         admission_number: 'ADM-2026-104',
         user_id: 'usr-student-02',
-        full_name: 'Aarav Sharma ⚡',
+        full_name: 'Aarav Sharma',
         avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200',
-        batch_name: 'Batch Cosmos 🚀 (IIT-JEE)',
+        batch_name: 'Class 11 • Physics & Calculus Mastery',
         grade: 'Class 12 Advanced',
         parent_code: 'STU-AARAV-104',
-        emoji: '🚀',
+        emoji: '📐',
       },
       'STU-ROHAN-305': {
         id: 'stud-rohan-03',
         admission_number: 'ADM-2026-305',
         user_id: 'usr-student-03',
-        full_name: 'Rohan Verma 🌿',
+        full_name: 'Rohan Verma',
         avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
-        batch_name: 'Batch Clover 🍀 (Foundation)',
+        batch_name: 'Class 10 CBSE • Board Toppers',
         grade: 'Class 10 STEM',
         parent_code: 'STU-ROHAN-305',
-        emoji: '🌿',
+        emoji: '📚',
       },
     };
 
@@ -217,11 +217,11 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         id: `stud-${Date.now()}`,
         admission_number: `ADM-${Math.floor(1000 + Math.random() * 9000)}`,
         user_id: `usr-${Date.now()}`,
-        full_name: `Student (${clean}) 🌸`,
-        batch_name: 'Batch Sakura 🌸',
+        full_name: `Student (${clean})`,
+        batch_name: 'Class 12 • JEE Advanced (Morning)',
         grade: 'Class 11 Science',
         parent_code: clean,
-        emoji: '🌸',
+        emoji: '🎓',
       };
     }
 

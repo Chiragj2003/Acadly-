@@ -194,7 +194,7 @@ export default function PinterestAdminScreen() {
         hasUnreadNotifications: unreadCount > 0,
       }}
     >
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-3.5 pb-20">
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }} contentContainerClassName="gap-3.5">
         {/* ================= TAB 1: HOME (OVERVIEW) ================= */}
         {activeTab === 'home' && (
           <View className="gap-3.5">

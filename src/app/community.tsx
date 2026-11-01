@@ -199,7 +199,7 @@ export default function PinterestCommunityScreen() {
         onBackPress: () => router.back(),
       }}
     >
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-3.5 pb-20">
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }} contentContainerClassName="gap-3.5">
         {/* Sub-Tabs: Doubts Wall vs. Resource Library */}
         <View className="flex-row bg-white p-1 rounded-2xl border border-slate-200/90 shadow-xs">
           <TouchableOpacity

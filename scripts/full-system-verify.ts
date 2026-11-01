@@ -51,14 +51,14 @@ async function runFullSystemVerify() {
   // WORKFLOW 2: Dual Account Onboarding & Teacher Mode Switcher
   const soloTeacher = {
     mode: 'solo',
-    teacherCode: 'SHARMA-MATH-89',
+    teacherCode: 'JOSHI-MATH-89',
     subjects: ['Physics', 'Mathematics'],
     feeRate: 3500,
   };
   const facultyTeacher = {
     mode: 'coaching_faculty',
-    linkedCoachingCode: 'BLOOM2026',
-    instituteName: 'Bloom Academy',
+    linkedCoachingCode: 'APEX2026',
+    instituteName: 'Apex Institute',
   };
   recordCheck(
     'WF-2.1',
@@ -69,8 +69,8 @@ async function runFullSystemVerify() {
 
   // WORKFLOW 3: Student Portal & Multi-Teacher Enrollment
   const enrolledTeachers = [
-    { id: 'teach-01', name: 'Prof. Vikram Joshi', subject: 'Physics', teacherCode: 'SHARMA-MATH-89' },
-    { id: 'teach-02', name: 'Dr. Meera Sen', subject: 'Organic Chemistry', teacherCode: 'MEERA-CHEM-42' },
+    { id: 'teach-01', name: 'Prof. Vikram Joshi', subject: 'Physics', teacherCode: 'JOSHI-MATH-89' },
+    { id: 'teach-02', name: 'Dr. Meera Sen', subject: 'Organic Chemistry', teacherCode: 'SEN-CHEM-26' },
   ];
   let activeTeacherId = enrolledTeachers[0].id;
   const switchTeacher = (id: string) => { activeTeacherId = id; };
@@ -198,7 +198,7 @@ async function runFullSystemVerify() {
 
   // WORKFLOW 7: Coaching Admin Desk
   const instituteBatches = [
-    { id: 'b-01', name: 'Batch Sakura', count: 28 },
+    { id: 'b-01', name: 'Class 12 • JEE Advanced (Morning)', count: 28 },
     { id: 'b-02', name: 'JEE Target 2026', count: 24 },
   ];
   const createBatch = (name: string, count: number) => {
@@ -223,7 +223,7 @@ async function runFullSystemVerify() {
 
   // WORKFLOW 8: Real-Time Chat & Community Doubts
   const chatRooms = [
-    { id: 'room-batch-01', type: 'batch_group', title: 'Batch Sakura Group Room' },
+    { id: 'room-batch-01', type: 'batch_group', title: 'Class 12 • JEE Advanced (Morning)' },
     { id: 'room-direct-01', type: 'direct_doubt', title: 'Amelia Sharma (1-on-1)' },
   ];
   const pinnedMessage = {

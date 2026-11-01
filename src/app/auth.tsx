@@ -169,7 +169,12 @@ export default function CleanAuthScreen() {
     // Teacher Sign Up (Solo Tutor vs Coaching Faculty)
     if (selectedRole === 'teacher') {
       if (teacherOption === 'solo') {
-        const generatedCode = `${fullName.split(' ')[0].toUpperCase()}-TUTOR-${Math.floor(10 + Math.random() * 90)}`;
+        const nameParts = fullName.trim().split(' ').filter(Boolean);
+        const lastName = (nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0])
+          .toUpperCase()
+          .replace(/[^A-Z]/g, '') || 'TUTOR';
+        const subjectPart = (teacherSubjects.split(',')[0].trim().toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4)) || 'MATH';
+        const generatedCode = `${lastName}-${subjectPart}-26`;
         setTeacherProfile({
           fullName,
           qualification: teacherQualification,
@@ -879,44 +884,44 @@ export default function CleanAuthScreen() {
           <View className="gap-2">
             <TouchableOpacity
               onPress={() => handleQuickDemo('student')}
-              className="bg-white border-2 border-cute-border py-2.5 px-3.5 rounded-2xl flex-row items-center justify-between active:scale-98 shadow-xs"
+              className="bg-white border border-slate-200 py-2.5 px-3.5 rounded-2xl flex-row items-center justify-between active:scale-98 shadow-xs"
             >
               <View className="flex-row items-center gap-2.5">
-                <Text className="text-lg">🌸</Text>
+                <Text className="text-lg">🎓</Text>
                 <View>
-                  <Text className="text-xs font-bold text-cute-cocoa">Student: Amelia Sharma</Text>
-                  <Text className="text-[10px] text-cute-muted">Batch Sakura • Multi-Teacher Tuition Hub</Text>
+                  <Text className="text-xs font-bold text-slate-900">Student: Amelia Sharma</Text>
+                  <Text className="text-[10px] text-slate-500">Class 12 • JEE Advanced (Morning)</Text>
                 </View>
               </View>
-              <Text className="text-xs font-black text-cute-peach">→</Text>
+              <Text className="text-xs font-bold text-blue-600">→</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => handleQuickDemo('teacher')}
-              className="bg-white border-2 border-cute-border py-2.5 px-3.5 rounded-2xl flex-row items-center justify-between active:scale-98 shadow-xs"
+              className="bg-white border border-slate-200 py-2.5 px-3.5 rounded-2xl flex-row items-center justify-between active:scale-98 shadow-xs"
             >
               <View className="flex-row items-center gap-2.5">
-                <Text className="text-lg">🍎</Text>
+                <Text className="text-lg">👨‍🏫</Text>
                 <View>
-                  <Text className="text-xs font-bold text-cute-cocoa">Teacher: Prof. Vikram Joshi</Text>
-                  <Text className="text-[10px] text-cute-muted">Code: SHARMA-MATH-89 • Grading & Roll Call</Text>
+                  <Text className="text-xs font-bold text-slate-900">Teacher: Prof. Vikram Joshi</Text>
+                  <Text className="text-[10px] text-slate-500">Code: JOSHI-MATH-89 • Grading & Roll Call</Text>
                 </View>
               </View>
-              <Text className="text-xs font-black text-cute-peach">→</Text>
+              <Text className="text-xs font-bold text-blue-600">→</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => handleQuickDemo('admin')}
-              className="bg-white border-2 border-cute-border py-2.5 px-3.5 rounded-2xl flex-row items-center justify-between active:scale-98 shadow-xs"
+              className="bg-white border border-slate-200 py-2.5 px-3.5 rounded-2xl flex-row items-center justify-between active:scale-98 shadow-xs"
             >
               <View className="flex-row items-center gap-2.5">
                 <Text className="text-lg">🏫</Text>
                 <View>
-                  <Text className="text-xs font-bold text-cute-cocoa">Director: Bloom Science Academy</Text>
-                  <Text className="text-[10px] text-cute-muted">Multi-Batch Roster • Admissions & Fees</Text>
+                  <Text className="text-xs font-bold text-slate-900">Director: Apex Institute</Text>
+                  <Text className="text-[10px] text-slate-500">Multi-Batch Roster • Admissions & Fees</Text>
                 </View>
               </View>
-              <Text className="text-xs font-black text-cute-peach">→</Text>
+              <Text className="text-xs font-bold text-blue-600">→</Text>
             </TouchableOpacity>
 
             <TouchableOpacity

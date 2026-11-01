@@ -395,7 +395,7 @@ export default function PinterestTeacherScreen() {
         onLogoutPress: handleLogout,
       }}
     >
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-3.5 pb-20">
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }} contentContainerClassName="gap-3.5">
         {/* ================= TAB 1: HOME (COMMAND DESK) ================= */}
         {activeTab === 'home' && (
           <View className="gap-3.5">
@@ -499,7 +499,7 @@ export default function PinterestTeacherScreen() {
 
               <View className="gap-2.5">
                 {[
-                  { batch: 'Batch Sakura (Class 12)', subject: 'Physics • Rotational Dynamics', time: '04:30 PM - 06:00 PM', count: '28 Students', active: true },
+                  { batch: 'Class 12 • JEE Advanced (Morning)', subject: 'Physics • Rotational Dynamics', time: '04:30 PM - 06:00 PM', count: '28 Students', active: true },
                   { batch: 'JEE Advanced Rankers', subject: 'Physics • Electromagnetic Induction', time: '06:15 PM - 07:45 PM', count: '18 Students', active: false },
                   { batch: 'Class 11 Foundation', subject: 'Mechanics • Laws of Motion', time: '08:00 PM - 09:15 PM', count: '22 Students', active: false },
                 ].map((item, idx) => (
@@ -598,7 +598,7 @@ export default function PinterestTeacherScreen() {
               <View className="flex-row items-center justify-between">
                 <View>
                   <Text className="text-xs font-semibold text-slate-400">Classroom Roll Call</Text>
-                  <Text className="text-base font-extrabold text-slate-900">Batch Sakura 🌸</Text>
+                  <Text className="text-base font-extrabold text-slate-900">Class 12 • JEE Advanced (Morning)</Text>
                 </View>
                 <TouchableOpacity
                   onPress={handleMarkAllPresent}
@@ -824,10 +824,10 @@ export default function PinterestTeacherScreen() {
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center gap-2.5">
                   <View className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
-                    <Text className="text-lg">🌸</Text>
+                    <Text className="text-lg">📚</Text>
                   </View>
                   <View>
-                    <Text className="text-sm font-bold text-slate-900">Batch Sakura Class Chat</Text>
+                    <Text className="text-sm font-bold text-slate-900">Class 12 • JEE Advanced Chat</Text>
                     <Text className="text-xs text-slate-500">Teacher + {studentsRoster.length} Pupils</Text>
                   </View>
                 </View>

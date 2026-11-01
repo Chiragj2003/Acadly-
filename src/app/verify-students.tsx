@@ -28,9 +28,10 @@ import { ScreenWrapper, Badge, Mascot } from '@/components/ui';
 import { useAcademic, JoinRequest } from '@/context/AcademicContext';
 
 const BATCH_CHOICES = [
-  { id: 'Batch Sakura 🌸 (Medical & Adv)', name: 'Batch Sakura 🌸' },
-  { id: 'Batch Cosmos 🚀 (Foundation JEE)', name: 'Batch Cosmos 🚀' },
-  { id: 'Batch Spark ⚡ (Board Revision)', name: 'Batch Spark ⚡' },
+  { id: 'Class 12 • JEE Advanced (Morning)', name: 'Class 12 • JEE Advanced' },
+  { id: 'Class 11 • Physics & Calculus Mastery', name: 'Class 11 • Physics & Calculus' },
+  { id: 'NEET-UG • Target 680+ Batch', name: 'NEET-UG • Target 680+' },
+  { id: 'Class 10 CBSE • Board Toppers', name: 'Class 10 CBSE • Board Toppers' },
 ];
 
 const FEE_PLAN_CHOICES = [

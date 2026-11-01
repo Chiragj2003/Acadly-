@@ -80,7 +80,7 @@ export default function JoinInstituteScreen() {
   const [guardianName, setGuardianName] = useState('Sunita Sharma');
   const [guardianPhone, setGuardianPhone] = useState('+91 98230 44551');
   const [bloodGroup, setBloodGroup] = useState('B+');
-  const [teacherCode, setTeacherCode] = useState('SHARMA-MATH-89');
+  const [teacherCode, setTeacherCode] = useState('JOSHI-MATH-89');
 
   // Toggle Weak Subject Chip
   const toggleWeakSubject = (sub: string) => {
@@ -166,7 +166,7 @@ export default function JoinInstituteScreen() {
     await simulateTeacherApproval();
     Alert.alert(
       'Teacher Approved! 🎉',
-      'Prof. Vikram Joshi has approved your admission into Batch Sakura 🌸. Welcome aboard!',
+      'Prof. Vikram Joshi has approved your admission into Class 12 • JEE Advanced (Morning). Welcome aboard!',
       [
         {
           text: 'Open Student Hub →',
@@ -319,7 +319,7 @@ export default function JoinInstituteScreen() {
             </View>
 
             <TextInput
-              placeholder="e.g. SHARMA-MATH-89 or BLOOM2026"
+              placeholder="e.g. JOSHI-MATH-89 or APEX2026"
               placeholderTextColor="#a89993"
               autoCapitalize="characters"
               value={teacherCode}

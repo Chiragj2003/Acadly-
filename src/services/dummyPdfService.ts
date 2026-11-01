@@ -65,7 +65,7 @@ export const DUMMY_PDF_CATALOG: PDFDocumentContent[] = [
     subject: 'Mathematics',
     author: 'Prof. Meera Sen (Maths Faculty)',
     category: 'dpp',
-    date: 'Batch Sakura 🌸 2026',
+    date: 'Class 12 • JEE Advanced 2026',
     sections: [
       {
         heading: 'Part A: Standard Properties of Definite Integrals',
@@ -141,11 +141,11 @@ export function buildDocumentHTML(doc: PDFDocumentContent): string {
   const sectionsHTML = doc.sections
     .map(
       sec => `
-      <div style="margin-top: 24px; padding: 18px; background: #fffcf7; border: 2px solid #f0e6dc; border-radius: 16px;">
-        <h3 style="margin: 0 0 12px 0; color: #2d1f1d; font-size: 16px; font-weight: 800; border-bottom: 2px dashed #ffd5cc; padding-bottom: 6px;">
+      <div style="margin-top: 20px; padding: 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+        <h3 style="margin: 0 0 10px 0; color: #0f172a; font-size: 15px; font-weight: 700; border-bottom: 2px solid #2563eb; padding-bottom: 6px;">
           ${sec.heading}
         </h3>
-        <ul style="margin: 0; padding-left: 20px; color: #4a3b37; font-size: 13px; line-height: 1.8;">
+        <ul style="margin: 0; padding-left: 20px; color: #334155; font-size: 13px; line-height: 1.8;">
           ${sec.items.map(item => `<li style="margin-bottom: 6px;">${item}</li>`).join('')}
         </ul>
       </div>
@@ -161,81 +161,82 @@ export function buildDocumentHTML(doc: PDFDocumentContent): string {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>${doc.title}</title>
         <style>
-          @page { margin: 28mm 18mm 28mm 18mm; }
+          @page { margin: 24mm 18mm 24mm 18mm; }
           body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #ffffff;
-            color: #2d1f1d;
+            color: #0f172a;
             margin: 0;
             padding: 24px;
           }
           .header {
-            text-align: center;
-            border-bottom: 3px solid #ff7d6b;
-            padding-bottom: 20px;
+            text-align: left;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 18px;
             margin-bottom: 20px;
           }
           .tag {
             display: inline-block;
-            background: #fff0ed;
-            color: #ff7d6b;
-            font-weight: 800;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-weight: 700;
             font-size: 11px;
-            padding: 4px 14px;
+            padding: 4px 12px;
             border-radius: 999px;
-            border: 1px solid #ffd5cc;
+            border: 1px solid #bfdbfe;
             text-transform: uppercase;
             letter-spacing: 0.5px;
           }
           .title {
-            font-size: 24px;
-            font-weight: 900;
-            color: #2d1f1d;
+            font-size: 22px;
+            font-weight: 800;
+            color: #0f172a;
             margin: 12px 0 6px 0;
             line-height: 1.25;
           }
           .subtitle {
             font-size: 13px;
-            color: #7d6f6a;
+            color: #64748b;
             margin: 0 0 14px 0;
           }
           .meta {
             display: flex;
-            justify-content: space-around;
-            background: #fbf8f5;
+            justify-content: space-between;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
             padding: 10px 16px;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 12px;
             font-weight: 600;
-            color: #5d4f4b;
+            color: #334155;
           }
           .footer {
-            margin-top: 40px;
+            margin-top: 36px;
             text-align: center;
             font-size: 11px;
-            color: #a89993;
-            border-top: 1px solid #eee;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
             padding-top: 14px;
           }
         </style>
       </head>
       <body>
         <div class="header">
-          <div class="tag">Acadly 🌸 Learning Library • ${doc.subject}</div>
+          <div class="tag">Acadly Academic Publishing • ${doc.subject}</div>
           <h1 class="title">${doc.title}</h1>
           <p class="subtitle">${doc.subtitle}</p>
           <div class="meta">
-            <div>👨‍🏫 <strong>Author:</strong> ${doc.author}</div>
-            <div>📅 <strong>Edition:</strong> ${doc.date}</div>
-            <div>📑 <strong>Type:</strong> ${doc.category.toUpperCase()}</div>
+            <div><strong>Faculty:</strong> ${doc.author}</div>
+            <div><strong>Session:</strong> ${doc.date}</div>
+            <div><strong>Category:</strong> ${doc.category.toUpperCase()}</div>
           </div>
         </div>
 
         ${sectionsHTML}
 
         <div class="footer">
-          <p>Created with Acadly • Coaching & Tuition Management Platform 🌸</p>
-          <p>For verified classroom use only. All rights reserved.</p>
+          <p>Acadly Education Management Platform • Official Classroom Resource</p>
+          <p>For enrolled student reference only. All rights reserved.</p>
         </div>
       </body>
     </html>

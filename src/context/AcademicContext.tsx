@@ -217,35 +217,35 @@ export interface AcademicContextType {
 }
 
 const DEFAULT_TEACHER_PROFILE: TeacherProfile = {
-  fullName: 'Prof. Vikram Joshi ⚡',
+  fullName: 'Prof. Vikram Joshi',
   qualification: 'M.Sc Physics (IIT Bombay), 12+ Yrs Exp',
-  specializationSubjects: ['Physics ⚡', 'Calculus 📐', 'Mechanics ⚙️'],
+  specializationSubjects: ['Physics', 'Calculus', 'Mechanics'],
   experienceYears: 12.5,
   bio: 'Passionate about turning complex physics equations into beautiful intuitive stories.',
   achievements: 'Mentored 40+ AIR Top 500 students in JEE Advanced.',
   monthlyFeeRate: 3500,
-  teacherCode: 'SHARMA-MATH-89',
+  teacherCode: 'JOSHI-MATH-89',
 };
 
 const DEFAULT_COACHING_PROFILE: CoachingProfile = {
-  name: 'Bloom Academy 🌸',
-  city: 'Pune / Kota',
+  name: 'Apex Institute',
+  city: 'Kota & Delhi Central',
   subjectsOffered: ['Physics', 'Chemistry', 'Mathematics', 'Biology'],
   directorName: 'Director Sharma',
   phone: '+91 98230 11223',
-  inviteCode: 'BLOOM2026',
+  inviteCode: 'APEX2026',
 };
 
 const INITIAL_STUDENTS_ROSTER: Student360Profile[] = [
   {
     id: 'stud-amelia',
-    name: 'Amelia Sharma 🌸',
+    name: 'Amelia Sharma',
     rollNumber: 'ADM-2026-088',
     grade: 'Class 11 Science',
     board: 'CBSE',
     school: 'Delhi Public School (R.K. Puram)',
     targetExam: 'IIT-JEE 2026',
-    batchName: 'Batch Sakura 🌸 (Medical & Adv)',
+    batchName: 'Class 12 • JEE Advanced (Morning)',
     parentLinkCode: 'STU-AMELIA-902',
     guardianName: 'Sunita Sharma (Mother)',
     guardianPhone: '+91 98230 44551',
@@ -261,13 +261,13 @@ const INITIAL_STUDENTS_ROSTER: Student360Profile[] = [
   },
   {
     id: 'stud-kabir',
-    name: 'Kabir Singhania 🚀',
+    name: 'Kabir Singhania',
     rollNumber: 'ADM-2026-118',
     grade: 'Class 11 Science',
     board: 'CBSE',
     school: 'The Mother International',
     targetExam: 'IIT-JEE 2026',
-    batchName: 'Batch Sakura 🌸 (Medical & Adv)',
+    batchName: 'Class 12 • JEE Advanced (Morning)',
     parentLinkCode: 'STU-KABIR-118',
     guardianName: 'Rajesh Singhania (Father)',
     guardianPhone: '+91 98110 33442',
@@ -283,13 +283,13 @@ const INITIAL_STUDENTS_ROSTER: Student360Profile[] = [
   },
   {
     id: 'stud-zoya',
-    name: 'Zoya Khan 🌿',
+    name: 'Zoya Khan',
     rollNumber: 'ADM-2026-124',
     grade: 'Class 11 Science',
     board: 'ICSE',
     school: 'St. Xavier High School',
     targetExam: 'NEET Medical 2026',
-    batchName: 'Batch Clover 🍀 (Foundation)',
+    batchName: 'NEET-UG • Target 680+ Batch',
     parentLinkCode: 'STU-ZOYA-124',
     guardianName: 'Dr. Farooq Khan',
     guardianPhone: '+91 98900 22119',
@@ -309,7 +309,7 @@ const INITIAL_JOIN_REQUESTS: JoinRequest[] = [
   {
     id: 'req-kabir-01',
     studentDetails: {
-      fullName: 'Kabir Singhania 🚀',
+      fullName: 'Kabir Singhania',
       grade: 'Class 11 Science',
       board: 'CBSE',
       targetExam: 'IIT-JEE 2026',
@@ -321,7 +321,7 @@ const INITIAL_JOIN_REQUESTS: JoinRequest[] = [
       bloodGroup: 'O+',
       address: 'B-14 Green Park, New Delhi',
     },
-    codeUsed: 'SHARMA-MATH-89',
+    codeUsed: 'JOSHI-MATH-89',
     status: 'pending',
     appliedAt: '25 mins ago',
     matchedTargetName: 'Prof. Vikram Joshi (Physics & Math Tuition)',
@@ -330,7 +330,7 @@ const INITIAL_JOIN_REQUESTS: JoinRequest[] = [
   {
     id: 'req-zoya-02',
     studentDetails: {
-      fullName: 'Zoya Khan 🌿',
+      fullName: 'Zoya Khan',
       grade: 'Class 11 Science',
       board: 'ICSE',
       targetExam: 'NEET Medical 2026',
@@ -342,10 +342,10 @@ const INITIAL_JOIN_REQUESTS: JoinRequest[] = [
       bloodGroup: 'A+',
       address: '77 Hill Road, Mumbai',
     },
-    codeUsed: 'BLOOM2026',
+    codeUsed: 'APEX2026',
     status: 'pending',
     appliedAt: '1 hour ago',
-    matchedTargetName: 'Bloom Academy 🌸 (Medical & JEE)',
+    matchedTargetName: 'Apex Institute (Medical & JEE)',
     matchedType: 'coaching_center',
   },
 ];
@@ -559,7 +559,7 @@ const INITIAL_SUBMISSIONS: Submission[] = [
     id: 'sub-01',
     assignment_id: 'asg-01',
     student_id: 'stud-amelia',
-    student_name: 'Amelia Sharma 🌸',
+    student_name: 'Amelia Sharma',
     roll_number: 'ADM-2026-088',
     file_url: 'https://example.com/dpp14_amelia_solution.pdf',
     file_name: 'Amelia_DPP14_Solutions.pdf',
@@ -574,7 +574,7 @@ const INITIAL_SUBMISSIONS: Submission[] = [
     id: 'sub-02',
     assignment_id: 'asg-01',
     student_id: 'stud-kabir',
-    student_name: 'Kabir Singhania 🚀',
+    student_name: 'Kabir Singhania',
     roll_number: 'ADM-2026-118',
     file_url: 'https://example.com/dpp14_kabir_solution.pdf',
     file_name: 'Kabir_DPP14_Solutions.pdf',
@@ -590,21 +590,21 @@ const INITIAL_SUBMISSIONS: Submission[] = [
 const DEFAULT_ENROLLED_TEACHERS: EnrolledTeacherItem[] = [
   {
     id: 'teach-verma-01',
-    name: 'Prof. Vikram Joshi ⚡',
+    name: 'Prof. Vikram Joshi',
     subject: 'Physics',
-    teacherCode: 'SHARMA-MATH-89',
-    instituteName: 'Bloom Science Academy',
-    batchName: 'Batch Sakura (Medical & JEE)',
+    teacherCode: 'JOSHI-MATH-89',
+    instituteName: 'Apex Science Academy',
+    batchName: 'Class 12 • JEE Advanced (Morning)',
     schedule: 'Mon, Wed, Fri @ 04:30 PM',
     attendanceRate: 96.4,
   },
   {
     id: 'teach-swami-02',
-    name: 'Prof. Arvind Swaminathan 📐',
+    name: 'Prof. Arvind Swaminathan',
     subject: 'Mathematics',
     teacherCode: 'SWAMI-MATH-99',
     instituteName: 'Pinnacle STEM Tuition',
-    batchName: 'Advanced Calculus Batch',
+    batchName: 'Class 11 • Physics & Calculus Mastery',
     schedule: 'Tue, Thu, Sat @ 05:00 PM',
     attendanceRate: 94.0,
   },
@@ -881,8 +881,8 @@ export const AcademicProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Join Request Gatekeeper Logic
   const submitJoinRequest = async (details: StudentExtraDetails, code: string) => {
     const cleanCode = code.trim().toUpperCase();
-    const isTeacher = cleanCode === teacherProfile.teacherCode || cleanCode.includes('SHARMA');
-    const targetName = isTeacher ? teacherProfile.fullName : 'Bloom Academy 🌸';
+    const isTeacher = cleanCode === teacherProfile.teacherCode || cleanCode.includes('JOSHI') || cleanCode.includes('SHARMA');
+    const targetName = isTeacher ? teacherProfile.fullName : (coachingProfile.name || 'Apex Institute');
     const targetType = isTeacher ? 'individual_teacher' : 'coaching_center';
 
     const newReq: JoinRequest = {
@@ -918,7 +918,7 @@ export const AcademicProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       board: targetReq.studentDetails.board,
       school: targetReq.studentDetails.school,
       targetExam: targetReq.studentDetails.targetExam,
-      batchName: batchId === 'batch-01' ? 'Batch Sakura 🌸 (Medical & Adv)' : 'Batch Cosmos 🚀 (IIT-JEE)',
+      batchName: batchId === 'batch-01' ? 'Class 12 • JEE Advanced (Morning)' : 'Class 11 • Physics & Calculus Mastery',
       guardianName: targetReq.studentDetails.guardianName,
       guardianPhone: targetReq.studentDetails.guardianPhone,
       address: targetReq.studentDetails.address || 'Address on file',
