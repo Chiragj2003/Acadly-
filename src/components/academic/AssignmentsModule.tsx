@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, Modal, Alert } from 'react-native';
+import { View, Text, Pressable, Modal, Alert, TouchableOpacity } from 'react-native';
 import {
   FileCheck,
   Calendar,
@@ -9,7 +9,9 @@ import {
   Plus,
   X,
   Award,
+  FileText,
 } from 'lucide-react-native';
+import * as DocumentPicker from 'expo-document-picker';
 import { useAcademic } from '@/context/AcademicContext';
 import { useAuth } from '@/context/AuthContext';
 import { Card, Button, Input, Badge, type BadgeVariant } from '@/components/ui';
@@ -26,15 +28,49 @@ export const AssignmentsModule: React.FC = () => {
   const [asgSubject, setAsgSubject] = useState('Physics');
   const [asgInstructions, setAsgInstructions] = useState('');
   const [asgMarks, setAsgMarks] = useState('100');
+  const [asgAttachedPdfName, setAsgAttachedPdfName] = useState<string | null>(null);
 
   // Submit Solution Modal
   const [selectedAsgId, setSelectedAsgId] = useState<string | null>(null);
   const [solutionNotes, setSolutionNotes] = useState('');
+  const [pickedFileName, setPickedFileName] = useState('amelia_gauss_solution.pdf');
+  const [pickedFileUri, setPickedFileUri] = useState<string | null>(null);
 
   // Grade Modal
   const [gradingSubId, setGradingSubId] = useState<string | null>(null);
-  const [gradeMarks, setGradeMarks] = useState('95');
-  const [gradeFeedback, setGradeFeedback] = useState('Excellent work on the derivations.');
+  const [gradeMarks, setGradeMarks] = useState('54');
+  const [gradeFeedback, setGradeFeedback] = useState('Excellent spherical shell derivations and step-by-step clarity.');
+
+  const handlePickQuestionPdf = async () => {
+    try {
+      const res = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf', 'image/*'],
+        copyToCacheDirectory: true,
+      });
+      if (!res.canceled && res.assets && res.assets.length > 0) {
+        setAsgAttachedPdfName(res.assets[0].name);
+      }
+    } catch {
+      Alert.alert('File Picker', 'Selected demo Question Sheet PDF.');
+      setAsgAttachedPdfName('Physics_DPP_Question_Sheet.pdf');
+    }
+  };
+
+  const handlePickSolutionDocument = async () => {
+    try {
+      const res = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf', 'image/*'],
+        copyToCacheDirectory: true,
+      });
+      if (!res.canceled && res.assets && res.assets.length > 0) {
+        setPickedFileName(res.assets[0].name);
+        setPickedFileUri(res.assets[0].uri);
+        Alert.alert('File Attached 📄', `Attached: ${res.assets[0].name}`);
+      }
+    } catch {
+      setPickedFileName('amelia_gauss_solution.pdf');
+    }
+  };
 
   const handleCreateAssignment = async () => {
     if (!asgTitle.trim()) {
@@ -47,34 +83,37 @@ export const AssignmentsModule: React.FC = () => {
       title: asgTitle,
       subject: asgSubject,
       instructions: asgInstructions || 'Solve all questions and upload work.',
-      due_date: '2025-11-10',
+      due_date: new Date(Date.now() + 86400000 * 7).toISOString(),
       due_label: 'Due in 7 Days',
-      total_marks: parseInt(asgMarks) || 100,
-      question_count: 25,
+      due_date_formatted: 'Due in 7 Days',
+      total_marks: parseInt(asgMarks, 10) || 100,
+      max_marks: parseInt(asgMarks, 10) || 100,
+      question_count: 20,
       created_by: userRole === 'teacher' ? 'Er. Rakesh Verma' : 'Director Sharma',
     });
 
     setIsCreateOpen(false);
     setAsgTitle('');
     setAsgInstructions('');
-    Alert.alert('Assignment Created', 'Assignment published to batch students.');
+    setAsgAttachedPdfName(null);
+    Alert.alert('Assignment Created 🎉', 'Assignment and question sheet published to batch.');
   };
 
   const handleSubmitSolution = async () => {
     if (!selectedAsgId) return;
 
-    await submitAssignment(selectedAsgId, solutionNotes || 'Submitted solutions PDF');
+    await submitAssignment(selectedAsgId, solutionNotes || 'Submitted solutions PDF', pickedFileName, pickedFileUri || undefined);
     setSelectedAsgId(null);
     setSolutionNotes('');
-    Alert.alert('Solution Submitted', 'Your assignment has been submitted to faculty for evaluation.');
+    Alert.alert('Solution Submitted 🎉', 'Your assignment has been submitted to faculty for evaluation.');
   };
 
   const handleGrade = async () => {
     if (!gradingSubId) return;
 
-    await gradeSubmission(gradingSubId, parseFloat(gradeMarks) || 95, gradeFeedback);
+    await gradeSubmission(gradingSubId, parseFloat(gradeMarks) || 54, gradeFeedback);
     setGradingSubId(null);
-    Alert.alert('Graded', 'Marks and feedback published to student profile.');
+    Alert.alert('Graded & Saved ⭐', 'Marks and feedback published to student profile.');
   };
 
   return (
@@ -303,13 +342,20 @@ export const AssignmentsModule: React.FC = () => {
               numberOfLines={3}
             />
 
-            <Card elevation="container" className="p-3 flex-row items-center justify-between">
+            <TouchableOpacity
+              onPress={handlePickSolutionDocument}
+              activeOpacity={0.8}
+              className="bg-cute-peach-light border border-cute-peach p-3 rounded-2xl flex-row items-center justify-between"
+            >
               <View className="flex-row items-center gap-2">
-                <FileCheck size={18} color="#0051d5" />
-                <Text className="text-xs font-semibold text-on-surface">aryan_solutions.pdf (2.4 MB)</Text>
+                <FileCheck size={18} color="#ff7d6b" />
+                <View>
+                  <Text className="text-xs font-bold text-cute-cocoa">{pickedFileName}</Text>
+                  <Text className="text-[10px] text-cute-muted">Tap to pick another PDF or photo</Text>
+                </View>
               </View>
-              <Badge label="Attached" variant="success" />
-            </Card>
+              <Badge label="Pick File 📄" variant="primary" />
+            </TouchableOpacity>
 
             <Button
               variant="primary"

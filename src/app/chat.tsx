@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
-  Image,
 } from 'react-native';
 import {
   Send,
@@ -18,20 +17,16 @@ import {
   FileText,
   Users,
   User,
-  Sparkles,
-  ChevronDown,
-  CheckCircle2,
-  Clock,
-  ArrowLeft,
+  Plus,
 } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
-import { ScreenWrapper, Mascot } from '@/components/ui';
+import { ScreenWrapper } from '@/components/ui';
 import { useChat, ChatMessage } from '@/context/ChatContext';
 import { useAuth } from '@/context/AuthContext';
 import { useAcademic } from '@/context/AcademicContext';
 
-export default function RealTimeChatScreen() {
+export default function PinterestChatScreen() {
   const router = useRouter();
   const { userRole } = useAuth();
   const { teacherProfile, studentsRoster } = useAcademic();
@@ -144,7 +139,7 @@ export default function RealTimeChatScreen() {
   return (
     <ScreenWrapper
       headerProps={{
-        title: activeRoom?.title || 'Classroom Chat 🌸',
+        title: activeRoom?.title || 'Classroom Chat',
         instituteName: activeRoom?.subtitle,
         onBackPress: () => router.back(),
       }}
@@ -163,16 +158,16 @@ export default function RealTimeChatScreen() {
                   <TouchableOpacity
                     key={room.id}
                     onPress={() => setActiveRoomId(room.id)}
-                    className={`px-3.5 py-2 rounded-2xl border-2 flex-row items-center gap-1.5 ${
+                    className={`px-3.5 py-2 rounded-2xl border flex-row items-center gap-1.5 ${
                       isSelected
-                        ? 'bg-cute-peach border-cute-peach shadow-xs'
-                        : 'bg-white border-cute-border'
+                        ? 'bg-blue-600 border-blue-600 shadow-xs'
+                        : 'bg-white border-slate-200'
                     }`}
                   >
                     <Text className="text-sm">{room.avatarEmoji}</Text>
                     <Text
-                      className={`text-xs font-black ${
-                        isSelected ? 'text-white' : 'text-cute-cocoa'
+                      className={`text-xs font-bold ${
+                        isSelected ? 'text-white' : 'text-slate-800'
                       }`}
                     >
                       {room.type === 'batch_group' ? 'Batch Sakura 🌸' : room.title.split(' ')[0]}
@@ -202,9 +197,10 @@ export default function RealTimeChatScreen() {
                       }))
                     );
                   }}
-                  className="px-3 py-2 rounded-2xl bg-cute-cream border border-cute-border flex-row items-center gap-1 active:scale-95"
+                  className="px-3 py-2 rounded-2xl bg-white border border-slate-200 flex-row items-center gap-1 active:scale-95"
                 >
-                  <Text className="text-xs font-bold text-cute-cocoa">+ Direct Student</Text>
+                  <Plus size={13} color="#2563EB" />
+                  <Text className="text-xs font-bold text-blue-600">Direct Student</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -213,11 +209,11 @@ export default function RealTimeChatScreen() {
 
         {/* ================= PINNED ANNOUNCEMENT BANNER ================= */}
         {activeRoom?.pinnedMessage && (
-          <View className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-3 mb-3 flex-row items-start gap-2 shadow-xs">
+          <View className="bg-amber-50 border border-amber-200 rounded-2xl p-3 mb-3 flex-row items-start gap-2 shadow-xs">
             <Text className="text-base">📌</Text>
             <View className="flex-1">
               <View className="flex-row items-center justify-between">
-                <Text className="text-[10px] font-black text-amber-900 uppercase tracking-wider">
+                <Text className="text-[10px] font-bold text-amber-900 uppercase tracking-wider">
                   Pinned by {activeRoom.pinnedMessage.senderName}
                 </Text>
                 {isTeacher && (
@@ -244,11 +240,13 @@ export default function RealTimeChatScreen() {
         >
           {messages.length === 0 ? (
             <View className="items-center justify-center py-12">
-              <Mascot mood="waving" size="md" />
-              <Text className="text-sm font-black text-cute-cocoa mt-2">
-                Start the conversation! 🌸
+              <View className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center mb-2">
+                <Users size={24} color="#2563EB" />
+              </View>
+              <Text className="text-sm font-bold text-slate-800">
+                Start the conversation!
               </Text>
-              <Text className="text-xs text-cute-muted text-center max-w-[220px] mt-0.5">
+              <Text className="text-xs text-slate-500 text-center max-w-[220px] mt-0.5">
                 Ask a conceptual question or share a doubt with your faculty.
               </Text>
             </View>
@@ -265,31 +263,31 @@ export default function RealTimeChatScreen() {
                 >
                   {/* Avatar for other participant */}
                   {!isMine && (
-                    <View className="w-8 h-8 rounded-full bg-white border border-cute-border items-center justify-center shadow-xs mb-1">
+                    <View className="w-8 h-8 rounded-full bg-white border border-slate-200 items-center justify-center shadow-xs mb-1">
                       <Text className="text-xs">{msg.senderAvatarEmoji}</Text>
                     </View>
                   )}
 
-                  <View className={`max-w-[80%]`}>
+                  <View className="max-w-[80%]">
                     {/* Author label for group chat */}
                     {!isMine && activeRoom?.type === 'batch_group' && (
                       <View className="flex-row items-center gap-1.5 mb-1 px-1">
-                        <Text className="text-[11px] font-black text-cute-cocoa">
+                        <Text className="text-[11px] font-bold text-slate-700">
                           {msg.senderName}
                         </Text>
                         <View
                           className={`px-1.5 py-0.2 rounded-md ${
                             msg.senderRole === 'teacher'
-                              ? 'bg-rose-100 border border-rose-300'
-                              : 'bg-emerald-100 border border-emerald-300'
+                              ? 'bg-blue-100 border border-blue-200'
+                              : 'bg-emerald-100 border border-emerald-200'
                           }`}
                         >
                           <Text
-                            className={`text-[9px] font-extrabold ${
-                              msg.senderRole === 'teacher' ? 'text-rose-800' : 'text-emerald-800'
+                            className={`text-[9px] font-bold ${
+                              msg.senderRole === 'teacher' ? 'text-blue-800' : 'text-emerald-800'
                             }`}
                           >
-                            {msg.senderRole === 'teacher' ? 'Faculty 🍎' : 'Student 🌸'}
+                            {msg.senderRole === 'teacher' ? 'Faculty 🍎' : 'Student 🎓'}
                           </Text>
                         </View>
                       </View>
@@ -301,15 +299,15 @@ export default function RealTimeChatScreen() {
                       onLongPress={() => handlePin(msg)}
                       className={`p-3.5 rounded-3xl shadow-xs ${
                         isMine
-                          ? 'bg-cute-peach rounded-br-sm'
-                          : 'bg-white border-2 border-cute-border rounded-bl-sm'
+                          ? 'bg-blue-600 rounded-br-sm'
+                          : 'bg-white border border-slate-200/90 rounded-bl-sm'
                       }`}
                     >
                       {/* Attachment Rendering */}
                       {msg.attachmentName && (
                         <View
                           className={`p-2.5 rounded-2xl mb-2 flex-row items-center gap-2 ${
-                            isMine ? 'bg-white/20' : 'bg-cute-cream border border-cute-border'
+                            isMine ? 'bg-white/20' : 'bg-slate-50 border border-slate-200'
                           }`}
                         >
                           <View
@@ -324,8 +322,8 @@ export default function RealTimeChatScreen() {
                           </View>
                           <View className="flex-1">
                             <Text
-                              className={`text-xs font-black ${
-                                isMine ? 'text-white' : 'text-cute-cocoa'
+                              className={`text-xs font-bold ${
+                                isMine ? 'text-white' : 'text-slate-800'
                               }`}
                               numberOfLines={1}
                             >
@@ -333,7 +331,7 @@ export default function RealTimeChatScreen() {
                             </Text>
                             <Text
                               className={`text-[10px] ${
-                                isMine ? 'text-white/80' : 'text-cute-muted'
+                                isMine ? 'text-white/80' : 'text-slate-500'
                               }`}
                             >
                               {msg.attachmentType?.toUpperCase()} • {msg.attachmentSize || '1.4 MB'}
@@ -346,7 +344,7 @@ export default function RealTimeChatScreen() {
                       {msg.text ? (
                         <Text
                           className={`text-xs leading-relaxed ${
-                            isMine ? 'text-white font-medium' : 'text-cute-cocoa font-medium'
+                            isMine ? 'text-white font-medium' : 'text-slate-800 font-medium'
                           }`}
                         >
                           {msg.text}
@@ -357,7 +355,7 @@ export default function RealTimeChatScreen() {
                       <View className="flex-row items-center justify-end gap-1.5 mt-1.5">
                         <Text
                           className={`text-[9px] ${
-                            isMine ? 'text-white/70' : 'text-cute-muted'
+                            isMine ? 'text-white/70' : 'text-slate-400'
                           }`}
                         >
                           {msg.timeFormatted}
@@ -369,7 +367,7 @@ export default function RealTimeChatScreen() {
                             hitSlop={8}
                             className="opacity-70"
                           >
-                            <Pin size={10} color={isMine ? '#ffffff' : '#7d6f6a'} />
+                            <Pin size={10} color={isMine ? '#ffffff' : '#64748B'} />
                           </TouchableOpacity>
                         )}
                       </View>
@@ -389,9 +387,9 @@ export default function RealTimeChatScreen() {
                 <TouchableOpacity
                   key={idx}
                   onPress={() => setInputText(chip)}
-                  className="bg-white border border-cute-border px-2.5 py-1 rounded-xl active:scale-95"
+                  className="bg-white border border-slate-200 px-2.5 py-1 rounded-xl active:scale-95"
                 >
-                  <Text className="text-[10px] font-bold text-cute-muted">{chip}</Text>
+                  <Text className="text-[10px] font-bold text-slate-600">{chip}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -400,33 +398,33 @@ export default function RealTimeChatScreen() {
 
         {/* ================= STAGED ATTACHMENT PREVIEW ================= */}
         {stagedAttachment && (
-          <View className="bg-cute-peach-light border border-cute-peach p-2.5 rounded-2xl mb-2 flex-row items-center justify-between shadow-xs">
+          <View className="bg-blue-50 border border-blue-200 p-2.5 rounded-2xl mb-2 flex-row items-center justify-between shadow-xs">
             <View className="flex-row items-center gap-2 flex-1 pr-2">
-              <FileText size={16} color="#ff7d6b" />
+              <FileText size={16} color="#2563EB" />
               <View className="flex-1">
-                <Text className="text-xs font-black text-cute-cocoa" numberOfLines={1}>
+                <Text className="text-xs font-bold text-slate-800" numberOfLines={1}>
                   {stagedAttachment.name}
                 </Text>
-                <Text className="text-[10px] text-cute-muted">
+                <Text className="text-[10px] text-slate-500">
                   {stagedAttachment.type.toUpperCase()} • {stagedAttachment.size}
                 </Text>
               </View>
             </View>
             <TouchableOpacity onPress={() => setStagedAttachment(null)} className="p-1">
-              <X size={14} color="#ff7d6b" />
+              <X size={14} color="#2563EB" />
             </TouchableOpacity>
           </View>
         )}
 
         {/* ================= CHAT INPUT DOCK ================= */}
-        <View className="bg-white border-2 border-cute-border rounded-3xl p-2 flex-row items-center gap-2 shadow-xs mb-2">
+        <View className="bg-white border border-slate-200/90 rounded-3xl p-2 flex-row items-center gap-2 shadow-xs mb-2">
           {/* Attachment Button */}
           <TouchableOpacity
             activeOpacity={0.88}
             onPress={handlePickAttachment}
-            className="w-10 h-10 rounded-2xl bg-cute-cream border border-cute-border items-center justify-center active:scale-95"
+            className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-200 items-center justify-center active:scale-95"
           >
-            <Paperclip size={18} color="#7d6f6a" />
+            <Paperclip size={18} color="#64748B" />
           </TouchableOpacity>
 
           {/* Text Input */}
@@ -436,11 +434,11 @@ export default function RealTimeChatScreen() {
                 ? 'Send message or announcement to batch...'
                 : 'Ask doubt or message teacher...'
             }
-            placeholderTextColor="#a89993"
+            placeholderTextColor="#94a3b8"
             value={inputText}
             onChangeText={setInputText}
             multiline
-            className="flex-1 max-h-24 text-xs font-bold text-cute-cocoa px-2 py-1"
+            className="flex-1 max-h-24 text-xs font-bold text-slate-800 px-2 py-1"
           />
 
           {/* Send Button */}
@@ -449,12 +447,12 @@ export default function RealTimeChatScreen() {
             onPress={handleSend}
             disabled={!inputText.trim() && !stagedAttachment}
             className={`w-10 h-10 rounded-2xl items-center justify-center shadow-xs active:scale-95 ${
-              inputText.trim() || stagedAttachment ? 'bg-cute-peach' : 'bg-cute-cream'
+              inputText.trim() || stagedAttachment ? 'bg-blue-600' : 'bg-slate-100'
             }`}
           >
             <Send
               size={16}
-              color={inputText.trim() || stagedAttachment ? '#ffffff' : '#a89993'}
+              color={inputText.trim() || stagedAttachment ? '#ffffff' : '#94a3b8'}
             />
           </TouchableOpacity>
         </View>

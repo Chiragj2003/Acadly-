@@ -1,5 +1,15 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+  TextInput,
+  Modal,
+  Linking,
+  Switch,
+} from 'react-native';
 import {
   Users,
   CalendarCheck,
@@ -10,30 +20,46 @@ import {
   CreditCard,
   FileText,
   Sparkles,
-  Heart,
   CheckCircle2,
+  Home,
+  MessageSquare,
+  LogOut,
+  Plus,
+  X,
+  Phone,
+  Clock,
+  Download,
+  Share2,
+  Award,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { useInstitute } from '@/context/InstituteContext';
-import { useChild } from '@/context/ChildContext';
+import { useChild, ChildStudent } from '@/context/ChildContext';
 import { useFeeNotification } from '@/context/FeeNotificationContext';
+import { useAcademic } from '@/context/AcademicContext';
 import {
   ScreenWrapper,
   Badge,
-  Mascot,
+  BottomTabBar,
+  type TabItem,
 } from '@/components/ui';
+import {
+  PerformanceComparisonChart,
+  AttendanceRingAndTrendChart,
+} from '@/components/charts';
 import {
   RazorpayCheckoutModal,
   FeeReceiptModal,
   NotificationDrawer,
 } from '@/components/finance';
+import { generateAndSharePDF, DUMMY_PDF_CATALOG } from '@/services/dummyPdfService';
 
-export default function CuteParentScreen() {
+export default function PinterestParentScreen() {
   const router = useRouter();
   const { signOut } = useAuth();
   const { currentInstitute } = useInstitute();
-  const { selectedChild, childrenList, selectChild } = useChild();
+  const { selectedChild, childrenList, selectChild, addChildByCodeOrPhone } = useChild();
   const {
     studentFees,
     payments,
@@ -42,183 +68,476 @@ export default function CuteParentScreen() {
     openNotificationDrawer,
     unreadCount,
   } = useFeeNotification();
+  const { comparisonChartData, studentsRoster } = useAcademic();
+
+  // Bottom Navigation Tabs (4 Tabs)
+  const [activeTab, setActiveTab] = useState<'home' | 'children' | 'fees_reports' | 'profile'>('home');
+
+  // Link Child Modal State
+  const [isLinkChildModalOpen, setIsLinkChildModalOpen] = useState(false);
+  const [childCodeInput, setChildCodeInput] = useState('');
+  const [isLinkingChild, setIsLinkingChild] = useState(false);
+
+  // Settings Toggles
+  const [smsAlerts, setSmsAlerts] = useState(true);
+  const [waDailyDigest, setWaDailyDigest] = useState(true);
 
   const currentFee = studentFees[0];
   const lastPayment = payments[0];
+  const matchedStudentProfile = studentsRoster.find((s) => s.id === 'stud-amelia') || studentsRoster[0];
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Sign Out 🚪',
+      'Are you sure you want to sign out from the Parent Portal?',
+      [
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            await signOut();
+            router.replace('/auth');
+          },
+        },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  };
+
+  const handleLinkChild = async () => {
+    if (!childCodeInput.trim()) {
+      Alert.alert('Required', 'Please enter a Student Link Code or registered phone number.');
+      return;
+    }
+    setIsLinkingChild(true);
+    const res = await addChildByCodeOrPhone(childCodeInput.trim());
+    setIsLinkingChild(false);
+
+    if (res.success && res.child) {
+      setIsLinkChildModalOpen(false);
+      setChildCodeInput('');
+      Alert.alert('Child Linked! 🎓', `Successfully connected ${res.child.full_name} to your parent portal.`);
+    } else {
+      Alert.alert('Not Found', res.error || 'Could not verify student code. Please check with the tuition teacher.');
+    }
+  };
+
+  const handleWhatsAppTeacher = () => {
+    const message = encodeURIComponent(
+      `Namaste from ${selectedChild?.full_name}'s parent. I wanted to inquire about recent homework and exam feedback on Acadly.`
+    );
+    Linking.openURL(`https://wa.me/919823044551?text=${message}`).catch(() => {
+      Alert.alert('WhatsApp Teacher', 'Connecting to tuition teacher at +91 98230 44551');
+    });
+  };
+
+  const handleDownloadInvoice = async () => {
+    const dummyDoc = DUMMY_PDF_CATALOG[0];
+    await generateAndSharePDF(dummyDoc);
+  };
+
+  const tabs: TabItem[] = [
+    {
+      key: 'home',
+      label: 'Home',
+      icon: (color, size) => <Home color={color} size={size} />,
+    },
+    {
+      key: 'children',
+      label: 'Children',
+      icon: (color, size) => <Users color={color} size={size} />,
+      badgeCount: childrenList.length,
+    },
+    {
+      key: 'fees_reports',
+      label: 'Fees & Invoices',
+      icon: (color, size) => <Wallet color={color} size={size} />,
+    },
+    {
+      key: 'profile',
+      label: 'Profile',
+      icon: (color, size) => <ShieldCheck color={color} size={size} />,
+    },
+  ];
 
   return (
     <ScreenWrapper
       headerProps={{
-        title: 'Parent Corner 🏡',
+        title: 'Parent Portal',
         instituteName: currentInstitute?.name || 'Bloom Academy',
         onNotificationPress: openNotificationDrawer,
         onProfilePress: () => {
           Alert.alert(
-            'Sunita Sharma 🏡',
-            'Primary Guardian • Enrolled: Amelia Sharma',
+            'Sunita Sharma',
+            'Primary Guardian • Enrolled: Amelia Sharma\nPhone: +91 98230 44551',
             [
-              {
-                text: 'Sign Out 🚪',
-                style: 'destructive',
-                onPress: async () => {
-                  await signOut();
-                  router.replace('/auth');
-                },
-              },
+              { text: 'Sign Out 🚪', style: 'destructive', onPress: handleLogout },
               { text: 'Close', style: 'cancel' },
             ]
           );
         },
+        onLogoutPress: handleLogout,
         hasUnreadNotifications: unreadCount > 0,
       }}
     >
-      {/* 1. Child Switcher with Cute Avatars */}
-      <View className="bg-white border-2 border-cute-border rounded-[28px] p-4 mb-4 shadow-xs">
-        <View className="flex-row items-center justify-between mb-3">
-          <View className="flex-row items-center gap-1.5">
-            <Heart size={16} color="#ff7d6b" fill="#ff7d6b" />
-            <Text className="text-xs font-bold text-cute-cocoa uppercase tracking-wider">
-              Your Enrolled Children
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-3.5 pb-20">
+        {/* Child Selector Strip */}
+        <View className="bg-white border border-slate-200/90 rounded-3xl p-4 shadow-xs">
+          <View className="flex-row items-center justify-between mb-2.5">
+            <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Enrolled Children ({childrenList.length})
             </Text>
+            <TouchableOpacity
+              onPress={() => setIsLinkChildModalOpen(true)}
+              className="flex-row items-center gap-1 active:scale-95"
+            >
+              <Plus size={13} color="#2563EB" />
+              <Text className="text-xs font-bold text-blue-600">Link Child</Text>
+            </TouchableOpacity>
           </View>
-          <Text className="text-[11px] font-semibold text-cute-peach">Tap to switch</Text>
+
+          <View className="flex-row gap-2">
+            {childrenList.map((c) => {
+              const isSelected = selectedChild?.id === c.id;
+              return (
+                <TouchableOpacity
+                  key={c.id}
+                  onPress={() => selectChild(c.id)}
+                  className={`flex-1 p-3 rounded-2xl flex-row items-center gap-2.5 border-2 ${
+                    isSelected
+                      ? 'bg-blue-50/80 border-blue-600 shadow-xs'
+                      : 'bg-slate-50 border-slate-200'
+                  }`}
+                >
+                  <View className="w-9 h-9 rounded-full bg-white border border-slate-200 items-center justify-center">
+                    <Text className="text-base">{c.emoji || '🎓'}</Text>
+                  </View>
+                  <View className="flex-1 min-w-0">
+                    <Text className="text-xs font-bold text-slate-900" numberOfLines={1}>
+                      {c.full_name}
+                    </Text>
+                    <Text className="text-[10px] text-slate-500" numberOfLines={1}>
+                      {c.batch_name}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         </View>
 
-        <View className="flex-row gap-2.5">
-          {childrenList.map((c) => {
-            const isSelected = selectedChild?.id === c.id;
-            return (
+        {/* ================= TAB 1: HOME ================= */}
+        {activeTab === 'home' && (
+          <View className="gap-3.5">
+            {/* 1. Daily Roll Call Status Card */}
+            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2">
+                  <CalendarCheck size={18} color="#059669" />
+                  <Text className="text-sm font-bold text-slate-900">Today's Attendance</Text>
+                </View>
+                <Badge label="Present in Class" variant="success" showDot />
+              </View>
+
+              <View className="flex-row items-center justify-between bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
+                <View>
+                  <Text className="text-xs font-bold text-slate-800">
+                    {selectedChild?.full_name} checked in at 09:28 AM
+                  </Text>
+                  <Text className="text-[11px] text-slate-500 mt-0.5">
+                    Batch Sakura • Physics Class • Roll No: 08
+                  </Text>
+                </View>
+                <View className="bg-emerald-100 px-2.5 py-1 rounded-full border border-emerald-200">
+                  <Text className="text-[10px] font-bold text-emerald-800">96.4% Overall</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* 2. Recent Test Benchmark Graph */}
+            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2">
+                  <Trophy size={18} color="#d97706" />
+                  <Text className="text-sm font-bold text-slate-900">Academic Benchmarks</Text>
+                </View>
+                <Badge label="Rank #01 🏆" variant="warning" />
+              </View>
+
+              <PerformanceComparisonChart data={comparisonChartData} />
+            </View>
+
+            {/* 3. Connect with Tuition Teacher */}
+            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2">
+                  <MessageSquare size={16} color="#2563EB" />
+                  <Text className="text-sm font-bold text-slate-900">Connect with Teacher</Text>
+                </View>
+                <Badge label="Active Today" variant="info" />
+              </View>
+
+              <Text className="text-xs text-slate-600 leading-relaxed">
+                Direct WhatsApp channel with {matchedStudentProfile.batchName} lead faculty. Inquire about test corrections, homework, and attendance.
+              </Text>
+
               <TouchableOpacity
-                key={c.id}
-                onPress={() => selectChild(c.id)}
-                className={`flex-1 p-3 rounded-2xl flex-row items-center gap-2.5 border-2 ${
-                  isSelected
-                    ? 'bg-cute-peach-light border-cute-peach shadow-xs'
-                    : 'bg-cute-cream border-cute-border'
-                }`}
+                onPress={handleWhatsAppTeacher}
+                className="bg-emerald-600 py-3 rounded-2xl items-center flex-row justify-center gap-2 active:scale-98 shadow-xs"
               >
-                <View className="w-10 h-10 rounded-full bg-white border border-black/10 items-center justify-center">
-                  <Text className="text-xl">{c.emoji || '🌸'}</Text>
+                <MessageSquare size={16} color="#ffffff" />
+                <Text className="text-xs font-bold text-white">Message Teacher on WhatsApp</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {/* ================= TAB 2: CHILDREN DETAILS ================= */}
+        {activeTab === 'children' && (
+          <View className="gap-3.5">
+            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
+              <View className="flex-row items-center justify-between">
+                <Text className="text-sm font-bold text-slate-900">Student Profile & Vitals</Text>
+                <TouchableOpacity
+                  onPress={() => setIsLinkChildModalOpen(true)}
+                  className="bg-blue-50 border border-blue-200 px-3 py-1 rounded-xl active:scale-95"
+                >
+                  <Text className="text-xs font-bold text-blue-600">+ Link Another Child</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 gap-2.5">
+                <View className="flex-row justify-between">
+                  <Text className="text-xs text-slate-500">Full Name:</Text>
+                  <Text className="text-xs font-bold text-slate-800">{selectedChild?.full_name}</Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-xs text-slate-500">Admission No:</Text>
+                  <Text className="text-xs font-mono font-bold text-slate-800">{selectedChild?.admission_number}</Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-xs text-slate-500">Class & Grade:</Text>
+                  <Text className="text-xs font-bold text-slate-800">{selectedChild?.grade}</Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-xs text-slate-500">Assigned Batch:</Text>
+                  <Text className="text-xs font-bold text-blue-600">{selectedChild?.batch_name}</Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-xs text-slate-500">Parent Link Code:</Text>
+                  <Text className="text-xs font-mono font-bold text-slate-800">{selectedChild?.parent_code}</Text>
+                </View>
+              </View>
+
+              {/* Attendance Breakdown */}
+              <AttendanceRingAndTrendChart percentage={96.4} />
+            </View>
+          </View>
+        )}
+
+        {/* ================= TAB 3: FEES & INVOICES ================= */}
+        {activeTab === 'fees_reports' && (
+          <View className="gap-3.5">
+            {/* Tuition Fee Ledger Card */}
+            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2">
+                  <Wallet size={18} color="#2563EB" />
+                  <Text className="text-sm font-bold text-slate-900">Tuition Fee Ledger</Text>
+                </View>
+                <Badge label="Due in 12 Days" variant="warning" />
+              </View>
+
+              <View className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 gap-2">
+                <View className="flex-row justify-between">
+                  <Text className="text-xs text-slate-500">Academic Term Plan</Text>
+                  <Text className="text-xs font-bold text-slate-800">Class 11 Full Term (Physics & Math)</Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-xs text-slate-500">Gross Term Fee</Text>
+                  <Text className="text-xs font-bold text-slate-800">₹45,000</Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-xs text-slate-500">Scholarship Concession</Text>
+                  <Text className="text-xs font-bold text-emerald-700">- ₹5,000</Text>
+                </View>
+                <View className="pt-2 border-t border-slate-200 flex-row justify-between items-center">
+                  <Text className="text-sm font-bold text-slate-900">Remaining Balance Due</Text>
+                  <Text className="text-xl font-black text-blue-600">₹15,000</Text>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => currentFee && openRazorpayCheckout(currentFee)}
+                className="bg-blue-600 py-3 rounded-2xl flex-row items-center justify-center gap-2 shadow-xs active:scale-98"
+              >
+                <CreditCard size={16} color="#ffffff" />
+                <Text className="text-xs font-bold text-white">Pay Online via UPI / Netbanking</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Official Tax Invoices & Receipts */}
+            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2">
+                  <FileText size={18} color="#059669" />
+                  <Text className="text-sm font-bold text-slate-900">Payment Invoices & Receipts</Text>
+                </View>
+                <Badge label="GST Compliant" variant="neutral" />
+              </View>
+
+              {lastPayment && (
+                <View className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 flex-row items-center justify-between">
+                  <View className="flex-row items-center gap-3 flex-1 pr-2">
+                    <View className="w-10 h-10 rounded-xl bg-white border border-slate-200 items-center justify-center">
+                      <FileText size={18} color="#2563EB" />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-xs font-bold text-slate-900">{lastPayment.receipt_number}</Text>
+                      <Text className="text-[11px] text-slate-500">Paid ₹{lastPayment.amount.toLocaleString()} • Razorpay UPI</Text>
+                    </View>
+                  </View>
+
+                  <View className="flex-row gap-1.5">
+                    <TouchableOpacity
+                      onPress={() => openReceipt(lastPayment)}
+                      className="bg-white border border-slate-200 px-2.5 py-1.5 rounded-xl active:scale-95"
+                    >
+                      <Text className="text-xs font-bold text-blue-600">View</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={handleDownloadInvoice}
+                      className="bg-blue-600 px-2.5 py-1.5 rounded-xl flex-row items-center gap-1 active:scale-95"
+                    >
+                      <Download size={12} color="#ffffff" />
+                      <Text className="text-xs font-bold text-white">PDF</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* ================= TAB 4: PROFILE & SETTINGS ================= */}
+        {activeTab === 'profile' && (
+          <View className="gap-3.5">
+            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
+              <View className="flex-row items-center gap-3.5">
+                <View className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
+                  <Text className="text-3xl">🏡</Text>
                 </View>
                 <View className="flex-1 min-w-0">
-                  <Text className="text-xs font-black text-cute-cocoa" numberOfLines={1}>
-                    {c.full_name}
-                  </Text>
-                  <Text className="text-[10px] text-cute-muted" numberOfLines={1}>
-                    {c.batch_name}
-                  </Text>
+                  <Text className="text-lg font-black text-slate-900">Sunita Sharma</Text>
+                  <Text className="text-xs text-slate-500">Primary Guardian</Text>
+                  <Badge label="Verified Parent" variant="success" />
                 </View>
+              </View>
+
+              <View className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 gap-2">
+                <View className="flex-row justify-between">
+                  <Text className="text-xs text-slate-500">Primary Phone:</Text>
+                  <Text className="text-xs font-bold text-slate-800">+91 98230 44551</Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-xs text-slate-500">Registered Email:</Text>
+                  <Text className="text-xs font-bold text-slate-800">parent.sharma@gmail.com</Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-xs text-slate-500">Residential Address:</Text>
+                  <Text className="text-xs font-bold text-slate-800">C-402, Green Glen Layout, Delhi</Text>
+                </View>
+              </View>
+
+              {/* Notification Preferences */}
+              <View className="gap-2 pt-2 border-t border-slate-100">
+                <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Notification Preferences
+                </Text>
+
+                <View className="flex-row items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+                  <View className="flex-1 pr-2">
+                    <Text className="text-xs font-bold text-slate-800">Daily WhatsApp Digest</Text>
+                    <Text className="text-[11px] text-slate-500">Receive evening attendance & homework recap</Text>
+                  </View>
+                  <Switch
+                    value={waDailyDigest}
+                    onValueChange={setWaDailyDigest}
+                    trackColor={{ false: '#cbd5e1', true: '#2563EB' }}
+                  />
+                </View>
+
+                <View className="flex-row items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+                  <View className="flex-1 pr-2">
+                    <Text className="text-xs font-bold text-slate-800">Fee Reminder SMS</Text>
+                    <Text className="text-[11px] text-slate-500">Receive due date reminders 3 days in advance</Text>
+                  </View>
+                  <Switch
+                    value={smsAlerts}
+                    onValueChange={setSmsAlerts}
+                    trackColor={{ false: '#cbd5e1', true: '#2563EB' }}
+                  />
+                </View>
+              </View>
+
+              {/* Sign Out Button */}
+              <TouchableOpacity
+                onPress={handleLogout}
+                className="bg-rose-50 border border-rose-200 p-3.5 rounded-2xl flex-row items-center justify-center gap-2 active:scale-98 mt-2"
+              >
+                <LogOut size={16} color="#e11d48" />
+                <Text className="text-xs font-bold text-rose-700">Sign Out of Parent Portal</Text>
               </TouchableOpacity>
-            );
-          })}
-        </View>
-      </View>
+            </View>
+          </View>
+        )}
+      </ScrollView>
 
-      {/* 2. Selected Child Attendance & Progress Summary */}
-      <View className="bg-white border-2 border-cute-border rounded-[28px] p-5 mb-4 shadow-xs">
-        <View className="flex-row items-center justify-between mb-3">
-          <View className="flex-row items-center gap-2">
-            <Mascot mood="celebrating" size="sm" />
-            <View>
-              <Text className="text-base font-extrabold text-cute-cocoa">
-                {selectedChild?.full_name}'s Progress 🌟
+      {/* ================= BOTTOM TAB BAR ================= */}
+      <BottomTabBar
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={(key) => setActiveTab(key as any)}
+        accentColor="#2563EB"
+      />
+
+      {/* ================= MODAL: LINK ANOTHER CHILD ================= */}
+      <Modal visible={isLinkChildModalOpen} transparent animationType="slide">
+        <View className="flex-1 justify-end bg-black/50">
+          <View className="bg-white rounded-t-3xl p-6 gap-3.5 max-h-[85%] border-t border-slate-200">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-base font-extrabold text-slate-900">Link Another Child</Text>
+              <TouchableOpacity onPress={() => setIsLinkChildModalOpen(false)}>
+                <X size={20} color="#64748B" />
+              </TouchableOpacity>
+            </View>
+
+            <Text className="text-xs text-slate-500 leading-relaxed">
+              Enter your ward's unique Student Link Code (provided by their tuition teacher, e.g. STU-AMELIA-902) or the student's registered mobile number.
+            </Text>
+
+            <TextInput
+              placeholder="e.g. STU-AMELIA-902 or 9823044551"
+              placeholderTextColor="#94a3b8"
+              value={childCodeInput}
+              onChangeText={setChildCodeInput}
+              autoCapitalize="characters"
+              className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-bold"
+            />
+
+            <TouchableOpacity
+              onPress={handleLinkChild}
+              disabled={isLinkingChild}
+              className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-1 active:scale-98"
+            >
+              <Text className="text-xs font-bold text-white">
+                {isLinkingChild ? 'Verifying Student Code...' : 'Verify & Link Child'}
               </Text>
-              <Text className="text-xs text-cute-muted">Weekly attendance & test performance</Text>
-            </View>
-          </View>
-          <View className="bg-cute-mint-light px-2.5 py-1 rounded-full border border-cute-mint">
-            <Text className="text-[11px] font-bold text-cute-mint">96.4% Regular</Text>
+            </TouchableOpacity>
           </View>
         </View>
-
-        <View className="flex-row gap-2.5 mt-2">
-          <View className="flex-1 bg-cute-cream border border-cute-border rounded-2xl p-3 items-center">
-            <CalendarCheck size={18} color="#52b788" />
-            <Text className="text-xs font-semibold text-cute-muted mt-1">Present</Text>
-            <Text className="text-lg font-black text-cute-cocoa">26 Days</Text>
-          </View>
-
-          <View className="flex-1 bg-cute-cream border border-cute-border rounded-2xl p-3 items-center">
-            <Trophy size={18} color="#f59e0b" />
-            <Text className="text-xs font-semibold text-cute-muted mt-1">Batch Rank</Text>
-            <Text className="text-lg font-black text-cute-cocoa">#01 / 28</Text>
-          </View>
-
-          <View className="flex-1 bg-cute-cream border border-cute-border rounded-2xl p-3 items-center">
-            <Sparkles size={18} color="#ff7d6b" />
-            <Text className="text-xs font-semibold text-cute-muted mt-1">Homework</Text>
-            <Text className="text-lg font-black text-cute-cocoa">100% Done</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* 3. Tuition Fee Ledger Card */}
-      <View className="bg-white border-2 border-cute-border rounded-[28px] p-5 mb-4 shadow-xs">
-        <View className="flex-row items-center justify-between mb-3">
-          <View className="flex-row items-center gap-2">
-            <Wallet size={18} color="#ff7d6b" />
-            <Text className="text-base font-extrabold text-cute-cocoa">Tuition Fee Ledger 💳</Text>
-          </View>
-          <Badge label="Due in 12 Days" variant="warning" />
-        </View>
-
-        <View className="bg-cute-cream p-4 rounded-2xl border border-cute-border mb-4">
-          <View className="flex-row justify-between mb-1.5">
-            <Text className="text-xs text-cute-muted">Course Term Plan</Text>
-            <Text className="text-xs font-bold text-cute-cocoa">Class 11 Full Academic Year</Text>
-          </View>
-          <View className="flex-row justify-between mb-1.5">
-            <Text className="text-xs text-cute-muted">Total Term Fee (incl. 18% GST)</Text>
-            <Text className="text-xs font-bold text-cute-cocoa">₹45,000</Text>
-          </View>
-          <View className="flex-row justify-between mb-2">
-            <Text className="text-xs text-cute-muted">Scholarship Discount</Text>
-            <Text className="text-xs font-bold text-cute-mint">- ₹5,000</Text>
-          </View>
-
-          <View className="pt-2 border-t border-cute-border flex-row justify-between items-center">
-            <Text className="text-sm font-extrabold text-cute-cocoa">Remaining Due Balance</Text>
-            <Text className="text-xl font-black text-cute-peach">₹15,000</Text>
-          </View>
-        </View>
-
-        <TouchableOpacity
-          onPress={() => currentFee && openRazorpayCheckout(currentFee)}
-          className="bg-cute-peach py-3 rounded-2xl flex-row items-center justify-center gap-2 shadow-xs active:scale-98"
-        >
-          <CreditCard size={16} color="#ffffff" />
-          <Text className="text-sm font-bold text-white">Pay Online via UPI / Card (Razorpay)</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* 4. Recent Payment Receipts */}
-      {lastPayment && (
-        <View className="bg-white border-2 border-cute-border rounded-[28px] p-5 shadow-xs mb-6">
-          <View className="flex-row items-center justify-between mb-3">
-            <View className="flex-row items-center gap-2">
-              <CheckCircle2 size={18} color="#52b788" />
-              <Text className="text-base font-extrabold text-cute-cocoa">Recent Receipts 📄</Text>
-            </View>
-            <Text className="text-xs text-cute-muted">Official GST Invoice</Text>
-          </View>
-
-          <TouchableOpacity
-            onPress={() => openReceipt(lastPayment)}
-            className="bg-cute-cream border border-cute-border rounded-2xl p-3.5 flex-row items-center justify-between"
-          >
-            <View className="flex-row items-center gap-3">
-              <View className="w-10 h-10 rounded-xl bg-white border border-cute-border items-center justify-center">
-                <FileText size={18} color="#ff7d6b" />
-              </View>
-              <View>
-                <Text className="text-xs font-black text-cute-cocoa">{lastPayment.receipt_number}</Text>
-                <Text className="text-[11px] text-cute-muted">Paid ₹{lastPayment.amount.toLocaleString()} • Razorpay UPI</Text>
-              </View>
-            </View>
-            <Text className="text-xs font-bold text-cute-peach">View & Share →</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      </Modal>
 
       {/* Modals */}
       <RazorpayCheckoutModal />

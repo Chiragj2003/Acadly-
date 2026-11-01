@@ -145,6 +145,8 @@ export interface Assignment {
   title: string;
   subject: string;
   instructions: string;
+  description?: string;
+  question_paper_url?: string;
   due_date: string;
   due_label: string;
   due_date_formatted?: string;
@@ -169,6 +171,7 @@ export interface Submission {
   roll_number: string;
   submission_text?: string;
   file_url?: string;
+  file_name?: string;
   status: 'submitted' | 'graded' | 'late';
   marks_obtained?: number;
   feedback?: string;

@@ -10,7 +10,10 @@ export type BadgeVariant =
   | 'due'
   | 'info'
   | 'neutral'
-  | 'admin';
+  | 'admin'
+  | 'primary'
+  | 'negative'
+  | 'error';
 
 export type BadgeSize = 'sm' | 'md';
 
@@ -68,6 +71,21 @@ const variantStyles: Record<
   admin: {
     container: 'bg-surface-container-highest',
     text: 'text-on-surface font-semibold',
+  },
+  primary: {
+    container: 'bg-blue-100',
+    text: 'text-blue-800 font-semibold',
+    dotColor: 'bg-blue-600',
+  },
+  negative: {
+    container: 'bg-rose-100',
+    text: 'text-rose-800 font-semibold',
+    dotColor: 'bg-rose-600',
+  },
+  error: {
+    container: 'bg-rose-100',
+    text: 'text-rose-800 font-semibold',
+    dotColor: 'bg-rose-600',
   },
 };
 

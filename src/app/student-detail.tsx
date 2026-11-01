@@ -21,13 +21,13 @@ import {
   Sparkles,
   MapPin,
   Clock,
-  Heart,
   MessageSquare,
   DollarSign,
   Plus,
+  Send,
 } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ScreenWrapper, Badge, Mascot } from '@/components/ui';
+import { ScreenWrapper, Badge } from '@/components/ui';
 import {
   PerformanceComparisonChart,
   SubjectRadarOrBarChart,
@@ -58,16 +58,27 @@ export default function StudentDetailScreen() {
     return (
       <ScreenWrapper headerProps={{ title: 'Student Profile', onBackPress: () => router.back() }}>
         <View className="items-center justify-center p-8">
-          <Text className="text-sm font-bold text-cute-cocoa">Student record not found.</Text>
+          <Text className="text-sm font-bold text-slate-700">Student record not found.</Text>
         </View>
       </ScreenWrapper>
     );
   }
 
-  // Handle calling parent
+  // Handle calling guardian
   const handleCallGuardian = () => {
     Linking.openURL(`tel:${student.guardianPhone}`).catch(() => {
       Alert.alert('Calling Guardian', `Dialing ${student.guardianPhone}`);
+    });
+  };
+
+  // Handle direct WhatsApp to guardian
+  const handleWhatsAppGuardian = () => {
+    const cleanPhone = student.guardianPhone.replace(/\D/g, '');
+    const message = encodeURIComponent(
+      `Namaste ${student.guardianName}: Connecting regarding ${student.name}'s performance and attendance progress on Acadly.`
+    );
+    Linking.openURL(`https://wa.me/${cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone}?text=${message}`).catch(() => {
+      Alert.alert('WhatsApp', `Could not open WhatsApp for ${student.guardianPhone}`);
     });
   };
 
@@ -76,7 +87,7 @@ export default function StudentDetailScreen() {
     if (!newRemarkText.trim()) return;
     updateStudentRemarks(student.id, newRemarkText.trim());
     setNewRemarkText('');
-    Alert.alert('Remark Added 🌸', 'Observation recorded in student 360 profile.');
+    Alert.alert('Observation Saved 📝', 'Teacher remark recorded in student 360 diagnostic profile.');
   };
 
   // Cycle fee status
@@ -99,33 +110,45 @@ export default function StudentDetailScreen() {
         onBackPress: () => router.back(),
       }}
     >
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-4 pb-16">
-        {/* 1. 360 Profile Header Card */}
-        <View className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs">
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-3.5 pb-16">
+        {/* 1. 360 Profile Diagnostic Header Card */}
+        <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs">
           <View className="flex-row items-center justify-between mb-3">
             <View className="flex-row items-center gap-3">
-              <Mascot mood="studying" size="sm" />
+              <View className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
+                <Text className="text-2xl">🎓</Text>
+              </View>
               <View>
-                <Text className="text-base font-black text-cute-cocoa">{student.name}</Text>
-                <Text className="text-xs text-cute-muted">
+                <Text className="text-base font-extrabold text-slate-900">{student.name}</Text>
+                <Text className="text-xs text-slate-500">
                   {student.rollNumber} • {student.grade}
                 </Text>
               </View>
             </View>
 
-            <View className="bg-cute-peach-light px-2.5 py-1 rounded-full border border-cute-peach">
-              <Text className="text-[10px] font-extrabold text-cute-peach">
+            <View className="bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+              <Text className="text-[11px] font-bold text-amber-800">
                 Rank #{student.rank} 🏆 ({student.percentile}%ile)
               </Text>
             </View>
           </View>
 
+          {/* Parent Link Code Strip */}
+          <View className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 mb-3 flex-row items-center justify-between">
+            <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              Parent Link Code:
+            </Text>
+            <Text className="text-xs font-mono font-bold text-blue-600">
+              {student.parentLinkCode || 'STU-AMELIA-902'}
+            </Text>
+          </View>
+
           {/* Quick Guardian Action Buttons */}
-          <View className="flex-row gap-2 mt-2 pt-3 border-t border-cute-border">
+          <View className="flex-row gap-2 pt-2 border-t border-slate-100">
             <TouchableOpacity
               activeOpacity={0.88}
               onPress={handleCallGuardian}
-              className="flex-1 py-2.5 rounded-xl bg-cute-peach flex-row items-center justify-center gap-1.5 shadow-xs active:scale-98"
+              className="flex-1 py-2.5 rounded-xl bg-blue-600 flex-row items-center justify-center gap-1.5 shadow-xs active:scale-98"
             >
               <Phone size={13} color="#ffffff" />
               <Text className="text-xs font-bold text-white">
@@ -135,30 +158,26 @@ export default function StudentDetailScreen() {
 
             <TouchableOpacity
               activeOpacity={0.88}
-              onPress={() =>
-                Alert.alert(
-                  'Guardian Contact Info',
-                  `Name: ${student.guardianName}\nPhone: ${student.guardianPhone}\nAddress: ${student.address}`
-                )
-              }
-              className="px-3.5 py-2.5 rounded-xl bg-cute-cream border border-cute-border items-center justify-center active:scale-98"
+              onPress={handleWhatsAppGuardian}
+              className="px-4 py-2.5 rounded-xl bg-emerald-600 flex-row items-center justify-center gap-1.5 active:scale-98"
             >
-              <Mail size={13} color="#7d6f6a" />
+              <MessageSquare size={13} color="#ffffff" />
+              <Text className="text-xs font-bold text-white">WhatsApp</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* 2. Sub-Tabs Selector */}
-        <View className="flex-row bg-white p-1 rounded-2xl border-2 border-cute-border shadow-xs">
+        <View className="flex-row bg-white p-1 rounded-2xl border border-slate-200/90 shadow-xs">
           <TouchableOpacity
             onPress={() => setActiveTab('analytics')}
             className={`flex-1 py-2 rounded-xl items-center ${
-              activeTab === 'analytics' ? 'bg-cute-peach' : ''
+              activeTab === 'analytics' ? 'bg-blue-600' : ''
             }`}
           >
             <Text
-              className={`text-xs font-extrabold ${
-                activeTab === 'analytics' ? 'text-white' : 'text-cute-muted'
+              className={`text-xs font-bold ${
+                activeTab === 'analytics' ? 'text-white' : 'text-slate-500'
               }`}
             >
               Analytics 📊
@@ -168,12 +187,12 @@ export default function StudentDetailScreen() {
           <TouchableOpacity
             onPress={() => setActiveTab('attendance')}
             className={`flex-1 py-2 rounded-xl items-center ${
-              activeTab === 'attendance' ? 'bg-cute-peach' : ''
+              activeTab === 'attendance' ? 'bg-blue-600' : ''
             }`}
           >
             <Text
-              className={`text-xs font-extrabold ${
-                activeTab === 'attendance' ? 'text-white' : 'text-cute-muted'
+              className={`text-xs font-bold ${
+                activeTab === 'attendance' ? 'text-white' : 'text-slate-500'
               }`}
             >
               Attendance 📅
@@ -183,12 +202,12 @@ export default function StudentDetailScreen() {
           <TouchableOpacity
             onPress={() => setActiveTab('bio')}
             className={`flex-1 py-2 rounded-xl items-center ${
-              activeTab === 'bio' ? 'bg-cute-peach' : ''
+              activeTab === 'bio' ? 'bg-blue-600' : ''
             }`}
           >
             <Text
-              className={`text-xs font-extrabold ${
-                activeTab === 'bio' ? 'text-white' : 'text-cute-muted'
+              className={`text-xs font-bold ${
+                activeTab === 'bio' ? 'text-white' : 'text-slate-500'
               }`}
             >
               Bio & Remarks 📝
@@ -198,7 +217,7 @@ export default function StudentDetailScreen() {
 
         {/* ================= TAB 1: ANALYTICS ================= */}
         {activeTab === 'analytics' && (
-          <View className="gap-4">
+          <View className="gap-3.5">
             <PerformanceComparisonChart data={comparisonChartData} />
             <SubjectRadarOrBarChart />
           </View>
@@ -206,11 +225,11 @@ export default function StudentDetailScreen() {
 
         {/* ================= TAB 2: ATTENDANCE ================= */}
         {activeTab === 'attendance' && (
-          <View className="gap-4">
+          <View className="gap-3.5">
             <AttendanceRingAndTrendChart percentage={student.overallAttendance} />
 
-            <View className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs">
-              <Text className="text-sm font-black text-cute-cocoa mb-3">
+            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs">
+              <Text className="text-sm font-bold text-slate-900 mb-3">
                 Recent Roll Call History
               </Text>
               <View className="gap-2">
@@ -223,11 +242,11 @@ export default function StudentDetailScreen() {
                 ].map((item, idx) => (
                   <View
                     key={idx}
-                    className="flex-row items-center justify-between p-2.5 rounded-xl bg-cute-cream border border-cute-border"
+                    className="flex-row items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/80"
                   >
                     <View>
-                      <Text className="text-xs font-bold text-cute-cocoa">{item.subject}</Text>
-                      <Text className="text-[10px] text-cute-muted">{item.date}</Text>
+                      <Text className="text-xs font-bold text-slate-800">{item.subject}</Text>
+                      <Text className="text-[10px] text-slate-500">{item.date}</Text>
                     </View>
                     <View
                       className={`px-2 py-0.5 rounded-full ${
@@ -237,7 +256,7 @@ export default function StudentDetailScreen() {
                       }`}
                     >
                       <Text
-                        className={`text-[10px] font-black ${
+                        className={`text-[10px] font-bold ${
                           item.status === 'P' ? 'text-emerald-800' : 'text-amber-800'
                         }`}
                       >
@@ -253,46 +272,46 @@ export default function StudentDetailScreen() {
 
         {/* ================= TAB 3: BIO, REMARKS & FEES ================= */}
         {activeTab === 'bio' && (
-          <View className="gap-4">
-            {/* Student Extra Details */}
-            <View className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs gap-2.5">
-              <Text className="text-sm font-black text-cute-cocoa mb-1">
-                Student Background & Identity
+          <View className="gap-3.5">
+            {/* Student Background Details */}
+            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
+              <Text className="text-sm font-bold text-slate-900">
+                Student Profile & Identity
               </Text>
 
-              <View className="bg-cute-cream rounded-2xl p-3 border border-cute-border gap-1.5">
+              <View className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 gap-2">
                 <View className="flex-row justify-between">
-                  <Text className="text-xs text-cute-muted">Board & School:</Text>
-                  <Text className="text-xs font-bold text-cute-cocoa">
+                  <Text className="text-xs text-slate-500">Board & School:</Text>
+                  <Text className="text-xs font-bold text-slate-800">
                     {student.board} • {student.school}
                   </Text>
                 </View>
                 <View className="flex-row justify-between">
-                  <Text className="text-xs text-cute-muted">Target Exam:</Text>
-                  <Text className="text-xs font-bold text-cute-cocoa">{student.targetExam}</Text>
+                  <Text className="text-xs text-slate-500">Target Exam:</Text>
+                  <Text className="text-xs font-bold text-slate-800">{student.targetExam}</Text>
                 </View>
                 <View className="flex-row justify-between">
-                  <Text className="text-xs text-cute-muted">Class 10 Score:</Text>
-                  <Text className="text-xs font-bold text-cute-peach">
+                  <Text className="text-xs text-slate-500">Previous Exam Score:</Text>
+                  <Text className="text-xs font-bold text-blue-600">
                     {student.previousPercentage}
                   </Text>
                 </View>
                 <View className="flex-row justify-between">
-                  <Text className="text-xs text-cute-muted">Blood Group:</Text>
-                  <Text className="text-xs font-bold text-cute-cocoa">{student.bloodGroup}</Text>
+                  <Text className="text-xs text-slate-500">Blood Group:</Text>
+                  <Text className="text-xs font-bold text-slate-800">{student.bloodGroup}</Text>
                 </View>
                 <View className="flex-row justify-between">
-                  <Text className="text-xs text-cute-muted">Residential Address:</Text>
-                  <Text className="text-xs font-bold text-cute-cocoa max-w-[180px] text-right">
+                  <Text className="text-xs text-slate-500">Residential Address:</Text>
+                  <Text className="text-xs font-bold text-slate-800 max-w-[200px] text-right">
                     {student.address}
                   </Text>
                 </View>
               </View>
 
               {/* Weak Subjects Tags */}
-              <View className="mt-1">
-                <Text className="text-xs font-black text-cute-muted uppercase tracking-wider mb-1.5">
-                  Focus / Weak Subject Areas:
+              <View>
+                <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                  Focus / Revision Priority:
                 </Text>
                 <View className="flex-row flex-wrap gap-1.5">
                   {student.weakSubjects.map((sub, i) => (
@@ -300,7 +319,7 @@ export default function StudentDetailScreen() {
                       key={i}
                       className="bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-xl"
                     >
-                      <Text className="text-xs font-bold text-rose-800">{sub}</Text>
+                      <Text className="text-xs font-bold text-rose-700">{sub}</Text>
                     </View>
                   ))}
                 </View>
@@ -308,33 +327,33 @@ export default function StudentDetailScreen() {
             </View>
 
             {/* Fee Collection Status Card */}
-            <View className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs">
+            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs">
               <View className="flex-row items-center justify-between mb-2">
                 <View className="flex-row items-center gap-1.5">
-                  <DollarSign size={16} color="#ff7d6b" />
-                  <Text className="text-sm font-black text-cute-cocoa">Tuition Fee Status</Text>
+                  <DollarSign size={16} color="#2563EB" />
+                  <Text className="text-sm font-bold text-slate-900">Tuition Fee Status</Text>
                 </View>
                 <TouchableOpacity
                   onPress={handleCycleFeeStatus}
-                  className="bg-cute-peach-light px-2.5 py-1 rounded-full border border-cute-peach active:scale-98"
+                  className="bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200 active:scale-98"
                 >
-                  <Text className="text-[10px] font-bold text-cute-peach">Tap to Update ↺</Text>
+                  <Text className="text-[10px] font-bold text-blue-700">Update Status ↺</Text>
                 </TouchableOpacity>
               </View>
-              <View className="bg-cute-cream p-3 rounded-2xl border border-cute-border">
-                <Text className="text-xs font-extrabold text-cute-cocoa">{student.feeStatus}</Text>
-                <Text className="text-[10px] text-cute-muted mt-0.5">
+              <View className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
+                <Text className="text-xs font-bold text-slate-800">{student.feeStatus}</Text>
+                <Text className="text-[10px] text-slate-500 mt-0.5">
                   UPI payments automatically reconcile via parent notifications.
                 </Text>
               </View>
             </View>
 
             {/* Teacher Remarks & Observations */}
-            <View className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs gap-3">
+            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
               <View className="flex-row items-center gap-1.5">
-                <MessageSquare size={16} color="#ff7d6b" />
-                <Text className="text-sm font-black text-cute-cocoa">
-                  Teacher Remarks & Notes
+                <MessageSquare size={16} color="#2563EB" />
+                <Text className="text-sm font-bold text-slate-900">
+                  Teacher Observations & Remarks
                 </Text>
               </View>
 
@@ -342,10 +361,10 @@ export default function StudentDetailScreen() {
                 {student.teacherRemarks.map((remark, idx) => (
                   <View
                     key={idx}
-                    className="p-3 rounded-2xl bg-cute-cream border border-cute-border flex-row items-start gap-2"
+                    className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex-row items-start gap-2"
                   >
                     <Text className="text-xs">📌</Text>
-                    <Text className="text-xs text-cute-cocoa flex-1 leading-relaxed">
+                    <Text className="text-xs text-slate-700 flex-1 leading-relaxed">
                       {remark}
                     </Text>
                   </View>
@@ -355,15 +374,15 @@ export default function StudentDetailScreen() {
               {/* Add New Remark Input */}
               <View className="flex-row gap-2 mt-1">
                 <TextInput
-                  placeholder="Add a mentor observation..."
-                  placeholderTextColor="#a89993"
+                  placeholder="Record mentor note..."
+                  placeholderTextColor="#94a3b8"
                   value={newRemarkText}
                   onChangeText={setNewRemarkText}
-                  className="flex-1 bg-cute-cream border border-cute-border rounded-2xl px-3.5 py-2 text-xs text-cute-cocoa"
+                  className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
                 />
                 <TouchableOpacity
                   onPress={handleAddRemark}
-                  className="bg-cute-peach px-3.5 py-2 rounded-2xl items-center justify-center active:scale-98 shadow-xs"
+                  className="bg-blue-600 px-3.5 py-2 rounded-2xl items-center justify-center active:scale-98 shadow-xs"
                 >
                   <Plus size={16} color="#ffffff" />
                 </TouchableOpacity>

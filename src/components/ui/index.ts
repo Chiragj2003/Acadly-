@@ -10,3 +10,4 @@ export * from './ScreenWrapper';
 export * from './Mascot';
 export * from './SubjectMascotCard';
 export * from './CuteProgressChart';
+export * from './BottomTabBar';

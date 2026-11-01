@@ -71,7 +71,12 @@ export const InstituteProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
+      // 2.5s safety timeout race to guarantee fast boot & prevent hanging
+      const timeoutPromise = new Promise<{ data: null; error: any }>((resolve) =>
+        setTimeout(() => resolve({ data: null, error: new Error('Timeout') }), 2500)
+      );
+
+      const queryPromise = supabase
         .from('institute_members')
         .select(`
           institute_id,
@@ -81,8 +86,10 @@ export const InstituteProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         .eq('user_id', user.id)
         .eq('is_active', true);
 
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
+
       if (error) {
-        // Graceful fallback for non-migrated or offline database state
+        // Graceful fallback for non-migrated, offline, or timed-out database state
         setAvailableInstitutes(DEFAULT_CUTE_INSTITUTES);
         if (!currentInstitute) setCurrentInstitute(DEFAULT_CUTE_INSTITUTES[0]);
         return;

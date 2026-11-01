@@ -45,6 +45,7 @@ export interface Student360Profile {
   school: string;
   targetExam: string;
   batchName: string;
+  parentLinkCode: string;
   guardianName: string;
   guardianPhone: string;
   address: string;
@@ -56,6 +57,17 @@ export interface Student360Profile {
   rank: number;
   percentile: number;
   teacherRemarks: string[];
+}
+
+export interface EnrolledTeacherItem {
+  id: string;
+  name: string;
+  subject: string;
+  teacherCode: string;
+  instituteName?: string;
+  batchName: string;
+  schedule: string;
+  attendanceRate: number;
 }
 
 export interface CommunityComment {
@@ -141,11 +153,23 @@ export interface AcademicContextType {
   offlineLectureIds: string[];
   toggleOfflineDownload: (lectureId: string) => void;
 
-  // Assignments
+  // Multi-Teacher Support for Students
+  enrolledTeachers: EnrolledTeacherItem[];
+  activeTeacherId: string;
+  switchActiveTeacher: (teacherId: string) => void;
+  addEnrolledTeacher: (teacher: EnrolledTeacherItem) => void;
+
+  // Teacher Dual Mode (Solo Tutor vs Coaching Faculty)
+  teacherMode: 'solo' | 'coaching_faculty';
+  setTeacherMode: (mode: 'solo' | 'coaching_faculty') => void;
+  linkedCoachingCode?: string;
+  linkToCoachingCenter: (code: string) => Promise<{ success: boolean; instituteName?: string; error?: string }>;
+
+  // Assignments & Homework
   assignments: Assignment[];
   submissions: Submission[];
   createAssignment: (data: Omit<Assignment, 'id' | 'institute_id' | 'created_at'>) => Promise<void>;
-  submitAssignment: (assignmentId: string, text: string) => Promise<void>;
+  submitAssignment: (assignmentId: string, text: string, fileName?: string, fileUri?: string) => Promise<void>;
   gradeSubmission: (submissionId: string, marks: number, feedback: string) => Promise<void>;
 
   // Teacher Code & Join Requests Gate
@@ -183,6 +207,7 @@ export interface AcademicContextType {
   addCommunityPost: (title: string, content: string, subject: string, attachmentName?: string, attachmentUri?: string) => Promise<void>;
   upvoteCommunityPost: (postId: string) => void;
   addCommunityComment: (postId: string, text: string, isTeacherVerified?: boolean) => void;
+  verifyCommunityComment: (postId: string, commentId: string) => void;
 
   // Teacher & Coaching Profiles
   teacherProfile: TeacherProfile;
@@ -221,6 +246,7 @@ const INITIAL_STUDENTS_ROSTER: Student360Profile[] = [
     school: 'Delhi Public School (R.K. Puram)',
     targetExam: 'IIT-JEE 2026',
     batchName: 'Batch Sakura 🌸 (Medical & Adv)',
+    parentLinkCode: 'STU-AMELIA-902',
     guardianName: 'Sunita Sharma (Mother)',
     guardianPhone: '+91 98230 44551',
     address: 'Flat 402, Lotus Towers, Pune, Maharashtra',
@@ -242,6 +268,7 @@ const INITIAL_STUDENTS_ROSTER: Student360Profile[] = [
     school: 'The Mother International',
     targetExam: 'IIT-JEE 2026',
     batchName: 'Batch Sakura 🌸 (Medical & Adv)',
+    parentLinkCode: 'STU-KABIR-118',
     guardianName: 'Rajesh Singhania (Father)',
     guardianPhone: '+91 98110 33442',
     address: 'B-14 Green Park, New Delhi',
@@ -263,6 +290,7 @@ const INITIAL_STUDENTS_ROSTER: Student360Profile[] = [
     school: 'St. Xavier High School',
     targetExam: 'NEET Medical 2026',
     batchName: 'Batch Clover 🍀 (Foundation)',
+    parentLinkCode: 'STU-ZOYA-124',
     guardianName: 'Dr. Farooq Khan',
     guardianPhone: '+91 98900 22119',
     address: '77 Hill Road, Bandra, Mumbai',
@@ -526,6 +554,62 @@ const INITIAL_ASSIGNMENTS: Assignment[] = [
   },
 ];
 
+const INITIAL_SUBMISSIONS: Submission[] = [
+  {
+    id: 'sub-01',
+    assignment_id: 'asg-01',
+    student_id: 'stud-amelia',
+    student_name: 'Amelia Sharma 🌸',
+    roll_number: 'ADM-2026-088',
+    file_url: 'https://example.com/dpp14_amelia_solution.pdf',
+    file_name: 'Amelia_DPP14_Solutions.pdf',
+    submitted_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+    submitted_at_formatted: '4 hrs ago',
+    submission_text: 'Solved all 15 questions with Gauss law derivations attached.',
+    status: 'submitted',
+    marks_obtained: undefined,
+    feedback: undefined,
+  },
+  {
+    id: 'sub-02',
+    assignment_id: 'asg-01',
+    student_id: 'stud-kabir',
+    student_name: 'Kabir Singhania 🚀',
+    roll_number: 'ADM-2026-118',
+    file_url: 'https://example.com/dpp14_kabir_solution.pdf',
+    file_name: 'Kabir_DPP14_Solutions.pdf',
+    submitted_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+    submitted_at_formatted: '2 hrs ago',
+    submission_text: 'Attached PDF solution for review.',
+    status: 'graded',
+    marks_obtained: 54,
+    feedback: 'Great step-by-step spherical shell derivation!',
+  },
+];
+
+const DEFAULT_ENROLLED_TEACHERS: EnrolledTeacherItem[] = [
+  {
+    id: 'teach-verma-01',
+    name: 'Prof. Vikram Joshi ⚡',
+    subject: 'Physics',
+    teacherCode: 'SHARMA-MATH-89',
+    instituteName: 'Bloom Science Academy',
+    batchName: 'Batch Sakura (Medical & JEE)',
+    schedule: 'Mon, Wed, Fri @ 04:30 PM',
+    attendanceRate: 96.4,
+  },
+  {
+    id: 'teach-swami-02',
+    name: 'Prof. Arvind Swaminathan 📐',
+    subject: 'Mathematics',
+    teacherCode: 'SWAMI-MATH-99',
+    instituteName: 'Pinnacle STEM Tuition',
+    batchName: 'Advanced Calculus Batch',
+    schedule: 'Tue, Thu, Sat @ 05:00 PM',
+    attendanceRate: 94.0,
+  },
+];
+
 const AcademicContext = createContext<AcademicContextType | undefined>(undefined);
 
 export const AcademicProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -539,7 +623,15 @@ export const AcademicProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [activeLecture, setActiveLecture] = useState<Lecture | null>(null);
   const [offlineLectureIds, setOfflineLectureIds] = useState<string[]>(['lec-01']);
   const [assignments, setAssignments] = useState<Assignment[]>(INITIAL_ASSIGNMENTS);
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>(INITIAL_SUBMISSIONS);
+
+  // Multi-Teacher Support for Students
+  const [enrolledTeachers, setEnrolledTeachers] = useState<EnrolledTeacherItem[]>(DEFAULT_ENROLLED_TEACHERS);
+  const [activeTeacherId, setActiveTeacherId] = useState<string>(DEFAULT_ENROLLED_TEACHERS[0].id);
+
+  // Teacher Dual Mode (Solo Tutor vs Coaching Faculty)
+  const [teacherMode, setTeacherMode] = useState<'solo' | 'coaching_faculty'>('solo');
+  const [linkedCoachingCode, setLinkedCoachingCode] = useState<string>('BLOOM2026');
 
   // Teacher Code & Join Requests
   const [joinRequests, setJoinRequests] = useState<JoinRequest[]>(INITIAL_JOIN_REQUESTS);
@@ -698,19 +790,29 @@ export const AcademicProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setAssignments((prev) => [newAssignment, ...prev]);
   };
 
-  const submitAssignment = async (assignmentId: string, text: string) => {
+  const submitAssignment = async (
+    assignmentId: string,
+    text: string,
+    fileName?: string,
+    fileUri?: string
+  ) => {
     const newSub: Submission = {
       id: `sub-${Date.now()}`,
       assignment_id: assignmentId,
       student_id: 'stud-amelia',
       student_name: 'Amelia Sharma 🌸',
       roll_number: 'ADM-2026-088',
+      file_url: fileUri || 'https://example.com/submitted_work.pdf',
+      file_name: fileName || 'Amelia_Solution.pdf',
       submitted_at: new Date().toISOString(),
       submitted_at_formatted: 'Just now',
-      submission_text: text,
+      submission_text: text || 'Uploaded solution PDF file.',
       status: 'submitted',
     };
-    setSubmissions((prev) => [newSub, ...prev]);
+    setSubmissions((prev) => [
+      newSub,
+      ...prev.filter((s) => s.assignment_id !== assignmentId || s.student_id !== 'stud-amelia'),
+    ]);
     setAssignments((prev) =>
       prev.map((a) => (a.id === assignmentId ? { ...a, status: 'submitted' } : a))
     );
@@ -718,7 +820,61 @@ export const AcademicProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const gradeSubmission = async (submissionId: string, marks: number, feedback: string) => {
     setSubmissions((prev) =>
-      prev.map((s) => (s.id === submissionId ? { ...s, marks_obtained: marks, feedback, status: 'graded' } : s))
+      prev.map((s) =>
+        s.id === submissionId ? { ...s, marks_obtained: marks, feedback, status: 'graded' } : s
+      )
+    );
+  };
+
+  // Multi-Teacher Support Functions
+  const switchActiveTeacher = (teacherId: string) => {
+    const found = enrolledTeachers.find((t) => t.id === teacherId);
+    if (found) {
+      setActiveTeacherId(teacherId);
+    }
+  };
+
+  const addEnrolledTeacher = (teacher: EnrolledTeacherItem) => {
+    setEnrolledTeachers((prev) => {
+      if (prev.some((t) => t.id === teacher.id || t.teacherCode === teacher.teacherCode)) {
+        return prev;
+      }
+      return [...prev, teacher];
+    });
+    setActiveTeacherId(teacher.id);
+  };
+
+  // Teacher Dual Mode Functions
+  const linkToCoachingCenter = async (
+    code: string
+  ): Promise<{ success: boolean; instituteName?: string; error?: string }> => {
+    const clean = code.trim().toUpperCase();
+    if (clean === 'BLOOM2026' || clean.includes('BLOOM') || clean.includes('APEX')) {
+      setTeacherMode('coaching_faculty');
+      setLinkedCoachingCode(clean);
+      return { success: true, instituteName: 'Bloom Science Academy 🌸' };
+    }
+    return { success: false, error: 'Institute code not found. Please verify with center admin.' };
+  };
+
+  // Community Verified Comment Handler
+  const verifyCommunityComment = (postId: string, commentId: string) => {
+    setCommunityPosts((prev) =>
+      prev.map((p) => {
+        if (p.id === postId) {
+          const targetComment = p.comments.find((c) => c.id === commentId);
+          return {
+            ...p,
+            hasTeacherAnswer: true,
+            teacherName: teacherProfile.fullName,
+            teacherVerifiedText: targetComment?.text || p.teacherVerifiedText,
+            comments: p.comments.map((c) =>
+              c.id === commentId ? { ...c, isTeacherVerified: true } : c
+            ),
+          };
+        }
+        return p;
+      })
     );
   };
 
@@ -773,6 +929,7 @@ export const AcademicProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       feeStatus: `Plan Assigned (${feePlan})`,
       rank: studentsRoster.length + 1,
       percentile: 88.0,
+      parentLinkCode: 'STU-' + targetReq.studentDetails.fullName.split(' ')[0].toUpperCase() + '-' + Math.floor(100 + Math.random() * 900),
       teacherRemarks: ['Admitted via Teacher Code verification.'],
     };
 
@@ -1021,6 +1178,14 @@ export const AcademicProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         createAssignment,
         submitAssignment,
         gradeSubmission,
+        enrolledTeachers,
+        activeTeacherId,
+        switchActiveTeacher,
+        addEnrolledTeacher,
+        teacherMode,
+        setTeacherMode,
+        linkedCoachingCode,
+        linkToCoachingCenter,
         joinRequests,
         studentJoinStatus,
         activeJoinRequest,
@@ -1038,6 +1203,7 @@ export const AcademicProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         addCommunityPost,
         upvoteCommunityPost,
         addCommunityComment,
+        verifyCommunityComment,
         teacherProfile,
         setTeacherProfile,
         coachingProfile,

@@ -11,6 +11,7 @@ export interface ChildStudent {
   avatar_url?: string;
   batch_name?: string;
   grade?: string;
+  parent_code?: string;
   emoji?: string;
 }
 
@@ -23,6 +24,7 @@ const DEFAULT_CHILDREN: ChildStudent[] = [
     avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
     batch_name: 'Batch Sakura 🌸 (Medical)',
     grade: 'Class 11 Science',
+    parent_code: 'STU-AMELIA-902',
     emoji: '🌸',
   },
   {
@@ -33,6 +35,7 @@ const DEFAULT_CHILDREN: ChildStudent[] = [
     avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200',
     batch_name: 'Batch Cosmos 🚀 (IIT-JEE)',
     grade: 'Class 12 Advanced',
+    parent_code: 'STU-AARAV-104',
     emoji: '🚀',
   },
 ];
@@ -41,6 +44,7 @@ interface ChildContextType {
   selectedChild: ChildStudent | null;
   childrenList: ChildStudent[];
   selectChild: (studentId: string) => void;
+  addChildByCodeOrPhone: (codeOrPhone: string) => Promise<{ success: boolean; child?: ChildStudent; error?: string }>;
   isLoading: boolean;
   refreshChildren: () => Promise<void>;
 }
@@ -64,12 +68,22 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     try {
       setIsLoading(true);
-      const { data: parentRecord, error: parentError } = await supabase
+      // 2.5s safety timeout race to ensure smooth non-blocking UI
+      const timeoutPromise = new Promise<{ data: null; error: any }>((resolve) =>
+        setTimeout(() => resolve({ data: null, error: new Error('Timeout') }), 2500)
+      );
+
+      const parentRecordPromise = supabase
         .from('parents')
         .select('id')
         .eq('institute_id', currentInstitute.id)
         .eq('user_id', user.id)
         .maybeSingle();
+
+      const { data: parentRecord, error: parentError } = await Promise.race([
+        parentRecordPromise,
+        timeoutPromise,
+      ]);
 
       if (parentError || !parentRecord) {
         setChildrenList(DEFAULT_CHILDREN);
@@ -77,7 +91,7 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return;
       }
 
-      const { data: mappings, error: mapError } = await supabase
+      const mappingsPromise = supabase
         .from('parent_student_mappings')
         .select(`
           student_id,
@@ -99,6 +113,11 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         .eq('parent_id', parentRecord.id)
         .eq('institute_id', currentInstitute.id);
 
+      const { data: mappings, error: mapError } = await Promise.race([
+        mappingsPromise,
+        timeoutPromise,
+      ]);
+
       if (mapError || !mappings || mappings.length === 0) {
         setChildrenList(DEFAULT_CHILDREN);
         setSelectedChild(DEFAULT_CHILDREN[0]);
@@ -115,6 +134,8 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           full_name: s?.profiles?.full_name || 'Amelia Sharma 🌸',
           avatar_url: s?.profiles?.avatar_url,
           batch_name: batchName,
+          grade: 'Class 11 Science',
+          parent_code: 'STU-AMELIA-902',
           emoji: '🌸',
         };
       });
@@ -140,12 +161,87 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const addChildByCodeOrPhone = async (
+    codeOrPhone: string
+  ): Promise<{ success: boolean; child?: ChildStudent; error?: string }> => {
+    const clean = codeOrPhone.trim().toUpperCase();
+    if (!clean) {
+      return { success: false, error: 'Please enter a Student Parent Link Code or Phone Number' };
+    }
+
+    // Demo lookup / simulated registration
+    const knownChildren: Record<string, ChildStudent> = {
+      'STU-AMELIA-902': {
+        id: 'stud-amelia-01',
+        admission_number: 'ADM-2026-088',
+        user_id: 'usr-student-01',
+        full_name: 'Amelia Sharma 🌸',
+        avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
+        batch_name: 'Batch Sakura 🌸 (Medical)',
+        grade: 'Class 11 Science',
+        parent_code: 'STU-AMELIA-902',
+        emoji: '🌸',
+      },
+      'STU-AARAV-104': {
+        id: 'stud-aarav-02',
+        admission_number: 'ADM-2026-104',
+        user_id: 'usr-student-02',
+        full_name: 'Aarav Sharma ⚡',
+        avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200',
+        batch_name: 'Batch Cosmos 🚀 (IIT-JEE)',
+        grade: 'Class 12 Advanced',
+        parent_code: 'STU-AARAV-104',
+        emoji: '🚀',
+      },
+      'STU-ROHAN-305': {
+        id: 'stud-rohan-03',
+        admission_number: 'ADM-2026-305',
+        user_id: 'usr-student-03',
+        full_name: 'Rohan Verma 🌿',
+        avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+        batch_name: 'Batch Clover 🍀 (Foundation)',
+        grade: 'Class 10 STEM',
+        parent_code: 'STU-ROHAN-305',
+        emoji: '🌿',
+      },
+    };
+
+    let matched = knownChildren[clean];
+    if (!matched && (clean.includes('98290') || clean.length >= 10)) {
+      matched = knownChildren['STU-AMELIA-902'];
+    }
+
+    if (!matched) {
+      // Dynamic generated match so any custom code works
+      matched = {
+        id: `stud-${Date.now()}`,
+        admission_number: `ADM-${Math.floor(1000 + Math.random() * 9000)}`,
+        user_id: `usr-${Date.now()}`,
+        full_name: `Student (${clean}) 🌸`,
+        batch_name: 'Batch Sakura 🌸',
+        grade: 'Class 11 Science',
+        parent_code: clean,
+        emoji: '🌸',
+      };
+    }
+
+    setChildrenList((prev) => {
+      if (prev.some((c) => c.id === matched.id || c.parent_code === matched.parent_code)) {
+        return prev;
+      }
+      return [...prev, matched];
+    });
+    setSelectedChild(matched);
+    return { success: true, child: matched };
+  };
+
   return (
     <ChildContext.Provider
       value={{
         selectedChild,
         childrenList,
         selectChild,
+        addChildByCodeOrPhone,
         isLoading,
         refreshChildren: fetchChildren,
       }}

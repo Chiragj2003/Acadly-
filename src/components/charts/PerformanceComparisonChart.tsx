@@ -90,9 +90,10 @@ export const PerformanceComparisonChart: React.FC<PerformanceComparisonChartProp
           {/* Grouped Bars */}
           {data.map((item, idx) => {
             const groupX = 35 + idx * barGroupWidth;
-            const studentBarH = (item.studentScore / 100) * chartHeight;
-            const avgBarH = (item.batchAvg / 100) * chartHeight;
-            const topperBarH = (item.batchTopper / 100) * chartHeight;
+            const max = item.maxScore && item.maxScore > 0 ? item.maxScore : 100;
+            const studentBarH = Math.max(2, Math.min(chartHeight, ((item.studentScore || 0) / max) * chartHeight));
+            const avgBarH = Math.max(2, Math.min(chartHeight, ((item.batchAvg || 0) / max) * chartHeight));
+            const topperBarH = Math.max(2, Math.min(chartHeight, ((item.batchTopper || 0) / max) * chartHeight));
 
             return (
               <React.Fragment key={item.testName}>

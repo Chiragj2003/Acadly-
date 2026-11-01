@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { Bell, ChevronDown, ArrowLeft, User, Sparkles } from 'lucide-react-native';
+import { Bell, ChevronDown, ArrowLeft, User, Sparkles, LogOut } from 'lucide-react-native';
 
 export interface HeaderBarProps {
   title: string;
@@ -8,6 +8,7 @@ export interface HeaderBarProps {
   onInstitutePress?: () => void;
   onNotificationPress?: () => void;
   onProfilePress?: () => void;
+  onLogoutPress?: () => void;
   onBackPress?: () => void;
   hasUnreadNotifications?: boolean;
   className?: string;
@@ -19,6 +20,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   onInstitutePress,
   onNotificationPress,
   onProfilePress,
+  onLogoutPress,
   onBackPress,
   hasUnreadNotifications = true,
   className = '',
@@ -64,27 +66,42 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
         </View>
       </View>
 
-      <View className="flex-row items-center gap-2 shrink-0">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Notifications"
-          onPress={onNotificationPress}
-          className="w-10 h-10 rounded-2xl bg-white border border-cute-border items-center justify-center relative active:scale-95 shadow-xs"
-        >
-          <Bell size={18} color="#7d6f6a" />
-          {hasUnreadNotifications && (
-            <View className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
-          )}
-        </Pressable>
+      <View className="flex-row items-center gap-1.5 shrink-0">
+        {onNotificationPress && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Notifications"
+            onPress={onNotificationPress}
+            className="w-9 h-9 rounded-2xl bg-white border border-cute-border items-center justify-center relative active:scale-95 shadow-xs"
+          >
+            <Bell size={16} color="#7d6f6a" />
+            {hasUnreadNotifications && (
+              <View className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
+            )}
+          </Pressable>
+        )}
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="User profile"
-          onPress={onProfilePress}
-          className="w-9 h-9 rounded-2xl bg-cute-peach-light border border-cute-peach items-center justify-center shadow-xs active:scale-95"
-        >
-          <Text className="text-sm">🌸</Text>
-        </Pressable>
+        {onProfilePress && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="User profile"
+            onPress={onProfilePress}
+            className="w-9 h-9 rounded-2xl bg-cute-peach-light border border-cute-peach items-center justify-center shadow-xs active:scale-95"
+          >
+            <Text className="text-sm">🌸</Text>
+          </Pressable>
+        )}
+
+        {onLogoutPress && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Log out"
+            onPress={onLogoutPress}
+            className="w-9 h-9 rounded-2xl bg-rose-50 border border-rose-200 items-center justify-center shadow-xs active:scale-95"
+          >
+            <LogOut size={15} color="#e11d48" />
+          </Pressable>
+        )}
       </View>
     </View>
   );
