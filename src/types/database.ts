@@ -80,3 +80,80 @@ export interface Batch {
   assigned_teacher_name?: string;
   created_at: string;
 }
+
+export interface AttendanceRecord {
+  id: string;
+  institute_id: string;
+  batch_id: string;
+  student_id: string;
+  student_name: string;
+  roll_number: string;
+  date: string;
+  status: 'P' | 'A' | 'L' | 'E';
+  remarks?: string;
+  marked_by?: string;
+  created_at: string;
+}
+
+export interface StudyMaterial {
+  id: string;
+  institute_id: string;
+  batch_id?: string;
+  title: string;
+  subject: string;
+  description?: string;
+  file_url: string;
+  file_type: 'pdf' | 'doc' | 'sheet';
+  file_size_formatted: string;
+  page_count?: number;
+  uploaded_by: string;
+  created_at: string;
+}
+
+export interface Lecture {
+  id: string;
+  institute_id: string;
+  batch_id: string;
+  title: string;
+  subject: string;
+  provider: 'youtube' | 'direct' | 'bunny';
+  video_id_or_url: string;
+  duration_minutes: number;
+  duration_formatted: string;
+  thumbnail_url?: string;
+  faculty_name: string;
+  lecture_number?: number;
+  is_live?: boolean;
+  created_at: string;
+}
+
+export interface Assignment {
+  id: string;
+  institute_id: string;
+  batch_id: string;
+  title: string;
+  subject: string;
+  instructions: string;
+  due_date: string;
+  due_label: string;
+  total_marks: number;
+  question_count: number;
+  attachment_url?: string;
+  created_by: string;
+  created_at: string;
+  submission_status?: 'pending' | 'submitted' | 'graded';
+}
+
+export interface Submission {
+  id: string;
+  assignment_id: string;
+  student_id: string;
+  student_name: string;
+  roll_number: string;
+  submission_text?: string;
+  file_url?: string;
+  status: 'submitted' | 'graded' | 'late';
+  marks_obtained?: number;
+  feedback?: string;
+  submitted_at: string;
+}

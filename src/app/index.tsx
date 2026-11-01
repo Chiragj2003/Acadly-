@@ -23,11 +23,16 @@ import {
   type UserRoleType,
   type AttendanceStatus,
 } from '@/components/ui';
+import { useAcademic } from '@/context/AcademicContext';
+import { VideoPlayerModal } from '@/components/academic';
 
 export default function HomeScreen() {
+  const { lectures, openPlayer } = useAcademic();
   const [selectedRole, setSelectedRole] = useState<UserRoleType>('student');
   const [attendance, setAttendance] = useState<AttendanceStatus>('P');
   const [mobileNumber, setMobileNumber] = useState('98290 41208');
+
+  const liveLecture = lectures[0];
 
   return (
     <ScreenWrapper
@@ -65,7 +70,7 @@ export default function HomeScreen() {
             variant="secondaryContainer"
             title="Join Lecture"
             rightIcon={<Play size={14} color="#ffffff" fill="#ffffff" />}
-            onPress={() => Alert.alert('Join Lecture', 'Opening live streaming player...')}
+            onPress={() => liveLecture && openPlayer(liveLecture)}
           />
         </View>
       </Card>
@@ -219,6 +224,8 @@ export default function HomeScreen() {
           </View>
         </View>
       </View>
+
+      <VideoPlayerModal />
     </ScreenWrapper>
   );
 }
