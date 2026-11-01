@@ -1,98 +1,224 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState } from 'react';
+import { View, Text, Alert } from 'react-native';
+import {
+  Users,
+  CalendarCheck,
+  TrendingUp,
+  Wallet,
+  Play,
+  MessageSquare,
+  ArrowRight,
+  Sparkles,
+} from 'lucide-react-native';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import {
+  ScreenWrapper,
+  MetricCard,
+  RoleCard,
+  AttendanceToggle,
+  Button,
+  Input,
+  Badge,
+  Card,
+  type UserRoleType,
+  type AttendanceStatus,
+} from '@/components/ui';
 
 export default function HomeScreen() {
+  const [selectedRole, setSelectedRole] = useState<UserRoleType>('student');
+  const [attendance, setAttendance] = useState<AttendanceStatus>('P');
+  const [mobileNumber, setMobileNumber] = useState('98290 41208');
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <ScreenWrapper
+      headerProps={{
+        title: 'Acadly Hub',
+        instituteName: 'Apex IIT-JEE Academy (Kota)',
+        onInstitutePress: () => Alert.alert('Institute Switcher', 'Switch active institute campus'),
+        onNotificationPress: () => Alert.alert('Notifications', 'No unread notifications'),
+        onProfilePress: () => Alert.alert('Profile', `Signed in as ${selectedRole.toUpperCase()}`),
+      }}
+    >
+      {/* Hero Live Class Banner (from Stitch Student Hub) */}
+      <Card elevation="hero" className="border-0">
+        <View className="flex-row items-center justify-between mb-2">
+          <Badge label="LIVE IN 35 MINS" variant="live" showDot />
+          <Badge label="Room 204 & Hybrid" variant="info" />
+        </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+        <View className="mt-1">
+          <Text className="text-xl font-bold text-surface-bright leading-tight">
+            JEE Adv. Masterclass: Electromagnetism
+          </Text>
+          <Text className="text-xs text-primary-fixed-dim mt-1">
+            Er. Rakesh Verma • Starts at 02:00 PM
+          </Text>
+        </View>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+        <View className="mt-4 pt-2 flex-row items-center justify-between border-t border-white/10">
+          <View className="flex-row items-center gap-1.5">
+            <Sparkles size={16} color="#85f8c4" />
+            <Text className="text-xs text-surface-container-high">Broadcast Synced</Text>
+          </View>
+          <Button
+            size="sm"
+            variant="secondaryContainer"
+            title="Join Lecture"
+            rightIcon={<Play size={14} color="#ffffff" fill="#ffffff" />}
+            onPress={() => Alert.alert('Join Lecture', 'Opening live streaming player...')}
           />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+        </View>
+      </Card>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      {/* Academic Vitals Mosaic (from Stitch Admin & Student designs) */}
+      <View className="gap-2">
+        <View className="flex-row items-center justify-between px-1">
+          <Text className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+            Live Academic Vitals
+          </Text>
+          <Badge label="Kota Campus" variant="success" />
+        </View>
+
+        <View className="flex-row gap-2.5">
+          <View className="flex-1">
+            <MetricCard
+              title="Students"
+              value="842"
+              trendText="+12% this mo"
+              trendDirection="positive"
+              icon={<Users size={16} color="#0051d5" />}
+            />
+          </View>
+          <View className="flex-1">
+            <MetricCard
+              title="Roll Call"
+              value="96.4%"
+              trendText="793 P • 49 A"
+              trendDirection="info"
+              icon={<CalendarCheck size={16} color="#0051d5" />}
+            />
+          </View>
+        </View>
+
+        <View className="flex-row gap-2.5">
+          <View className="flex-1">
+            <MetricCard
+              title="Avg Mock Score"
+              value="248"
+              subValue="/300"
+              trendText="Top 0.8% • AIR 142"
+              trendDirection="positive"
+              icon={<TrendingUp size={16} color="#069669" />}
+            />
+          </View>
+          <View className="flex-1">
+            <MetricCard
+              title="Pending Dues"
+              value="₹4.85L"
+              trendText="34 Students"
+              trendDirection="negative"
+              icon={<Wallet size={16} color="#ba1a1a" />}
+            />
+          </View>
+        </View>
+      </View>
+
+      {/* Role Workspace Switcher (from Stitch Onboarding) */}
+      <View className="gap-2">
+        <View className="flex-row items-center justify-between px-1">
+          <Text className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+            Switch Role Workspace
+          </Text>
+          <Badge label={`Current: ${selectedRole.toUpperCase()}`} variant="admin" />
+        </View>
+
+        <View className="flex-row gap-2">
+          <View className="flex-1">
+            <RoleCard
+              role="admin"
+              isSelected={selectedRole === 'admin'}
+              onSelect={setSelectedRole}
+            />
+          </View>
+          <View className="flex-1">
+            <RoleCard
+              role="teacher"
+              isSelected={selectedRole === 'teacher'}
+              onSelect={setSelectedRole}
+            />
+          </View>
+        </View>
+
+        <View className="flex-row gap-2">
+          <View className="flex-1">
+            <RoleCard
+              role="student"
+              isSelected={selectedRole === 'student'}
+              onSelect={setSelectedRole}
+            />
+          </View>
+          <View className="flex-1">
+            <RoleCard
+              role="parent"
+              isSelected={selectedRole === 'parent'}
+              onSelect={setSelectedRole}
+            />
+          </View>
+        </View>
+      </View>
+
+      {/* Interactive Roll Call Widget (from Stitch Teacher Hub) */}
+      <Card elevation="lowest" className="gap-3">
+        <View className="flex-row items-center justify-between">
+          <View>
+            <Text className="text-xs font-semibold text-secondary">In-Session Roll Call</Text>
+            <Text className="text-base font-bold text-on-surface">Aditya Sharma (#01)</Text>
+          </View>
+          <AttendanceToggle
+            value={attendance}
+            onChange={(status) => {
+              setAttendance(status);
+              Alert.alert('Status Updated', `Aditya marked as ${status === 'P' ? 'Present' : status === 'A' ? 'Absent' : 'Late'}`);
+            }}
+          />
+        </View>
+        <Text className="text-xs text-on-surface-variant">
+          Auto WhatsApp broadcast enabled for unexcused absence
+        </Text>
+      </Card>
+
+      {/* Quick Input & WhatsApp Nudge CTA */}
+      <View className="gap-3">
+        <Input
+          label="Registered Mobile Identifier"
+          rightLabel="India (+91)"
+          showPhonePrefix
+          value={mobileNumber}
+          onChangeText={setMobileNumber}
+          placeholder="Enter 10-digit number"
+        />
+
+        <View className="flex-row gap-2">
+          <View className="flex-1">
+            <Button
+              variant="primary"
+              title="Launch Portal"
+              rightIcon={<ArrowRight size={16} color="#ffffff" />}
+              fullWidth
+              onPress={() => Alert.alert('Launch Portal', `Launching ${selectedRole} portal`)}
+            />
+          </View>
+          <View className="flex-1">
+            <Button
+              variant="surface"
+              title="WhatsApp Nudge"
+              leftIcon={<MessageSquare size={16} color="#069669" />}
+              fullWidth
+              onPress={() => Alert.alert('WhatsApp Nudge', 'Dispatched reminder to 34 parents')}
+            />
+          </View>
+        </View>
+      </View>
+    </ScreenWrapper>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-});
