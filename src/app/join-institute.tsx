@@ -186,7 +186,7 @@ export default function JoinInstituteScreen() {
       {step === 'waiting' ? (
         /* ================= WAITING FOR APPROVAL SCREEN ================= */
         <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-12">
-          <View className="bg-white border-2 border-cute-border rounded-[32px] p-6 items-center shadow-xs">
+          <View className="bg-white border border-slate-200 rounded-[32px] p-6 items-center shadow-xs">
             <Mascot mood="curious" size="lg" />
 
             <View className="bg-amber-50 border border-amber-200 px-3 py-1 rounded-full mt-3">
@@ -195,57 +195,57 @@ export default function JoinInstituteScreen() {
               </Text>
             </View>
 
-            <Text className="text-xl font-black text-cute-cocoa mt-3 text-center">
+            <Text className="text-xl font-black text-slate-800 mt-3 text-center">
               Request Sent to Teacher! 🌸
             </Text>
-            <Text className="text-xs text-cute-muted text-center mt-1.5 leading-relaxed px-2">
+            <Text className="text-xs text-slate-500 text-center mt-1.5 leading-relaxed px-2">
               Your profile has been submitted to{' '}
-              <Text className="font-extrabold text-cute-peach">
+              <Text className="font-extrabold text-blue-600">
                 {activeJoinRequest?.matchedTargetName || teacherProfile.fullName}
               </Text>{' '}
               under code{' '}
-              <Text className="font-extrabold text-cute-cocoa">
+              <Text className="font-extrabold text-slate-800">
                 {activeJoinRequest?.codeUsed || teacherCode.toUpperCase()}
               </Text>
               .
             </Text>
 
             {/* Profile Summary Card */}
-            <View className="bg-cute-cream rounded-2xl p-4 border border-cute-border my-4 w-full">
-              <Text className="text-[10px] font-black text-cute-muted uppercase tracking-wider mb-2">
+            <View className="bg-slate-50 rounded-2xl p-4 border border-slate-200 my-4 w-full">
+              <Text className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2">
                 Submitted Student Profile
               </Text>
               <View className="gap-1.5">
                 <View className="flex-row justify-between">
-                  <Text className="text-xs text-cute-muted">Student:</Text>
-                  <Text className="text-xs font-bold text-cute-cocoa">
+                  <Text className="text-xs text-slate-500">Student:</Text>
+                  <Text className="text-xs font-bold text-slate-800">
                     {activeJoinRequest?.studentDetails.fullName || fullName}
                   </Text>
                 </View>
                 <View className="flex-row justify-between">
-                  <Text className="text-xs text-cute-muted">Target Exam:</Text>
-                  <Text className="text-xs font-bold text-cute-cocoa">
+                  <Text className="text-xs text-slate-500">Target Exam:</Text>
+                  <Text className="text-xs font-bold text-slate-800">
                     {activeJoinRequest?.studentDetails.targetExam || targetExam}
                   </Text>
                 </View>
                 <View className="flex-row justify-between">
-                  <Text className="text-xs text-cute-muted">School & Board:</Text>
-                  <Text className="text-xs font-bold text-cute-cocoa">
+                  <Text className="text-xs text-slate-500">School & Board:</Text>
+                  <Text className="text-xs font-bold text-slate-800">
                     {activeJoinRequest?.studentDetails.board || board} •{' '}
                     {activeJoinRequest?.studentDetails.grade || grade}
                   </Text>
                 </View>
                 <View className="flex-row justify-between">
-                  <Text className="text-xs text-cute-muted">Guardian Phone:</Text>
-                  <Text className="text-xs font-bold text-cute-cocoa">
+                  <Text className="text-xs text-slate-500">Guardian Phone:</Text>
+                  <Text className="text-xs font-bold text-slate-800">
                     {activeJoinRequest?.studentDetails.guardianPhone || guardianPhone}
                   </Text>
                 </View>
               </View>
 
               {/* Weak Subject Tags */}
-              <View className="mt-2.5 pt-2.5 border-t border-cute-border">
-                <Text className="text-[10px] font-bold text-cute-muted mb-1.5">
+              <View className="mt-2.5 pt-2.5 border-t border-slate-200">
+                <Text className="text-[10px] font-bold text-slate-500 mb-1.5">
                   Focus / Weak Areas:
                 </Text>
                 <View className="flex-row flex-wrap gap-1.5">
@@ -278,9 +278,9 @@ export default function JoinInstituteScreen() {
             <TouchableOpacity
               activeOpacity={0.88}
               onPress={() => router.push('/verify-students')}
-              className="w-full bg-cute-peach-light border border-cute-peach py-2.5 rounded-2xl items-center mb-2.5 active:scale-98"
+              className="w-full bg-blue-50 border border-blue-200 py-2.5 rounded-2xl items-center mb-2.5 active:scale-98"
             >
-              <Text className="text-xs font-bold text-cute-peach">
+              <Text className="text-xs font-bold text-blue-600">
                 Open Teacher Verification Desk 🍎
               </Text>
             </TouchableOpacity>
@@ -289,7 +289,7 @@ export default function JoinInstituteScreen() {
               onPress={() => setStep('form')}
               className="py-2"
             >
-              <Text className="text-xs font-bold text-cute-muted underline">
+              <Text className="text-xs font-bold text-slate-500 underline">
                 Edit Details or Change Code
               </Text>
             </TouchableOpacity>
@@ -303,16 +303,16 @@ export default function JoinInstituteScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {/* 1. Teacher Code & Live Preview */}
-          <View className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs">
+          <View className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs">
             <View className="flex-row items-center gap-2.5 mb-2">
-              <View className="w-10 h-10 rounded-2xl bg-cute-peach-light border border-cute-peach items-center justify-center">
+              <View className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
                 <QrCode size={18} color="#ff7d6b" />
               </View>
               <View className="flex-1">
-                <Text className="text-sm font-black text-cute-cocoa">
+                <Text className="text-sm font-black text-slate-800">
                   Enter Teacher / Coaching Code
                 </Text>
-                <Text className="text-xs text-cute-muted">
+                <Text className="text-xs text-slate-500">
                   Share code provided by your teacher
                 </Text>
               </View>
@@ -324,29 +324,29 @@ export default function JoinInstituteScreen() {
               autoCapitalize="characters"
               value={teacherCode}
               onChangeText={setTeacherCode}
-              className="bg-cute-cream border border-cute-border rounded-2xl px-4 py-2.5 text-sm font-black text-cute-cocoa tracking-wider mt-2 uppercase"
+              className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-sm font-black text-slate-800 tracking-wider mt-2 uppercase"
             />
 
             {/* Live Matched Teacher Preview Card */}
             {matchedTarget && (
-              <View className="bg-cute-peach-light border border-cute-peach rounded-2xl p-3.5 mt-3">
+              <View className="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 mt-3">
                 <View className="flex-row items-center justify-between mb-1">
                   <View className="flex-row items-center gap-1.5">
                     <CheckCircle2 size={14} color="#ff7d6b" />
-                    <Text className="text-xs font-black text-cute-cocoa">
+                    <Text className="text-xs font-black text-slate-800">
                       {matchedTarget.name}
                     </Text>
                   </View>
-                  <View className="bg-white/90 px-2 py-0.5 rounded-md border border-cute-peach/30">
-                    <Text className="text-[10px] font-bold text-cute-peach">
+                  <View className="bg-white/90 px-2 py-0.5 rounded-md border border-blue-200/30">
+                    <Text className="text-[10px] font-bold text-blue-600">
                       {matchedTarget.type}
                     </Text>
                   </View>
                 </View>
-                <Text className="text-[11px] text-cute-cocoa/80 leading-snug">
+                <Text className="text-[11px] text-slate-800/80 leading-snug">
                   {matchedTarget.detail}
                 </Text>
-                <Text className="text-[10px] font-bold text-cute-peach mt-1">
+                <Text className="text-[10px] font-bold text-blue-600 mt-1">
                   Fee: {matchedTarget.rate}
                 </Text>
               </View>
@@ -354,27 +354,27 @@ export default function JoinInstituteScreen() {
           </View>
 
           {/* 2. Student Academic Details */}
-          <View className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs gap-3">
+          <View className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs gap-3">
             <View className="flex-row items-center gap-2 mb-1">
               <GraduationCap size={16} color="#ff7d6b" />
-              <Text className="text-sm font-black text-cute-cocoa">
+              <Text className="text-sm font-black text-slate-800">
                 Student Academic Profile
               </Text>
             </View>
 
             <View>
-              <Text className="text-xs font-bold text-cute-cocoa mb-1">Student Full Name</Text>
+              <Text className="text-xs font-bold text-slate-800 mb-1">Student Full Name</Text>
               <TextInput
                 placeholder="e.g. Amelia Sharma"
                 placeholderTextColor="#a89993"
                 value={fullName}
                 onChangeText={setFullName}
-                className="bg-cute-cream border border-cute-border rounded-2xl px-3.5 py-2 text-xs text-cute-cocoa"
+                className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
               />
             </View>
 
             <View>
-              <Text className="text-xs font-bold text-cute-cocoa mb-1.5">Class / Grade</Text>
+              <Text className="text-xs font-bold text-slate-800 mb-1.5">Class / Grade</Text>
               <View className="flex-row flex-wrap gap-1.5">
                 {GRADE_OPTIONS.map(g => (
                   <TouchableOpacity
@@ -382,13 +382,13 @@ export default function JoinInstituteScreen() {
                     onPress={() => setGrade(g)}
                     className={`px-3 py-1.5 rounded-xl border ${
                       grade === g
-                        ? 'bg-cute-peach border-cute-peach'
-                        : 'bg-cute-cream border-cute-border'
+                        ? 'bg-blue-600 border-blue-200'
+                        : 'bg-slate-50 border-slate-200'
                     }`}
                   >
                     <Text
                       className={`text-[11px] font-bold ${
-                        grade === g ? 'text-white' : 'text-cute-cocoa'
+                        grade === g ? 'text-white' : 'text-slate-800'
                       }`}
                     >
                       {g}
@@ -399,7 +399,7 @@ export default function JoinInstituteScreen() {
             </View>
 
             <View>
-              <Text className="text-xs font-bold text-cute-cocoa mb-1.5">Board of Education</Text>
+              <Text className="text-xs font-bold text-slate-800 mb-1.5">Board of Education</Text>
               <View className="flex-row flex-wrap gap-1.5">
                 {BOARD_OPTIONS.map(b => (
                   <TouchableOpacity
@@ -407,13 +407,13 @@ export default function JoinInstituteScreen() {
                     onPress={() => setBoard(b)}
                     className={`px-3 py-1.5 rounded-xl border ${
                       board === b
-                        ? 'bg-cute-peach border-cute-peach'
-                        : 'bg-cute-cream border-cute-border'
+                        ? 'bg-blue-600 border-blue-200'
+                        : 'bg-slate-50 border-slate-200'
                     }`}
                   >
                     <Text
                       className={`text-[11px] font-bold ${
-                        board === b ? 'text-white' : 'text-cute-cocoa'
+                        board === b ? 'text-white' : 'text-slate-800'
                       }`}
                     >
                       {b}
@@ -425,41 +425,41 @@ export default function JoinInstituteScreen() {
 
             <View className="flex-row gap-2">
               <View className="flex-1">
-                <Text className="text-xs font-bold text-cute-cocoa mb-1">Target Exam</Text>
+                <Text className="text-xs font-bold text-slate-800 mb-1">Target Exam</Text>
                 <TextInput
                   placeholder="e.g. IIT-JEE 2026"
                   placeholderTextColor="#a89993"
                   value={targetExam}
                   onChangeText={setTargetExam}
-                  className="bg-cute-cream border border-cute-border rounded-2xl px-3.5 py-2 text-xs text-cute-cocoa"
+                  className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
                 />
               </View>
               <View className="flex-1">
-                <Text className="text-xs font-bold text-cute-cocoa mb-1">Class 10 %</Text>
+                <Text className="text-xs font-bold text-slate-800 mb-1">Class 10 %</Text>
                 <TextInput
                   placeholder="e.g. 96.2%"
                   placeholderTextColor="#a89993"
                   value={previousScore}
                   onChangeText={setPreviousScore}
-                  className="bg-cute-cream border border-cute-border rounded-2xl px-3.5 py-2 text-xs text-cute-cocoa"
+                  className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
                 />
               </View>
             </View>
 
             <View>
-              <Text className="text-xs font-bold text-cute-cocoa mb-1">Current School Name</Text>
+              <Text className="text-xs font-bold text-slate-800 mb-1">Current School Name</Text>
               <TextInput
                 placeholder="e.g. Delhi Public School (R.K. Puram)"
                 placeholderTextColor="#a89993"
                 value={school}
                 onChangeText={setSchool}
-                className="bg-cute-cream border border-cute-border rounded-2xl px-3.5 py-2 text-xs text-cute-cocoa"
+                className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
               />
             </View>
 
             {/* Weak Subjects Multi-Select */}
             <View className="mt-1">
-              <Text className="text-xs font-bold text-cute-cocoa mb-1.5">
+              <Text className="text-xs font-bold text-slate-800 mb-1.5">
                 Focus Areas / Weak Subjects (Select chips)
               </Text>
               <View className="flex-row flex-wrap gap-1.5">
@@ -472,12 +472,12 @@ export default function JoinInstituteScreen() {
                       className={`px-2.5 py-1.5 rounded-xl border ${
                         isSelected
                           ? 'bg-rose-100 border-rose-300'
-                          : 'bg-cute-cream border-cute-border'
+                          : 'bg-slate-50 border-slate-200'
                       }`}
                     >
                       <Text
                         className={`text-[10px] font-bold ${
-                          isSelected ? 'text-rose-800' : 'text-cute-muted'
+                          isSelected ? 'text-rose-800' : 'text-slate-500'
                         }`}
                       >
                         {isSelected ? '✓ ' : '+ '}
@@ -491,45 +491,45 @@ export default function JoinInstituteScreen() {
           </View>
 
           {/* 3. Guardian & Emergency Contact */}
-          <View className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs gap-3">
+          <View className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs gap-3">
             <View className="flex-row items-center gap-2 mb-1">
               <Phone size={16} color="#ff7d6b" />
-              <Text className="text-sm font-black text-cute-cocoa">
+              <Text className="text-sm font-black text-slate-800">
                 Guardian Contact & Bio
               </Text>
             </View>
 
             <View>
-              <Text className="text-xs font-bold text-cute-cocoa mb-1">Guardian Full Name</Text>
+              <Text className="text-xs font-bold text-slate-800 mb-1">Guardian Full Name</Text>
               <TextInput
                 placeholder="e.g. Sunita Sharma"
                 placeholderTextColor="#a89993"
                 value={guardianName}
                 onChangeText={setGuardianName}
-                className="bg-cute-cream border border-cute-border rounded-2xl px-3.5 py-2 text-xs text-cute-cocoa"
+                className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
               />
             </View>
 
             <View className="flex-row gap-2">
               <View className="flex-1">
-                <Text className="text-xs font-bold text-cute-cocoa mb-1">Guardian Phone (UPI/SMS)</Text>
+                <Text className="text-xs font-bold text-slate-800 mb-1">Guardian Phone (UPI/SMS)</Text>
                 <TextInput
                   placeholder="+91 98230 44551"
                   placeholderTextColor="#a89993"
                   keyboardType="phone-pad"
                   value={guardianPhone}
                   onChangeText={setGuardianPhone}
-                  className="bg-cute-cream border border-cute-border rounded-2xl px-3.5 py-2 text-xs text-cute-cocoa"
+                  className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
                 />
               </View>
               <View className="w-24">
-                <Text className="text-xs font-bold text-cute-cocoa mb-1">Blood Grp</Text>
+                <Text className="text-xs font-bold text-slate-800 mb-1">Blood Grp</Text>
                 <TextInput
                   placeholder="e.g. B+"
                   placeholderTextColor="#a89993"
                   value={bloodGroup}
                   onChangeText={setBloodGroup}
-                  className="bg-cute-cream border border-cute-border rounded-2xl px-3.5 py-2 text-xs text-cute-cocoa"
+                  className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
                 />
               </View>
             </View>
@@ -539,7 +539,7 @@ export default function JoinInstituteScreen() {
           <TouchableOpacity
             activeOpacity={0.88}
             onPress={handleSubmit}
-            className="w-full bg-cute-peach py-3.5 rounded-2xl items-center shadow-xs flex-row justify-center gap-2 active:scale-98"
+            className="w-full bg-blue-600 py-3.5 rounded-2xl items-center shadow-xs flex-row justify-center gap-2 active:scale-98"
           >
             <Text className="text-xs font-black text-white tracking-wide">
               Send Join Request to Teacher 🌸
@@ -551,3 +551,4 @@ export default function JoinInstituteScreen() {
     </ScreenWrapper>
   );
 }
+

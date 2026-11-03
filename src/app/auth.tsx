@@ -121,13 +121,6 @@ export default function CleanAuthScreen() {
     }
   };
 
-  // 1-Click Demo Login (clearly separated at bottom)
-  const handleQuickDemo = async (role: UserRole) => {
-    setSelectedRole(role);
-    await switchRole(role);
-    navigateToRoleScreen(role);
-  };
-
   // Submission handler for both Sign In and Sign Up
   const handleSubmit = async () => {
     // 1. Sign In Flow
@@ -141,11 +134,11 @@ export default function CleanAuthScreen() {
         return;
       }
 
-      const res = await signIn(email, selectedRole);
+      const res = await signIn(email, password, selectedRole);
       if (res.success) {
-        navigateToRoleScreen(selectedRole);
+        navigateToRoleScreen(res.role || selectedRole);
       } else {
-        Alert.alert('Sign In Failed', res.error || 'Invalid credentials. Try our quick demo below!');
+        Alert.alert('Sign In Failed', res.error || 'Invalid credentials.');
       }
       return;
     }
@@ -316,7 +309,7 @@ export default function CleanAuthScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      className="flex-1 bg-cute-cream"
+      className="flex-1 bg-[#F8FAFC]"
     >
       <ScrollView
         contentContainerClassName="p-5 pt-12 pb-24"
@@ -331,30 +324,30 @@ export default function CleanAuthScreen() {
             showSpeechBubble
             speechText={
               authMode === 'signin'
-                ? `Welcome back to ${currentInstitute?.name || 'Acadly'}! 🌸`
-                : "Let's create your happy study account! 🚀"
+                ? `Welcome back to ${currentInstitute?.name || 'Acadly'}`
+                : 'Create your academic account'
             }
           />
-          <Text className="text-3xl font-black text-cute-cocoa tracking-tight mt-3 text-center">
+          <Text className="text-3xl font-black text-slate-900 tracking-tight mt-3 text-center">
             Acadly
           </Text>
-          <Text className="text-xs font-bold text-cute-muted text-center mt-1">
-            Tuition & Coaching Made Beautiful 🌸
+          <Text className="text-xs font-bold text-slate-500 text-center mt-1">
+            Tuition & Coaching Operating System
           </Text>
         </View>
 
         {/* 2. Top Segmented Mode Toggle: Sign In vs Create Account */}
-        <View className="flex-row bg-white p-1.5 rounded-2xl border-2 border-cute-border mb-5 shadow-xs">
+        <View className="flex-row bg-white p-1.5 rounded-2xl border border-slate-200 mb-5 shadow-xs">
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={() => setAuthMode('signin')}
             className={`flex-1 py-3 rounded-xl items-center flex-row justify-center gap-1.5 ${
-              authMode === 'signin' ? 'bg-cute-peach shadow-xs' : 'bg-transparent'
+              authMode === 'signin' ? 'bg-blue-600 shadow-xs' : 'bg-transparent'
             }`}
           >
             <Text
               className={`text-xs font-extrabold ${
-                authMode === 'signin' ? 'text-white' : 'text-cute-muted'
+                authMode === 'signin' ? 'text-white' : 'text-slate-500'
               }`}
             >
               Sign In
@@ -365,12 +358,12 @@ export default function CleanAuthScreen() {
             activeOpacity={0.85}
             onPress={() => setAuthMode('signup')}
             className={`flex-1 py-3 rounded-xl items-center flex-row justify-center gap-1.5 ${
-              authMode === 'signup' ? 'bg-cute-peach shadow-xs' : 'bg-transparent'
+              authMode === 'signup' ? 'bg-blue-600 shadow-xs' : 'bg-transparent'
             }`}
           >
             <Text
               className={`text-xs font-extrabold ${
-                authMode === 'signup' ? 'text-white' : 'text-cute-muted'
+                authMode === 'signup' ? 'text-white' : 'text-slate-500'
               }`}
             >
               Create Account
@@ -382,27 +375,27 @@ export default function CleanAuthScreen() {
         {/* VIEW A: CLEAN SIGN IN PAGE (DEFAULT ON LAUNCH)           */}
         {/* ======================================================== */}
         {authMode === 'signin' ? (
-          <View className="bg-white border-2 border-cute-border rounded-3xl p-5 mb-5 shadow-xs">
+          <View className="bg-white border border-slate-200/90 rounded-3xl p-5 mb-5 shadow-xs">
             <View className="flex-row items-center justify-between mb-4">
               <View>
-                <Text className="text-base font-black text-cute-cocoa">Welcome Back!</Text>
-                <Text className="text-xs text-cute-muted">Sign in to your learning dashboard</Text>
+                <Text className="text-base font-black text-slate-900">Welcome Back</Text>
+                <Text className="text-xs text-slate-500">Sign in to your learning dashboard</Text>
               </View>
-              <View className="bg-cute-peach-light px-2.5 py-1 rounded-full border border-cute-peach">
-                <Text className="text-[10px] font-bold text-cute-peach uppercase">Secure Login</Text>
+              <View className="bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
+                <Text className="text-[10px] font-bold text-blue-700 uppercase">Secure Login</Text>
               </View>
             </View>
 
             {/* Role Switcher Pill Bar for Sign In */}
-            <Text className="text-[11px] font-black text-cute-muted uppercase tracking-wider mb-2">
+            <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
               Sign In As:
             </Text>
             <View className="flex-row gap-1.5 mb-4">
               {[
-                { role: 'student', label: '🌸 Student' },
-                { role: 'teacher', label: '🍎 Teacher' },
-                { role: 'admin', label: '🏫 Admin' },
-                { role: 'parent', label: '🏡 Parent' },
+                { role: 'student', label: 'Student' },
+                { role: 'teacher', label: 'Teacher' },
+                { role: 'admin', label: 'Admin' },
+                { role: 'parent', label: 'Parent' },
               ].map((item) => {
                 const isSelected = selectedRole === item.role;
                 return (
@@ -411,13 +404,13 @@ export default function CleanAuthScreen() {
                     onPress={() => setSelectedRole(item.role as UserRole)}
                     className={`flex-1 py-2 rounded-xl items-center border ${
                       isSelected
-                        ? 'bg-cute-peach border-cute-peach shadow-xs'
-                        : 'bg-cute-cream border-cute-border'
+                        ? 'bg-blue-600 border-blue-600 shadow-xs'
+                        : 'bg-slate-50 border-slate-200'
                     }`}
                   >
                     <Text
-                      className={`text-[10px] font-black ${
-                        isSelected ? 'text-white' : 'text-cute-cocoa'
+                      className={`text-[11px] font-bold ${
+                        isSelected ? 'text-white' : 'text-slate-700'
                       }`}
                     >
                       {item.label}
@@ -429,33 +422,33 @@ export default function CleanAuthScreen() {
 
             {/* Email / Username Input */}
             <View className="mb-3">
-              <Text className="text-xs font-bold text-cute-cocoa mb-1">Email Address or Phone</Text>
+              <Text className="text-xs font-bold text-slate-800 mb-1">Email Address or Phone</Text>
               <TextInput
                 placeholder="e.g. amelia@student.in or +91 98230..."
-                placeholderTextColor="#a89993"
+                placeholderTextColor="#94a3b8"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
                 onChangeText={setEmail}
-                className="bg-cute-cream border border-cute-border rounded-2xl px-4 py-3 text-xs text-cute-cocoa font-medium"
+                className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs text-slate-800 font-medium"
               />
             </View>
 
             {/* Password Input */}
             <View className="mb-2">
               <View className="flex-row items-center justify-between mb-1">
-                <Text className="text-xs font-bold text-cute-cocoa">Password</Text>
+                <Text className="text-xs font-bold text-slate-800">Password</Text>
                 <TouchableOpacity onPress={() => setIsForgotPasswordOpen(true)}>
-                  <Text className="text-xs font-bold text-cute-peach">Forgot Password?</Text>
+                  <Text className="text-xs font-bold text-blue-600">Forgot Password?</Text>
                 </TouchableOpacity>
               </View>
               <TextInput
                 placeholder="••••••••"
-                placeholderTextColor="#a89993"
+                placeholderTextColor="#94a3b8"
                 secureTextEntry
                 value={password}
                 onChangeText={setPassword}
-                className="bg-cute-cream border border-cute-border rounded-2xl px-4 py-3 text-xs text-cute-cocoa font-medium"
+                className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs text-slate-800 font-medium"
               />
             </View>
 
@@ -463,10 +456,9 @@ export default function CleanAuthScreen() {
             <TouchableOpacity
               activeOpacity={0.88}
               onPress={handleGoogleAuth}
-              className="w-full bg-white border border-cute-border py-2.5 rounded-2xl flex-row items-center justify-center gap-2 mt-2 mb-3 active:scale-98"
+              className="w-full bg-white border border-slate-200 py-2.5 rounded-2xl flex-row items-center justify-center gap-2 mt-2 mb-3 active:scale-98"
             >
-              <Text className="text-sm">🌐</Text>
-              <Text className="text-xs font-bold text-cute-cocoa">Continue with Google</Text>
+              <Text className="text-xs font-bold text-slate-700">Continue with Google</Text>
             </TouchableOpacity>
 
             {/* Primary Sign In Button */}
@@ -474,7 +466,7 @@ export default function CleanAuthScreen() {
               activeOpacity={0.88}
               onPress={handleSubmit}
               disabled={loading}
-              className="bg-cute-peach py-3.5 rounded-2xl items-center shadow-xs active:scale-98"
+              className="bg-blue-600 py-3.5 rounded-2xl items-center shadow-xs active:scale-98"
             >
               <Text className="text-xs font-extrabold text-white tracking-wide">
                 {loading ? 'Authenticating...' : `Sign In as ${selectedRole.toUpperCase()} →`}
@@ -482,11 +474,11 @@ export default function CleanAuthScreen() {
             </TouchableOpacity>
 
             {/* Bottom Toggle Link */}
-            <View className="mt-4 pt-3 border-t border-cute-border items-center">
+            <View className="mt-4 pt-3 border-t border-slate-200 items-center">
               <TouchableOpacity onPress={() => setAuthMode('signup')}>
-                <Text className="text-xs text-cute-muted">
+                <Text className="text-xs text-slate-500">
                   Don't have an account?{' '}
-                  <Text className="font-extrabold text-cute-peach">Create an Account</Text>
+                  <Text className="font-extrabold text-blue-600">Create an Account</Text>
                 </Text>
               </TouchableOpacity>
             </View>
@@ -499,11 +491,11 @@ export default function CleanAuthScreen() {
             {/* Step 1: Select Your Role */}
             <View>
               <View className="flex-row items-center justify-between mb-2.5 px-1">
-                <Text className="text-xs font-black text-cute-cocoa uppercase tracking-wider">
+                <Text className="text-xs font-black text-slate-800 uppercase tracking-wider">
                   Step 1: Choose Account Role
                 </Text>
-                <View className="bg-cute-peach-light px-2.5 py-0.5 rounded-full border border-cute-peach">
-                  <Text className="text-[10px] font-bold text-cute-peach">Select One</Text>
+                <View className="bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+                  <Text className="text-[10px] font-bold text-blue-600">Select One</Text>
                 </View>
               </View>
 
@@ -518,7 +510,7 @@ export default function CleanAuthScreen() {
                       className={`p-3.5 rounded-2xl border-2 flex-row items-center justify-between shadow-xs ${
                         isSelected
                           ? `${role.bgColor} ${role.borderColor} scale-[1.01]`
-                          : 'bg-white border-cute-border'
+                          : 'bg-white border-slate-200'
                       }`}
                     >
                       <View className="flex-row items-center gap-3 flex-1 pr-2">
@@ -527,16 +519,16 @@ export default function CleanAuthScreen() {
                         </View>
                         <View className="flex-1">
                           <View className="flex-row items-center gap-1.5">
-                            <Text className="text-sm font-extrabold text-cute-cocoa">
+                            <Text className="text-sm font-extrabold text-slate-800">
                               {role.title}
                             </Text>
                             <View className="bg-white/80 px-1.5 py-0.5 rounded-md border border-black/5">
-                              <Text className="text-[9px] font-bold text-cute-muted uppercase">
+                              <Text className="text-[9px] font-bold text-slate-500 uppercase">
                                 {role.badge}
                               </Text>
                             </View>
                           </View>
-                          <Text className="text-xs text-cute-muted mt-0.5" numberOfLines={1}>
+                          <Text className="text-xs text-slate-500 mt-0.5" numberOfLines={1}>
                             {role.subtitle}
                           </Text>
                         </View>
@@ -544,7 +536,7 @@ export default function CleanAuthScreen() {
 
                       <View
                         className={`w-5 h-5 rounded-full items-center justify-center border ${
-                          isSelected ? 'bg-cute-peach border-cute-peach' : 'bg-white border-cute-border'
+                          isSelected ? 'bg-blue-600 border-blue-200' : 'bg-white border-slate-200'
                         }`}
                       >
                         {isSelected && <View className="w-2 h-2 rounded-full bg-white" />}
@@ -556,26 +548,26 @@ export default function CleanAuthScreen() {
             </View>
 
             {/* Step 2: Role-Specific Details & Credentials */}
-            <View className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs">
-              <Text className="text-xs font-black text-cute-cocoa uppercase tracking-wider mb-3">
+            <View className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs">
+              <Text className="text-xs font-black text-slate-800 uppercase tracking-wider mb-3">
                 Step 2: Account & Role Details
               </Text>
 
               {/* Common Credentials */}
               <View className="gap-3 mb-3">
                 <View>
-                  <Text className="text-xs font-bold text-cute-cocoa mb-1">Full Name</Text>
+                  <Text className="text-xs font-bold text-slate-800 mb-1">Full Name</Text>
                   <TextInput
                     placeholder="e.g. Amelia Sharma or Prof. Vikram Joshi"
                     placeholderTextColor="#a89993"
                     value={fullName}
                     onChangeText={setFullName}
-                    className="bg-cute-cream border border-cute-border rounded-2xl px-4 py-2.5 text-xs text-cute-cocoa font-medium"
+                    className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-xs text-slate-800 font-medium"
                   />
                 </View>
 
                 <View>
-                  <Text className="text-xs font-bold text-cute-cocoa mb-1">Email Address</Text>
+                  <Text className="text-xs font-bold text-slate-800 mb-1">Email Address</Text>
                   <TextInput
                     placeholder="name@example.com"
                     placeholderTextColor="#a89993"
@@ -583,19 +575,19 @@ export default function CleanAuthScreen() {
                     autoCapitalize="none"
                     value={email}
                     onChangeText={setEmail}
-                    className="bg-cute-cream border border-cute-border rounded-2xl px-4 py-2.5 text-xs text-cute-cocoa font-medium"
+                    className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-xs text-slate-800 font-medium"
                   />
                 </View>
 
                 <View>
-                  <Text className="text-xs font-bold text-cute-cocoa mb-1">Password</Text>
+                  <Text className="text-xs font-bold text-slate-800 mb-1">Password</Text>
                   <TextInput
                     placeholder="At least 6 characters"
                     placeholderTextColor="#a89993"
                     secureTextEntry
                     value={password}
                     onChangeText={setPassword}
-                    className="bg-cute-cream border border-cute-border rounded-2xl px-4 py-2.5 text-xs text-cute-cocoa font-medium"
+                    className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-xs text-slate-800 font-medium"
                   />
                 </View>
               </View>
@@ -623,7 +615,7 @@ export default function CleanAuthScreen() {
                     >
                       <Text
                         className={`text-[11px] font-bold ${
-                          teacherOption === 'solo' ? 'text-white' : 'text-cute-cocoa'
+                          teacherOption === 'solo' ? 'text-white' : 'text-slate-800'
                         }`}
                       >
                         🍎 Solo Tuition Tutor
@@ -637,7 +629,7 @@ export default function CleanAuthScreen() {
                     >
                       <Text
                         className={`text-[11px] font-bold ${
-                          teacherOption === 'coaching_faculty' ? 'text-white' : 'text-cute-cocoa'
+                          teacherOption === 'coaching_faculty' ? 'text-white' : 'text-slate-800'
                         }`}
                       >
                         🏫 Institute Faculty
@@ -648,7 +640,7 @@ export default function CleanAuthScreen() {
                   {teacherOption === 'solo' ? (
                     <View className="gap-2.5">
                       <View>
-                        <Text className="text-[11px] font-bold text-cute-cocoa mb-1">
+                        <Text className="text-[11px] font-bold text-slate-800 mb-1">
                           Academic Qualification
                         </Text>
                         <TextInput
@@ -656,12 +648,12 @@ export default function CleanAuthScreen() {
                           placeholderTextColor="#a89993"
                           value={teacherQualification}
                           onChangeText={setTeacherQualification}
-                          className="bg-white border border-rose-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                          className="bg-white border border-rose-200 rounded-xl px-3 py-2 text-xs text-slate-800"
                         />
                       </View>
                       <View className="flex-row gap-2">
                         <View className="flex-1">
-                          <Text className="text-[11px] font-bold text-cute-cocoa mb-1">
+                          <Text className="text-[11px] font-bold text-slate-800 mb-1">
                             Experience (Yrs)
                           </Text>
                           <TextInput
@@ -670,11 +662,11 @@ export default function CleanAuthScreen() {
                             keyboardType="numeric"
                             value={teacherExperience}
                             onChangeText={setTeacherExperience}
-                            className="bg-white border border-rose-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                            className="bg-white border border-rose-200 rounded-xl px-3 py-2 text-xs text-slate-800"
                           />
                         </View>
                         <View className="flex-1">
-                          <Text className="text-[11px] font-bold text-cute-cocoa mb-1">
+                          <Text className="text-[11px] font-bold text-slate-800 mb-1">
                             Fee (₹/mo)
                           </Text>
                           <TextInput
@@ -683,7 +675,7 @@ export default function CleanAuthScreen() {
                             keyboardType="numeric"
                             value={teacherFeeRate}
                             onChangeText={setTeacherFeeRate}
-                            className="bg-white border border-rose-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                            className="bg-white border border-rose-200 rounded-xl px-3 py-2 text-xs text-slate-800"
                           />
                         </View>
                       </View>
@@ -696,7 +688,7 @@ export default function CleanAuthScreen() {
                     </View>
                   ) : (
                     <View className="gap-2">
-                      <Text className="text-[11px] font-bold text-cute-cocoa mb-1">
+                      <Text className="text-[11px] font-bold text-slate-800 mb-1">
                         Coaching Center Invite Code
                       </Text>
                       <TextInput
@@ -705,7 +697,7 @@ export default function CleanAuthScreen() {
                         autoCapitalize="characters"
                         value={facultyCoachingCode}
                         onChangeText={setFacultyCoachingCode}
-                        className="bg-white border border-rose-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa font-bold"
+                        className="bg-white border border-rose-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
                       />
                       <Text className="text-[10px] text-rose-700">
                         Enter the invite code given by your Coaching Director.
@@ -723,34 +715,34 @@ export default function CleanAuthScreen() {
                     <Text className="text-xs font-black text-indigo-900">Coaching Academy Details</Text>
                   </View>
                   <View>
-                    <Text className="text-[11px] font-bold text-cute-cocoa mb-1">Institute Name</Text>
+                    <Text className="text-[11px] font-bold text-slate-800 mb-1">Institute Name</Text>
                     <TextInput
                       placeholder="e.g. Bloom Science Academy"
                       placeholderTextColor="#a89993"
                       value={instituteName}
                       onChangeText={setInstituteName}
-                      className="bg-white border border-indigo-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                      className="bg-white border border-indigo-200 rounded-xl px-3 py-2 text-xs text-slate-800"
                     />
                   </View>
                   <View className="flex-row gap-2">
                     <View className="flex-1">
-                      <Text className="text-[11px] font-bold text-cute-cocoa mb-1">City / Branch</Text>
+                      <Text className="text-[11px] font-bold text-slate-800 mb-1">City / Branch</Text>
                       <TextInput
                         placeholder="e.g. Pune, Kothrud"
                         placeholderTextColor="#a89993"
                         value={instituteCity}
                         onChangeText={setInstituteCity}
-                        className="bg-white border border-indigo-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                        className="bg-white border border-indigo-200 rounded-xl px-3 py-2 text-xs text-slate-800"
                       />
                     </View>
                     <View className="flex-1">
-                      <Text className="text-[11px] font-bold text-cute-cocoa mb-1">Director Phone</Text>
+                      <Text className="text-[11px] font-bold text-slate-800 mb-1">Director Phone</Text>
                       <TextInput
                         placeholder="+91 98230 11223"
                         placeholderTextColor="#a89993"
                         value={directorPhone}
                         onChangeText={setDirectorPhone}
-                        className="bg-white border border-indigo-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                        className="bg-white border border-indigo-200 rounded-xl px-3 py-2 text-xs text-slate-800"
                       />
                     </View>
                   </View>
@@ -766,38 +758,38 @@ export default function CleanAuthScreen() {
                   </View>
                   <View className="flex-row gap-2">
                     <View className="flex-1">
-                      <Text className="text-[11px] font-bold text-cute-cocoa mb-1">Grade / Class</Text>
+                      <Text className="text-[11px] font-bold text-slate-800 mb-1">Grade / Class</Text>
                       <TextInput
                         placeholder="Class 11 Science"
                         placeholderTextColor="#a89993"
                         value={studentGrade}
                         onChangeText={setStudentGrade}
-                        className="bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                        className="bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs text-slate-800"
                       />
                     </View>
                     <View className="flex-1">
-                      <Text className="text-[11px] font-bold text-cute-cocoa mb-1">Target Exam</Text>
+                      <Text className="text-[11px] font-bold text-slate-800 mb-1">Target Exam</Text>
                       <TextInput
                         placeholder="IIT-JEE 2026"
                         placeholderTextColor="#a89993"
                         value={studentTargetExam}
                         onChangeText={setStudentTargetExam}
-                        className="bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                        className="bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs text-slate-800"
                       />
                     </View>
                   </View>
                   <View>
-                    <Text className="text-[11px] font-bold text-cute-cocoa mb-1">Current School</Text>
+                    <Text className="text-[11px] font-bold text-slate-800 mb-1">Current School</Text>
                     <TextInput
                       placeholder="e.g. Delhi Public School"
                       placeholderTextColor="#a89993"
                       value={studentSchool}
                       onChangeText={setStudentSchool}
-                      className="bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                      className="bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs text-slate-800"
                     />
                   </View>
                   <View>
-                    <Text className="text-[11px] font-bold text-cute-cocoa mb-1">
+                    <Text className="text-[11px] font-bold text-slate-800 mb-1">
                       Parent / Guardian Phone
                     </Text>
                     <TextInput
@@ -805,7 +797,7 @@ export default function CleanAuthScreen() {
                       placeholderTextColor="#a89993"
                       value={studentGuardianPhone}
                       onChangeText={setStudentGuardianPhone}
-                      className="bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs text-cute-cocoa"
+                      className="bg-white border border-emerald-200 rounded-xl px-3 py-2 text-xs text-slate-800"
                     />
                   </View>
                 </View>
@@ -818,7 +810,7 @@ export default function CleanAuthScreen() {
                     <Home size={14} color="#d97706" />
                     <Text className="text-xs font-black text-amber-900">Child Linking</Text>
                   </View>
-                  <Text className="text-[11px] text-cute-muted">
+                  <Text className="text-[11px] text-slate-500">
                     Enter your child's Parent Link Code (found on student profile) or registered parent phone.
                   </Text>
                   <TextInput
@@ -827,7 +819,7 @@ export default function CleanAuthScreen() {
                     autoCapitalize="characters"
                     value={parentChildCode}
                     onChangeText={setParentChildCode}
-                    className="bg-white border border-amber-300 rounded-xl px-3 py-2 text-xs text-cute-cocoa font-bold"
+                    className="bg-white border border-amber-300 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
                   />
                 </View>
               )}
@@ -837,7 +829,7 @@ export default function CleanAuthScreen() {
                 activeOpacity={0.88}
                 onPress={handleSubmit}
                 disabled={loading}
-                className="bg-cute-peach py-3.5 rounded-2xl items-center shadow-xs active:scale-98"
+                className="bg-blue-600 py-3.5 rounded-2xl items-center shadow-xs active:scale-98"
               >
                 <Text className="text-xs font-extrabold text-white tracking-wide">
                   {loading
@@ -852,11 +844,11 @@ export default function CleanAuthScreen() {
                 </Text>
               </TouchableOpacity>
 
-              <View className="mt-4 pt-3 border-t border-cute-border items-center">
+              <View className="mt-4 pt-3 border-t border-slate-200 items-center">
                 <TouchableOpacity onPress={() => setAuthMode('signin')}>
-                  <Text className="text-xs text-cute-muted">
+                  <Text className="text-xs text-slate-500">
                     Already have an account?{' '}
-                    <Text className="font-extrabold text-cute-peach">Sign In here</Text>
+                    <Text className="font-extrabold text-blue-600">Sign In here</Text>
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -864,83 +856,7 @@ export default function CleanAuthScreen() {
           </View>
         )}
 
-        {/* 3. Clearly Separated Instant Demo Mode (Bottom of Screen) */}
-        <View className="mt-8 pt-5 border-t-2 border-cute-border/60">
-          <View className="flex-row items-center justify-between mb-2 px-1">
-            <View className="flex-row items-center gap-1.5">
-              <Sparkles size={14} color="#ff7d6b" />
-              <Text className="text-xs font-black text-cute-cocoa uppercase tracking-wider">
-                1-Click Instant Demo Access
-              </Text>
-            </View>
-            <View className="bg-cute-peach-light px-2 py-0.5 rounded-full border border-cute-peach">
-              <Text className="text-[10px] font-bold text-cute-peach">Evaluation</Text>
-            </View>
-          </View>
-          <Text className="text-[11px] text-cute-muted mb-3 px-1 leading-relaxed">
-            Instantly evaluate any role with pre-loaded dummy data without typing credentials:
-          </Text>
-
-          <View className="gap-2">
-            <TouchableOpacity
-              onPress={() => handleQuickDemo('student')}
-              className="bg-white border border-slate-200 py-2.5 px-3.5 rounded-2xl flex-row items-center justify-between active:scale-98 shadow-xs"
-            >
-              <View className="flex-row items-center gap-2.5">
-                <Text className="text-lg">🎓</Text>
-                <View>
-                  <Text className="text-xs font-bold text-slate-900">Student: Amelia Sharma</Text>
-                  <Text className="text-[10px] text-slate-500">Class 12 • JEE Advanced (Morning)</Text>
-                </View>
-              </View>
-              <Text className="text-xs font-bold text-blue-600">→</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => handleQuickDemo('teacher')}
-              className="bg-white border border-slate-200 py-2.5 px-3.5 rounded-2xl flex-row items-center justify-between active:scale-98 shadow-xs"
-            >
-              <View className="flex-row items-center gap-2.5">
-                <Text className="text-lg">👨‍🏫</Text>
-                <View>
-                  <Text className="text-xs font-bold text-slate-900">Teacher: Prof. Vikram Joshi</Text>
-                  <Text className="text-[10px] text-slate-500">Code: JOSHI-MATH-89 • Grading & Roll Call</Text>
-                </View>
-              </View>
-              <Text className="text-xs font-bold text-blue-600">→</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => handleQuickDemo('admin')}
-              className="bg-white border border-slate-200 py-2.5 px-3.5 rounded-2xl flex-row items-center justify-between active:scale-98 shadow-xs"
-            >
-              <View className="flex-row items-center gap-2.5">
-                <Text className="text-lg">🏫</Text>
-                <View>
-                  <Text className="text-xs font-bold text-slate-900">Director: Apex Institute</Text>
-                  <Text className="text-[10px] text-slate-500">Multi-Batch Roster • Admissions & Fees</Text>
-                </View>
-              </View>
-              <Text className="text-xs font-bold text-blue-600">→</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => handleQuickDemo('parent')}
-              className="bg-white border-2 border-cute-border py-2.5 px-3.5 rounded-2xl flex-row items-center justify-between active:scale-98 shadow-xs"
-            >
-              <View className="flex-row items-center gap-2.5">
-                <Text className="text-lg">🏡</Text>
-                <View>
-                  <Text className="text-xs font-bold text-cute-cocoa">Parent: Sunita Sharma</Text>
-                  <Text className="text-[10px] text-cute-muted">Amelia & Aarav • Roll-Call & UPI Fee Pay</Text>
-                </View>
-              </View>
-              <Text className="text-xs font-black text-cute-peach">→</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* 4. Forgot Password Modal */}
+        {/* 3. Forgot Password Modal */}
         <Modal
           visible={isForgotPasswordOpen}
           transparent
@@ -948,21 +864,21 @@ export default function CleanAuthScreen() {
           onRequestClose={() => setIsForgotPasswordOpen(false)}
         >
           <View className="flex-1 bg-black/60 items-center justify-center p-5">
-            <View className="bg-white border-2 border-cute-border rounded-3xl p-5 w-full max-w-sm shadow-lg">
+            <View className="bg-white border border-slate-200 rounded-3xl p-5 w-full max-w-sm shadow-lg">
               <View className="flex-row items-center justify-between mb-3">
                 <View className="flex-row items-center gap-2">
                   <KeyRound size={18} color="#ff7d6b" />
-                  <Text className="text-base font-black text-cute-cocoa">Forgot Password</Text>
+                  <Text className="text-base font-black text-slate-800">Forgot Password</Text>
                 </View>
                 <TouchableOpacity
                   onPress={() => setIsForgotPasswordOpen(false)}
-                  className="w-8 h-8 rounded-full bg-cute-cream items-center justify-center"
+                  className="w-8 h-8 rounded-full bg-slate-50 items-center justify-center"
                 >
                   <X size={16} color="#7d6f6a" />
                 </TouchableOpacity>
               </View>
 
-              <Text className="text-xs text-cute-muted mb-4 leading-relaxed">
+              <Text className="text-xs text-slate-500 mb-4 leading-relaxed">
                 Enter your registered email address and we'll send you instructions to reset your password.
               </Text>
 
@@ -973,12 +889,12 @@ export default function CleanAuthScreen() {
                 autoCapitalize="none"
                 value={forgotEmail}
                 onChangeText={setForgotEmail}
-                className="bg-cute-cream border border-cute-border rounded-2xl px-4 py-3 text-xs text-cute-cocoa font-medium mb-4"
+                className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs text-slate-800 font-medium mb-4"
               />
 
               <TouchableOpacity
                 onPress={handleForgotPasswordSubmit}
-                className="bg-cute-peach py-3 rounded-2xl items-center shadow-xs active:scale-98"
+                className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs active:scale-98"
               >
                 <Text className="text-xs font-bold text-white">Send Reset Instructions</Text>
               </TouchableOpacity>
@@ -989,3 +905,4 @@ export default function CleanAuthScreen() {
     </KeyboardAvoidingView>
   );
 }
+

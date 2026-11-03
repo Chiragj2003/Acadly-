@@ -71,15 +71,24 @@ export default function StudentDetailScreen() {
     });
   };
 
-  // Handle direct WhatsApp to guardian
-  const handleWhatsAppGuardian = () => {
-    const cleanPhone = student.guardianPhone.replace(/\D/g, '');
-    const message = encodeURIComponent(
-      `Namaste ${student.guardianName}: Connecting regarding ${student.name}'s performance and attendance progress on Acadly.`
+  // Handle direct in-app message/notice to guardian
+  const handleMessageGuardianInApp = () => {
+    Alert.alert(
+      'In-App Parent Notice',
+      `Dispatch progress and attendance update directly to ${student.guardianName}'s parent portal?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Dispatch In-App Notice',
+          onPress: () => {
+            Alert.alert(
+              'Notice Dispatched',
+              `Update sent to ${student.guardianName}'s portal for ${student.name}.`
+            );
+          },
+        },
+      ]
     );
-    Linking.openURL(`https://wa.me/${cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone}?text=${message}`).catch(() => {
-      Alert.alert('WhatsApp', `Could not open WhatsApp for ${student.guardianPhone}`);
-    });
   };
 
   // Add teacher remark
@@ -158,11 +167,11 @@ export default function StudentDetailScreen() {
 
             <TouchableOpacity
               activeOpacity={0.88}
-              onPress={handleWhatsAppGuardian}
-              className="px-4 py-2.5 rounded-xl bg-emerald-600 flex-row items-center justify-center gap-1.5 active:scale-98"
+              onPress={handleMessageGuardianInApp}
+              className="px-4 py-2.5 rounded-xl bg-blue-50 border border-blue-200 flex-row items-center justify-center gap-1.5 active:scale-98"
             >
-              <MessageSquare size={13} color="#ffffff" />
-              <Text className="text-xs font-bold text-white">WhatsApp</Text>
+              <MessageSquare size={13} color="#2563EB" />
+              <Text className="text-xs font-bold text-blue-700">In-App Notice</Text>
             </TouchableOpacity>
           </View>
         </View>

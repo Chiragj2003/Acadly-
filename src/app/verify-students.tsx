@@ -123,16 +123,16 @@ export default function VerifyStudentsScreen() {
     >
       <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-4 pb-16">
         {/* Header Banner */}
-        <View className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs">
+        <View className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs">
           <View className="flex-row items-center justify-between mb-2">
             <View className="flex-row items-center gap-2">
-              <View className="w-10 h-10 rounded-2xl bg-cute-peach-light border border-cute-peach items-center justify-center">
+              <View className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
                 <UserCheck size={18} color="#ff7d6b" />
               </View>
               <View>
-                <Text className="text-base font-black text-cute-cocoa">Pending Admissions</Text>
-                <Text className="text-xs text-cute-muted">
-                  Code: <Text className="font-bold text-cute-peach">{teacherProfile.teacherCode}</Text>
+                <Text className="text-base font-black text-slate-800">Pending Admissions</Text>
+                <Text className="text-xs text-slate-500">
+                  Code: <Text className="font-bold text-blue-600">{teacherProfile.teacherCode}</Text>
                 </Text>
               </View>
             </View>
@@ -143,16 +143,16 @@ export default function VerifyStudentsScreen() {
               </Text>
             </View>
           </View>
-          <Text className="text-xs text-cute-muted leading-relaxed">
+          <Text className="text-xs text-slate-500 leading-relaxed">
             Review applicant backgrounds, assign their study batch, and confirm fee structures before granting classroom access.
           </Text>
 
           <TouchableOpacity
             onPress={handleAddDemoRequest}
-            className="mt-3 bg-cute-cream border border-cute-border py-2 px-3 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-98"
+            className="mt-3 bg-slate-50 border border-slate-200 py-2 px-3 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-98"
           >
             <Sparkles size={13} color="#ff7d6b" />
-            <Text className="text-xs font-bold text-cute-cocoa">
+            <Text className="text-xs font-bold text-slate-800">
               + Generate Test Applicant Request
             </Text>
           </TouchableOpacity>
@@ -160,14 +160,14 @@ export default function VerifyStudentsScreen() {
 
         {/* Pending Requests List */}
         {pendingRequests.length === 0 ? (
-          <View className="bg-white border-2 border-cute-border rounded-3xl p-8 items-center shadow-xs my-4">
+          <View className="bg-white border border-slate-200 rounded-3xl p-8 items-center shadow-xs my-4">
             <Mascot mood="celebrating" size="lg" />
-            <Text className="text-base font-black text-cute-cocoa mt-3 text-center">
+            <Text className="text-base font-black text-slate-800 mt-3 text-center">
               All Students Verified! 🌸
             </Text>
-            <Text className="text-xs text-cute-muted text-center mt-1 max-w-[240px]">
+            <Text className="text-xs text-slate-500 text-center mt-1 max-w-[240px]">
               No pending admission requests in queue. Share your teacher code{' '}
-              <Text className="font-bold text-cute-peach">{teacherProfile.teacherCode}</Text> to invite students.
+              <Text className="font-bold text-blue-600">{teacherProfile.teacherCode}</Text> to invite students.
             </Text>
           </View>
         ) : (
@@ -176,15 +176,15 @@ export default function VerifyStudentsScreen() {
             return (
               <View
                 key={req.id}
-                className="bg-white border-2 border-cute-border rounded-3xl p-5 shadow-xs gap-3"
+                className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs gap-3"
               >
                 {/* Header */}
                 <View className="flex-row items-center justify-between">
                   <View>
-                    <Text className="text-base font-black text-cute-cocoa">
+                    <Text className="text-base font-black text-slate-800">
                       {d.fullName}
                     </Text>
-                    <Text className="text-xs text-cute-muted">
+                    <Text className="text-xs text-slate-500">
                       {d.grade} • {d.board}
                     </Text>
                   </View>
@@ -196,25 +196,25 @@ export default function VerifyStudentsScreen() {
                 </View>
 
                 {/* Details Grid */}
-                <View className="bg-cute-cream rounded-2xl p-3 border border-cute-border gap-1.5">
+                <View className="bg-slate-50 rounded-2xl p-3 border border-slate-200 gap-1.5">
                   <View className="flex-row items-center justify-between">
-                    <Text className="text-[11px] text-cute-muted">School:</Text>
-                    <Text className="text-[11px] font-bold text-cute-cocoa">{d.school}</Text>
+                    <Text className="text-[11px] text-slate-500">School:</Text>
+                    <Text className="text-[11px] font-bold text-slate-800">{d.school}</Text>
                   </View>
                   <View className="flex-row items-center justify-between">
-                    <Text className="text-[11px] text-cute-muted">Prior Performance:</Text>
-                    <Text className="text-[11px] font-bold text-cute-peach">{d.previousPercentage}</Text>
+                    <Text className="text-[11px] text-slate-500">Prior Performance:</Text>
+                    <Text className="text-[11px] font-bold text-blue-600">{d.previousPercentage}</Text>
                   </View>
                   <View className="flex-row items-center justify-between">
-                    <Text className="text-[11px] text-cute-muted">Guardian Phone:</Text>
-                    <Text className="text-[11px] font-bold text-cute-cocoa">{d.guardianPhone}</Text>
+                    <Text className="text-[11px] text-slate-500">Guardian Phone:</Text>
+                    <Text className="text-[11px] font-bold text-slate-800">{d.guardianPhone}</Text>
                   </View>
                 </View>
 
                 {/* Weak Subjects */}
                 {d.weakSubjects && d.weakSubjects.length > 0 && (
                   <View>
-                    <Text className="text-[10px] font-black text-cute-muted uppercase tracking-wider mb-1.5">
+                    <Text className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-1.5">
                       Requested Help in Focus Areas:
                     </Text>
                     <View className="flex-row flex-wrap gap-1.5">
@@ -231,7 +231,7 @@ export default function VerifyStudentsScreen() {
                 )}
 
                 {/* Action Buttons */}
-                <View className="flex-row gap-2 pt-2 border-t border-cute-border">
+                <View className="flex-row gap-2 pt-2 border-t border-slate-200">
                   <TouchableOpacity
                     activeOpacity={0.88}
                     onPress={() => openApprovalModal(req)}
@@ -246,7 +246,7 @@ export default function VerifyStudentsScreen() {
                   <TouchableOpacity
                     activeOpacity={0.88}
                     onPress={() => handleReject(req)}
-                    className="px-3.5 py-2.5 rounded-xl bg-cute-cream border border-cute-border items-center justify-center active:scale-98"
+                    className="px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 items-center justify-center active:scale-98"
                   >
                     <X size={14} color="#a89993" />
                   </TouchableOpacity>
@@ -265,11 +265,11 @@ export default function VerifyStudentsScreen() {
         onRequestClose={() => setModalVisible(false)}
       >
         <View className="flex-1 bg-black/40 items-center justify-center p-5">
-          <View className="bg-white rounded-[32px] p-6 w-full max-w-sm border-2 border-cute-border shadow-lg">
+          <View className="bg-white rounded-[32px] p-6 w-full max-w-sm border border-slate-200 shadow-lg">
             <View className="flex-row items-center justify-between mb-3">
               <View className="flex-row items-center gap-2">
                 <HeartHandshake size={18} color="#ff7d6b" />
-                <Text className="text-base font-black text-cute-cocoa">
+                <Text className="text-base font-black text-slate-800">
                   Admit Student
                 </Text>
               </View>
@@ -278,12 +278,12 @@ export default function VerifyStudentsScreen() {
               </TouchableOpacity>
             </View>
 
-            <Text className="text-xs text-cute-muted mb-4">
-              Enrolling <Text className="font-bold text-cute-cocoa">{selectedRequest?.studentDetails.fullName}</Text>
+            <Text className="text-xs text-slate-500 mb-4">
+              Enrolling <Text className="font-bold text-slate-800">{selectedRequest?.studentDetails.fullName}</Text>
             </Text>
 
             {/* Select Batch */}
-            <Text className="text-xs font-black text-cute-cocoa mb-1.5">
+            <Text className="text-xs font-black text-slate-800 mb-1.5">
               1. Select Batch
             </Text>
             <View className="gap-1.5 mb-4">
@@ -293,13 +293,13 @@ export default function VerifyStudentsScreen() {
                   onPress={() => setSelectedBatch(b.id)}
                   className={`p-2.5 rounded-xl border ${
                     selectedBatch === b.id
-                      ? 'bg-cute-peach-light border-cute-peach'
-                      : 'bg-cute-cream border-cute-border'
+                      ? 'bg-blue-50 border-blue-200'
+                      : 'bg-slate-50 border-slate-200'
                   }`}
                 >
                   <Text
                     className={`text-xs font-bold ${
-                      selectedBatch === b.id ? 'text-cute-peach' : 'text-cute-cocoa'
+                      selectedBatch === b.id ? 'text-blue-600' : 'text-slate-800'
                     }`}
                   >
                     {b.name}
@@ -309,7 +309,7 @@ export default function VerifyStudentsScreen() {
             </View>
 
             {/* Select Fee Plan */}
-            <Text className="text-xs font-black text-cute-cocoa mb-1.5">
+            <Text className="text-xs font-black text-slate-800 mb-1.5">
               2. Fee Plan Structure
             </Text>
             <View className="gap-1.5 mb-5">
@@ -319,13 +319,13 @@ export default function VerifyStudentsScreen() {
                   onPress={() => setSelectedFeePlan(plan)}
                   className={`p-2.5 rounded-xl border ${
                     selectedFeePlan === plan
-                      ? 'bg-cute-peach-light border-cute-peach'
-                      : 'bg-cute-cream border-cute-border'
+                      ? 'bg-blue-50 border-blue-200'
+                      : 'bg-slate-50 border-slate-200'
                   }`}
                 >
                   <Text
                     className={`text-xs font-bold ${
-                      selectedFeePlan === plan ? 'text-cute-peach' : 'text-cute-cocoa'
+                      selectedFeePlan === plan ? 'text-blue-600' : 'text-slate-800'
                     }`}
                   >
                     {plan}
@@ -337,7 +337,7 @@ export default function VerifyStudentsScreen() {
             {/* Confirm Button */}
             <TouchableOpacity
               onPress={confirmApprove}
-              className="bg-cute-peach py-3 rounded-2xl items-center shadow-xs active:scale-98"
+              className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs active:scale-98"
             >
               <Text className="text-xs font-black text-white">
                 Confirm Admission & Notify Student 🌸
@@ -349,3 +349,4 @@ export default function VerifyStudentsScreen() {
     </ScreenWrapper>
   );
 }
+

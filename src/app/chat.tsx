@@ -138,6 +138,7 @@ export default function PinterestChatScreen() {
 
   return (
     <ScreenWrapper
+      scrollable={false}
       headerProps={{
         title: activeRoom?.title || 'Classroom Chat',
         instituteName: activeRoom?.subtitle,

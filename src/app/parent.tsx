@@ -168,8 +168,8 @@ export default function PinterestParentScreen() {
         onNotificationPress: openNotificationDrawer,
         onProfilePress: () => {
           Alert.alert(
-            'Sunita Sharma',
-            'Primary Guardian • Enrolled: Amelia Sharma\nPhone: +91 98230 44551',
+            'Rajesh Sharma',
+            `Primary Guardian • Enrolled: ${selectedChild?.full_name || 'Amelia Sharma'}\nPhone: +91 98230 44551`,
             [
               { text: 'Sign Out 🚪', style: 'destructive', onPress: handleLogout },
               { text: 'Close', style: 'cancel' },
@@ -179,9 +179,18 @@ export default function PinterestParentScreen() {
         onLogoutPress: handleLogout,
         hasUnreadNotifications: unreadCount > 0,
       }}
+      contentContainerClassName="gap-3.5 px-4 py-4"
+      contentContainerStyle={{ paddingBottom: 24 }}
+      footer={
+        <BottomTabBar
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={(key) => setActiveTab(key as any)}
+          accentColor="#2563EB"
+        />
+      }
     >
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }} contentContainerClassName="gap-3.5">
-        {/* Child Selector Strip */}
+      {/* Child Selector Strip */}
         <View className="bg-white border border-slate-200/90 rounded-3xl p-4 shadow-xs">
           <View className="flex-row items-center justify-between mb-2.5">
             <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -278,15 +287,15 @@ export default function PinterestParentScreen() {
               </View>
 
               <Text className="text-xs text-slate-600 leading-relaxed">
-                Direct WhatsApp channel with {matchedStudentProfile.batchName} lead faculty. Inquire about test corrections, homework, and attendance.
+                Direct in-app messaging channel with {selectedChild?.batch_name || 'tuition'} faculty. Inquire about test corrections, homework, and attendance.
               </Text>
 
               <TouchableOpacity
-                onPress={handleWhatsAppTeacher}
-                className="bg-emerald-600 py-3 rounded-2xl items-center flex-row justify-center gap-2 active:scale-98 shadow-xs"
+                onPress={() => router.push('/chat')}
+                className="bg-blue-600 py-3 rounded-2xl items-center flex-row justify-center gap-2 active:scale-98 shadow-xs"
               >
                 <MessageSquare size={16} color="#ffffff" />
-                <Text className="text-xs font-bold text-white">Message Teacher on WhatsApp</Text>
+                <Text className="text-xs font-bold text-white">Open In-App Faculty Chat</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -492,15 +501,6 @@ export default function PinterestParentScreen() {
             </View>
           </View>
         )}
-      </ScrollView>
-
-      {/* ================= BOTTOM TAB BAR ================= */}
-      <BottomTabBar
-        tabs={tabs}
-        activeTab={activeTab}
-        onTabChange={(key) => setActiveTab(key as any)}
-        accentColor="#2563EB"
-      />
 
       {/* ================= MODAL: LINK ANOTHER CHILD ================= */}
       <Modal visible={isLinkChildModalOpen} transparent animationType="slide">

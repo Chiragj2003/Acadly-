@@ -132,20 +132,15 @@ export default function PinterestAdminScreen() {
   const handleWhatsAppFeeBlast = async () => {
     await sendNotification(
       'parent',
-      'Fee Cycle Reminder Dispatched',
-      `Queued WhatsApp templates for ${analytics.overdue_students_count} overdue accounts via WhatsApp Business API.`,
+      'Fee Overdue Reminders Dispatched',
+      `Sent in-app notifications and payment prompts to ${analytics.overdue_students_count} overdue accounts.`,
       'fee'
     );
 
-    const message = encodeURIComponent(
-      `Namaste from ${activeInstitute?.name || 'Bloom Academy'}: This is a gentle reminder regarding tuition fees due for this term. Please pay via Acadly UPI to avoid penalty.`
+    Alert.alert(
+      'In-App Fee Reminders Dispatched',
+      `Instant in-app notice and UPI payment links sent to all ${analytics.overdue_students_count} student & parent dashboards.`
     );
-    Linking.openURL(`https://wa.me/919823044551?text=${message}`).catch(() => {
-      Alert.alert(
-        'WhatsApp Fee Automation Dispatched 📲',
-        `Dispatched fee overdue reminders to ${analytics.overdue_students_count} parents via WhatsApp Business API.`
-      );
-    });
   };
 
   const tabs: TabItem[] = [
@@ -193,9 +188,18 @@ export default function PinterestAdminScreen() {
         onLogoutPress: handleLogout,
         hasUnreadNotifications: unreadCount > 0,
       }}
+      contentContainerClassName="gap-3.5 px-4 py-4"
+      contentContainerStyle={{ paddingBottom: 24 }}
+      footer={
+        <BottomTabBar
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={(key) => setActiveTab(key as any)}
+          accentColor="#2563EB"
+        />
+      }
     >
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }} contentContainerClassName="gap-3.5">
-        {/* ================= TAB 1: HOME (OVERVIEW) ================= */}
+      {/* ================= TAB 1: HOME (OVERVIEW) ================= */}
         {activeTab === 'home' && (
           <View className="gap-3.5">
             {/* Institute Master Hero Card */}
@@ -552,15 +556,6 @@ export default function PinterestAdminScreen() {
             </View>
           </View>
         )}
-      </ScrollView>
-
-      {/* ================= BOTTOM TAB BAR ================= */}
-      <BottomTabBar
-        tabs={tabs}
-        activeTab={activeTab}
-        onTabChange={(key) => setActiveTab(key as any)}
-        accentColor="#2563EB"
-      />
 
       {/* ================= CREATE BATCH MODAL ================= */}
       <Modal visible={isCreateBatchModalOpen} transparent animationType="slide">

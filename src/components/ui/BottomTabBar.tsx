@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export interface TabItem {
   key: string;
@@ -21,30 +22,38 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
   onTabChange,
   accentColor = '#2563EB', // Academic Indigo
 }) => {
+  const insets = useSafeAreaInsets();
+  const bottomPadding = Math.max(insets.bottom, Platform.OS === 'ios' ? 14 : 10);
+
   return (
     <View
       style={{
+        paddingBottom: bottomPadding,
+        paddingTop: 8,
+        backgroundColor: '#FFFFFF',
+        borderTopWidth: 1,
+        borderTopColor: '#E2E8F0',
         shadowColor: '#0F172A',
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
+        shadowOffset: { width: 0, height: -3 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
         elevation: 8,
       }}
-      className="bg-white border-t border-slate-200/80 px-2 py-2 flex-row items-center justify-around"
+      className="px-2 flex-row items-center justify-around"
     >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.key;
         return (
           <TouchableOpacity
             key={tab.key}
-            activeOpacity={0.8}
+            activeOpacity={0.75}
             onPress={() => onTabChange(tab.key)}
             className="items-center justify-center py-1 px-2.5 rounded-2xl relative min-w-[56px]"
           >
             {/* Active Pill Glow */}
             <View
-              className={`p-1.5 rounded-2xl items-center justify-center transition-all ${
-                isActive ? 'bg-blue-50' : 'bg-transparent'
+              className={`p-1.5 rounded-2xl items-center justify-center ${
+                isActive ? 'bg-blue-50/90' : 'bg-transparent'
               }`}
             >
               {tab.icon(isActive ? accentColor : '#64748B', 20)}
@@ -61,8 +70,8 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
 
             <Text
               style={{ color: isActive ? accentColor : '#64748B' }}
-              className={`text-[10px] mt-0.5 tracking-tight ${
-                isActive ? 'font-black' : 'font-semibold'
+              className={`text-[11px] mt-0.5 tracking-tight ${
+                isActive ? 'font-bold' : 'font-medium'
               }`}
             >
               {tab.label}

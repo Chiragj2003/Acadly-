@@ -158,25 +158,29 @@ export default function PinterestStudentScreen() {
   ];
 
   return (
-    <View className="flex-1 bg-[#F8FAFC]">
-      <ScreenWrapper
-        headerProps={{
-          title: 'Student Desk',
-          instituteName: currentInstitute?.name || 'Bloom Science Academy',
-          onNotificationPress: openNotificationDrawer,
-          onProfilePress: () => setActiveTab('profile'),
-          onLogoutPress: handleLogout,
-          hasUnreadNotifications: unreadCount > 0,
-        }}
-      >
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 120 }}
-          contentContainerClassName="p-5 gap-5"
-        >
-          {/* ======================================================== */}
-          {/* TAB 1: HOME (BENTO EDITORIAL DASHBOARD)                  */}
-          {/* ======================================================== */}
+    <ScreenWrapper
+      headerProps={{
+        title: 'Student Desk',
+        instituteName: currentInstitute?.name || 'Bloom Science Academy',
+        onNotificationPress: openNotificationDrawer,
+        onProfilePress: () => setActiveTab('profile'),
+        onLogoutPress: handleLogout,
+        hasUnreadNotifications: unreadCount > 0,
+      }}
+      contentContainerClassName="p-5 gap-5"
+      contentContainerStyle={{ paddingBottom: 24 }}
+      footer={
+        <BottomTabBar
+          tabs={studentTabs}
+          activeTab={activeTab}
+          onTabChange={(key) => setActiveTab(key as any)}
+          accentColor="#2563EB"
+        />
+      }
+    >
+      {/* ======================================================== */}
+      {/* TAB 1: HOME (BENTO EDITORIAL DASHBOARD)                  */}
+      {/* ======================================================== */}
           {activeTab === 'home' && (
             <View className="gap-5">
               {/* 1. Multi-Teacher Tuition Switcher Pill Strip */}
@@ -699,7 +703,6 @@ export default function PinterestStudentScreen() {
               </View>
             </View>
           )}
-        </ScrollView>
 
         {/* Edit Profile Modal */}
         <Modal
@@ -750,14 +753,5 @@ export default function PinterestStudentScreen() {
         <FeeReceiptModal />
         <RazorpayCheckoutModal />
       </ScreenWrapper>
-
-      {/* Persistent Responsive 5-Tab Bottom Navigation Bar */}
-      <BottomTabBar
-        tabs={studentTabs}
-        activeTab={activeTab}
-        onTabChange={(key) => setActiveTab(key as any)}
-        accentColor="#2563EB"
-      />
-    </View>
   );
 }

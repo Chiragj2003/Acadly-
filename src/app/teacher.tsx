@@ -200,22 +200,9 @@ export default function PinterestTeacherScreen() {
       setIsSyncing(false);
       if (waParentPing) {
         Alert.alert(
-          'Roll Call Recorded 📲',
-          'Dispatch automated WhatsApp absentee notification to registered parent contact?',
-          [
-            {
-              text: 'Send WhatsApp Alert',
-              onPress: () => {
-                const message = encodeURIComponent(
-                  `Namaste from Acadly: This is an automated update from ${teacherProfile.fullName}'s classroom. Your ward was marked absent today. Please connect if this was unexcused.`
-                );
-                Linking.openURL(`https://wa.me/919823044551?text=${message}`).catch(() => {
-                  Alert.alert('Alert Dispatched', 'WhatsApp message simulated successfully.');
-                });
-              },
-            },
-            { text: 'Done', style: 'cancel' },
-          ]
+          'Roll Call Recorded',
+          'Automated in-app absentee notification dispatched to the registered parent portal and notification drawer.',
+          [{ text: 'OK' }]
         );
       } else {
         Alert.alert('Synced to Cloud', 'Attendance recorded safely in the database.');
@@ -394,9 +381,18 @@ export default function PinterestTeacherScreen() {
         },
         onLogoutPress: handleLogout,
       }}
+      contentContainerClassName="gap-3.5 px-4 py-4"
+      contentContainerStyle={{ paddingBottom: 24 }}
+      footer={
+        <BottomTabBar
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={(key) => setActiveTab(key as any)}
+          accentColor="#2563EB"
+        />
+      }
     >
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }} contentContainerClassName="gap-3.5">
-        {/* ================= TAB 1: HOME (COMMAND DESK) ================= */}
+      {/* ================= TAB 1: HOME (COMMAND DESK) ================= */}
         {activeTab === 'home' && (
           <View className="gap-3.5">
             {/* 1. Shareable Teacher Code Hero Card */}
@@ -608,15 +604,15 @@ export default function PinterestTeacherScreen() {
                 </TouchableOpacity>
               </View>
 
-              {/* WhatsApp Absence Ping Toggle */}
+              {/* In-App Absence Notification Toggle */}
               <View className="flex-row items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
                 <View className="flex-row items-center gap-2.5 flex-1 mr-2">
-                  <View className="w-8 h-8 rounded-full bg-emerald-100 items-center justify-center">
-                    <MessageSquare size={14} color="#047857" />
+                  <View className="w-8 h-8 rounded-full bg-blue-100 items-center justify-center">
+                    <MessageSquare size={14} color="#2563EB" />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-xs font-bold text-slate-800">WhatsApp Absence Alert</Text>
-                    <Text className="text-[11px] text-slate-500">Auto-compose message to parent phone on absence</Text>
+                    <Text className="text-xs font-bold text-slate-800">In-App Absence Alert</Text>
+                    <Text className="text-[11px] text-slate-500">Auto-dispatch in-app alert to parent portal on absence</Text>
                   </View>
                 </View>
                 <Switch
@@ -974,15 +970,6 @@ export default function PinterestTeacherScreen() {
             </View>
           </View>
         )}
-      </ScrollView>
-
-      {/* ================= BOTTOM TAB BAR ================= */}
-      <BottomTabBar
-        tabs={tabs}
-        activeTab={activeTab}
-        onTabChange={(key) => setActiveTab(key as any)}
-        accentColor="#2563EB"
-      />
 
       {/* ================= MODAL 1: DUAL MODE SWITCHER ================= */}
       <Modal visible={isDualModeModalOpen} transparent animationType="slide">

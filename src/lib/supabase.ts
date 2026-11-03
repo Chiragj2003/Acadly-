@@ -3,18 +3,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 
-const supabaseUrl =
-  process.env.EXPO_PUBLIC_SUPABASE_URL ||
-  process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  'https://cwxuwaljqrqdogsyqhwc.supabase.co';
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-const supabaseKey =
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
-  process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-  'sb_publishable_zdo5LS30p0HOoOGS7yUsig_z2ytCYBK';
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error(
+    '[Supabase Configuration Error]: Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_ANON_KEY. ' +
+      'Please verify that your .env file is created and contains valid Supabase project credentials.'
+  );
+}
 
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey);
+export const isSupabaseConfigured = true;
 
 // Universal safe storage adapter preventing SSR window undefined errors
 const safeStorage = {

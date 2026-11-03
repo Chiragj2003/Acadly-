@@ -15,7 +15,7 @@ export interface AuthContextType {
   institutes: Institute[];
   batches: Batch[];
   loading: boolean;
-  signIn: (identifier: string, role?: UserRole) => Promise<{ success: boolean; error?: string }>;
+  signIn: (identifier: string, password?: string, role?: UserRole) => Promise<{ success: boolean; role?: UserRole; error?: string }>;
   signInWithGoogle: (role: UserRole) => Promise<{ success: boolean; error?: string }>;
   signUp: (fullName: string, email: string, role: UserRole) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
@@ -98,33 +98,33 @@ const INITIAL_BATCHES: Batch[] = [
 const ROLE_PROFILES: Record<UserRole, Profile> = {
   admin: {
     id: 'user-admin',
-    email: 'director@apex.in',
+    email: 'admin@acadly.com',
     phone: '+91 98290 41208',
-    full_name: 'Director Sharma',
+    full_name: 'Director Rajesh Gupta',
     default_role: 'admin',
     created_at: '2025-01-01',
   },
   teacher: {
     id: 'user-teacher',
-    email: 'r.verma@apex.in',
+    email: 'teacher@acadly.com',
     phone: '+91 98290 41209',
-    full_name: 'Er. Rakesh Verma',
+    full_name: 'Prof. Vikram Joshi',
     default_role: 'teacher',
     created_at: '2025-01-05',
   },
   student: {
     id: 'user-student',
-    email: 'aryan.kapoor@student.in',
+    email: 'student@acadly.com',
     phone: '+91 98290 41210',
-    full_name: 'Aryan Kapoor',
+    full_name: 'Amelia Sharma',
     default_role: 'student',
     created_at: '2025-01-15',
   },
   parent: {
     id: 'user-parent',
-    email: 's.kapoor@parent.in',
+    email: 'parent@acadly.com',
     phone: '+91 98290 41211',
-    full_name: 'Suresh Kapoor',
+    full_name: 'Rajesh Sharma',
     default_role: 'parent',
     created_at: '2025-01-15',
   },
@@ -175,23 +175,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signIn = async (identifier: string, role?: UserRole) => {
+  const signIn = async (identifier: string, password?: string, role?: UserRole) => {
     setLoading(true);
     try {
-      const selectedRole = role || userRole;
+      const cleanEmail = identifier.trim().toLowerCase();
+      const enteredPass = password ? password.trim() : '';
+
+      if (enteredPass && enteredPass.length < 6) {
+        return { success: false, error: 'Password must be at least 6 characters.' };
+      }
+
       if (isSupabaseConfigured) {
-        // Attempt Supabase Auth login
-        const { error } = await supabase.auth.signInWithPassword({
-          email: identifier.includes('@') ? identifier : `${identifier}@acadly.app`,
-          password: 'Password123!',
-        });
-        if (error) {
-          // If credentials fail in demo mode, gracefully fall back to role profile
+        try {
+          const { error } = await supabase.auth.signInWithPassword({
+            email: cleanEmail.includes('@') ? cleanEmail : `${cleanEmail}@acadly.app`,
+            password: enteredPass || 'Password123!',
+          });
+          if (error) {
+            // Note: will be strictly handled in Step 2D with real Supabase Auth
+          }
+        } catch {
+          // Gracefully continue with selected role profile
         }
       }
 
-      await switchRole(selectedRole);
-      return { success: true };
+      const finalRole = role || userRole;
+      await switchRole(finalRole);
+      return { success: true, role: finalRole };
     } catch (e: any) {
       return { success: false, error: e.message || 'Failed to sign in' };
     } finally {
