@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Modal,
   TextInput,
   Switch,
+  ActivityIndicator,
 } from 'react-native';
 import {
   Trophy,
@@ -41,6 +42,7 @@ import {
   Bell,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useRoleGuard } from '@/hooks/useRoleGuard';
 import { useAuth } from '@/context/AuthContext';
 import { useInstitute } from '@/context/InstituteContext';
 import { useAcademic } from '@/context/AcademicContext';
@@ -66,6 +68,7 @@ import { DAILY_AFFIRMATIONS } from '@/data/dummyAcademicData';
 
 export default function PinterestStudentScreen() {
   const router = useRouter();
+  const { isAuthorized, isLoading } = useRoleGuard(['student', 'teacher', 'admin']);
   const { user, signOut } = useAuth();
   const { currentInstitute } = useInstitute();
   const {
@@ -156,6 +159,18 @@ export default function PinterestStudentScreen() {
       icon: (color, size) => <GraduationCap size={size} color={color} />,
     },
   ];
+
+  
+  if (isLoading || !isAuthorized) {
+    return (
+      <ScreenWrapper headerProps={{ title: 'Student Hub' }}>
+        <View className="flex-1 items-center justify-center p-8">
+          <ActivityIndicator size="small" color="#2563EB" />
+          <Text className="text-xs text-slate-500 mt-2 font-medium">Verifying authorization...</Text>
+        </View>
+      </ScreenWrapper>
+    );
+  }
 
   return (
     <ScreenWrapper

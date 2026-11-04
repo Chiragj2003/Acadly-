@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Alert,
   Linking,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import {
   Phone,
@@ -27,6 +28,7 @@ import {
   Send,
 } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRoleGuard } from '@/hooks/useRoleGuard';
 import { ScreenWrapper, Badge } from '@/components/ui';
 import {
   PerformanceComparisonChart,
@@ -36,6 +38,7 @@ import {
 import { useAcademic } from '@/context/AcademicContext';
 
 export default function StudentDetailScreen() {
+  const { isAuthorized, isLoading } = useRoleGuard(["teacher","admin","parent"]);
   const router = useRouter();
   const params = useLocalSearchParams<{ studentId?: string }>();
   const {
@@ -55,8 +58,20 @@ export default function StudentDetailScreen() {
     studentsRoster[0];
 
   if (!student) {
+    
+  if (isLoading || !isAuthorized) {
     return (
-      <ScreenWrapper headerProps={{ title: 'Student Profile', onBackPress: () => router.back() }}>
+      <ScreenWrapper headerProps={{ title: 'Student Profile' }}>
+        <View className="flex-1 items-center justify-center p-8">
+          <ActivityIndicator size="small" color="#2563EB" />
+          <Text className="text-xs text-slate-500 mt-2 font-medium">Verifying authorization...</Text>
+        </View>
+      </ScreenWrapper>
+    );
+  }
+
+  return (
+    <ScreenWrapper headerProps={{ title: 'Student Profile', onBackPress: () => router.back() }}>
         <View className="items-center justify-center p-8">
           <Text className="text-sm font-bold text-slate-700">Student record not found.</Text>
         </View>

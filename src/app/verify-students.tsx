@@ -6,26 +6,18 @@ import {
   ScrollView,
   Alert,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import {
   UserCheck,
   Check,
   X,
-  Clock,
-  GraduationCap,
-  Sparkles,
-  ArrowLeft,
-  ChevronRight,
-  Shield,
-  Phone,
-  School,
-  Award,
-  Layers,
   HeartHandshake,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { ScreenWrapper, Badge, Mascot } from '@/components/ui';
+import { ScreenWrapper, Mascot } from '@/components/ui';
 import { useAcademic, JoinRequest } from '@/context/AcademicContext';
+import { useRoleGuard } from '@/hooks/useRoleGuard';
 
 const BATCH_CHOICES = [
   { id: 'Class 12 • JEE Advanced (Morning)', name: 'Class 12 • JEE Advanced' },
@@ -42,11 +34,11 @@ const FEE_PLAN_CHOICES = [
 
 export default function VerifyStudentsScreen() {
   const router = useRouter();
+  const { isAuthorized, isLoading } = useRoleGuard(['teacher', 'admin']);
   const {
     joinRequests,
     approveJoinRequest,
     rejectJoinRequest,
-    submitJoinRequest,
     teacherProfile,
   } = useAcademic();
 
@@ -56,7 +48,18 @@ export default function VerifyStudentsScreen() {
   const [modalVisible, setModalVisible] = useState(false);
 
   // Filter pending requests
-  const pendingRequests = joinRequests.filter(r => r.status === 'pending');
+  const pendingRequests = joinRequests.filter((r) => r.status === 'pending');
+
+  if (isLoading || !isAuthorized) {
+    return (
+      <ScreenWrapper headerProps={{ title: 'Verification Desk', onBackPress: () => router.back() }}>
+        <View className="flex-1 items-center justify-center p-8">
+          <ActivityIndicator size="small" color="#2563EB" />
+          <Text className="text-xs text-slate-500 mt-2 font-medium">Verifying authorization...</Text>
+        </View>
+      </ScreenWrapper>
+    );
+  }
 
   const openApprovalModal = (req: JoinRequest) => {
     setSelectedRequest(req);
@@ -68,7 +71,7 @@ export default function VerifyStudentsScreen() {
     await approveJoinRequest(selectedRequest.id, selectedBatch, selectedFeePlan);
     setModalVisible(false);
     Alert.alert(
-      'Student Verified & Enrolled! 🎉',
+      'Student Verified & Enrolled',
       `${selectedRequest.studentDetails.fullName} has been successfully assigned to ${selectedBatch}. They now appear in your active class roster.`
     );
     setSelectedRequest(null);
@@ -92,32 +95,10 @@ export default function VerifyStudentsScreen() {
     );
   };
 
-  // Add dummy test request
-  const handleAddDemoRequest = async () => {
-    const demoNames = ['Riya Patel 🌸', 'Dev Malhotra ⚡', 'Ananya Sen 🌿', 'Arjun Verma 🚀'];
-    const chosenName = demoNames[Math.floor(Math.random() * demoNames.length)];
-    await submitJoinRequest(
-      {
-        fullName: chosenName,
-        grade: 'Class 11 Science',
-        board: 'CBSE',
-        targetExam: 'IIT-JEE 2026',
-        school: 'St. Vincent High School',
-        previousPercentage: '94.8%',
-        weakSubjects: ['Optics', 'Thermodynamics'],
-        guardianName: 'Rajesh Patel',
-        guardianPhone: '+91 98221 55667',
-        bloodGroup: 'O+',
-      },
-      teacherProfile.teacherCode
-    );
-    Alert.alert('Demo Request Added 🌸', `${chosenName} submitted a join request.`);
-  };
-
   return (
     <ScreenWrapper
       headerProps={{
-        title: 'Student Verification Queue 🍎',
+        title: 'Student Verification Queue',
         onBackPress: () => router.back(),
       }}
     >
@@ -127,7 +108,7 @@ export default function VerifyStudentsScreen() {
           <View className="flex-row items-center justify-between mb-2">
             <View className="flex-row items-center gap-2">
               <View className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
-                <UserCheck size={18} color="#ff7d6b" />
+                <UserCheck size={18} color="#2563EB" />
               </View>
               <View>
                 <Text className="text-base font-black text-slate-800">Pending Admissions</Text>
@@ -146,16 +127,6 @@ export default function VerifyStudentsScreen() {
           <Text className="text-xs text-slate-500 leading-relaxed">
             Review applicant backgrounds, assign their study batch, and confirm fee structures before granting classroom access.
           </Text>
-
-          <TouchableOpacity
-            onPress={handleAddDemoRequest}
-            className="mt-3 bg-slate-50 border border-slate-200 py-2 px-3 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-98"
-          >
-            <Sparkles size={13} color="#ff7d6b" />
-            <Text className="text-xs font-bold text-slate-800">
-              + Generate Test Applicant Request
-            </Text>
-          </TouchableOpacity>
         </View>
 
         {/* Pending Requests List */}
@@ -163,7 +134,7 @@ export default function VerifyStudentsScreen() {
           <View className="bg-white border border-slate-200 rounded-3xl p-8 items-center shadow-xs my-4">
             <Mascot mood="celebrating" size="lg" />
             <Text className="text-base font-black text-slate-800 mt-3 text-center">
-              All Students Verified! 🌸
+              All Students Verified
             </Text>
             <Text className="text-xs text-slate-500 text-center mt-1 max-w-[240px]">
               No pending admission requests in queue. Share your teacher code{' '}
@@ -171,7 +142,7 @@ export default function VerifyStudentsScreen() {
             </Text>
           </View>
         ) : (
-          pendingRequests.map(req => {
+          pendingRequests.map((req) => {
             const d = req.studentDetails;
             return (
               <View
@@ -248,7 +219,7 @@ export default function VerifyStudentsScreen() {
                     onPress={() => handleReject(req)}
                     className="px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 items-center justify-center active:scale-98"
                   >
-                    <X size={14} color="#a89993" />
+                    <X size={14} color="#64748B" />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -268,13 +239,13 @@ export default function VerifyStudentsScreen() {
           <View className="bg-white rounded-[32px] p-6 w-full max-w-sm border border-slate-200 shadow-lg">
             <View className="flex-row items-center justify-between mb-3">
               <View className="flex-row items-center gap-2">
-                <HeartHandshake size={18} color="#ff7d6b" />
+                <HeartHandshake size={18} color="#2563EB" />
                 <Text className="text-base font-black text-slate-800">
                   Admit Student
                 </Text>
               </View>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <X size={18} color="#a89993" />
+                <X size={18} color="#64748B" />
               </TouchableOpacity>
             </View>
 
@@ -287,7 +258,7 @@ export default function VerifyStudentsScreen() {
               1. Select Batch
             </Text>
             <View className="gap-1.5 mb-4">
-              {BATCH_CHOICES.map(b => (
+              {BATCH_CHOICES.map((b) => (
                 <TouchableOpacity
                   key={b.id}
                   onPress={() => setSelectedBatch(b.id)}
@@ -313,7 +284,7 @@ export default function VerifyStudentsScreen() {
               2. Fee Plan Structure
             </Text>
             <View className="gap-1.5 mb-5">
-              {FEE_PLAN_CHOICES.map(plan => (
+              {FEE_PLAN_CHOICES.map((plan) => (
                 <TouchableOpacity
                   key={plan}
                   onPress={() => setSelectedFeePlan(plan)}
@@ -340,7 +311,7 @@ export default function VerifyStudentsScreen() {
               className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs active:scale-98"
             >
               <Text className="text-xs font-black text-white">
-                Confirm Admission & Notify Student 🌸
+                Confirm Admission & Notify Student
               </Text>
             </TouchableOpacity>
           </View>
@@ -349,4 +320,3 @@ export default function VerifyStudentsScreen() {
     </ScreenWrapper>
   );
 }
-

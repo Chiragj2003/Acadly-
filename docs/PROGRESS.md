@@ -25,3 +25,19 @@
 ### Entry 001 - Spec Saved & Branch Setup
 - **Timestamp:** 2026-11-04T00:45:00+05:30
 - **Action:** Created `rebuild-v1` branch, committed `docs/PRODUCT_SPEC.md` and initial `docs/PROGRESS.md`.
+
+### Entry 002 - Sub-step 1A: Role Guards & Route Protection
+- **Timestamp:** 2026-11-05T00:12:00+05:30
+- **Actions:**
+  - Deleted orphaned src/app/explore.tsx boilerplate.
+  - Implemented strictly typed src/hooks/useRoleGuard.ts.
+  - Added role guards across all role-specific screens:
+    - /verify-students (restricted to Teacher/Admin)
+    - /join-institute (restricted to Student)
+    - /teacher (restricted to Teacher/Admin)
+    - /student (restricted to Student/Teacher/Admin)
+    - /parent (restricted to Parent/Admin)
+    - /admin (restricted to Admin)
+    - /student-detail (restricted to Teacher/Admin/Parent)
+  - Removed 'Simulate Teacher Approval' and 'Open Teacher Verification Desk' backdoor buttons from join-institute.tsx, replacing with clean 'Return to Student Desk' navigation.
+  - TypeScript verification: Passed with 0 errors.

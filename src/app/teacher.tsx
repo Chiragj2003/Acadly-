@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   TextInput,
   Share,
   Linking,
+  ActivityIndicator,
 } from 'react-native';
 import {
   BookOpen,
@@ -41,6 +42,7 @@ import {
 } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
+import { useRoleGuard } from '@/hooks/useRoleGuard';
 import { useAuth } from '@/context/AuthContext';
 import { useAcademic } from '@/context/AcademicContext';
 import {
@@ -60,6 +62,7 @@ import {
 import { type AttendanceRecord } from '@/types/database';
 
 export default function PinterestTeacherScreen() {
+  const { isAuthorized, isLoading } = useRoleGuard(["teacher","admin"]);
   const router = useRouter();
   const { activeInstitute, signOut } = useAuth();
   const {
@@ -360,6 +363,18 @@ export default function PinterestTeacherScreen() {
       icon: (color, size) => <GraduationCap color={color} size={size} />,
     },
   ];
+
+  
+  if (isLoading || !isAuthorized) {
+    return (
+      <ScreenWrapper headerProps={{ title: 'Teacher Desk' }}>
+        <View className="flex-1 items-center justify-center p-8">
+          <ActivityIndicator size="small" color="#2563EB" />
+          <Text className="text-xs text-slate-500 mt-2 font-medium">Verifying authorization...</Text>
+        </View>
+      </ScreenWrapper>
+    );
+  }
 
   return (
     <ScreenWrapper

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Modal,
   Linking,
   Switch,
+  ActivityIndicator,
 } from 'react-native';
 import {
   Users,
@@ -33,6 +34,7 @@ import {
   Award,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useRoleGuard } from '@/hooks/useRoleGuard';
 import { useAuth } from '@/context/AuthContext';
 import { useInstitute } from '@/context/InstituteContext';
 import { useChild, ChildStudent } from '@/context/ChildContext';
@@ -56,6 +58,7 @@ import {
 import { generateAndSharePDF, DUMMY_PDF_CATALOG } from '@/services/dummyPdfService';
 
 export default function PinterestParentScreen() {
+  const { isAuthorized, isLoading } = useRoleGuard(["parent","admin"]);
   const router = useRouter();
   const { signOut } = useAuth();
   const { currentInstitute } = useInstitute();
@@ -159,6 +162,18 @@ export default function PinterestParentScreen() {
       icon: (color, size) => <ShieldCheck color={color} size={size} />,
     },
   ];
+
+  
+  if (isLoading || !isAuthorized) {
+    return (
+      <ScreenWrapper headerProps={{ title: 'Parent Portal' }}>
+        <View className="flex-1 items-center justify-center p-8">
+          <ActivityIndicator size="small" color="#2563EB" />
+          <Text className="text-xs text-slate-500 mt-2 font-medium">Verifying authorization...</Text>
+        </View>
+      </ScreenWrapper>
+    );
+  }
 
   return (
     <ScreenWrapper

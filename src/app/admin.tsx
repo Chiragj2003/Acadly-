@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,10 @@ import {
   ScrollView,
   TextInput,
   Linking,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useRoleGuard } from '@/hooks/useRoleGuard';
 import {
   Users,
   BookOpen,
@@ -54,6 +56,7 @@ import {
 } from '@/components/finance';
 
 export default function PinterestAdminScreen() {
+  const { isAuthorized, isLoading } = useRoleGuard(["admin"]);
   const router = useRouter();
   const { activeInstitute, batches, createBatch, signOut } = useAuth();
   const { joinRequests, coachingProfile, studentsRoster } = useAcademic();
@@ -168,6 +171,18 @@ export default function PinterestAdminScreen() {
       icon: (color, size) => <ShieldCheck color={color} size={size} />,
     },
   ];
+
+  
+  if (isLoading || !isAuthorized) {
+    return (
+      <ScreenWrapper headerProps={{ title: 'Admin Command' }}>
+        <View className="flex-1 items-center justify-center p-8">
+          <ActivityIndicator size="small" color="#2563EB" />
+          <Text className="text-xs text-slate-500 mt-2 font-medium">Verifying authorization...</Text>
+        </View>
+      </ScreenWrapper>
+    );
+  }
 
   return (
     <ScreenWrapper

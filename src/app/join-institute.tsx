@@ -6,28 +6,21 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {
-  Sparkles,
   QrCode,
   ArrowRight,
-  ShieldCheck,
   GraduationCap,
   Clock,
   CheckCircle2,
-  BookOpen,
-  User,
   Phone,
-  Heart,
-  School,
-  Award,
-  Layers,
-  ArrowLeft,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { ScreenWrapper, Mascot } from '@/components/ui';
 import { useAcademic, StudentExtraDetails } from '@/context/AcademicContext';
 import { useAuth } from '@/context/AuthContext';
+import { useRoleGuard } from '@/hooks/useRoleGuard';
 
 const WEAK_SUBJECT_OPTIONS = [
   'Rotational Mechanics',
@@ -51,12 +44,12 @@ const BOARD_OPTIONS = ['CBSE', 'ICSE', 'State Board', 'IB / Cambridge'];
 
 export default function JoinInstituteScreen() {
   const router = useRouter();
+  const { isAuthorized, isLoading } = useRoleGuard(['student']);
   const { user } = useAuth();
   const {
     submitJoinRequest,
     studentJoinStatus,
     activeJoinRequest,
-    simulateTeacherApproval,
     teacherProfile,
     coachingProfile,
   } = useAcademic();
@@ -84,58 +77,56 @@ export default function JoinInstituteScreen() {
 
   // Toggle Weak Subject Chip
   const toggleWeakSubject = (sub: string) => {
-    setSelectedWeakSubjects(prev =>
-      prev.includes(sub) ? prev.filter(s => s !== sub) : [...prev, sub]
+    setSelectedWeakSubjects((prev) =>
+      prev.includes(sub) ? prev.filter((s) => s !== sub) : [...prev, sub]
     );
   };
 
-  // Determine matched target for preview
-  const getMatchedTarget = () => {
-    const trimmed = teacherCode.trim().toUpperCase();
-    if (trimmed === teacherProfile.teacherCode.toUpperCase()) {
-      return {
-        name: teacherProfile.fullName,
-        type: 'Individual Solo Teacher',
-        detail: `${teacherProfile.qualification} • ${teacherProfile.specializationSubjects.join(', ')}`,
-        rate: `₹${teacherProfile.monthlyFeeRate}/mo`,
-        isMatch: true,
-      };
-    }
-    if (trimmed === coachingProfile.inviteCode.toUpperCase()) {
-      return {
-        name: coachingProfile.name,
-        type: 'Coaching Institute',
-        detail: `${coachingProfile.city} • ${coachingProfile.subjectsOffered.join(', ')}`,
-        rate: 'Comprehensive Batch',
-        isMatch: true,
-      };
-    }
-    if (trimmed.length > 3) {
-      return {
-        name: `Educator (${trimmed})`,
-        type: 'Verified Teacher',
-        detail: 'Physics & Mathematics Classroom',
-        rate: 'Standard Plan',
-        isMatch: true,
-      };
-    }
-    return null;
-  };
+  // Matched target resolution
+  const cleanCode = teacherCode.trim().toUpperCase();
+  let matchedTarget: { name: string; type: string; detail: string; rate: string } | null = null;
+  if (cleanCode === teacherProfile.teacherCode.toUpperCase()) {
+    matchedTarget = {
+      name: teacherProfile.fullName,
+      type: 'Solo Faculty Desk',
+      detail: `${teacherProfile.qualification} • ${teacherProfile.specializationSubjects.join(', ')}`,
+      rate: `₹${teacherProfile.monthlyFeeRate.toLocaleString('en-IN')}/month`,
+    };
+  } else if (cleanCode === (coachingProfile?.inviteCode || '').toUpperCase()) {
+    matchedTarget = {
+      name: coachingProfile?.name || 'Bloom Science Academy',
+      type: 'Coaching Center',
+      detail: `${coachingProfile?.city} Campus • ${coachingProfile?.subjectsOffered.join(', ')}`,
+      rate: 'Comprehensive Tier Plan',
+    };
+  } else if (cleanCode.length >= 4) {
+    matchedTarget = {
+      name: `Teacher / Institute (${cleanCode})`,
+      type: 'Verified Provider',
+      detail: 'Curriculum & Live Batches',
+      rate: 'Standard Batch Rate',
+    };
+  }
 
-  const matchedTarget = getMatchedTarget();
+  if (isLoading || !isAuthorized) {
+    return (
+      <ScreenWrapper headerProps={{ title: 'Join Classes', onBackPress: () => router.back() }}>
+        <View className="flex-1 items-center justify-center p-8">
+          <ActivityIndicator size="small" color="#2563EB" />
+          <Text className="text-xs text-slate-500 mt-2 font-medium">Verifying authorization...</Text>
+        </View>
+      </ScreenWrapper>
+    );
+  }
 
-  // Submit Handler
+  // Handle Join Submission
   const handleSubmit = async () => {
-    if (!fullName.trim()) {
-      Alert.alert('Required', 'Please enter your Full Name.');
-      return;
-    }
     if (!teacherCode.trim()) {
-      Alert.alert('Required', 'Please enter your Teacher or Coaching Code.');
+      Alert.alert('Validation Error', 'Please enter your Teacher Code or Coaching Code.');
       return;
     }
-    if (!guardianPhone.trim()) {
-      Alert.alert('Required', 'Please provide a Guardian Contact Number.');
+    if (!fullName.trim()) {
+      Alert.alert('Validation Error', 'Please enter your full name.');
       return;
     }
 
@@ -155,31 +146,16 @@ export default function JoinInstituteScreen() {
     const res = await submitJoinRequest(details, teacherCode.trim().toUpperCase());
     if (res.success) {
       setStep('waiting');
-      Alert.alert('Request Submitted! 🌸', `Sent to ${res.targetName} for verification.`);
+      Alert.alert('Request Submitted', `Sent to ${res.targetName} for verification.`);
     } else {
       Alert.alert('Error', res.error || 'Could not submit join request.');
     }
   };
 
-  // Instant Demo Simulation
-  const handleSimulateApproval = async () => {
-    await simulateTeacherApproval();
-    Alert.alert(
-      'Teacher Approved! 🎉',
-      'Prof. Vikram Joshi has approved your admission into Class 12 • JEE Advanced (Morning). Welcome aboard!',
-      [
-        {
-          text: 'Open Student Hub →',
-          onPress: () => router.replace('/student'),
-        },
-      ]
-    );
-  };
-
   return (
     <ScreenWrapper
       headerProps={{
-        title: 'Join Coaching or Teacher 🌸',
+        title: 'Join Coaching or Teacher',
         onBackPress: () => router.back(),
       }}
     >
@@ -189,39 +165,34 @@ export default function JoinInstituteScreen() {
           <View className="bg-white border border-slate-200 rounded-[32px] p-6 items-center shadow-xs">
             <Mascot mood="curious" size="lg" />
 
-            <View className="bg-amber-50 border border-amber-200 px-3 py-1 rounded-full mt-3">
+            <View className="bg-amber-50 border border-amber-200 px-3 py-1 rounded-full mt-3 flex-row items-center gap-1.5">
+              <Clock size={12} color="#D97706" />
               <Text className="text-[11px] font-extrabold text-amber-800">
-                ⏳ Verification Pending
+                Verification Pending
               </Text>
             </View>
 
             <Text className="text-xl font-black text-slate-800 mt-3 text-center">
-              Request Sent to Teacher! 🌸
+              Request Sent to Teacher
             </Text>
-            <Text className="text-xs text-slate-500 text-center mt-1.5 leading-relaxed px-2">
-              Your profile has been submitted to{' '}
-              <Text className="font-extrabold text-blue-600">
-                {activeJoinRequest?.matchedTargetName || teacherProfile.fullName}
-              </Text>{' '}
-              under code{' '}
-              <Text className="font-extrabold text-slate-800">
-                {activeJoinRequest?.codeUsed || teacherCode.toUpperCase()}
-              </Text>
-              .
+            <Text className="text-xs text-slate-500 text-center mt-1 max-w-[280px] leading-relaxed">
+              Your application has been received. Your teacher will review your background and assign your batch shortly.
             </Text>
 
-            {/* Profile Summary Card */}
-            <View className="bg-slate-50 rounded-2xl p-4 border border-slate-200 my-4 w-full">
-              <Text className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2">
-                Submitted Student Profile
-              </Text>
-              <View className="gap-1.5">
-                <View className="flex-row justify-between">
-                  <Text className="text-xs text-slate-500">Student:</Text>
-                  <Text className="text-xs font-bold text-slate-800">
-                    {activeJoinRequest?.studentDetails.fullName || fullName}
+            {/* Target Card */}
+            <View className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 my-4">
+              <View className="flex-row items-center justify-between pb-2 mb-2 border-b border-slate-200">
+                <Text className="text-xs font-black text-slate-800">
+                  {activeJoinRequest?.matchedTargetName || matchedTarget?.name || 'Prof. Vikram Joshi'}
+                </Text>
+                <View className="bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
+                  <Text className="text-[10px] font-bold text-blue-600">
+                    Code: {activeJoinRequest?.codeUsed || cleanCode}
                   </Text>
                 </View>
+              </View>
+
+              <View className="gap-1">
                 <View className="flex-row justify-between">
                   <Text className="text-xs text-slate-500">Target Exam:</Text>
                   <Text className="text-xs font-bold text-slate-800">
@@ -263,31 +234,21 @@ export default function JoinInstituteScreen() {
               </View>
             </View>
 
-            {/* Instant Demo Simulation Button */}
+            {/* Clean Action Buttons */}
             <TouchableOpacity
               activeOpacity={0.88}
-              onPress={handleSimulateApproval}
-              className="w-full bg-emerald-500 py-3.5 rounded-2xl items-center shadow-xs flex-row justify-center gap-2 mb-2.5 active:scale-98"
+              onPress={() => router.replace('/student')}
+              className="w-full bg-blue-600 py-3.5 rounded-2xl items-center shadow-xs flex-row justify-center gap-2 mb-2.5 active:scale-98"
             >
-              <Sparkles size={16} color="#ffffff" />
+              <GraduationCap size={16} color="#ffffff" />
               <Text className="text-xs font-black text-white tracking-wide">
-                ⚡ Simulate Teacher Approval (Instant Demo)
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.88}
-              onPress={() => router.push('/verify-students')}
-              className="w-full bg-blue-50 border border-blue-200 py-2.5 rounded-2xl items-center mb-2.5 active:scale-98"
-            >
-              <Text className="text-xs font-bold text-blue-600">
-                Open Teacher Verification Desk 🍎
+                Return to Student Desk
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => setStep('form')}
-              className="py-2"
+              className="py-2 items-center"
             >
               <Text className="text-xs font-bold text-slate-500 underline">
                 Edit Details or Change Code
@@ -306,7 +267,7 @@ export default function JoinInstituteScreen() {
           <View className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs">
             <View className="flex-row items-center gap-2.5 mb-2">
               <View className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
-                <QrCode size={18} color="#ff7d6b" />
+                <QrCode size={18} color="#2563EB" />
               </View>
               <View className="flex-1">
                 <Text className="text-sm font-black text-slate-800">
@@ -320,7 +281,7 @@ export default function JoinInstituteScreen() {
 
             <TextInput
               placeholder="e.g. JOSHI-MATH-89 or APEX2026"
-              placeholderTextColor="#a89993"
+              placeholderTextColor="#94A3B8"
               autoCapitalize="characters"
               value={teacherCode}
               onChangeText={setTeacherCode}
@@ -332,7 +293,7 @@ export default function JoinInstituteScreen() {
               <View className="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 mt-3">
                 <View className="flex-row items-center justify-between mb-1">
                   <View className="flex-row items-center gap-1.5">
-                    <CheckCircle2 size={14} color="#ff7d6b" />
+                    <CheckCircle2 size={14} color="#2563EB" />
                     <Text className="text-xs font-black text-slate-800">
                       {matchedTarget.name}
                     </Text>
@@ -356,7 +317,7 @@ export default function JoinInstituteScreen() {
           {/* 2. Student Academic Details */}
           <View className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs gap-3">
             <View className="flex-row items-center gap-2 mb-1">
-              <GraduationCap size={16} color="#ff7d6b" />
+              <GraduationCap size={16} color="#2563EB" />
               <Text className="text-sm font-black text-slate-800">
                 Student Academic Profile
               </Text>
@@ -366,7 +327,7 @@ export default function JoinInstituteScreen() {
               <Text className="text-xs font-bold text-slate-800 mb-1">Student Full Name</Text>
               <TextInput
                 placeholder="e.g. Amelia Sharma"
-                placeholderTextColor="#a89993"
+                placeholderTextColor="#94A3B8"
                 value={fullName}
                 onChangeText={setFullName}
                 className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
@@ -376,19 +337,19 @@ export default function JoinInstituteScreen() {
             <View>
               <Text className="text-xs font-bold text-slate-800 mb-1.5">Class / Grade</Text>
               <View className="flex-row flex-wrap gap-1.5">
-                {GRADE_OPTIONS.map(g => (
+                {GRADE_OPTIONS.map((g) => (
                   <TouchableOpacity
                     key={g}
                     onPress={() => setGrade(g)}
                     className={`px-3 py-1.5 rounded-xl border ${
                       grade === g
-                        ? 'bg-blue-600 border-blue-200'
+                        ? 'bg-blue-600 border-blue-600'
                         : 'bg-slate-50 border-slate-200'
                     }`}
                   >
                     <Text
-                      className={`text-[11px] font-bold ${
-                        grade === g ? 'text-white' : 'text-slate-800'
+                      className={`text-xs font-bold ${
+                        grade === g ? 'text-white' : 'text-slate-700'
                       }`}
                     >
                       {g}
@@ -399,21 +360,21 @@ export default function JoinInstituteScreen() {
             </View>
 
             <View>
-              <Text className="text-xs font-bold text-slate-800 mb-1.5">Board of Education</Text>
+              <Text className="text-xs font-bold text-slate-800 mb-1.5">Affiliated Board</Text>
               <View className="flex-row flex-wrap gap-1.5">
-                {BOARD_OPTIONS.map(b => (
+                {BOARD_OPTIONS.map((b) => (
                   <TouchableOpacity
                     key={b}
                     onPress={() => setBoard(b)}
                     className={`px-3 py-1.5 rounded-xl border ${
                       board === b
-                        ? 'bg-blue-600 border-blue-200'
+                        ? 'bg-blue-600 border-blue-600'
                         : 'bg-slate-50 border-slate-200'
                     }`}
                   >
                     <Text
-                      className={`text-[11px] font-bold ${
-                        board === b ? 'text-white' : 'text-slate-800'
+                      className={`text-xs font-bold ${
+                        board === b ? 'text-white' : 'text-slate-700'
                       }`}
                     >
                       {b}
@@ -428,17 +389,17 @@ export default function JoinInstituteScreen() {
                 <Text className="text-xs font-bold text-slate-800 mb-1">Target Exam</Text>
                 <TextInput
                   placeholder="e.g. IIT-JEE 2026"
-                  placeholderTextColor="#a89993"
+                  placeholderTextColor="#94A3B8"
                   value={targetExam}
                   onChangeText={setTargetExam}
                   className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
                 />
               </View>
-              <View className="flex-1">
-                <Text className="text-xs font-bold text-slate-800 mb-1">Class 10 %</Text>
+              <View className="w-28">
+                <Text className="text-xs font-bold text-slate-800 mb-1">Previous %</Text>
                 <TextInput
                   placeholder="e.g. 96.2%"
-                  placeholderTextColor="#a89993"
+                  placeholderTextColor="#94A3B8"
                   value={previousScore}
                   onChangeText={setPreviousScore}
                   className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
@@ -447,40 +408,40 @@ export default function JoinInstituteScreen() {
             </View>
 
             <View>
-              <Text className="text-xs font-bold text-slate-800 mb-1">Current School Name</Text>
+              <Text className="text-xs font-bold text-slate-800 mb-1">School / College Name</Text>
               <TextInput
-                placeholder="e.g. Delhi Public School (R.K. Puram)"
-                placeholderTextColor="#a89993"
+                placeholder="e.g. Delhi Public School"
+                placeholderTextColor="#94A3B8"
                 value={school}
                 onChangeText={setSchool}
                 className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
               />
             </View>
 
-            {/* Weak Subjects Multi-Select */}
-            <View className="mt-1">
+            {/* Weak Subject Checkboxes */}
+            <View>
               <Text className="text-xs font-bold text-slate-800 mb-1.5">
-                Focus Areas / Weak Subjects (Select chips)
+                Focus Subject Areas (Select areas where you need guidance)
               </Text>
               <View className="flex-row flex-wrap gap-1.5">
-                {WEAK_SUBJECT_OPTIONS.map(sub => {
-                  const isSelected = selectedWeakSubjects.includes(sub);
+                {WEAK_SUBJECT_OPTIONS.map((sub) => {
+                  const isSel = selectedWeakSubjects.includes(sub);
                   return (
                     <TouchableOpacity
                       key={sub}
                       onPress={() => toggleWeakSubject(sub)}
                       className={`px-2.5 py-1.5 rounded-xl border ${
-                        isSelected
-                          ? 'bg-rose-100 border-rose-300'
+                        isSel
+                          ? 'bg-rose-50 border-rose-300'
                           : 'bg-slate-50 border-slate-200'
                       }`}
                     >
                       <Text
-                        className={`text-[10px] font-bold ${
-                          isSelected ? 'text-rose-800' : 'text-slate-500'
+                        className={`text-[11px] font-bold ${
+                          isSel ? 'text-rose-700' : 'text-slate-600'
                         }`}
                       >
-                        {isSelected ? '✓ ' : '+ '}
+                        {isSel ? '✓ ' : '+ '}
                         {sub}
                       </Text>
                     </TouchableOpacity>
@@ -493,7 +454,7 @@ export default function JoinInstituteScreen() {
           {/* 3. Guardian & Emergency Contact */}
           <View className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs gap-3">
             <View className="flex-row items-center gap-2 mb-1">
-              <Phone size={16} color="#ff7d6b" />
+              <Phone size={16} color="#2563EB" />
               <Text className="text-sm font-black text-slate-800">
                 Guardian Contact & Bio
               </Text>
@@ -503,7 +464,7 @@ export default function JoinInstituteScreen() {
               <Text className="text-xs font-bold text-slate-800 mb-1">Guardian Full Name</Text>
               <TextInput
                 placeholder="e.g. Sunita Sharma"
-                placeholderTextColor="#a89993"
+                placeholderTextColor="#94A3B8"
                 value={guardianName}
                 onChangeText={setGuardianName}
                 className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
@@ -512,10 +473,10 @@ export default function JoinInstituteScreen() {
 
             <View className="flex-row gap-2">
               <View className="flex-1">
-                <Text className="text-xs font-bold text-slate-800 mb-1">Guardian Phone (UPI/SMS)</Text>
+                <Text className="text-xs font-bold text-slate-800 mb-1">Guardian Phone (SMS Alerts)</Text>
                 <TextInput
                   placeholder="+91 98230 44551"
-                  placeholderTextColor="#a89993"
+                  placeholderTextColor="#94A3B8"
                   keyboardType="phone-pad"
                   value={guardianPhone}
                   onChangeText={setGuardianPhone}
@@ -526,7 +487,7 @@ export default function JoinInstituteScreen() {
                 <Text className="text-xs font-bold text-slate-800 mb-1">Blood Grp</Text>
                 <TextInput
                   placeholder="e.g. B+"
-                  placeholderTextColor="#a89993"
+                  placeholderTextColor="#94A3B8"
                   value={bloodGroup}
                   onChangeText={setBloodGroup}
                   className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
@@ -542,7 +503,7 @@ export default function JoinInstituteScreen() {
             className="w-full bg-blue-600 py-3.5 rounded-2xl items-center shadow-xs flex-row justify-center gap-2 active:scale-98"
           >
             <Text className="text-xs font-black text-white tracking-wide">
-              Send Join Request to Teacher 🌸
+              Send Join Request to Teacher
             </Text>
             <ArrowRight size={14} color="#ffffff" />
           </TouchableOpacity>
@@ -551,4 +512,3 @@ export default function JoinInstituteScreen() {
     </ScreenWrapper>
   );
 }
-
