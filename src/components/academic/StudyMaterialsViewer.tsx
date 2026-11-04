@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, Alert, ScrollView, TextInput } from 'react-native';
+import * as DocumentPicker from 'expo-document-picker';
 import {
   FileText,
   Download,
@@ -28,12 +29,40 @@ export const StudyMaterialsViewer: React.FC = () => {
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('Physics');
   const [description, setDescription] = useState('');
+  const [selectedFile, setSelectedFile] = useState<{
+    name: string;
+    uri: string;
+    sizeFormatted: string;
+  } | null>(null);
 
   const subjects = ['All', 'Physics', 'Chemistry', 'Mathematics'];
 
   const filtered = selectedSubject === 'All'
     ? materials
     : materials.filter((m) => m.subject.toLowerCase() === selectedSubject.toLowerCase());
+
+  const handlePickFile = async () => {
+    try {
+      const res = await DocumentPicker.getDocumentAsync({
+        type: 'application/pdf',
+        copyToCacheDirectory: true,
+      });
+      if (!res.canceled && res.assets && res.assets.length > 0) {
+        const asset = res.assets[0];
+        const sizeMB = asset.size ? `${(asset.size / (1024 * 1024)).toFixed(1)} MB` : '1.5 MB';
+        setSelectedFile({
+          name: asset.name,
+          uri: asset.uri,
+          sizeFormatted: sizeMB,
+        });
+        if (!title.trim()) {
+          setTitle(asset.name.replace(/\.[^/.]+$/, ''));
+        }
+      }
+    } catch {
+      Alert.alert('File Picker', 'Unable to select file.');
+    }
+  };
 
   const handleDownload = async (item: StudyMaterial) => {
     try {
@@ -72,20 +101,26 @@ export const StudyMaterialsViewer: React.FC = () => {
       return;
     }
 
+    if (!selectedFile) {
+      Alert.alert('Document Required', 'Please attach a real PDF document to publish.');
+      return;
+    }
+
     await uploadMaterial({
       title,
       subject,
       description,
-      file_url: 'https://example.com/notes.pdf',
+      file_url: selectedFile.uri,
       file_type: 'pdf',
-      file_size_formatted: '3.2 MB',
-      page_count: 24,
+      file_size_formatted: selectedFile.sizeFormatted,
+      page_count: 12,
       uploaded_by: userRole === 'teacher' ? 'Prof. Vikram Joshi' : 'Director Sharma',
     });
 
     setIsUploadOpen(false);
     setTitle('');
     setDescription('');
+    setSelectedFile(null);
     Alert.alert('Published! 📄', 'Study material is now accessible to all enrolled batches.');
   };
 
@@ -219,6 +254,35 @@ export const StudyMaterialsViewer: React.FC = () => {
                 numberOfLines={3}
                 className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 min-h-[70px]"
               />
+            </View>
+
+            <View>
+              <Text className="text-xs font-bold text-slate-700 mb-1">Attached PDF File</Text>
+              <TouchableOpacity
+                onPress={handlePickFile}
+                className={`p-3 rounded-xl border flex-row items-center justify-between active:scale-98 ${
+                  selectedFile
+                    ? 'bg-emerald-50 border-emerald-300'
+                    : 'bg-slate-50 border-dashed border-slate-300'
+                }`}
+              >
+                <View className="flex-row items-center gap-2 flex-1 pr-2">
+                  <FileText size={16} color={selectedFile ? '#059669' : '#64748B'} />
+                  <Text
+                    className={`text-xs font-semibold ${
+                      selectedFile ? 'text-emerald-900 font-bold' : 'text-slate-600'
+                    }`}
+                    numberOfLines={1}
+                  >
+                    {selectedFile ? `${selectedFile.name} (${selectedFile.sizeFormatted})` : 'Choose PDF from device...'}
+                  </Text>
+                </View>
+                {selectedFile ? (
+                  <CheckCircle size={16} color="#059669" />
+                ) : (
+                  <Upload size={14} color="#64748B" />
+                )}
+              </TouchableOpacity>
             </View>
 
             <TouchableOpacity

@@ -1,18 +1,24 @@
 import React from 'react';
-import { View, Text, Modal, Pressable, Platform } from 'react-native';
+import { View, Text, Modal, Pressable, Platform, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { X, Play, Clock, User, Download, Check } from 'lucide-react-native';
 import { useAcademic } from '@/context/AcademicContext';
 import { Badge, Button } from '@/components/ui';
 
 export const VideoPlayerModal: React.FC = () => {
-  const { activeLecture, closePlayer, offlineLectureIds, toggleOfflineDownload } = useAcademic();
+  const { activeLecture, closePlayer } = useAcademic();
 
   if (!activeLecture) return null;
 
-  const isOffline = offlineLectureIds.includes(activeLecture.id);
-  const videoId = activeLecture.video_id_or_url || 'dQw4w9WgXcQ';
+  const videoId = activeLecture.video_id_or_url || 'fNk_zzaMoSs';
   const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0`;
+
+  const handleOfflinePress = () => {
+    Alert.alert(
+      'Offline Caching (Coming in v2)',
+      'Offline video caching with encrypted DRM playback is coming in v2 powered by Bunny Stream CDN.'
+    );
+  };
 
   return (
     <Modal visible={Boolean(activeLecture)} transparent animationType="slide">
@@ -86,16 +92,10 @@ export const VideoPlayerModal: React.FC = () => {
 
               <Button
                 size="sm"
-                variant={isOffline ? 'surface' : 'outline'}
-                title={isOffline ? 'Cached' : 'Save Offline'}
-                leftIcon={
-                  isOffline ? (
-                    <Check size={14} color="#069669" />
-                  ) : (
-                    <Download size={14} color="#0051d5" />
-                  )
-                }
-                onPress={() => toggleOfflineDownload(activeLecture.id)}
+                variant="outline"
+                title="Download (v2)"
+                leftIcon={<Download size={14} color="#0051d5" />}
+                onPress={handleOfflinePress}
               />
             </View>
 

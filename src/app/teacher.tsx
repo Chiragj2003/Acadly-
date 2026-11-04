@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -197,20 +197,21 @@ export default function PinterestTeacherScreen() {
     Alert.alert('Roll Call Updated', 'All enrolled batch students marked as Present.');
   };
 
-  const handleCommitAttendance = () => {
+  const handleCommitAttendance = async () => {
     setIsSyncing(true);
-    setTimeout(() => {
-      setIsSyncing(false);
+    try {
       if (waParentPing) {
         Alert.alert(
           'Roll Call Recorded',
-          'Automated in-app absentee notification dispatched to the registered parent portal and notification drawer.',
+          'Attendance recorded in the roster. Absentee SMS & WhatsApp gateway dispatch is scheduled for v2.',
           [{ text: 'OK' }]
         );
       } else {
-        Alert.alert('Synced to Cloud', 'Attendance recorded safely in the database.');
+        Alert.alert('Attendance Recorded', 'Attendance recorded safely in the roster.');
       }
-    }, 600);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   // Pick Document for PDF Upload

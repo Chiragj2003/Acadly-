@@ -221,34 +221,44 @@ export default function PinterestParentScreen() {
             </TouchableOpacity>
           </View>
 
-          <View className="flex-row gap-2">
-            {childrenList.map((c) => {
-              const isSelected = selectedChild?.id === c.id;
-              return (
-                <TouchableOpacity
-                  key={c.id}
-                  onPress={() => selectChild(c.id)}
-                  className={`flex-1 p-3 rounded-2xl flex-row items-center gap-2.5 border-2 ${
-                    isSelected
-                      ? 'bg-blue-50/80 border-blue-600 shadow-xs'
-                      : 'bg-slate-50 border-slate-200'
-                  }`}
-                >
-                  <View className="w-9 h-9 rounded-full bg-white border border-slate-200 items-center justify-center">
-                    <Text className="text-base">{c.emoji || '🎓'}</Text>
-                  </View>
-                  <View className="flex-1 min-w-0">
-                    <Text className="text-xs font-bold text-slate-900" numberOfLines={1}>
-                      {c.full_name}
-                    </Text>
-                    <Text className="text-[10px] text-slate-500" numberOfLines={1}>
-                      {c.batch_name}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+          {childrenList.length === 0 ? (
+            <TouchableOpacity
+              onPress={() => setIsLinkChildModalOpen(true)}
+              className="p-4 rounded-2xl bg-slate-50 border border-dashed border-slate-300 items-center justify-center gap-1 active:scale-98"
+            >
+              <Text className="text-xs font-bold text-slate-700">No student accounts linked yet</Text>
+              <Text className="text-[11px] text-blue-600 font-semibold">+ Tap here to enter your ward's Student Link Code</Text>
+            </TouchableOpacity>
+          ) : (
+            <View className="flex-row gap-2">
+              {childrenList.map((c) => {
+                const isSelected = selectedChild?.id === c.id;
+                return (
+                  <TouchableOpacity
+                    key={c.id}
+                    onPress={() => selectChild(c.id)}
+                    className={`flex-1 p-3 rounded-2xl flex-row items-center gap-2.5 border-2 ${
+                      isSelected
+                        ? 'bg-blue-50/80 border-blue-600 shadow-xs'
+                        : 'bg-slate-50 border-slate-200'
+                    }`}
+                  >
+                    <View className="w-9 h-9 rounded-full bg-white border border-slate-200 items-center justify-center">
+                      <Text className="text-base">{c.emoji || '🎓'}</Text>
+                    </View>
+                    <View className="flex-1 min-w-0">
+                      <Text className="text-xs font-bold text-slate-900" numberOfLines={1}>
+                        {c.full_name}
+                      </Text>
+                      <Text className="text-[10px] text-slate-500" numberOfLines={1}>
+                        {c.batch_name}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
         </View>
 
         {/* ================= TAB 1: HOME ================= */}

@@ -163,7 +163,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const switchRole = async (role: UserRole) => {
     setUserRole(role);
-    setUser(ROLE_PROFILES[role]);
+    setUser((prev) => (prev ? { ...prev, default_role: role } : ROLE_PROFILES[role]));
     await AsyncStorage.setItem('@acadly_role', role);
     await AsyncStorage.setItem('@acadly_authenticated', 'true');
   };
@@ -213,19 +213,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       if (isSupabaseConfigured) {
-        await supabase.auth.signInWithOAuth({
+        const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
             redirectTo: 'acadly://auth/callback',
           },
         });
+        if (error) {
+          return { success: false, error: error.message };
+        }
+        return { success: true };
       }
-
-      await switchRole(role);
-      return { success: true };
-    } catch {
-      await switchRole(role);
-      return { success: true };
+      return { success: false, error: 'Google sign-in requires active Supabase OAuth configuration.' };
+    } catch (e: any) {
+      return { success: false, error: e?.message || 'Google sign-in failed' };
     } finally {
       setLoading(false);
     }

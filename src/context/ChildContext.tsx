@@ -54,14 +54,14 @@ const ChildContext = createContext<ChildContextType | undefined>(undefined);
 export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const { currentInstitute } = useInstitute();
-  const [childrenList, setChildrenList] = useState<ChildStudent[]>(DEFAULT_CHILDREN);
-  const [selectedChild, setSelectedChild] = useState<ChildStudent | null>(DEFAULT_CHILDREN[0]);
+  const [childrenList, setChildrenList] = useState<ChildStudent[]>([]);
+  const [selectedChild, setSelectedChild] = useState<ChildStudent | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchChildren = async () => {
     if (!user || !currentInstitute) {
-      setChildrenList(DEFAULT_CHILDREN);
-      setSelectedChild(DEFAULT_CHILDREN[0]);
+      setChildrenList([]);
+      setSelectedChild(null);
       setIsLoading(false);
       return;
     }
@@ -86,8 +86,8 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ]);
 
       if (parentError || !parentRecord) {
-        setChildrenList(DEFAULT_CHILDREN);
-        setSelectedChild(DEFAULT_CHILDREN[0]);
+        setChildrenList([]);
+        setSelectedChild(null);
         return;
       }
 
@@ -119,8 +119,8 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ]);
 
       if (mapError || !mappings || mappings.length === 0) {
-        setChildrenList(DEFAULT_CHILDREN);
-        setSelectedChild(DEFAULT_CHILDREN[0]);
+        setChildrenList([]);
+        setSelectedChild(null);
         return;
       }
 
@@ -131,11 +131,11 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           id: s?.id || m.student_id,
           admission_number: s?.admission_number || 'ADM-2026-088',
           user_id: s?.user_id,
-          full_name: s?.profiles?.full_name || 'Amelia Sharma',
+          full_name: s?.profiles?.full_name || 'Student',
           avatar_url: s?.profiles?.avatar_url,
           batch_name: batchName,
           grade: 'Class 11 Science',
-          parent_code: 'STU-AMELIA-902',
+          parent_code: 'STU-STUDENT-001',
           emoji: '🎓',
         };
       });
@@ -143,8 +143,8 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setChildrenList(list);
       setSelectedChild(list[0]);
     } catch {
-      setChildrenList(DEFAULT_CHILDREN);
-      setSelectedChild(DEFAULT_CHILDREN[0]);
+      setChildrenList([]);
+      setSelectedChild(null);
     } finally {
       setIsLoading(false);
     }
@@ -212,16 +212,9 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
 
     if (!matched) {
-      // Dynamic generated match so any custom code works
-      matched = {
-        id: `stud-${Date.now()}`,
-        admission_number: `ADM-${Math.floor(1000 + Math.random() * 9000)}`,
-        user_id: `usr-${Date.now()}`,
-        full_name: `Student (${clean})`,
-        batch_name: 'Class 12 • JEE Advanced (Morning)',
-        grade: 'Class 11 Science',
-        parent_code: clean,
-        emoji: '🎓',
+      return {
+        success: false,
+        error: `No registered student found for code "${clean}". Please ask your student or tuition faculty for their active Student Link Code.`,
       };
     }
 
