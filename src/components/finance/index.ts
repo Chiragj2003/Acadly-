@@ -1,4 +1,2 @@
-export * from './RazorpayCheckoutModal';
-export * from './FeeReceiptModal';
+export * from '@/features/fees';
 export * from './NotificationDrawer';
-export * from './AdminAnalyticsView';

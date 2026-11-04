@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -65,6 +65,7 @@ import {
 } from '@/components/finance';
 import { generateAndSharePDF, DUMMY_PDF_CATALOG } from '@/services/dummyPdfService';
 import { DAILY_AFFIRMATIONS } from '@/data/dummyAcademicData';
+import { FEATURE_FEES } from '@/config/features';
 
 export default function PinterestStudentScreen() {
   const router = useRouter();
@@ -322,20 +323,37 @@ export default function PinterestStudentScreen() {
                   <Text className="text-[10px] text-emerald-600 font-bold mt-1">Above 90% Target 🎯</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  activeOpacity={0.9}
-                  onPress={() => studentFees[0] && openRazorpayCheckout(studentFees[0])}
-                  className="flex-1 bg-white rounded-3xl p-4 border border-slate-200/80 shadow-xs"
-                >
-                  <View className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 items-center justify-center mb-2">
-                    <CreditCard size={16} color="#F59E0B" />
-                  </View>
-                  <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Tuition Fee
-                  </Text>
-                  <Text className="text-2xl font-black text-slate-800 mt-0.5">₹3,500</Text>
-                  <Text className="text-[10px] text-blue-600 font-bold mt-1">Tap to Pay UPI 💳</Text>
-                </TouchableOpacity>
+                {FEATURE_FEES ? (
+                  <TouchableOpacity
+                    activeOpacity={0.9}
+                    onPress={() => studentFees[0] && openRazorpayCheckout(studentFees[0])}
+                    className="flex-1 bg-white rounded-3xl p-4 border border-slate-200/80 shadow-xs"
+                  >
+                    <View className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 items-center justify-center mb-2">
+                      <CreditCard size={16} color="#F59E0B" />
+                    </View>
+                    <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      Tuition Fee
+                    </Text>
+                    <Text className="text-2xl font-black text-slate-800 mt-0.5">₹3,500</Text>
+                    <Text className="text-[10px] text-blue-600 font-bold mt-1">Tap to Pay UPI 💳</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    activeOpacity={0.9}
+                    onPress={() => setActiveTab('study')}
+                    className="flex-1 bg-white rounded-3xl p-4 border border-slate-200/80 shadow-xs"
+                  >
+                    <View className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 items-center justify-center mb-2">
+                      <BookOpen size={16} color="#059669" />
+                    </View>
+                    <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      Assignments
+                    </Text>
+                    <Text className="text-2xl font-black text-slate-800 mt-0.5">12 / 12</Text>
+                    <Text className="text-[10px] text-emerald-600 font-bold mt-1">100% Submitted</Text>
+                  </TouchableOpacity>
+                )}
               </View>
 
               {/* 4. Quick Action Hub */}
@@ -765,8 +783,12 @@ export default function PinterestStudentScreen() {
         {/* Global Modals */}
         <VideoPlayerModal />
         <NotificationDrawer />
-        <FeeReceiptModal />
-        <RazorpayCheckoutModal />
+        {FEATURE_FEES && (
+          <>
+            <FeeReceiptModal />
+            <RazorpayCheckoutModal />
+          </>
+        )}
       </ScreenWrapper>
   );
 }

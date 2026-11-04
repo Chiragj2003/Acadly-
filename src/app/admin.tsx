@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -49,11 +49,12 @@ import {
   FeeCollectionBarChart,
 } from '@/components/charts';
 import {
-  RazorpayCheckoutModal,
+  AdminAnalyticsView,
   FeeReceiptModal,
   NotificationDrawer,
-  AdminAnalyticsView,
+  RazorpayCheckoutModal,
 } from '@/components/finance';
+import { FEATURE_FEES } from '@/config/features';
 
 export default function PinterestAdminScreen() {
   const { isAuthorized, isLoading } = useRoleGuard(["admin"]);
@@ -161,9 +162,9 @@ export default function PinterestAdminScreen() {
     },
     {
       key: 'admissions_dues',
-      label: 'Admissions & Dues',
+      label: FEATURE_FEES ? 'Admissions & Dues' : 'Admissions & Approvals',
       icon: (color, size) => <Users color={color} size={size} />,
-      badgeCount: analytics.overdue_students_count,
+      badgeCount: FEATURE_FEES ? analytics.overdue_students_count : pendingJoinCount,
     },
     {
       key: 'profile',
@@ -302,37 +303,49 @@ export default function PinterestAdminScreen() {
                   />
                 </View>
                 <View className="flex-1">
-                  <MetricCard
-                    title="Pending Dues"
-                    value={`₹${(analytics.total_pending_dues / 100000).toFixed(2)}L`}
-                    trendText={`${analytics.overdue_students_count} Overdue`}
-                    trendDirection="negative"
-                    icon={<Wallet size={16} color="#e11d48" />}
-                  />
+                  {FEATURE_FEES ? (
+                    <MetricCard
+                      title="Pending Dues"
+                      value={`₹${(analytics.total_pending_dues / 100000).toFixed(2)}L`}
+                      trendText={`${analytics.overdue_students_count} Overdue`}
+                      trendDirection="negative"
+                      icon={<Wallet size={16} color="#e11d48" />}
+                    />
+                  ) : (
+                    <MetricCard
+                      title="Pending Approvals"
+                      value={pendingJoinCount.toString()}
+                      trendText={pendingJoinCount > 0 ? "Review Required" : "All Clear"}
+                      trendDirection={pendingJoinCount > 0 ? "negative" : "positive"}
+                      icon={<Clock size={16} color="#F59E0B" />}
+                    />
+                  )}
                 </View>
               </View>
             </View>
 
-            {/* WhatsApp Fee Recovery Card */}
-            <View className="bg-white border border-slate-200/90 rounded-3xl p-4 shadow-xs flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2.5 flex-1 pr-2">
-                <View className="w-9 h-9 rounded-xl bg-emerald-50 items-center justify-center">
-                  <MessageSquare size={16} color="#059669" />
+            {/* WhatsApp Fee Recovery Card (v2) */}
+            {FEATURE_FEES && (
+              <View className="bg-white border border-slate-200/90 rounded-3xl p-4 shadow-xs flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2.5 flex-1 pr-2">
+                  <View className="w-9 h-9 rounded-xl bg-emerald-50 items-center justify-center">
+                    <MessageSquare size={16} color="#059669" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-xs font-bold text-slate-800">Fee Cycle Overdue Blast</Text>
+                    <Text className="text-[11px] text-slate-500">
+                      {analytics.overdue_students_count} parents pending reminders
+                    </Text>
+                  </View>
                 </View>
-                <View className="flex-1">
-                  <Text className="text-xs font-bold text-slate-800">Fee Cycle Overdue Blast</Text>
-                  <Text className="text-[11px] text-slate-500">
-                    {analytics.overdue_students_count} parents pending reminders
-                  </Text>
-                </View>
+                <TouchableOpacity
+                  onPress={handleWhatsAppFeeBlast}
+                  className="bg-emerald-600 px-3.5 py-2 rounded-xl active:scale-95 shadow-xs"
+                >
+                  <Text className="text-xs font-bold text-white">Send WhatsApp</Text>
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                onPress={handleWhatsAppFeeBlast}
-                className="bg-emerald-600 px-3.5 py-2 rounded-xl active:scale-95 shadow-xs"
-              >
-                <Text className="text-xs font-bold text-white">Send WhatsApp</Text>
-              </TouchableOpacity>
-            </View>
+            )}
 
             {/* Quick Actions Panel */}
             <View className="gap-2">
@@ -360,15 +373,27 @@ export default function PinterestAdminScreen() {
                   <Text className="text-[11px] font-bold text-slate-800 text-center">New Batch</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={handleWhatsAppFeeBlast}
-                  className="flex-1 bg-white border border-slate-200/90 p-3 rounded-2xl items-center gap-1.5 active:scale-98 shadow-xs"
-                >
-                  <View className="w-9 h-9 rounded-xl bg-amber-50 items-center justify-center">
-                    <IndianRupee size={16} color="#d97706" />
-                  </View>
-                  <Text className="text-[11px] font-bold text-slate-800 text-center">Fee Blast</Text>
-                </TouchableOpacity>
+                {FEATURE_FEES ? (
+                  <TouchableOpacity
+                    onPress={handleWhatsAppFeeBlast}
+                    className="flex-1 bg-white border border-slate-200/90 p-3 rounded-2xl items-center gap-1.5 active:scale-98 shadow-xs"
+                  >
+                    <View className="w-9 h-9 rounded-xl bg-amber-50 items-center justify-center">
+                      <IndianRupee size={16} color="#d97706" />
+                    </View>
+                    <Text className="text-[11px] font-bold text-slate-800 text-center">Fee Blast</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    onPress={() => router.push('/student-detail')}
+                    className="flex-1 bg-white border border-slate-200/90 p-3 rounded-2xl items-center gap-1.5 active:scale-98 shadow-xs"
+                  >
+                    <View className="w-9 h-9 rounded-xl bg-amber-50 items-center justify-center">
+                      <Users size={16} color="#d97706" />
+                    </View>
+                    <Text className="text-[11px] font-bold text-slate-800 text-center">Roster</Text>
+                  </TouchableOpacity>
+                )}
 
                 <TouchableOpacity
                   onPress={() => router.push('/community')}
@@ -382,8 +407,8 @@ export default function PinterestAdminScreen() {
               </View>
             </View>
 
-            {/* Fee Collection Bar Chart */}
-            <FeeCollectionBarChart />
+            {/* Fee Collection Bar Chart (v2) */}
+            {FEATURE_FEES && <FeeCollectionBarChart />}
           </View>
         )}
 
@@ -454,7 +479,7 @@ export default function PinterestAdminScreen() {
           </View>
         )}
 
-        {/* ================= TAB 3: ADMISSIONS & DUES ================= */}
+        {/* ================= TAB 3: ADMISSIONS & DUES / APPROVALS ================= */}
         {activeTab === 'admissions_dues' && (
           <View className="gap-3.5">
             {/* Admissions Queue */}
@@ -468,7 +493,9 @@ export default function PinterestAdminScreen() {
               </View>
 
               <Text className="text-xs text-slate-600">
-                Review verified student applications, approve classroom access, and assign fee plans.
+                {FEATURE_FEES
+                  ? 'Review verified student applications, approve classroom access, and assign fee plans.'
+                  : 'Review student applications, verify credentials, and approve classroom admission.'}
               </Text>
 
               <TouchableOpacity
@@ -479,45 +506,86 @@ export default function PinterestAdminScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Overdue Accounts & Direct Action */}
-            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <Wallet size={16} color="#e11d48" />
-                  <Text className="text-sm font-bold text-slate-900">Overdue Tuition Accounts</Text>
+            {FEATURE_FEES ? (
+              /* Overdue Accounts & Direct Action (v2) */
+              <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center gap-2">
+                    <Wallet size={16} color="#e11d48" />
+                    <Text className="text-sm font-bold text-slate-900">Overdue Tuition Accounts</Text>
+                  </View>
+                  <Badge label="34 Accounts" variant="negative" />
                 </View>
-                <Badge label="34 Accounts" variant="negative" />
-              </View>
 
-              <View className="gap-2">
-                {studentsRoster.slice(0, 3).map((st) => (
-                  <TouchableOpacity
-                    key={st.id}
-                    onPress={() => router.push({ pathname: '/student-detail', params: { studentId: st.id } })}
-                    className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex-row items-center justify-between active:scale-98"
-                  >
-                    <View className="flex-1 pr-2">
-                      <Text className="text-xs font-bold text-slate-800">{st.name}</Text>
-                      <Text className="text-[11px] text-slate-500">{st.batchName}</Text>
-                      <Text className="text-[10px] text-rose-700 font-semibold mt-0.5">
-                        Due: ₹15,000 • Guardian: {st.guardianName}
-                      </Text>
-                    </View>
-                    <View className="bg-rose-50 border border-rose-200 px-2 py-1 rounded-lg">
-                      <Text className="text-[10px] font-bold text-rose-700">Overdue</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </View>
+                <View className="gap-2">
+                  {studentsRoster.slice(0, 3).map((st) => (
+                    <TouchableOpacity
+                      key={st.id}
+                      onPress={() => router.push({ pathname: '/student-detail', params: { studentId: st.id } })}
+                      className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex-row items-center justify-between active:scale-98"
+                    >
+                      <View className="flex-1 pr-2">
+                        <Text className="text-xs font-bold text-slate-800">{st.name}</Text>
+                        <Text className="text-[11px] text-slate-500">{st.batchName}</Text>
+                        <Text className="text-[10px] text-rose-700 font-semibold mt-0.5">
+                          Due: ₹15,000 • Guardian: {st.guardianName}
+                        </Text>
+                      </View>
+                      <View className="bg-rose-50 border border-rose-200 px-2 py-1 rounded-lg">
+                        <Text className="text-[10px] font-bold text-rose-700">Overdue</Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
 
-              <TouchableOpacity
-                onPress={handleWhatsAppFeeBlast}
-                className="bg-emerald-600 py-3 rounded-2xl items-center flex-row justify-center gap-2 active:scale-98 shadow-xs mt-1"
-              >
-                <MessageSquare size={14} color="#ffffff" />
-                <Text className="text-xs font-bold text-white">Dispatch Automated WhatsApp Nudges</Text>
-              </TouchableOpacity>
-            </View>
+                <TouchableOpacity
+                  onPress={handleWhatsAppFeeBlast}
+                  className="bg-emerald-600 py-3 rounded-2xl items-center flex-row justify-center gap-2 active:scale-98 shadow-xs mt-1"
+                >
+                  <MessageSquare size={14} color="#ffffff" />
+                  <Text className="text-xs font-bold text-white">Dispatch Automated WhatsApp Nudges</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              /* Enrolled Students Roster Overview */
+              <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center gap-2">
+                    <Users size={16} color="#2563EB" />
+                    <Text className="text-sm font-bold text-slate-900">Enrolled Student Directory</Text>
+                  </View>
+                  <Badge label={`${studentsRoster.length} Active`} variant="success" />
+                </View>
+
+                <View className="gap-2">
+                  {studentsRoster.slice(0, 4).map((st) => (
+                    <TouchableOpacity
+                      key={st.id}
+                      onPress={() => router.push({ pathname: '/student-detail', params: { studentId: st.id } })}
+                      className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex-row items-center justify-between active:scale-98"
+                    >
+                      <View className="flex-1 pr-2">
+                        <Text className="text-xs font-bold text-slate-800">{st.name}</Text>
+                        <Text className="text-[11px] text-slate-500">{st.batchName}</Text>
+                        <Text className="text-[10px] text-blue-600 font-semibold mt-0.5">
+                          Roll: {st.rollNumber} • Guardian: {st.guardianName}
+                        </Text>
+                      </View>
+                      <View className="bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-lg">
+                        <Text className="text-[10px] font-bold text-blue-700">Inspect 360°</Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <TouchableOpacity
+                  onPress={() => router.push('/student-detail')}
+                  className="bg-slate-100 py-2.5 rounded-xl items-center active:scale-98 mt-1"
+                >
+                  <Text className="text-xs font-bold text-slate-700">View Full Student Directory →</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         )}
 
@@ -651,8 +719,12 @@ export default function PinterestAdminScreen() {
       </Modal>
 
       {/* Modals */}
-      <RazorpayCheckoutModal />
-      <FeeReceiptModal />
+      {FEATURE_FEES && (
+        <>
+          <RazorpayCheckoutModal />
+          <FeeReceiptModal />
+        </>
+      )}
       <NotificationDrawer />
     </ScreenWrapper>
   );
