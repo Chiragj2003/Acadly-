@@ -1,0 +1,46 @@
+{
+  "common": {
+    "appName": "Acadly",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "signOut": "Sign Out",
+    "search": "Search",
+    "comingSoon": "Coming Soon"
+  },
+  "roles": {
+    "student": "Student",
+    "teacher": "Teacher / Faculty",
+    "parent": "Parent / Guardian",
+    "admin": "Director / Admin"
+  },
+  "auth": {
+    "welcome": "Welcome to Acadly",
+    "subtitle": "Education management unified for institutions and learners",
+    "signIn": "Sign In",
+    "signUp": "Create Account",
+    "emailOrPhone": "Email or Mobile Number",
+    "password": "Password",
+    "selectRole": "Choose your primary role",
+    "googleSignIn": "Continue with Google"
+  },
+  "attendance": {
+    "title": "Roll Call & Attendance",
+    "present": "Present",
+    "absent": "Absent",
+    "late": "Late",
+    "rate": "Attendance Rate",
+    "markAllPresent": "Mark All Present",
+    "recordSuccess": "Attendance recorded successfully"
+  },
+  "navigation": {
+    "home": "Home",
+    "study": "Study Vault",
+    "analytics": "Performance",
+    "roster": "Class Roster",
+    "chat": "Messages",
+    "profile": "Profile"
+  }
+}

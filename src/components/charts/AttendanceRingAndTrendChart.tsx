@@ -19,7 +19,8 @@ export const AttendanceRingAndTrendChart: React.FC<AttendanceRingAndTrendChartPr
   absentCount = 1,
   lateCount = 3,
 }) => {
-  const effectiveRate = percentage ?? presentRate ?? 96.4;
+  const rawRate = percentage ?? presentRate ?? (totalClasses > 0 ? (presentCount / totalClasses) * 100 : 96.4);
+  const effectiveRate = Math.min(100, Math.max(0, Number(rawRate.toFixed(1))));
   const radius = 42;
   const strokeWidth = 10;
   const circumference = 2 * Math.PI * radius;
@@ -35,14 +36,16 @@ export const AttendanceRingAndTrendChart: React.FC<AttendanceRingAndTrendChartPr
           <Text className="text-xs text-cute-muted">Monthly ring + 6-month trend</Text>
         </View>
         <View className="bg-cute-mint-light px-2.5 py-1 rounded-full border border-cute-mint">
-          <Text className="text-[10px] font-bold text-cute-mint">Target 90%+ Met 🎯</Text>
+          <Text className="text-[10px] font-bold text-cute-mint">
+            {effectiveRate >= 90 ? 'Target 90%+ Met 🎯' : `${effectiveRate}% Current`}
+          </Text>
         </View>
       </View>
 
       <View className="flex-row items-center justify-between gap-4 mb-4">
         {/* SVG Circular Ring Chart */}
         <View className="items-center justify-center">
-          <Svg width={110} height={110}>
+          <Svg width={110} height={110} viewBox="0 0 110 110">
             {/* Background Ring */}
             <Circle
               cx="55"

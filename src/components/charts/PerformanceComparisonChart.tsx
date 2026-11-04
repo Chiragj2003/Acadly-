@@ -31,7 +31,8 @@ export const PerformanceComparisonChart: React.FC<PerformanceComparisonChartProp
   const chartHeight = 150;
   const barGroupWidth = 55;
   const barWidth = 12;
-  const svgWidth = data.length * barGroupWidth + 40;
+  const safeData = data && data.length > 0 ? data : DEFAULT_DATA;
+  const svgWidth = Math.max(260, safeData.length * barGroupWidth + 40);
 
   return (
     <View className="bg-white border-2 border-cute-border rounded-[28px] p-5 shadow-xs mb-4">
@@ -58,8 +59,8 @@ export const PerformanceComparisonChart: React.FC<PerformanceComparisonChartProp
       </View>
 
       {/* Interactive SVG Bar Group */}
-      <View className="items-center bg-cute-cream/50 rounded-2xl p-2 border border-cute-border">
-        <Svg height={chartHeight + 35} width={svgWidth}>
+      <View className="items-center bg-cute-cream/50 rounded-2xl p-2 border border-cute-border overflow-hidden">
+        <Svg height={chartHeight + 35} width="100%" viewBox={`0 0 ${svgWidth} ${chartHeight + 35}`}>
           {/* Grid lines */}
           {[0, 25, 50, 75, 100].map((val) => {
             const y = chartHeight - (val / 100) * chartHeight + 10;

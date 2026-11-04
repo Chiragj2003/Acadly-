@@ -2,13 +2,13 @@
 
 ## Master Plan Checklist
 - [x] Save `docs/PRODUCT_SPEC.md` as source of truth and create branch `rebuild-v1`.
-- [ ] **Phase 1: Critical Cleanup (Quick Wins)**
+- [x] **Phase 1: Critical Cleanup (Quick Wins)**
   - [x] 1.1 Remove bypass buttons from `join-institute.tsx` and add role guards to routes.
-  - [ ] 1.2 Fix all corrupted UTF-8 strings and replace emojis in headers/titles with lucide icons.
+  - [x] 1.2 Fix all corrupted UTF-8 strings and replace emojis in headers/titles with lucide icons.
   - [x] 1.3 Delete `src/app/explore.tsx` and unused boilerplate.
   - [x] 1.4 Remove mock-success fallbacks (Google login mock, DEFAULT_CHILDREN fallback, fake offline video toggle, fake absentee alert, example.com PDF).
   - [x] 1.5 Remove broken `switchRole` identity-swapping in `AuthContext`.
-  - [ ] 1.6 Make all SVG charts responsive with viewBox + container width, and safe with 0, 1, or N points.
+  - [x] 1.6 Make all SVG charts responsive with viewBox + container width, and safe with 0, 1, or N points.
   - [x] 1.7 V1 decisions: Move fees to `src/features/fees/` with `FEATURE_FEES=false`; set `userInterfaceStyle: "light"` in `app.json`.
   - [x] 1.8 Verify `npx tsc --noEmit` is 0 errors.
 - [ ] **Phase 2: New Data Model + Backend (Supabase)**
@@ -59,6 +59,22 @@
   - Configured `app.json`: Locked `userInterfaceStyle` to `"light"`.
   - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.
 
+### Entry 005 - Sub-step 1D: Responsive SVG Charts, React Native Text Crash Fix & i18n
+- **Timestamp:** 2026-11-05T00:31:00+05:30
+- **Actions:**
+  - Resolved fatal runtime crash in `src/app/student.tsx` caused by illegal HTML `<strong>` tags, replacing them with React Native `<Text className="font-bold">`.
+  - Audited full AST across all TSX files in `src/` to confirm zero illegal HTML tags or strings outside `<Text>` components remain.
+  - Made SVG charts fully responsive and guarded against zero/empty data points:
+    - `AttendanceRingAndTrendChart.tsx`: Added `viewBox="0 0 110 110"`, clamped rates between 0% and 100%, and handled 0 classes safely.
+    - `PerformanceComparisonChart.tsx`: Added responsive `viewBox` with dynamic width scaling, clamped bar heights, and safe fallbacks for empty assessment histories.
+    - `SubjectRadarOrBarChart.tsx`: Added dynamic percentage average calculation, clamped mastery percentages, and empty state safety.
+  - Established i18n foundation:
+    - Installed `i18next`, `react-i18next`, and `expo-localization`.
+    - Created `src/i18n/locales/en.json` and `src/i18n/locales/hi.json` with primary localization keys.
+    - Created `src/i18n/index.ts` and initialized in `src/app/_layout.tsx`.
+  - Verified default teacher code `JOSHI-MATH-89` is consistently aligned with `Prof. Vikram Joshi`.
+  - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.
+
 ### Entry 004 - Sub-step 1C: Removal of Mock Fallbacks & Broken Identity Swapping
 - **Timestamp:** 2026-11-05T00:26:00+05:30
 - **Actions:**
@@ -77,4 +93,20 @@
     - Added validation requiring an attached PDF file before publication.
   - In `teacher.tsx`:
     - Replaced simulated `setTimeout` attendance commit with direct state commit and honest note on v2 SMS gateway.
+  - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.
+
+### Entry 005 - Sub-step 1D: Responsive SVG Charts, React Native Text Crash Fix & i18n
+- **Timestamp:** 2026-11-05T00:31:00+05:30
+- **Actions:**
+  - Resolved fatal runtime crash in `src/app/student.tsx` caused by illegal HTML `<strong>` tags, replacing them with React Native `<Text className="font-bold">`.
+  - Audited full AST across all TSX files in `src/` to confirm zero illegal HTML tags or strings outside `<Text>` components remain.
+  - Made SVG charts fully responsive and guarded against zero/empty data points:
+    - `AttendanceRingAndTrendChart.tsx`: Added `viewBox="0 0 110 110"`, clamped rates between 0% and 100%, and handled 0 classes safely.
+    - `PerformanceComparisonChart.tsx`: Added responsive `viewBox` with dynamic width scaling, clamped bar heights, and safe fallbacks for empty assessment histories.
+    - `SubjectRadarOrBarChart.tsx`: Added dynamic percentage average calculation, clamped mastery percentages, and empty state safety.
+  - Established i18n foundation:
+    - Installed `i18next`, `react-i18next`, and `expo-localization`.
+    - Created `src/i18n/locales/en.json` and `src/i18n/locales/hi.json` with primary localization keys.
+    - Created `src/i18n/index.ts` and initialized in `src/app/_layout.tsx`.
+  - Verified default teacher code `JOSHI-MATH-89` is consistently aligned with `Prof. Vikram Joshi`.
   - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.

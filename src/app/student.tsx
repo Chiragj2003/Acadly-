@@ -538,7 +538,7 @@ export default function PinterestStudentScreen() {
           {/* ======================================================== */}
           {activeTab === 'chat' && (
             <View className="gap-4">
-              {/* Batch Sakura Group Live Room */}
+              {/* Batch JEE Advanced Group Live Room */}
               <View className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs gap-3">
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center gap-2.5">
@@ -656,16 +656,16 @@ export default function PinterestStudentScreen() {
 
                 <View className="bg-slate-50 p-3 rounded-2xl border border-slate-200 gap-1.5">
                   <Text className="text-xs text-slate-600 font-medium">
-                    🏫 <strong>School:</strong> {profileSchoolInput}
+                    🏫 <Text className="font-bold text-slate-800">School:</Text> {profileSchoolInput}
                   </Text>
                   <Text className="text-xs text-slate-600 font-medium">
-                    🎯 <strong>Target Exam:</strong> {studentProfile.targetExam}
+                    🎯 <Text className="font-bold text-slate-800">Target Exam:</Text> {studentProfile.targetExam}
                   </Text>
                   <Text className="text-xs text-slate-600 font-medium">
-                    🩸 <strong>Blood Group:</strong> {studentProfile.bloodGroup}
+                    🩸 <Text className="font-bold text-slate-800">Blood Group:</Text> {studentProfile.bloodGroup}
                   </Text>
                   <Text className="text-xs text-slate-600 font-medium">
-                    📍 <strong>Address:</strong> {studentProfile.address}
+                    📍 <Text className="font-bold text-slate-800">Address:</Text> {studentProfile.address}
                   </Text>
                 </View>
               </View>

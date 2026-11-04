@@ -27,6 +27,9 @@ export const SubjectRadarOrBarChart: React.FC<SubjectRadarOrBarChartProps> = ({
   data = DEFAULT_SUBJECTS,
   title = 'Subject-Wise Mastery Breakdown',
 }) => {
+  const safeData = data && data.length > 0 ? data : DEFAULT_SUBJECTS;
+  const avg = Math.round(safeData.reduce((acc, curr) => acc + curr.percentage, 0) / safeData.length);
+
   return (
     <View className="bg-white border-2 border-cute-border rounded-[28px] p-5 shadow-xs mb-4">
       <View className="flex-row items-center justify-between mb-3">
@@ -35,12 +38,12 @@ export const SubjectRadarOrBarChart: React.FC<SubjectRadarOrBarChartProps> = ({
           <Text className="text-xs text-cute-muted">Based on quizzes, assignments & unit tests</Text>
         </View>
         <View className="bg-cute-peach-light px-2.5 py-1 rounded-full border border-cute-peach">
-          <Text className="text-[10px] font-bold text-cute-peach">Avg 83% ⭐</Text>
+          <Text className="text-[10px] font-bold text-cute-peach">Avg {avg}% ⭐</Text>
         </View>
       </View>
 
       <View className="gap-3 mt-1">
-        {data.map((item) => (
+        {safeData.map((item) => (
           <View key={item.subject} className="bg-cute-cream/70 p-3 rounded-2xl border border-cute-border">
             <View className="flex-row items-center justify-between mb-1.5">
               <View className="flex-row items-center gap-2">
