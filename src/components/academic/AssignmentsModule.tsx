@@ -10,11 +10,13 @@ import {
   X,
   Award,
   FileText,
+  Download,
 } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { useAcademic } from '@/context/AcademicContext';
 import { useAuth } from '@/context/AuthContext';
 import { Card, Button, Input, Badge, type BadgeVariant } from '@/components/ui';
+import { generateAndSharePDF } from '@/services/dummyPdfService';
 
 export const AssignmentsModule: React.FC = () => {
   const { assignments, submissions, createAssignment, submitAssignment, gradeSubmission } = useAcademic();
@@ -246,6 +248,45 @@ export const AssignmentsModule: React.FC = () => {
               <Text className="text-xs text-on-surface-variant bg-surface-container-low p-2 rounded-lg">
                 "{sub.submission_text}"
               </Text>
+
+              {sub.file_name && (
+                <View className="flex-row items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                  <View className="flex-row items-center gap-1.5 flex-1 min-w-0 pr-2">
+                    <FileText size={14} color="#2563EB" />
+                    <Text className="text-xs font-semibold text-slate-800" numberOfLines={1}>
+                      {sub.file_name}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() =>
+                      generateAndSharePDF({
+                        id: sub.id,
+                        title: `${sub.student_name} - ${sub.file_name}`,
+                        subtitle: `Coursework Submission • Roll: ${sub.roll_number}`,
+                        subject: 'Physics',
+                        author: sub.student_name,
+                        category: 'dpp',
+                        date: sub.submitted_at_formatted || 'Recently',
+                        sections: [
+                          {
+                            heading: 'Student Submission Notes & Solution Work',
+                            items: [
+                              sub.submission_text || 'Submitted homework solution sheet.',
+                              `Submission ID: ${sub.id}`,
+                              `Status: ${sub.status === 'graded' ? `Graded (${sub.marks_obtained}/100)` : 'Pending Faculty Review'}`,
+                              sub.feedback ? `Faculty Feedback: ${sub.feedback}` : 'No instructor notes yet.',
+                            ],
+                          },
+                        ],
+                      })
+                    }
+                    className="bg-blue-600 px-2.5 py-1 rounded-lg flex-row items-center gap-1 active:scale-95 shadow-xs"
+                  >
+                    <Download size={11} color="#ffffff" />
+                    <Text className="text-[10px] font-bold text-white">Open File</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
 
               {sub.feedback && (
                 <View className="p-2 rounded-lg bg-tertiary-fixed/30 flex-row items-center gap-1.5">

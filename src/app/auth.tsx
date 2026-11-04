@@ -255,7 +255,7 @@ export default function CleanAuthScreen() {
     setIsForgotPasswordOpen(false);
     Alert.alert(
       'Reset Link Dispatched 📬',
-      `A password reset link has been simulated to: ${forgotEmail}. You can also use password "Password123!" for demo accounts.`
+      `A password reset link has been sent to: ${forgotEmail}. Please check your inbox to update your password.`
     );
   };
 

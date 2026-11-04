@@ -40,6 +40,7 @@ import {
   X,
   ShieldCheck,
   Bell,
+  ChevronRight,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useRoleGuard } from '@/hooks/useRoleGuard';
@@ -57,13 +58,14 @@ import {
   VideoPlayerModal,
   StudyMaterialsViewer,
   AssignmentsModule,
+  DocumentReaderModal,
 } from '@/components/academic';
 import {
   FeeReceiptModal,
   NotificationDrawer,
   RazorpayCheckoutModal,
 } from '@/components/finance';
-import { generateAndSharePDF, DUMMY_PDF_CATALOG } from '@/services/dummyPdfService';
+import { generateAndSharePDF, DUMMY_PDF_CATALOG, type PDFDocumentContent } from '@/services/dummyPdfService';
 import { DAILY_AFFIRMATIONS } from '@/data/dummyAcademicData';
 import { FEATURE_FEES } from '@/config/features';
 
@@ -72,6 +74,7 @@ export default function PinterestStudentScreen() {
   const { isAuthorized, isLoading } = useRoleGuard(['student', 'teacher', 'admin']);
   const { user, signOut } = useAuth();
   const { currentInstitute } = useInstitute();
+  const [selectedReaderDoc, setSelectedReaderDoc] = useState<PDFDocumentContent | null>(null);
   const {
     lectures,
     openPlayer,
@@ -150,7 +153,7 @@ export default function PinterestStudentScreen() {
     },
     {
       key: 'chat',
-      label: 'Doubts',
+      label: 'Chat',
       icon: (color, size) => <MessageSquare size={size} color={color} />,
       badgeCount: 2,
     },
@@ -457,11 +460,20 @@ export default function PinterestStudentScreen() {
                       <View className="flex-row gap-2 mt-3 pt-2.5 border-t border-slate-100">
                         <TouchableOpacity
                           activeOpacity={0.85}
+                          onPress={() => setSelectedReaderDoc(pdfDoc)}
+                          className="flex-1 bg-slate-100 py-2 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95"
+                        >
+                          <BookOpen size={13} color="#2563EB" />
+                          <Text className="text-xs font-bold text-blue-700">Open & Read</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          activeOpacity={0.85}
                           onPress={() => generateAndSharePDF(pdfDoc)}
                           className="flex-1 bg-blue-600 py-2 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95 shadow-xs"
                         >
                           <DownloadCloud size={13} color="#FFFFFF" />
-                          <Text className="text-xs font-bold text-white">Download & Share PDF</Text>
+                          <Text className="text-xs font-bold text-white">Save PDF</Text>
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -495,7 +507,7 @@ export default function PinterestStudentScreen() {
               <AttendanceRingAndTrendChart percentage={96.4} />
 
               {/* Hall of Stars Leaderboard */}
-              <View className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs">
+              <View className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs overflow-hidden">
                 <View className="flex-row items-center justify-between mb-3">
                   <View className="flex-row items-center gap-2">
                     <Trophy size={18} color="#F59E0B" />
@@ -511,22 +523,28 @@ export default function PinterestStudentScreen() {
                 ].map((item, idx) => (
                   <View
                     key={idx}
-                    className={`flex-row items-center justify-between p-3 rounded-2xl mb-2 ${
+                    className={`flex-row items-center justify-between p-3 rounded-2xl mb-2 gap-2 ${
                       idx === 0
                         ? 'bg-amber-50/70 border border-amber-200'
                         : 'bg-slate-50 border border-slate-200'
                     }`}
                   >
-                    <View className="flex-row items-center gap-2.5">
-                      <View className="w-7 h-7 rounded-full bg-white border border-slate-200 items-center justify-center">
+                    <View className="flex-row items-center gap-2.5 flex-1 min-w-0 pr-1">
+                      <View className="w-7 h-7 rounded-full bg-white border border-slate-200 items-center justify-center shrink-0">
                         <Text className="text-xs font-black text-slate-800">{item.rank}</Text>
                       </View>
-                      <View>
-                        <Text className="text-xs font-bold text-slate-800">{item.name}</Text>
-                        <Text className="text-[10px] text-slate-500">{item.tag}</Text>
+                      <View className="flex-1 min-w-0">
+                        <Text className="text-xs font-bold text-slate-800" numberOfLines={1}>
+                          {item.name}
+                        </Text>
+                        <Text className="text-[10px] text-slate-500" numberOfLines={1}>
+                          {item.tag}
+                        </Text>
                       </View>
                     </View>
-                    <Text className="text-xs font-black text-slate-800">{item.score}</Text>
+                    <View className="bg-white/80 border border-slate-200 px-2 py-1 rounded-xl shrink-0">
+                      <Text className="text-xs font-black text-slate-800">{item.score}</Text>
+                    </View>
                   </View>
                 ))}
               </View>
@@ -534,98 +552,119 @@ export default function PinterestStudentScreen() {
           )}
 
           {/* ======================================================== */}
-          {/* TAB 4: CHAT & DOUBTS (REAL-TIME ROOMS)                   */}
+          {/* TAB 4: CHAT (CLASSROOM GROUPS & ANNOUNCEMENTS)           */}
           {/* ======================================================== */}
           {activeTab === 'chat' && (
-            <View className="gap-4">
-              {/* Batch JEE Advanced Group Live Room */}
-              <View className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs gap-3">
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center gap-2.5">
-                    <View className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
-                      <Text className="text-lg">📚</Text>
-                    </View>
-                    <View>
-                      <Text className="text-sm font-black text-slate-800">Class 12 • JEE Advanced Chat</Text>
-                      <Text className="text-xs text-slate-500">Teacher & 28 Verified Classmates</Text>
-                    </View>
-                  </View>
-                  <View className="bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                    <Text className="text-[10px] font-bold text-emerald-700">Live Sync ⚡</Text>
-                  </View>
-                </View>
-
-                <View className="bg-slate-50 p-3 rounded-2xl border border-slate-200 gap-1">
-                  <Text className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                    Teacher Pinned Announcement:
-                  </Text>
-                  <Text className="text-xs font-bold text-slate-700">
-                    📌 Rotational Dynamics homework DPP #14 is due tomorrow night. Please attach derivation sheets.
-                  </Text>
-                </View>
-
-                <TouchableOpacity
-                  activeOpacity={0.88}
-                  onPress={() => router.push('/chat')}
-                  className="bg-blue-600 py-3 rounded-2xl items-center flex-row justify-center gap-2 shadow-xs active:scale-98"
-                >
-                  <MessageSquare size={14} color="#FFFFFF" />
-                  <Text className="text-xs font-black text-white">
-                    Enter Batch Group Chat →
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Direct 1-on-1 Teacher Chat */}
-              <View className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs gap-3">
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center gap-2.5">
-                    <View className="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-200 items-center justify-center">
-                      <Text className="text-lg">🍎</Text>
-                    </View>
-                    <View>
-                      <Text className="text-sm font-black text-slate-800">{activeTeacher.name}</Text>
-                      <Text className="text-xs text-slate-500">1-on-1 Private Doubt Room</Text>
-                    </View>
-                  </View>
-                  <Badge label="Private" variant="info" />
-                </View>
-
-                <Text className="text-xs text-slate-500 leading-relaxed">
-                  Ask private questions directly to your teacher with PDF or photo attachments.
+            <View className="gap-3">
+              <View className="flex-row items-center justify-between px-1">
+                <Text className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                  Classroom Group Channels
                 </Text>
-
-                <TouchableOpacity
-                  activeOpacity={0.88}
-                  onPress={() => router.push('/chat')}
-                  className="bg-slate-50 border border-slate-200 py-2.5 rounded-2xl items-center flex-row justify-center gap-1.5 active:scale-98"
-                >
-                  <Text className="text-xs font-bold text-slate-800">Direct Message Faculty ✉️</Text>
-                </TouchableOpacity>
+                <Badge label="Active Cohort" variant="primary" />
               </View>
 
-              {/* Community Doubts Wall Card */}
-              <View className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs gap-3">
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center gap-2.5">
-                    <View className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200 items-center justify-center">
-                      <Text className="text-lg">💡</Text>
+              {[
+                {
+                  id: 'math-group',
+                  name: 'Class 12 • Mathematics Group',
+                  faculty: 'Prof. Vikram Joshi',
+                  unread: 3,
+                  lastMessage: '📌 DPP #14 solutions discussed. Homework due tomorrow night.',
+                  members: 28,
+                  tag: 'Calculus & Vectors',
+                  icon: '📐',
+                  bgColor: 'bg-blue-50',
+                  borderColor: 'border-blue-200',
+                },
+                {
+                  id: 'physics-group',
+                  name: 'Class 12 • Physics Group',
+                  faculty: 'Prof. Vikram Joshi',
+                  unread: 1,
+                  lastMessage: 'Derivation for rotational kinetic energy uploaded to Study Hub.',
+                  members: 28,
+                  tag: 'Mechanics & Rotational',
+                  icon: '⚡',
+                  bgColor: 'bg-indigo-50',
+                  borderColor: 'border-indigo-200',
+                },
+                {
+                  id: 'chemistry-group',
+                  name: 'Class 12 • Chemistry Discussion',
+                  faculty: 'Dr. Sen',
+                  unread: 0,
+                  lastMessage: 'Aldol condensation mechanism chart is pinned in the study vault.',
+                  members: 28,
+                  tag: 'Organic Chemistry',
+                  icon: '🧪',
+                  bgColor: 'bg-emerald-50',
+                  borderColor: 'border-emerald-200',
+                },
+                {
+                  id: 'batch-announcements',
+                  name: 'Batch Announcements & Circulars',
+                  faculty: 'Administration Desk',
+                  unread: 0,
+                  lastMessage: 'Next Mock Test schedule: Sunday 09:30 AM to 12:30 PM.',
+                  members: 32,
+                  tag: 'Official Notices',
+                  icon: '📢',
+                  bgColor: 'bg-amber-50',
+                  borderColor: 'border-amber-200',
+                },
+                {
+                  id: 'community-forum',
+                  name: 'Community Student Lounge',
+                  faculty: 'Peer Doubts & Study Hub',
+                  unread: 0,
+                  lastMessage: 'Ask questions, share concept shortcuts, and study together.',
+                  members: 45,
+                  tag: 'Peer Discussion',
+                  icon: '💡',
+                  bgColor: 'bg-purple-50',
+                  borderColor: 'border-purple-200',
+                  isForum: true,
+                },
+              ].map((grp) => (
+                <TouchableOpacity
+                  key={grp.id}
+                  activeOpacity={0.88}
+                  onPress={() => (grp.isForum ? router.push('/community') : router.push('/chat'))}
+                  className="bg-white rounded-3xl p-4 border border-slate-200/80 shadow-xs gap-2.5 active:scale-98"
+                >
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center gap-2.5 flex-1 min-w-0 mr-2">
+                      <View className={`w-10 h-10 rounded-2xl ${grp.bgColor} border ${grp.borderColor} items-center justify-center shrink-0`}>
+                        <Text className="text-lg">{grp.icon}</Text>
+                      </View>
+                      <View className="flex-1 min-w-0">
+                        <Text className="text-sm font-bold text-slate-900" numberOfLines={1}>
+                          {grp.name}
+                        </Text>
+                        <Text className="text-[11px] text-slate-500 font-medium" numberOfLines={1}>
+                          {grp.faculty} • {grp.members} Students
+                        </Text>
+                      </View>
                     </View>
-                    <View>
-                      <Text className="text-sm font-black text-slate-800">Community Doubts Wall</Text>
-                      <Text className="text-xs text-slate-500">Peer solutions & Teacher verified badges</Text>
-                    </View>
+                    {grp.unread > 0 ? (
+                      <View className="bg-blue-600 px-2 py-0.5 rounded-full shrink-0">
+                        <Text className="text-[10px] font-black text-white">{grp.unread} new</Text>
+                      </View>
+                    ) : (
+                      <View className="bg-slate-100 px-2 py-0.5 rounded-full shrink-0">
+                        <Text className="text-[10px] font-bold text-slate-500">Synced</Text>
+                      </View>
+                    )}
                   </View>
-                </View>
 
-                <TouchableOpacity
-                  activeOpacity={0.88}
-                  onPress={() => router.push('/community')}
-                  className="bg-amber-50 border border-amber-200 py-2.5 rounded-2xl items-center flex-row justify-center gap-1.5 active:scale-98"
-                >
-                  <Text className="text-xs font-bold text-amber-800">Browse Doubts & Ask Questions 💡</Text>
+                  <View className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex-row items-center justify-between">
+                    <Text className="text-xs text-slate-600 flex-1 min-w-0 pr-2" numberOfLines={1}>
+                      {grp.lastMessage}
+                    </Text>
+                    <ChevronRight size={14} color="#94A3B8" />
+                  </View>
                 </TouchableOpacity>
-              </View>
+              ))}
             </View>
           )}
 
@@ -654,19 +693,23 @@ export default function PinterestStudentScreen() {
                   </TouchableOpacity>
                 </View>
 
-                <View className="bg-slate-50 p-3 rounded-2xl border border-slate-200 gap-1.5">
-                  <Text className="text-xs text-slate-600 font-medium">
-                    🏫 <Text className="font-bold text-slate-800">School:</Text> {profileSchoolInput}
-                  </Text>
-                  <Text className="text-xs text-slate-600 font-medium">
-                    🎯 <Text className="font-bold text-slate-800">Target Exam:</Text> {studentProfile.targetExam}
-                  </Text>
-                  <Text className="text-xs text-slate-600 font-medium">
-                    🩸 <Text className="font-bold text-slate-800">Blood Group:</Text> {studentProfile.bloodGroup}
-                  </Text>
-                  <Text className="text-xs text-slate-600 font-medium">
-                    📍 <Text className="font-bold text-slate-800">Address:</Text> {studentProfile.address}
-                  </Text>
+                <View className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 gap-2">
+                  <View className="flex-row items-center justify-between">
+                    <Text className="text-xs text-slate-500 font-medium">🏫 School / Junior College:</Text>
+                    <Text className="text-xs font-bold text-slate-800">{profileSchoolInput}</Text>
+                  </View>
+                  <View className="flex-row items-center justify-between">
+                    <Text className="text-xs text-slate-500 font-medium">🎯 Target Exam:</Text>
+                    <Text className="text-xs font-bold text-slate-800">{studentProfile.targetExam}</Text>
+                  </View>
+                  <View className="flex-row items-center justify-between">
+                    <Text className="text-xs text-slate-500 font-medium">📚 Enrolled Batch:</Text>
+                    <Text className="text-xs font-bold text-blue-600">{studentProfile.batchName}</Text>
+                  </View>
+                  <View className="flex-row items-center justify-between">
+                    <Text className="text-xs text-slate-500 font-medium">🆔 Admission Number:</Text>
+                    <Text className="text-xs font-bold font-mono text-slate-800">{studentProfile.rollNumber}</Text>
+                  </View>
                 </View>
               </View>
 
@@ -782,6 +825,11 @@ export default function PinterestStudentScreen() {
 
         {/* Global Modals */}
         <VideoPlayerModal />
+        <DocumentReaderModal
+          document={selectedReaderDoc}
+          visible={Boolean(selectedReaderDoc)}
+          onClose={() => setSelectedReaderDoc(null)}
+        />
         <NotificationDrawer />
         {FEATURE_FEES && (
           <>

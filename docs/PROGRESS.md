@@ -59,6 +59,25 @@
   - Configured `app.json`: Locked `userInterfaceStyle` to `"light"`.
   - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.
 
+### Entry 006 - Student UI/UX Polish, In-App Document Reader & Analytics Fixes
+- **Timestamp:** 2026-11-05T00:51:00+05:30
+- **Actions:**
+  - In-App Document Opening & Download:
+    - Created `DocumentReaderModal.tsx` for immediate offline reading of study notes and solution files inside the app with formatted sections and a 1-tap "Save PDF" button.
+    - Integrated in-app reading and device downloads across `StudyMaterialsViewer.tsx`, `AssignmentsModule.tsx`, and `student.tsx`.
+  - Analytics & Cohort Curve Fixes:
+    - Redesigned `PerformanceComparisonChart.tsx` with genuine SVG curves (Cohort Average, Batch Topper, and Student Score) with dynamic coordinate mapping and score halos.
+    - Replaced hardcoded static vitals with 100% dynamically computed stats (Latest Score %, pts vs. Batch Avg, and Gap to Topper).
+    - Fixed Leaderboard card in `student.tsx`: added `overflow-hidden`, `min-w-0 flex-1` text truncation, and `shrink-0` score badges so values never overflow container boxes.
+  - Profile Clean-Up:
+    - Removed non-essential fields (Blood Group, residential address) from Student profile.
+    - Preserved relevant academic fields: School/Junior College, Target Exam, Enrolled Batch, and Admission Number.
+  - Classroom Chat Reorganization:
+    - Renamed tab from "Doubts" to "Chat".
+    - Removed 1-on-1 direct faculty messaging.
+    - Structured authentic group chat channels: `Class 12 • Mathematics Group`, `Class 12 • Physics Group`, `Class 12 • Chemistry Discussion`, `Batch Announcements & Circulars`, and `Community Student Lounge`.
+  - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.
+
 ### Entry 005 - Sub-step 1D: Responsive SVG Charts, React Native Text Crash Fix & i18n
 - **Timestamp:** 2026-11-05T00:31:00+05:30
 - **Actions:**
@@ -73,6 +92,25 @@
     - Created `src/i18n/locales/en.json` and `src/i18n/locales/hi.json` with primary localization keys.
     - Created `src/i18n/index.ts` and initialized in `src/app/_layout.tsx`.
   - Verified default teacher code `JOSHI-MATH-89` is consistently aligned with `Prof. Vikram Joshi`.
+  - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.
+
+### Entry 006 - Student UI/UX Polish, In-App Document Reader & Analytics Fixes
+- **Timestamp:** 2026-11-05T00:51:00+05:30
+- **Actions:**
+  - In-App Document Opening & Download:
+    - Created `DocumentReaderModal.tsx` for immediate offline reading of study notes and solution files inside the app with formatted sections and a 1-tap "Save PDF" button.
+    - Integrated in-app reading and device downloads across `StudyMaterialsViewer.tsx`, `AssignmentsModule.tsx`, and `student.tsx`.
+  - Analytics & Cohort Curve Fixes:
+    - Redesigned `PerformanceComparisonChart.tsx` with genuine SVG curves (Cohort Average, Batch Topper, and Student Score) with dynamic coordinate mapping and score halos.
+    - Replaced hardcoded static vitals with 100% dynamically computed stats (Latest Score %, pts vs. Batch Avg, and Gap to Topper).
+    - Fixed Leaderboard card in `student.tsx`: added `overflow-hidden`, `min-w-0 flex-1` text truncation, and `shrink-0` score badges so values never overflow container boxes.
+  - Profile Clean-Up:
+    - Removed non-essential fields (Blood Group, residential address) from Student profile.
+    - Preserved relevant academic fields: School/Junior College, Target Exam, Enrolled Batch, and Admission Number.
+  - Classroom Chat Reorganization:
+    - Renamed tab from "Doubts" to "Chat".
+    - Removed 1-on-1 direct faculty messaging.
+    - Structured authentic group chat channels: `Class 12 • Mathematics Group`, `Class 12 • Physics Group`, `Class 12 • Chemistry Discussion`, `Batch Announcements & Circulars`, and `Community Student Lounge`.
   - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.
 
 ### Entry 004 - Sub-step 1C: Removal of Mock Fallbacks & Broken Identity Swapping
@@ -95,6 +133,25 @@
     - Replaced simulated `setTimeout` attendance commit with direct state commit and honest note on v2 SMS gateway.
   - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.
 
+### Entry 006 - Student UI/UX Polish, In-App Document Reader & Analytics Fixes
+- **Timestamp:** 2026-11-05T00:51:00+05:30
+- **Actions:**
+  - In-App Document Opening & Download:
+    - Created `DocumentReaderModal.tsx` for immediate offline reading of study notes and solution files inside the app with formatted sections and a 1-tap "Save PDF" button.
+    - Integrated in-app reading and device downloads across `StudyMaterialsViewer.tsx`, `AssignmentsModule.tsx`, and `student.tsx`.
+  - Analytics & Cohort Curve Fixes:
+    - Redesigned `PerformanceComparisonChart.tsx` with genuine SVG curves (Cohort Average, Batch Topper, and Student Score) with dynamic coordinate mapping and score halos.
+    - Replaced hardcoded static vitals with 100% dynamically computed stats (Latest Score %, pts vs. Batch Avg, and Gap to Topper).
+    - Fixed Leaderboard card in `student.tsx`: added `overflow-hidden`, `min-w-0 flex-1` text truncation, and `shrink-0` score badges so values never overflow container boxes.
+  - Profile Clean-Up:
+    - Removed non-essential fields (Blood Group, residential address) from Student profile.
+    - Preserved relevant academic fields: School/Junior College, Target Exam, Enrolled Batch, and Admission Number.
+  - Classroom Chat Reorganization:
+    - Renamed tab from "Doubts" to "Chat".
+    - Removed 1-on-1 direct faculty messaging.
+    - Structured authentic group chat channels: `Class 12 • Mathematics Group`, `Class 12 • Physics Group`, `Class 12 • Chemistry Discussion`, `Batch Announcements & Circulars`, and `Community Student Lounge`.
+  - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.
+
 ### Entry 005 - Sub-step 1D: Responsive SVG Charts, React Native Text Crash Fix & i18n
 - **Timestamp:** 2026-11-05T00:31:00+05:30
 - **Actions:**
@@ -109,4 +166,23 @@
     - Created `src/i18n/locales/en.json` and `src/i18n/locales/hi.json` with primary localization keys.
     - Created `src/i18n/index.ts` and initialized in `src/app/_layout.tsx`.
   - Verified default teacher code `JOSHI-MATH-89` is consistently aligned with `Prof. Vikram Joshi`.
+  - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.
+
+### Entry 006 - Student UI/UX Polish, In-App Document Reader & Analytics Fixes
+- **Timestamp:** 2026-11-05T00:51:00+05:30
+- **Actions:**
+  - In-App Document Opening & Download:
+    - Created `DocumentReaderModal.tsx` for immediate offline reading of study notes and solution files inside the app with formatted sections and a 1-tap "Save PDF" button.
+    - Integrated in-app reading and device downloads across `StudyMaterialsViewer.tsx`, `AssignmentsModule.tsx`, and `student.tsx`.
+  - Analytics & Cohort Curve Fixes:
+    - Redesigned `PerformanceComparisonChart.tsx` with genuine SVG curves (Cohort Average, Batch Topper, and Student Score) with dynamic coordinate mapping and score halos.
+    - Replaced hardcoded static vitals with 100% dynamically computed stats (Latest Score %, pts vs. Batch Avg, and Gap to Topper).
+    - Fixed Leaderboard card in `student.tsx`: added `overflow-hidden`, `min-w-0 flex-1` text truncation, and `shrink-0` score badges so values never overflow container boxes.
+  - Profile Clean-Up:
+    - Removed non-essential fields (Blood Group, residential address) from Student profile.
+    - Preserved relevant academic fields: School/Junior College, Target Exam, Enrolled Batch, and Admission Number.
+  - Classroom Chat Reorganization:
+    - Renamed tab from "Doubts" to "Chat".
+    - Removed 1-on-1 direct faculty messaging.
+    - Structured authentic group chat channels: `Class 12 • Mathematics Group`, `Class 12 • Physics Group`, `Class 12 • Chemistry Discussion`, `Batch Announcements & Circulars`, and `Community Student Lounge`.
   - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.

@@ -16,6 +16,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Badge } from '@/components/ui';
 import { generateAndSharePDF, DUMMY_PDF_CATALOG, type PDFDocumentContent } from '@/services/dummyPdfService';
 import { type StudyMaterial } from '@/types/database';
+import { DocumentReaderModal } from './DocumentReaderModal';
 
 export const StudyMaterialsViewer: React.FC = () => {
   const { materials, uploadMaterial } = useAcademic();
@@ -34,6 +35,7 @@ export const StudyMaterialsViewer: React.FC = () => {
     uri: string;
     sizeFormatted: string;
   } | null>(null);
+  const [activeReaderDoc, setActiveReaderDoc] = useState<PDFDocumentContent | null>(null);
 
   const subjects = ['All', 'Physics', 'Chemistry', 'Mathematics'];
 
@@ -64,12 +66,12 @@ export const StudyMaterialsViewer: React.FC = () => {
     }
   };
 
-  const handleDownload = async (item: StudyMaterial) => {
-    try {
-      const matched = DUMMY_PDF_CATALOG.find(
-        (d) => d.subject.toLowerCase() === item.subject.toLowerCase()
-      );
-      const doc: PDFDocumentContent = matched || {
+  const getItemDoc = (item: StudyMaterial): PDFDocumentContent => {
+    const matched = DUMMY_PDF_CATALOG.find(
+      (d) => d.subject.toLowerCase() === item.subject.toLowerCase()
+    );
+    return (
+      matched || {
         id: item.id,
         title: item.title,
         subtitle: item.description || 'Verified Classroom Reference Document',
@@ -87,12 +89,23 @@ export const StudyMaterialsViewer: React.FC = () => {
             ],
           },
         ],
-      };
+      }
+    );
+  };
+
+  const handleDownload = async (item: StudyMaterial) => {
+    try {
+      const doc = getItemDoc(item);
       await generateAndSharePDF(doc);
       setDownloadedIds((prev) => [...prev, item.id]);
     } catch {
       Alert.alert('PDF Viewer', 'Could not open document preview.');
     }
+  };
+
+  const handleOpenReader = (item: StudyMaterial) => {
+    const doc = getItemDoc(item);
+    setActiveReaderDoc(doc);
   };
 
   const handleUpload = async () => {
@@ -198,13 +211,23 @@ export const StudyMaterialsViewer: React.FC = () => {
                 Faculty: {item.uploaded_by}
               </Text>
 
-              <TouchableOpacity
-                onPress={() => handleDownload(item)}
-                className="bg-blue-600 px-3 py-1.5 rounded-xl flex-row items-center gap-1.5 active:scale-95 shadow-xs"
-              >
-                <Download size={13} color="#ffffff" />
-                <Text className="text-xs font-bold text-white">View & Share PDF</Text>
-              </TouchableOpacity>
+              <View className="flex-row gap-1.5">
+                <TouchableOpacity
+                  onPress={() => handleOpenReader(item)}
+                  className="bg-slate-100 px-2.5 py-1.5 rounded-xl flex-row items-center gap-1 active:scale-95"
+                >
+                  <BookOpen size={12} color="#2563EB" />
+                  <Text className="text-xs font-bold text-blue-700">Open</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => handleDownload(item)}
+                  className="bg-blue-600 px-2.5 py-1.5 rounded-xl flex-row items-center gap-1 active:scale-95 shadow-xs"
+                >
+                  <Download size={12} color="#ffffff" />
+                  <Text className="text-xs font-bold text-white">Save PDF</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         ))}
@@ -294,6 +317,13 @@ export const StudyMaterialsViewer: React.FC = () => {
           </View>
         </View>
       </Modal>
+
+      {/* In-App Document Reader Modal */}
+      <DocumentReaderModal
+        document={activeReaderDoc}
+        visible={Boolean(activeReaderDoc)}
+        onClose={() => setActiveReaderDoc(null)}
+      />
     </View>
   );
 };
