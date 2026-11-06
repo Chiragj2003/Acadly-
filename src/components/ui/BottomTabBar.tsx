@@ -59,7 +59,7 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
             {/* Active Pill / Icon Container */}
             <View className="items-center justify-center relative">
               <View
-                className={`px-3 py-1 rounded-full items-center justify-center transition-all ${
+                className={`px-3 py-1 rounded-full items-center justify-center ${
                   isActive ? 'bg-blue-50/90' : 'bg-transparent'
                 }`}
               >

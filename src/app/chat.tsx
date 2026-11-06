@@ -22,12 +22,14 @@ import {
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
 import { ScreenWrapper } from '@/components/ui';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useChat, ChatMessage } from '@/context/ChatContext';
 import { useAuth } from '@/context/AuthContext';
 import { useAcademic } from '@/context/AcademicContext';
 
 export default function PinterestChatScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { userRole } = useAuth();
   const { teacherProfile, studentsRoster } = useAcademic();
   const {
@@ -148,7 +150,7 @@ export default function PinterestChatScreen() {
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 56 + insets.top : 0}
         className="flex-1"
       >
         {/* ================= ROOM SELECTOR TABS ================= */}

@@ -65,7 +65,7 @@ export const AttendanceToggle: React.FC<AttendanceToggleProps> = ({
             onPress={() => onChange(status)}
             className={`min-w-[34px] h-8 items-center justify-center px-2.5 rounded-xl ${
               style.container
-            } ${disabled ? 'opacity-50' : 'active:scale-95 transition-transform'}`}
+            } ${disabled ? 'opacity-50' : 'active:scale-95'}`}
           >
             <Text className={`text-xs ${style.text}`}>{status}</Text>
           </Pressable>

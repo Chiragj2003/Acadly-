@@ -31,7 +31,7 @@ export const Card: React.FC<CardProps> = ({
     return (
       <Pressable
         onPress={onPress}
-        className={`${baseClasses} active:scale-[0.99] transition-transform`}
+        className={`${baseClasses} active:scale-[0.99]`}
         {...(rest as PressableProps)}
       >
         {children}

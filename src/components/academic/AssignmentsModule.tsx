@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, Modal, Alert, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  Modal,
+  Alert,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+} from 'react-native';
 import {
   FileCheck,
   Calendar,
@@ -322,137 +332,161 @@ export const AssignmentsModule: React.FC = () => {
 
       {/* MODAL 1: CREATE ASSIGNMENT */}
       <Modal visible={isCreateOpen} transparent animationType="slide">
-        <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-surface rounded-t-3xl p-5 gap-3 max-h-[85%]">
-            <View className="flex-row items-center justify-between">
-              <Text className="text-lg font-bold text-on-surface">Create Batch Assignment</Text>
-              <Pressable onPress={() => setIsCreateOpen(false)}>
-                <X size={20} color="#0b1c30" />
-              </Pressable>
-            </View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1 justify-end bg-black/50"
+        >
+          <View className="bg-white rounded-t-3xl p-5 gap-3 max-h-[85%] border-t border-slate-200">
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+              <View className="flex-row items-center justify-between mb-3">
+                <Text className="text-lg font-bold text-slate-900">Create Batch Assignment</Text>
+                <Pressable onPress={() => setIsCreateOpen(false)} hitSlop={8}>
+                  <X size={20} color="#64748B" />
+                </Pressable>
+              </View>
 
-            <Input
-              label="Assignment Title"
-              placeholder="e.g. Kinematics Daily Practice Problem #05"
-              value={asgTitle}
-              onChangeText={setAsgTitle}
-            />
+              <View className="gap-3">
+                <Input
+                  label="Assignment Title"
+                  placeholder="e.g. Kinematics Daily Practice Problem #05"
+                  value={asgTitle}
+                  onChangeText={setAsgTitle}
+                />
 
-            <Input
-              label="Subject Domain"
-              placeholder="Physics / Chemistry / Mathematics"
-              value={asgSubject}
-              onChangeText={setAsgSubject}
-            />
+                <Input
+                  label="Subject Domain"
+                  placeholder="Physics / Chemistry / Mathematics"
+                  value={asgSubject}
+                  onChangeText={setAsgSubject}
+                />
 
-            <Input
-              label="Instructions & Focus Topics"
-              placeholder="e.g. Complete questions 1 to 30. Show diagrams for problem 12."
-              value={asgInstructions}
-              onChangeText={setAsgInstructions}
-              multiline
-              numberOfLines={3}
-            />
+                <Input
+                  label="Instructions & Focus Topics"
+                  placeholder="e.g. Complete questions 1 to 30. Show diagrams for problem 12."
+                  value={asgInstructions}
+                  onChangeText={setAsgInstructions}
+                  multiline
+                  numberOfLines={3}
+                />
 
-            <Input
-              label="Total Marks"
-              placeholder="100"
-              keyboardType="numeric"
-              value={asgMarks}
-              onChangeText={setAsgMarks}
-            />
+                <Input
+                  label="Total Marks"
+                  placeholder="100"
+                  keyboardType="numeric"
+                  value={asgMarks}
+                  onChangeText={setAsgMarks}
+                />
 
-            <Button
-              variant="primary"
-              title="Publish Assignment"
-              fullWidth
-              onPress={handleCreateAssignment}
-            />
+                <Button
+                  variant="primary"
+                  title="Publish Assignment"
+                  fullWidth
+                  onPress={handleCreateAssignment}
+                  className="mt-2"
+                />
+              </View>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* MODAL 2: SUBMIT WORK */}
       <Modal visible={Boolean(selectedAsgId)} transparent animationType="slide">
-        <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-surface rounded-t-3xl p-5 gap-3 max-h-[85%]">
-            <View className="flex-row items-center justify-between">
-              <Text className="text-lg font-bold text-on-surface">Submit Assignment Work</Text>
-              <Pressable onPress={() => setSelectedAsgId(null)}>
-                <X size={20} color="#0b1c30" />
-              </Pressable>
-            </View>
-
-            <Input
-              label="Submission Notes / Steps"
-              placeholder="Brief summary of derivations, steps or attached solution sheets"
-              value={solutionNotes}
-              onChangeText={setSolutionNotes}
-              multiline
-              numberOfLines={3}
-            />
-
-            <TouchableOpacity
-              onPress={handlePickSolutionDocument}
-              activeOpacity={0.8}
-              className="bg-cute-peach-light border border-cute-peach p-3 rounded-2xl flex-row items-center justify-between"
-            >
-              <View className="flex-row items-center gap-2">
-                <FileCheck size={18} color="#ff7d6b" />
-                <View>
-                  <Text className="text-xs font-bold text-cute-cocoa">{pickedFileName}</Text>
-                  <Text className="text-[10px] text-cute-muted">Tap to pick another PDF or photo</Text>
-                </View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1 justify-end bg-black/50"
+        >
+          <View className="bg-white rounded-t-3xl p-5 gap-3 max-h-[85%] border-t border-slate-200">
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+              <View className="flex-row items-center justify-between mb-3">
+                <Text className="text-lg font-bold text-slate-900">Submit Assignment Work</Text>
+                <Pressable onPress={() => setSelectedAsgId(null)} hitSlop={8}>
+                  <X size={20} color="#64748B" />
+                </Pressable>
               </View>
-              <Badge label="Pick File 📄" variant="primary" />
-            </TouchableOpacity>
 
-            <Button
-              variant="primary"
-              title="Confirm & Submit Solution"
-              fullWidth
-              onPress={handleSubmitSolution}
-            />
+              <View className="gap-3">
+                <Input
+                  label="Submission Notes / Steps"
+                  placeholder="Brief summary of derivations, steps or attached solution sheets"
+                  value={solutionNotes}
+                  onChangeText={setSolutionNotes}
+                  multiline
+                  numberOfLines={3}
+                />
+
+                <TouchableOpacity
+                  onPress={handlePickSolutionDocument}
+                  activeOpacity={0.8}
+                  className="bg-blue-50 border border-blue-200 p-3 rounded-2xl flex-row items-center justify-between"
+                >
+                  <View className="flex-row items-center gap-2">
+                    <FileCheck size={18} color="#2563EB" />
+                    <View>
+                      <Text className="text-xs font-bold text-slate-800">{pickedFileName}</Text>
+                      <Text className="text-[10px] text-slate-500">Tap to pick another PDF or photo</Text>
+                    </View>
+                  </View>
+                  <Badge label="Pick File 📄" variant="primary" />
+                </TouchableOpacity>
+
+                <Button
+                  variant="primary"
+                  title="Confirm & Submit Solution"
+                  fullWidth
+                  onPress={handleSubmitSolution}
+                  className="mt-2"
+                />
+              </View>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* MODAL 3: GRADE SUBMISSION */}
       <Modal visible={Boolean(gradingSubId)} transparent animationType="slide">
-        <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-surface rounded-t-3xl p-5 gap-3 max-h-[85%]">
-            <View className="flex-row items-center justify-between">
-              <Text className="text-lg font-bold text-on-surface">Grade Student Submission</Text>
-              <Pressable onPress={() => setGradingSubId(null)}>
-                <X size={20} color="#0b1c30" />
-              </Pressable>
-            </View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1 justify-end bg-black/50"
+        >
+          <View className="bg-white rounded-t-3xl p-5 gap-3 max-h-[85%] border-t border-slate-200">
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+              <View className="flex-row items-center justify-between mb-3">
+                <Text className="text-lg font-bold text-slate-900">Grade Student Submission</Text>
+                <Pressable onPress={() => setGradingSubId(null)} hitSlop={8}>
+                  <X size={20} color="#64748B" />
+                </Pressable>
+              </View>
 
-            <Input
-              label="Marks Awarded (out of 100)"
-              placeholder="e.g. 95"
-              keyboardType="numeric"
-              value={gradeMarks}
-              onChangeText={setGradeMarks}
-            />
+              <View className="gap-3">
+                <Input
+                  label="Marks Awarded (out of 100)"
+                  placeholder="e.g. 95"
+                  keyboardType="numeric"
+                  value={gradeMarks}
+                  onChangeText={setGradeMarks}
+                />
 
-            <Input
-              label="Faculty Feedback & Remark"
-              placeholder="e.g. Great technique. Revise question 14 formula."
-              value={gradeFeedback}
-              onChangeText={setGradeFeedback}
-              multiline
-              numberOfLines={3}
-            />
+                <Input
+                  label="Faculty Feedback & Remark"
+                  placeholder="e.g. Great technique. Revise question 14 formula."
+                  value={gradeFeedback}
+                  onChangeText={setGradeFeedback}
+                  multiline
+                  numberOfLines={3}
+                />
 
-            <Button
-              variant="primary"
-              title="Publish Grade & Notify Student"
-              fullWidth
-              onPress={handleGrade}
-            />
+                <Button
+                  variant="primary"
+                  title="Publish Grade & Notify Student"
+                  fullWidth
+                  onPress={handleGrade}
+                  className="mt-2"
+                />
+              </View>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );

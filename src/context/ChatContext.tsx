@@ -400,11 +400,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Broadcast in real-time via Supabase channel
     try {
       const channel = supabase.channel(`chat_${activeRoomId}`);
-      await channel.send({
-        type: 'broadcast',
+      const payload = {
+        type: 'broadcast' as const,
         event: 'new_message',
         payload: newMsg,
-      });
+      };
+      if (typeof (channel as any).httpSend === 'function') {
+        await (channel as any).httpSend(payload);
+      } else {
+        await channel.send(payload);
+      }
     } catch (err) {
       console.warn('Realtime broadcast note (using local state fallback):', err);
     }
@@ -431,11 +436,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Broadcast pin to all participants
     try {
       const channel = supabase.channel(`chat_${activeRoomId}`);
-      await channel.send({
-        type: 'broadcast',
+      const payload = {
+        type: 'broadcast' as const,
         event: 'pin_message',
         payload: { messageId, roomId: activeRoomId },
-      });
+      };
+      if (typeof (channel as any).httpSend === 'function') {
+        await (channel as any).httpSend(payload);
+      } else {
+        await channel.send(payload);
+      }
     } catch (err) {
       console.warn('Realtime pin note:', err);
     }

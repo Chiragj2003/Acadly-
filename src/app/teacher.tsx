@@ -11,6 +11,8 @@ import {
   Share,
   Linking,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import {
   BookOpen,
@@ -39,6 +41,13 @@ import {
   Layers,
   ArrowRight,
   ExternalLink,
+  Search,
+  Phone,
+  Star,
+  ShieldCheck,
+  FileQuestion,
+  Download,
+  AlertTriangle,
 } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
@@ -58,8 +67,39 @@ import {
   StudyMaterialsViewer,
   AssignmentsModule,
   AttendanceCorrectionModal,
+  DocumentReaderModal,
+  InteractiveDppBuilderModal,
+  type InteractiveQuestion,
 } from '@/components/academic';
+import { DUMMY_PDF_CATALOG, type PDFDocumentContent } from '@/services/dummyPdfService';
 import { type AttendanceRecord } from '@/types/database';
+
+const TEACHER_BATCHES = [
+  {
+    id: 'batch-01',
+    name: 'Class 12 • JEE Advanced (Morning)',
+    time: '04:30 PM - 06:00 PM',
+    subject: 'Physics • Rotational Dynamics',
+    room: 'Room 204 • Hybrid',
+    count: 28,
+  },
+  {
+    id: 'batch-02',
+    name: 'JEE Rankers Cohort (Evening)',
+    time: '06:15 PM - 07:45 PM',
+    subject: 'Physics • Electromagnetic Induction',
+    room: 'Room 102 • Lab 1',
+    count: 18,
+  },
+  {
+    id: 'batch-03',
+    name: 'Class 11 Foundation Batch',
+    time: '08:00 PM - 09:15 PM',
+    subject: 'Mechanics • Laws of Motion',
+    room: 'Virtual Room A',
+    count: 22,
+  },
+];
 
 export default function PinterestTeacherScreen() {
   const { isAuthorized, isLoading } = useRoleGuard(["teacher","admin"]);
@@ -73,6 +113,7 @@ export default function PinterestTeacherScreen() {
     joinRequests,
     teacherProfile,
     studentsRoster,
+    updateStudentFeeStatus,
     recordTestMarks,
     uploadPDFMaterial,
     teacherMode,
@@ -136,6 +177,20 @@ export default function PinterestTeacherScreen() {
   const [newAssignDueDays, setNewAssignDueDays] = useState('2');
   const [newAssignPdfName, setNewAssignPdfName] = useState<string | null>(null);
 
+  // Active Batch Filter
+  const [selectedBatchId, setSelectedBatchId] = useState('batch-01');
+  const currentBatch = TEACHER_BATCHES.find((b) => b.id === selectedBatchId) || TEACHER_BATCHES[0];
+
+  // In-App PDF Reader Modal State
+  const [selectedReaderDoc, setSelectedReaderDoc] = useState<PDFDocumentContent | null>(null);
+
+  // In-App Interactive DPP / Quiz Builder Modal State
+  const [isInteractiveDppOpen, setIsInteractiveDppOpen] = useState(false);
+
+  // Student Directory Search & Fee Filter
+  const [directorySearchQuery, setDirectorySearchQuery] = useState('');
+  const [directoryFeeFilter, setDirectoryFeeFilter] = useState<'all' | 'paid' | 'pending'>('all');
+
   const pendingJoinCount = joinRequests.filter((r) => r.status === 'pending').length;
 
   const handleLogout = () => {
@@ -192,9 +247,34 @@ export default function PinterestTeacherScreen() {
     await markAttendance(studentId, status);
   };
 
-  const handleMarkAllPresent = async () => {
-    await markBatchAllPresent('batch-02');
-    Alert.alert('Roll Call Updated', 'All enrolled batch students marked as Present.');
+  const handlePublishInteractiveDpp = async (dppData: {
+    title: string;
+    subject: string;
+    batchId: string;
+    totalMarks: number;
+    questions: InteractiveQuestion[];
+  }) => {
+    const due = new Date();
+    due.setDate(due.getDate() + 2);
+
+    await createAssignment({
+      batch_id: selectedBatchId,
+      title: dppData.title,
+      subject: dppData.subject,
+      instructions: `Interactive Quiz Form (${dppData.questions.length} Questions: MCQ, True/False & Numerical). Answer directly in app.`,
+      description: `Interactive Quiz Form (${dppData.questions.length} Questions: MCQ, True/False & Numerical). Answer directly in app.`,
+      due_date: due.toISOString(),
+      due_label: 'Due in 2 days',
+      total_marks: dppData.totalMarks,
+      max_marks: dppData.totalMarks,
+      question_count: dppData.questions.length,
+      created_by: teacherProfile.fullName,
+    });
+
+    Alert.alert(
+      'In-App Quiz Published! ⚡',
+      `Interactive DPP "${dppData.title}" with ${dppData.questions.length} questions is now live for ${currentBatch.name}.`
+    );
   };
 
   const handleCommitAttendance = async () => {
@@ -409,6 +489,62 @@ export default function PinterestTeacherScreen() {
         />
       }
     >
+      {/* Active Batch & Timing Focus Switcher */}
+      <View className="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-xs">
+        <View className="flex-row items-center justify-between mb-2 px-1">
+          <View className="flex-row items-center gap-1.5">
+            <Clock size={13} color="#2563EB" />
+            <Text className="text-xs font-black text-slate-800 uppercase tracking-wider">
+              Batch & Schedule Focus
+            </Text>
+          </View>
+          <View className="bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
+            <Text className="text-[10px] font-bold text-blue-700">
+              {currentBatch.time}
+            </Text>
+          </View>
+        </View>
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View className="flex-row gap-2">
+            {TEACHER_BATCHES.map((b) => {
+              const isSelected = selectedBatchId === b.id;
+              return (
+                <TouchableOpacity
+                  key={b.id}
+                  activeOpacity={0.85}
+                  onPress={() => setSelectedBatchId(b.id)}
+                  className={`px-3 py-2 rounded-xl border flex-row items-center gap-2 ${
+                    isSelected
+                      ? 'bg-blue-600 border-blue-600 shadow-xs'
+                      : 'bg-slate-50 border-slate-200'
+                  }`}
+                >
+                  <View className="items-start">
+                    <Text
+                      className={`text-xs font-extrabold ${
+                        isSelected ? 'text-white' : 'text-slate-800'
+                      }`}
+                      numberOfLines={1}
+                    >
+                      {b.name.split(' • ')[0]}
+                    </Text>
+                    <Text
+                      className={`text-[10px] ${
+                        isSelected ? 'text-blue-100 font-medium' : 'text-slate-500'
+                      }`}
+                    >
+                      {b.time.split(' - ')[0]} • {b.count} Students
+                    </Text>
+                  </View>
+                  {isSelected && <Check size={14} color="#FFFFFF" />}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </ScrollView>
+      </View>
+
       {/* ================= TAB 1: HOME (COMMAND DESK) ================= */}
         {activeTab === 'home' && (
           <View className="gap-3.5">
@@ -604,103 +740,158 @@ export default function PinterestTeacherScreen() {
         )}
 
         {/* ================= TAB 2: ROSTER & ATTENDANCE ================= */}
-        {activeTab === 'roster' && (
-          <View className="gap-3.5">
-            {/* Roll Call Hub Card */}
-            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
-              <View className="flex-row items-center justify-between">
-                <View>
-                  <Text className="text-xs font-semibold text-slate-400">Classroom Roll Call</Text>
-                  <Text className="text-base font-extrabold text-slate-900">Class 12 • JEE Advanced (Morning)</Text>
+        {activeTab === 'roster' && (() => {
+          const presentCount = attendanceRecords.filter((r) => r.status === 'P' || r.status === 'E').length;
+          const absentCount = attendanceRecords.filter((r) => r.status === 'A').length;
+          const lateCount = attendanceRecords.filter((r) => r.status === 'L').length;
+
+          return (
+            <View className="gap-3.5">
+              {/* Roll Call Hub Card */}
+              <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-1 pr-2">
+                    <Text className="text-xs font-semibold text-slate-400">Classroom Roll Call</Text>
+                    <Text className="text-base font-extrabold text-slate-900" numberOfLines={1}>
+                      {currentBatch.name}
+                    </Text>
+                  </View>
+
+                  {/* Live Attendance Counter Badges */}
+                  <View className="flex-row items-center gap-1.5 shrink-0">
+                    <View className="bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-lg">
+                      <Text className="text-[10px] font-extrabold text-emerald-800">{presentCount} Present</Text>
+                    </View>
+                    {absentCount > 0 && (
+                      <View className="bg-rose-50 border border-rose-200/80 px-2 py-0.5 rounded-lg">
+                        <Text className="text-[10px] font-extrabold text-rose-800">{absentCount} Absent</Text>
+                      </View>
+                    )}
+                    {lateCount > 0 && (
+                      <View className="bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-lg">
+                        <Text className="text-[10px] font-extrabold text-amber-800">{lateCount} Late</Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
+
+                {/* In-App Absence Notification Toggle */}
+                <View className="flex-row items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+                  <View className="flex-row items-center gap-2.5 flex-1 mr-2">
+                    <View className="w-8 h-8 rounded-full bg-blue-100 items-center justify-center">
+                      <MessageSquare size={14} color="#2563EB" />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-xs font-bold text-slate-800">In-App Absence Alert</Text>
+                      <Text className="text-[11px] text-slate-500">Auto-dispatch in-app alert to parent portal on absence</Text>
+                    </View>
+                  </View>
+                  <Switch
+                    value={waParentPing}
+                    onValueChange={setWaParentPing}
+                    trackColor={{ false: '#cbd5e1', true: '#2563EB' }}
+                  />
+                </View>
+
+                {/* Student Roll List (Tapping ANY student row navigates to 360° diagnostics) */}
+                <View className="gap-2">
+                  <View className="flex-row items-center justify-between px-1">
+                    <Text className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      Enrolled Students ({attendanceRecords.length})
+                    </Text>
+                    <Text className="text-[11px] text-slate-500 font-medium">
+                      Tap name for 360° diagnostics
+                    </Text>
+                  </View>
+
+                  {attendanceRecords.map((record) => (
+                    <View
+                      key={record.id}
+                      className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex-row items-center justify-between gap-2"
+                    >
+                      <TouchableOpacity
+                        onPress={() => router.push({ pathname: '/student-detail', params: { studentId: record.student_id } })}
+                        className="flex-row items-center gap-2.5 flex-1 min-w-0"
+                      >
+                        {/* Auto-sized Roll Container that NEVER overflows */}
+                        <View className="min-w-[36px] h-8 px-1.5 rounded-xl bg-white border border-slate-200 items-center justify-center shrink-0">
+                          <Text className="text-[11px] font-bold text-blue-600 font-mono" numberOfLines={1}>
+                            {record.roll_number.replace('ROLL-', '#').replace('STU-', '#')}
+                          </Text>
+                        </View>
+                        <View className="flex-1 min-w-0">
+                          <View className="flex-row items-center gap-1.5">
+                            <Text className="text-xs font-bold text-slate-900" numberOfLines={1}>
+                              {record.student_name}
+                            </Text>
+                            <TouchableOpacity
+                              onPress={() => setSelectedRecordForCorrection(record)}
+                              hitSlop={8}
+                            >
+                              <Edit2 size={12} color="#64748B" />
+                            </TouchableOpacity>
+                          </View>
+                          <Text className="text-[11px] text-slate-500" numberOfLines={1}>
+                            {record.remarks || 'Tap to inspect diagnostic report & marks'}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+
+                      <AttendanceToggle
+                        value={record.status === 'E' ? 'P' : record.status}
+                        onChange={(status) => handleStatusChange(record.student_id, status)}
+                      />
+                    </View>
+                  ))}
+                </View>
+
+                {/* Commit & Broadcast Roll Call */}
                 <TouchableOpacity
-                  onPress={handleMarkAllPresent}
-                  className="bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl active:scale-95"
+                  onPress={handleCommitAttendance}
+                  disabled={isSyncing}
+                  className="bg-blue-600 py-3 rounded-2xl items-center flex-row justify-center gap-2 shadow-xs active:scale-98"
                 >
-                  <Text className="text-xs font-bold text-blue-700">Mark All Present</Text>
+                  <Save size={16} color="#ffffff" />
+                  <Text className="text-sm font-bold text-white">
+                    {isSyncing ? 'Syncing to Database...' : 'Commit & Dispatch Roll Call'}
+                  </Text>
                 </TouchableOpacity>
               </View>
-
-              {/* In-App Absence Notification Toggle */}
-              <View className="flex-row items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
-                <View className="flex-row items-center gap-2.5 flex-1 mr-2">
-                  <View className="w-8 h-8 rounded-full bg-blue-100 items-center justify-center">
-                    <MessageSquare size={14} color="#2563EB" />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-xs font-bold text-slate-800">In-App Absence Alert</Text>
-                    <Text className="text-[11px] text-slate-500">Auto-dispatch in-app alert to parent portal on absence</Text>
-                  </View>
-                </View>
-                <Switch
-                  value={waParentPing}
-                  onValueChange={setWaParentPing}
-                  trackColor={{ false: '#cbd5e1', true: '#2563EB' }}
-                />
-              </View>
-
-              {/* Student Roll List (Tapping ANY student row navigates to 360° diagnostics) */}
-              <View className="gap-2">
-                <Text className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">
-                  Enrolled Students ({attendanceRecords.length}) • Tap name for 360° Diagnostics
-                </Text>
-
-                {attendanceRecords.map((record) => (
-                  <View
-                    key={record.id}
-                    className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex-row items-center justify-between gap-2"
-                  >
-                    <TouchableOpacity
-                      onPress={() => router.push({ pathname: '/student-detail', params: { studentId: record.student_id } })}
-                      className="flex-row items-center gap-2.5 flex-1 min-w-0"
-                    >
-                      <View className="w-8 h-8 rounded-full bg-white border border-slate-200 items-center justify-center shrink-0">
-                        <Text className="text-xs font-bold text-blue-600">{record.roll_number}</Text>
-                      </View>
-                      <View className="flex-1 min-w-0">
-                        <View className="flex-row items-center gap-1.5">
-                          <Text className="text-xs font-bold text-slate-900" numberOfLines={1}>
-                            {record.student_name}
-                          </Text>
-                          <TouchableOpacity
-                            onPress={() => setSelectedRecordForCorrection(record)}
-                            hitSlop={8}
-                          >
-                            <Edit2 size={12} color="#64748B" />
-                          </TouchableOpacity>
-                        </View>
-                        <Text className="text-[11px] text-slate-500" numberOfLines={1}>
-                          {record.remarks || 'Tap to inspect diagnostic report & marks'}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-
-                    <AttendanceToggle
-                      value={record.status === 'E' ? 'P' : record.status}
-                      onChange={(status) => handleStatusChange(record.student_id, status)}
-                    />
-                  </View>
-                ))}
-              </View>
-
-              {/* Commit & Broadcast Roll Call */}
-              <TouchableOpacity
-                onPress={handleCommitAttendance}
-                disabled={isSyncing}
-                className="bg-blue-600 py-3 rounded-2xl items-center flex-row justify-center gap-2 shadow-xs active:scale-98"
-              >
-                <Save size={16} color="#ffffff" />
-                <Text className="text-sm font-bold text-white">
-                  {isSyncing ? 'Syncing to Database...' : 'Commit & Dispatch Roll Call'}
-                </Text>
-              </TouchableOpacity>
             </View>
-          </View>
-        )}
+          );
+        })()}
 
         {/* ================= TAB 3: PUBLISH (STUDY HUB & GRADING) ================= */}
         {activeTab === 'publish' && (
           <View className="gap-3.5">
+            {/* Interactive DPP Builder Featured Card */}
+            <View className="bg-gradient-to-r from-blue-600 to-indigo-700 p-4 rounded-3xl shadow-xs">
+              <View className="flex-row items-center justify-between mb-2">
+                <View className="flex-row items-center gap-2">
+                  <View className="w-8 h-8 rounded-xl bg-white/20 items-center justify-center">
+                    <FileQuestion size={18} color="#ffffff" />
+                  </View>
+                  <View>
+                    <Text className="text-sm font-black text-white">In-App Interactive DPP & Quiz Builder</Text>
+                    <Text className="text-[11px] text-blue-100">Create forms like Google Forms inside Acadly</Text>
+                  </View>
+                </View>
+                <View className="bg-white/20 px-2 py-0.5 rounded-full">
+                  <Text className="text-[10px] font-bold text-white">MCQ & T/F</Text>
+                </View>
+              </View>
+              <Text className="text-xs text-blue-50/90 leading-relaxed mb-3">
+                Craft questions with multi-choice options, correct answers key, true/false, and short answer with instant marking.
+              </Text>
+              <TouchableOpacity
+                onPress={() => setIsInteractiveDppOpen(true)}
+                className="bg-white py-2.5 px-4 rounded-2xl items-center flex-row justify-center gap-2 shadow-xs active:scale-98"
+              >
+                <Plus size={16} color="#2563EB" />
+                <Text className="text-xs font-black text-blue-600">Create In-App Interactive DPP →</Text>
+              </TouchableOpacity>
+            </View>
+
             {/* Quick Upload Buttons */}
             <View className="flex-row gap-2">
               <TouchableOpacity
@@ -720,7 +911,7 @@ export default function PinterestTeacherScreen() {
                 <View className="w-9 h-9 rounded-xl bg-blue-50 items-center justify-center">
                   <Plus size={18} color="#2563EB" />
                 </View>
-                <Text className="text-xs font-bold text-slate-800">+ Create DPP</Text>
+                <Text className="text-xs font-bold text-slate-800">+ Offline DPP</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -776,9 +967,20 @@ export default function PinterestTeacherScreen() {
                         <Text className="text-[11px] text-slate-600 font-medium" numberOfLines={1}>
                           {assignment?.title || 'Mechanics DPP 04'}
                         </Text>
-                        <Text className="text-[10px] text-slate-400 mt-0.5">
-                          File: {sub.file_name || 'handwritten_solution.pdf'}
-                        </Text>
+                        
+                        {/* In-App Document Preview Button */}
+                        <TouchableOpacity
+                          onPress={() => {
+                            const match = DUMMY_PDF_CATALOG.find((d) => d.subject.toLowerCase().includes(assignment?.subject?.toLowerCase() || 'physics')) || DUMMY_PDF_CATALOG[0];
+                            setSelectedReaderDoc(match);
+                          }}
+                          className="flex-row items-center gap-1.5 mt-1.5 self-start bg-blue-50 px-2 py-1 rounded-lg border border-blue-200/60 active:scale-95"
+                        >
+                          <FileText size={11} color="#2563EB" />
+                          <Text className="text-[10px] font-semibold text-blue-700" numberOfLines={1}>
+                            Open & Review: {sub.file_name || 'handwritten_solution.pdf'} ↗
+                          </Text>
+                        </TouchableOpacity>
                       </View>
 
                       <TouchableOpacity
@@ -917,59 +1119,287 @@ export default function PinterestTeacherScreen() {
         )}
 
         {/* ================= TAB 5: PROFILE & SETTINGS ================= */}
-        {activeTab === 'profile' && (
-          <View className="gap-3.5">
-            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
-              <View className="flex-row items-center gap-3.5">
-                <View className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
-                  <Text className="text-3xl">👨‍🏫</Text>
+        {activeTab === 'profile' && (() => {
+          // Filter students roster by search & fee status
+          const filteredStudents = studentsRoster.filter((st) => {
+            const matchesSearch =
+              st.name.toLowerCase().includes(directorySearchQuery.toLowerCase()) ||
+              st.rollNumber.toLowerCase().includes(directorySearchQuery.toLowerCase()) ||
+              st.batchName.toLowerCase().includes(directorySearchQuery.toLowerCase());
+
+            const isPaid = st.feeStatus.toLowerCase().includes('paid');
+            if (directoryFeeFilter === 'paid') return matchesSearch && isPaid;
+            if (directoryFeeFilter === 'pending') return matchesSearch && !isPaid;
+            return matchesSearch;
+          });
+
+          const paidCount = studentsRoster.filter((st) => st.feeStatus.toLowerCase().includes('paid')).length;
+          const pendingCount = studentsRoster.filter((st) => !st.feeStatus.toLowerCase().includes('paid')).length;
+
+          return (
+            <View className="gap-4">
+              {/* Teacher Identity & Profile Card */}
+              <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
+                <View className="flex-row items-center gap-3.5">
+                  <View className="w-14 h-14 rounded-2xl bg-blue-600 items-center justify-center shadow-xs">
+                    <Text className="text-xl font-black text-white">
+                      {teacherProfile.fullName.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                    </Text>
+                  </View>
+                  <View className="flex-1 min-w-0">
+                    <Text className="text-base font-extrabold text-slate-900" numberOfLines={1}>
+                      {teacherProfile.fullName}
+                    </Text>
+                    <Text className="text-xs text-slate-500 font-medium">{teacherProfile.qualification}</Text>
+                    <View className="flex-row items-center gap-2 mt-1">
+                      <View className="bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
+                        <Text className="text-[10px] font-bold text-blue-700">
+                          {teacherMode === 'solo' ? 'Solo Tutor' : 'Institute Faculty'}
+                        </Text>
+                      </View>
+                      <View className="bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                        <Text className="text-[10px] font-bold text-emerald-700">
+                          ₹{teacherProfile.monthlyFeeRate.toLocaleString()}/mo per pupil
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
                 </View>
-                <View className="flex-1 min-w-0">
-                  <Text className="text-lg font-black text-slate-900">{teacherProfile.fullName}</Text>
-                  <Text className="text-xs text-slate-500">{teacherProfile.qualification}</Text>
-                  <Badge
-                    label={teacherMode === 'solo' ? 'Solo Tutor Account' : 'Institute Faculty'}
-                    variant="info"
-                  />
+
+                {/* Teacher Code Card */}
+                <View className="bg-slate-50 border border-slate-200 rounded-2xl p-3 flex-row items-center justify-between">
+                  <View>
+                    <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Batch Enrollment Code
+                    </Text>
+                    <Text className="text-sm font-extrabold text-blue-600 font-mono">
+                      {teacherProfile.teacherCode}
+                    </Text>
+                  </View>
+                  <View className="flex-row gap-1.5">
+                    <TouchableOpacity
+                      onPress={handleShareTeacherCode}
+                      className="bg-blue-600 px-3 py-1.5 rounded-xl active:scale-95 flex-row items-center gap-1.5 shadow-xs"
+                    >
+                      <Share2 size={13} color="#ffffff" />
+                      <Text className="text-xs font-bold text-white">Share Code</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
 
-              <View className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 gap-2">
-                <View className="flex-row justify-between">
-                  <Text className="text-xs text-slate-500">Teacher Code:</Text>
-                  <Text className="text-xs font-bold text-blue-600">{teacherProfile.teacherCode}</Text>
+              {/* Active Batch & Timing Settings */}
+              <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center gap-2">
+                    <Clock size={16} color="#2563EB" />
+                    <Text className="text-sm font-bold text-slate-900">Active Batch & Schedule Filter</Text>
+                  </View>
+                  <Badge label={`${TEACHER_BATCHES.length} Batches`} variant="info" />
                 </View>
-                <View className="flex-row justify-between">
-                  <Text className="text-xs text-slate-500">Experience:</Text>
-                  <Text className="text-xs font-bold text-slate-800">{teacherProfile.experienceYears} Years</Text>
-                </View>
-                <View className="flex-row justify-between">
-                  <Text className="text-xs text-slate-500">Subject Domains:</Text>
-                  <Text className="text-xs font-bold text-slate-800">
-                    {teacherProfile.specializationSubjects.join(', ')}
-                  </Text>
-                </View>
-                <View className="flex-row justify-between">
-                  <Text className="text-xs text-slate-500">Monthly Tuition Rate:</Text>
-                  <Text className="text-xs font-bold text-emerald-700">₹{teacherProfile.monthlyFeeRate.toLocaleString()} / month</Text>
-                </View>
-              </View>
-
-              <View className="gap-1">
-                <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider">Bio & Pedagogy</Text>
-                <Text className="text-xs text-slate-700 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200/80">
-                  {teacherProfile.bio}
+                <Text className="text-xs text-slate-500 leading-relaxed">
+                  Select which batch and timing you want to manage. The roll call, DPP assignments, and diagnostics across Acadly adapt automatically.
                 </Text>
+
+                <View className="gap-2 mt-1">
+                  {TEACHER_BATCHES.map((batch) => {
+                    const isSelected = selectedBatchId === batch.id;
+                    return (
+                      <TouchableOpacity
+                        key={batch.id}
+                        onPress={() => setSelectedBatchId(batch.id)}
+                        className={`p-3.5 rounded-2xl border flex-row items-center justify-between ${
+                          isSelected
+                            ? 'bg-blue-50/70 border-blue-600'
+                            : 'bg-slate-50 border-slate-200/80'
+                        } active:scale-98`}
+                      >
+                        <View className="flex-1 pr-2">
+                          <View className="flex-row items-center gap-2 mb-0.5">
+                            <Text className={`text-xs font-bold ${isSelected ? 'text-blue-950' : 'text-slate-900'}`}>
+                              {batch.name}
+                            </Text>
+                            {isSelected && (
+                              <View className="bg-blue-600 px-1.5 py-0.2 rounded">
+                                <Text className="text-[9px] font-bold text-white">Active Focus</Text>
+                              </View>
+                            )}
+                          </View>
+                          <Text className="text-[11px] text-slate-500">{batch.subject} • {batch.room}</Text>
+                          <Text className="text-[10px] font-semibold text-slate-600 mt-1">🕒 {batch.time} • {batch.count} Pupils</Text>
+                        </View>
+
+                        <View
+                          className={`w-6 h-6 rounded-full border items-center justify-center ${
+                            isSelected ? 'bg-blue-600 border-blue-600' : 'border-slate-300 bg-white'
+                          }`}
+                        >
+                          {isSelected && <Check size={13} color="#ffffff" strokeWidth={3} />}
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+
+              {/* Searchable Student Directory with Fee Status & Contact */}
+              <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center gap-2">
+                    <Users size={16} color="#2563EB" />
+                    <Text className="text-sm font-bold text-slate-900">Student Directory & Fee Tracker</Text>
+                  </View>
+                  <Text className="text-xs font-bold text-slate-500">{filteredStudents.length} Students</Text>
+                </View>
+
+                {/* Search Bar */}
+                <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 gap-2">
+                  <Search size={15} color="#94A3B8" />
+                  <TextInput
+                    placeholder="Search pupil by name or roll number..."
+                    placeholderTextColor="#94a3b8"
+                    value={directorySearchQuery}
+                    onChangeText={setDirectorySearchQuery}
+                    className="flex-1 text-xs text-slate-800 font-medium p-0"
+                  />
+                  {directorySearchQuery.length > 0 && (
+                    <TouchableOpacity onPress={() => setDirectorySearchQuery('')}>
+                      <X size={14} color="#94A3B8" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                {/* Fee Status Filter Tabs */}
+                <View className="flex-row gap-1.5">
+                  {[
+                    { id: 'all', label: `All (${studentsRoster.length})` },
+                    { id: 'paid', label: `Paid (${paidCount})` },
+                    { id: 'pending', label: `Pending (${pendingCount})` },
+                  ].map((tab) => {
+                    const isActive = directoryFeeFilter === tab.id;
+                    return (
+                      <TouchableOpacity
+                        key={tab.id}
+                        onPress={() => setDirectoryFeeFilter(tab.id as any)}
+                        className={`px-3 py-1.5 rounded-xl border ${
+                          isActive
+                            ? 'bg-slate-900 border-slate-900'
+                            : 'bg-slate-50 border-slate-200'
+                        } active:scale-95`}
+                      >
+                        <Text className={`text-xs font-bold ${isActive ? 'text-white' : 'text-slate-600'}`}>
+                          {tab.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                {/* Student Cards List */}
+                <View className="gap-2.5">
+                  {filteredStudents.length === 0 ? (
+                    <View className="py-8 items-center justify-center">
+                      <Text className="text-xs text-slate-400">No students match your filter.</Text>
+                    </View>
+                  ) : (
+                    filteredStudents.map((st) => {
+                      const isFeePaid = st.feeStatus.toLowerCase().includes('paid');
+                      return (
+                        <View
+                          key={st.id}
+                          className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 gap-2.5"
+                        >
+                          <View className="flex-row items-start justify-between">
+                            <TouchableOpacity
+                              onPress={() => router.push({ pathname: '/student-detail', params: { studentId: st.id } })}
+                              className="flex-row items-center gap-2.5 flex-1 min-w-0"
+                            >
+                              <View className="min-w-[36px] h-8 px-1.5 rounded-xl bg-white border border-slate-200 items-center justify-center shrink-0">
+                                <Text className="text-[11px] font-bold text-blue-600 font-mono" numberOfLines={1}>
+                                  {st.rollNumber.replace('ROLL-', '#').replace('STU-', '#')}
+                                </Text>
+                              </View>
+                              <View className="flex-1 min-w-0">
+                                <Text className="text-xs font-bold text-slate-900" numberOfLines={1}>
+                                  {st.name}
+                                </Text>
+                                <Text className="text-[11px] text-slate-500" numberOfLines={1}>
+                                  {st.batchName} • {st.grade}
+                                </Text>
+                              </View>
+                            </TouchableOpacity>
+
+                            {/* Fee Status Badge */}
+                            <TouchableOpacity
+                              onPress={() => {
+                                const newStatus = isFeePaid ? 'Fee Pending (₹3,500)' : 'Fee Paid (Verified)';
+                                updateStudentFeeStatus(st.id, newStatus);
+                              }}
+                              className={`px-2.5 py-1 rounded-xl border flex-row items-center gap-1 active:scale-95 ${
+                                isFeePaid
+                                  ? 'bg-emerald-50 border-emerald-200'
+                                  : 'bg-amber-50 border-amber-200'
+                              }`}
+                            >
+                              {isFeePaid ? (
+                                <ShieldCheck size={12} color="#059669" />
+                              ) : (
+                                <AlertTriangle size={12} color="#d97706" />
+                              )}
+                              <Text
+                                className={`text-[10px] font-bold ${
+                                  isFeePaid ? 'text-emerald-700' : 'text-amber-700'
+                                }`}
+                              >
+                                {isFeePaid ? 'Fee Paid' : 'Pending ₹3,500'}
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+
+                          {/* Chips: Attendance & Rank & Action */}
+                          <View className="flex-row items-center justify-between pt-1 border-t border-slate-200/60">
+                            <View className="flex-row items-center gap-2">
+                              <Text className="text-[10px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+                                📊 {st.overallAttendance}% Attendance
+                              </Text>
+                              <Text className="text-[10px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+                                🏆 Rank #{st.rank}
+                              </Text>
+                            </View>
+
+                            <View className="flex-row items-center gap-1.5">
+                              {st.guardianPhone && (
+                                <TouchableOpacity
+                                  onPress={() => Linking.openURL(`tel:${st.guardianPhone}`)}
+                                  className="w-7 h-7 rounded-xl bg-white border border-slate-200 items-center justify-center active:scale-90"
+                                >
+                                  <Phone size={12} color="#2563EB" />
+                                </TouchableOpacity>
+                              )}
+                              <TouchableOpacity
+                                onPress={() => router.push({ pathname: '/student-detail', params: { studentId: st.id } })}
+                                className="bg-white border border-slate-200 px-2.5 py-1 rounded-xl flex-row items-center gap-1 active:scale-95"
+                              >
+                                <Text className="text-[11px] font-bold text-slate-700">360° Profile</Text>
+                                <ChevronRight size={12} color="#64748B" />
+                              </TouchableOpacity>
+                            </View>
+                          </View>
+                        </View>
+                      );
+                    })
+                  )}
+                </View>
               </View>
 
               {/* Mode Switch Card */}
               <TouchableOpacity
                 onPress={() => setIsDualModeModalOpen(true)}
-                className="bg-blue-50/70 border border-blue-200 p-3.5 rounded-2xl flex-row items-center justify-between active:scale-98"
+                className="bg-blue-50/70 border border-blue-200 p-4 rounded-3xl flex-row items-center justify-between active:scale-98"
               >
                 <View className="flex-1 pr-2">
                   <Text className="text-xs font-bold text-blue-900">Switch Account Mode</Text>
-                  <Text className="text-[11px] text-blue-700">
+                  <Text className="text-[11px] text-blue-700 mt-0.5">
                     Currently: {teacherMode === 'solo' ? 'Independent Solo Tutor' : 'Connected to Coaching Center'}
                   </Text>
                 </View>
@@ -979,18 +1409,21 @@ export default function PinterestTeacherScreen() {
               {/* Sign Out Button */}
               <TouchableOpacity
                 onPress={handleLogout}
-                className="bg-rose-50 border border-rose-200 p-3.5 rounded-2xl flex-row items-center justify-center gap-2 active:scale-98 mt-2"
+                className="bg-rose-50 border border-rose-200 p-4 rounded-3xl flex-row items-center justify-center gap-2 active:scale-98 mb-6"
               >
                 <LogOut size={16} color="#e11d48" />
                 <Text className="text-xs font-bold text-rose-700">Sign Out of Teacher Desk</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        )}
+          );
+        })()}
 
       {/* ================= MODAL 1: DUAL MODE SWITCHER ================= */}
       <Modal visible={isDualModeModalOpen} transparent animationType="slide">
-        <View className="flex-1 justify-end bg-black/50">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1 justify-end bg-black/50"
+        >
           <View className="bg-white rounded-t-3xl p-6 gap-3.5 max-h-[85%] border-t border-slate-200">
             <View className="flex-row items-center justify-between">
               <Text className="text-base font-extrabold text-slate-900">Teacher Workspace Mode</Text>
@@ -1049,12 +1482,15 @@ export default function PinterestTeacherScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* ================= MODAL 2: UPLOAD PDF NOTES ================= */}
       <Modal visible={isUploadPdfOpen} transparent animationType="slide">
-        <View className="flex-1 justify-end bg-black/50">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1 justify-end bg-black/50"
+        >
           <View className="bg-white rounded-t-3xl p-6 gap-3 max-h-[85%] border-t border-slate-200">
             <View className="flex-row items-center justify-between">
               <Text className="text-base font-extrabold text-slate-900">Upload PDF Study Material</Text>
@@ -1063,86 +1499,91 @@ export default function PinterestTeacherScreen() {
               </TouchableOpacity>
             </View>
 
-            <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Document Title</Text>
-              <TextInput
-                placeholder="e.g. Rotational Mechanics Master Formula Sheet"
-                placeholderTextColor="#94a3b8"
-                value={pdfTitle}
-                onChangeText={setPdfTitle}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-medium"
-              />
-            </View>
-
-            <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Subject</Text>
-              <View className="flex-row flex-wrap gap-1.5">
-                {['Physics', 'Chemistry', 'Mathematics', 'Biology'].map((sub) => (
-                  <TouchableOpacity
-                    key={sub}
-                    onPress={() => setPdfSubject(sub)}
-                    className={`px-3 py-1.5 rounded-xl border ${
-                      pdfSubject === sub ? 'bg-blue-600 border-blue-600' : 'bg-slate-50 border-slate-200'
-                    }`}
-                  >
-                    <Text className={`text-[11px] font-bold ${pdfSubject === sub ? 'text-white' : 'text-slate-700'}`}>
-                      {sub}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3">
+              <View>
+                <Text className="text-xs font-bold text-slate-700 mb-1">Document Title</Text>
+                <TextInput
+                  placeholder="e.g. Rotational Mechanics Master Formula Sheet"
+                  placeholderTextColor="#94a3b8"
+                  value={pdfTitle}
+                  onChangeText={setPdfTitle}
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-medium"
+                />
               </View>
-            </View>
 
-            <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Category</Text>
-              <View className="flex-row flex-wrap gap-1.5">
-                {[
-                  { id: 'notes', label: 'Notes 📖' },
-                  { id: 'formula_sheet', label: 'Formula Sheet 📐' },
-                  { id: 'dpp', label: 'DPP ⚡' },
-                  { id: 'pyq', label: 'PYQ 📝' },
-                ].map((cat) => (
-                  <TouchableOpacity
-                    key={cat.id}
-                    onPress={() => setPdfCategory(cat.id as any)}
-                    className={`px-3 py-1.5 rounded-xl border ${
-                      pdfCategory === cat.id ? 'bg-blue-600 border-blue-600' : 'bg-slate-50 border-slate-200'
-                    }`}
-                  >
-                    <Text className={`text-[10px] font-bold ${pdfCategory === cat.id ? 'text-white' : 'text-slate-700'}`}>
-                      {cat.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+              <View>
+                <Text className="text-xs font-bold text-slate-700 mb-1">Subject</Text>
+                <View className="flex-row flex-wrap gap-1.5">
+                  {['Physics', 'Chemistry', 'Mathematics', 'Biology'].map((sub) => (
+                    <TouchableOpacity
+                      key={sub}
+                      onPress={() => setPdfSubject(sub)}
+                      className={`px-3 py-1.5 rounded-xl border ${
+                        pdfSubject === sub ? 'bg-blue-600 border-blue-600' : 'bg-slate-50 border-slate-200'
+                      }`}
+                    >
+                      <Text className={`text-[11px] font-bold ${pdfSubject === sub ? 'text-white' : 'text-slate-700'}`}>
+                        {sub}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
 
-            <TouchableOpacity
-              onPress={handlePickPdf}
-              className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex-row items-center justify-between"
-            >
-              <View className="flex-row items-center gap-2 flex-1 pr-2">
-                <FileText size={18} color="#2563EB" />
-                <Text className="text-xs font-bold text-slate-800" numberOfLines={1}>
-                  {pickedPdfFile ? pickedPdfFile.name : 'Pick PDF File from Phone'}
-                </Text>
+              <View>
+                <Text className="text-xs font-bold text-slate-700 mb-1">Category</Text>
+                <View className="flex-row flex-wrap gap-1.5">
+                  {[
+                    { id: 'notes', label: 'Notes 📖' },
+                    { id: 'formula_sheet', label: 'Formula Sheet 📐' },
+                    { id: 'dpp', label: 'DPP ⚡' },
+                    { id: 'pyq', label: 'PYQ 📝' },
+                  ].map((cat) => (
+                    <TouchableOpacity
+                      key={cat.id}
+                      onPress={() => setPdfCategory(cat.id as any)}
+                      className={`px-3 py-1.5 rounded-xl border ${
+                        pdfCategory === cat.id ? 'bg-blue-600 border-blue-600' : 'bg-slate-50 border-slate-200'
+                      }`}
+                    >
+                      <Text className={`text-[10px] font-bold ${pdfCategory === cat.id ? 'text-white' : 'text-slate-700'}`}>
+                        {cat.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-              <Text className="text-xs font-bold text-blue-600">Browse</Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={handleConfirmPdfUpload}
-              className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-1"
-            >
-              <Text className="text-xs font-bold text-white">Publish PDF to Batch</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handlePickPdf}
+                className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex-row items-center justify-between"
+              >
+                <View className="flex-row items-center gap-2 flex-1 pr-2">
+                  <FileText size={18} color="#2563EB" />
+                  <Text className="text-xs font-bold text-slate-800" numberOfLines={1}>
+                    {pickedPdfFile ? pickedPdfFile.name : 'Pick PDF File from Phone'}
+                  </Text>
+                </View>
+                <Text className="text-xs font-bold text-blue-600">Browse</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleConfirmPdfUpload}
+                className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-2 mb-4"
+              >
+                <Text className="text-xs font-bold text-white">Publish PDF to Batch</Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* ================= MODAL 3: EXAM MARKS & RANKS ================= */}
       <Modal visible={isExamMarksModalOpen} transparent animationType="slide">
-        <View className="flex-1 justify-end bg-black/50">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1 justify-end bg-black/50"
+        >
           <View className="bg-white rounded-t-3xl p-6 gap-3 max-h-[85%] border-t border-slate-200">
             <View className="flex-row items-center justify-between">
               <View>
@@ -1154,70 +1595,75 @@ export default function PinterestTeacherScreen() {
               </TouchableOpacity>
             </View>
 
-            <View className="flex-row gap-2">
-              <View className="flex-1">
-                <Text className="text-[11px] font-bold text-slate-700 mb-1">Test Title</Text>
-                <TextInput
-                  placeholder="e.g. Unit Mock Test 04"
-                  placeholderTextColor="#94a3b8"
-                  value={examTestName}
-                  onChangeText={setExamTestName}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
-                />
-              </View>
-              <View className="w-24">
-                <Text className="text-[11px] font-bold text-slate-700 mb-1">Max Marks</Text>
-                <TextInput
-                  placeholder="100"
-                  keyboardType="numeric"
-                  placeholderTextColor="#94a3b8"
-                  value={examMaxScore}
-                  onChangeText={setExamMaxScore}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
-                />
-              </View>
-            </View>
-
-            <Text className="text-xs font-bold text-slate-700 mt-1">
-              Enter Student Scores (out of {examMaxScore}):
-            </Text>
-            <ScrollView className="max-h-56 gap-2">
-              {studentsRoster.map((st) => (
-                <View
-                  key={st.id}
-                  className="flex-row items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 mb-1.5"
-                >
-                  <View className="flex-1 pr-2">
-                    <Text className="text-xs font-bold text-slate-800">{st.name}</Text>
-                    <Text className="text-[10px] text-slate-400">{st.rollNumber}</Text>
-                  </View>
-
-                  <View className="w-20">
-                    <TextInput
-                      placeholder="85"
-                      keyboardType="numeric"
-                      value={studentMarksInput[st.id] || '85'}
-                      onChangeText={(val) => setStudentMarksInput((prev) => ({ ...prev, [st.id]: val }))}
-                      className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 text-center font-bold"
-                    />
-                  </View>
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+              <View className="flex-row gap-2 mb-3">
+                <View className="flex-1">
+                  <Text className="text-[11px] font-bold text-slate-700 mb-1">Test Title</Text>
+                  <TextInput
+                    placeholder="e.g. Unit Mock Test 04"
+                    placeholderTextColor="#94a3b8"
+                    value={examTestName}
+                    onChangeText={setExamTestName}
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
+                  />
                 </View>
-              ))}
-            </ScrollView>
+                <View className="w-24">
+                  <Text className="text-[11px] font-bold text-slate-700 mb-1">Max Marks</Text>
+                  <TextInput
+                    placeholder="100"
+                    keyboardType="numeric"
+                    placeholderTextColor="#94a3b8"
+                    value={examMaxScore}
+                    onChangeText={setExamMaxScore}
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
+                  />
+                </View>
+              </View>
 
-            <TouchableOpacity
-              onPress={handleSaveExamMarks}
-              className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-1"
-            >
-              <Text className="text-xs font-bold text-white">Save Marks & Compute Ranks 🏆</Text>
-            </TouchableOpacity>
+              <Text className="text-xs font-bold text-slate-700 mb-2">
+                Enter Student Scores (out of {examMaxScore}):
+              </Text>
+              <View className="gap-2 mb-3">
+                {studentsRoster.map((st) => (
+                  <View
+                    key={st.id}
+                    className="flex-row items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200"
+                  >
+                    <View className="flex-1 pr-2">
+                      <Text className="text-xs font-bold text-slate-800">{st.name}</Text>
+                      <Text className="text-[10px] text-slate-400">{st.rollNumber}</Text>
+                    </View>
+
+                    <View className="w-20">
+                      <TextInput
+                        placeholder="85"
+                        keyboardType="numeric"
+                        value={studentMarksInput[st.id] || '85'}
+                        onChangeText={(val) => setStudentMarksInput((prev) => ({ ...prev, [st.id]: val }))}
+                        className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 text-center font-bold"
+                      />
+                    </View>
+                  </View>
+                ))}
+              </View>
+
+              <TouchableOpacity
+                onPress={handleSaveExamMarks}
+                className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mb-4"
+              >
+                <Text className="text-xs font-bold text-white">Save Marks & Compute Ranks 🏆</Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* ================= MODAL 4: GRADE HOMEWORK ================= */}
       <Modal visible={isGradingModalOpen} transparent animationType="slide">
-        <View className="flex-1 justify-end bg-black/50">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1 justify-end bg-black/50"
+        >
           <View className="bg-white rounded-t-3xl p-6 gap-3.5 max-h-[85%] border-t border-slate-200">
             <View className="flex-row items-center justify-between">
               <Text className="text-base font-extrabold text-slate-900">Grade Student Homework</Text>
@@ -1226,43 +1672,48 @@ export default function PinterestTeacherScreen() {
               </TouchableOpacity>
             </View>
 
-            <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Marks Awarded (out of 25)</Text>
-              <TextInput
-                placeholder="24"
-                keyboardType="numeric"
-                value={gradingScoreInput}
-                onChangeText={setGradingScoreInput}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
-              />
-            </View>
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3.5">
+              <View>
+                <Text className="text-xs font-bold text-slate-700 mb-1">Marks Awarded (out of 25)</Text>
+                <TextInput
+                  placeholder="24"
+                  keyboardType="numeric"
+                  value={gradingScoreInput}
+                  onChangeText={setGradingScoreInput}
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
+                />
+              </View>
 
-            <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Teacher Feedback / Observations</Text>
-              <TextInput
-                placeholder="Add teacher feedback or step correction..."
-                placeholderTextColor="#94a3b8"
-                value={gradingFeedbackInput}
-                onChangeText={setGradingFeedbackInput}
-                multiline
-                numberOfLines={3}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800"
-              />
-            </View>
+              <View>
+                <Text className="text-xs font-bold text-slate-700 mb-1">Teacher Feedback / Observations</Text>
+                <TextInput
+                  placeholder="Add teacher feedback or step correction..."
+                  placeholderTextColor="#94a3b8"
+                  value={gradingFeedbackInput}
+                  onChangeText={setGradingFeedbackInput}
+                  multiline
+                  numberOfLines={3}
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800"
+                />
+              </View>
 
-            <TouchableOpacity
-              onPress={handleConfirmGrade}
-              className="bg-emerald-600 py-3 rounded-2xl items-center shadow-xs mt-1"
-            >
-              <Text className="text-xs font-bold text-white">Save Grade & Notify Student ✅</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleConfirmGrade}
+                className="bg-emerald-600 py-3 rounded-2xl items-center shadow-xs mt-2 mb-4"
+              >
+                <Text className="text-xs font-bold text-white">Save Grade & Notify Student ✅</Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* ================= MODAL 5: CREATE ASSIGNMENT ================= */}
       <Modal visible={isCreateAssignmentOpen} transparent animationType="slide">
-        <View className="flex-1 justify-end bg-black/50">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1 justify-end bg-black/50"
+        >
           <View className="bg-white rounded-t-3xl p-6 gap-3 max-h-[85%] border-t border-slate-200">
             <View className="flex-row items-center justify-between">
               <Text className="text-base font-extrabold text-slate-900">Create New DPP / Assignment</Text>
@@ -1271,74 +1722,79 @@ export default function PinterestTeacherScreen() {
               </TouchableOpacity>
             </View>
 
-            <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Title</Text>
-              <TextInput
-                placeholder="e.g. DPP 05: Rotational Torque & Angular Momentum"
-                placeholderTextColor="#94a3b8"
-                value={newAssignTitle}
-                onChangeText={setNewAssignTitle}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
-              />
-            </View>
-
-            <View className="flex-row gap-2">
-              <View className="flex-1">
-                <Text className="text-[11px] font-bold text-slate-700 mb-1">Subject</Text>
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3">
+              <View>
+                <Text className="text-xs font-bold text-slate-700 mb-1">Title</Text>
                 <TextInput
-                  placeholder="Physics"
-                  value={newAssignSubject}
-                  onChangeText={setNewAssignSubject}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
+                  placeholder="e.g. DPP 05: Rotational Torque & Angular Momentum"
+                  placeholderTextColor="#94a3b8"
+                  value={newAssignTitle}
+                  onChangeText={setNewAssignTitle}
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
                 />
               </View>
-              <View className="w-24">
-                <Text className="text-[11px] font-bold text-slate-700 mb-1">Max Marks</Text>
-                <TextInput
-                  placeholder="25"
-                  keyboardType="numeric"
-                  value={newAssignMaxMarks}
-                  onChangeText={setNewAssignMaxMarks}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
-                />
-              </View>
-            </View>
 
-            <TouchableOpacity
-              onPress={async () => {
-                try {
-                  const res = await DocumentPicker.getDocumentAsync({
-                    type: 'application/pdf',
-                    copyToCacheDirectory: true,
-                  });
-                  if (!res.canceled && res.assets && res.assets.length > 0) {
-                    setNewAssignPdfName(res.assets[0].name);
+              <View className="flex-row gap-2">
+                <View className="flex-1">
+                  <Text className="text-[11px] font-bold text-slate-700 mb-1">Subject</Text>
+                  <TextInput
+                    placeholder="Physics"
+                    value={newAssignSubject}
+                    onChangeText={setNewAssignSubject}
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
+                  />
+                </View>
+                <View className="w-24">
+                  <Text className="text-[11px] font-bold text-slate-700 mb-1">Max Marks</Text>
+                  <TextInput
+                    placeholder="25"
+                    keyboardType="numeric"
+                    value={newAssignMaxMarks}
+                    onChangeText={setNewAssignMaxMarks}
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
+                  />
+                </View>
+              </View>
+
+              <TouchableOpacity
+                onPress={async () => {
+                  try {
+                    const res = await DocumentPicker.getDocumentAsync({
+                      type: 'application/pdf',
+                      copyToCacheDirectory: true,
+                    });
+                    if (!res.canceled && res.assets && res.assets.length > 0) {
+                      setNewAssignPdfName(res.assets[0].name);
+                    }
+                  } catch {
+                    Alert.alert('Picker Error', 'Could not open picker.');
                   }
-                } catch {
-                  Alert.alert('Picker Error', 'Could not open picker.');
-                }
-              }}
-              className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex-row items-center justify-between"
-            >
-              <Text className="text-xs text-slate-700 font-medium" numberOfLines={1}>
-                {newAssignPdfName || 'Attach Question Paper PDF (Optional)'}
-              </Text>
-              <Text className="text-xs font-bold text-blue-600">Pick</Text>
-            </TouchableOpacity>
+                }}
+                className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex-row items-center justify-between"
+              >
+                <Text className="text-xs text-slate-700 font-medium" numberOfLines={1}>
+                  {newAssignPdfName || 'Attach Question Paper PDF (Optional)'}
+                </Text>
+                <Text className="text-xs font-bold text-blue-600">Pick</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={handleCreateAssignment}
-              className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-1"
-            >
-              <Text className="text-xs font-bold text-white">Publish Assignment to Batch</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleCreateAssignment}
+                className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-2 mb-4"
+              >
+                <Text className="text-xs font-bold text-white">Publish Assignment to Batch</Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* ================= MODAL 6: ADD LECTURE ================= */}
       <Modal visible={isAddLectureOpen} transparent animationType="slide">
-        <View className="flex-1 justify-end bg-black/50">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1 justify-end bg-black/50"
+        >
           <View className="bg-white rounded-t-3xl p-6 gap-3 max-h-[85%] border-t border-slate-200">
             <View className="flex-row items-center justify-between">
               <Text className="text-base font-extrabold text-slate-900">Link YouTube Lecture</Text>
@@ -1347,47 +1803,49 @@ export default function PinterestTeacherScreen() {
               </TouchableOpacity>
             </View>
 
-            <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Lecture Title</Text>
-              <TextInput
-                placeholder="e.g. Kinematics Lecture 08: Projectile Motion"
-                placeholderTextColor="#94a3b8"
-                value={lectureTitle}
-                onChangeText={setLectureTitle}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
-              />
-            </View>
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3">
+              <View>
+                <Text className="text-xs font-bold text-slate-700 mb-1">Lecture Title</Text>
+                <TextInput
+                  placeholder="e.g. Kinematics Lecture 08: Projectile Motion"
+                  placeholderTextColor="#94a3b8"
+                  value={lectureTitle}
+                  onChangeText={setLectureTitle}
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
+                />
+              </View>
 
-            <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Subject</Text>
-              <TextInput
-                placeholder="Physics / Chemistry / Mathematics"
-                placeholderTextColor="#94a3b8"
-                value={lectureSubject}
-                onChangeText={setLectureSubject}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
-              />
-            </View>
+              <View>
+                <Text className="text-xs font-bold text-slate-700 mb-1">Subject</Text>
+                <TextInput
+                  placeholder="Physics / Chemistry / Mathematics"
+                  placeholderTextColor="#94a3b8"
+                  value={lectureSubject}
+                  onChangeText={setLectureSubject}
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
+                />
+              </View>
 
-            <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">YouTube Video ID or Unlisted URL</Text>
-              <TextInput
-                placeholder="e.g. dQw4w9WgXcQ or https://youtu.be/..."
-                placeholderTextColor="#94a3b8"
-                value={lectureVideoId}
-                onChangeText={setLectureVideoId}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
-              />
-            </View>
+              <View>
+                <Text className="text-xs font-bold text-slate-700 mb-1">YouTube Video ID or Unlisted URL</Text>
+                <TextInput
+                  placeholder="e.g. dQw4w9WgXcQ or https://youtu.be/..."
+                  placeholderTextColor="#94a3b8"
+                  value={lectureVideoId}
+                  onChangeText={setLectureVideoId}
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
+                />
+              </View>
 
-            <TouchableOpacity
-              onPress={handleAddLecture}
-              className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-1"
-            >
-              <Text className="text-xs font-bold text-white">Publish Video Lecture</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleAddLecture}
+                className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-2 mb-4"
+              >
+                <Text className="text-xs font-bold text-white">Publish Video Lecture</Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* ATTENDANCE CORRECTION MODAL */}
@@ -1398,6 +1856,22 @@ export default function PinterestTeacherScreen() {
 
       {/* VIDEO PLAYER MODAL */}
       <VideoPlayerModal />
+
+      {/* IN-APP DOCUMENT READER MODAL */}
+      <DocumentReaderModal
+        document={selectedReaderDoc}
+        visible={Boolean(selectedReaderDoc)}
+        onClose={() => setSelectedReaderDoc(null)}
+      />
+
+      {/* IN-APP INTERACTIVE DPP / QUIZ BUILDER MODAL */}
+      <InteractiveDppBuilderModal
+        visible={isInteractiveDppOpen}
+        onClose={() => setIsInteractiveDppOpen(false)}
+        onPublish={handlePublishInteractiveDpp}
+        defaultBatchName={currentBatch.name}
+        defaultSubject={currentBatch.subject}
+      />
     </ScreenWrapper>
   );
 }

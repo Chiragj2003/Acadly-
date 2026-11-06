@@ -7,6 +7,8 @@ import {
   TextInput,
   Alert,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import {
   MessageSquare,
@@ -31,6 +33,7 @@ import {
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
 import { ScreenWrapper, Badge } from '@/components/ui';
+import { DocumentReaderModal } from '@/components/academic';
 import { useAcademic, CommunityPost, PDFMaterialItem } from '@/context/AcademicContext';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -553,9 +556,9 @@ export default function PinterestCommunityScreen() {
                     <View className="flex-row gap-2 pt-2 border-t border-slate-100">
                       <TouchableOpacity
                         activeOpacity={0.85}
-                        onPress={async () => {
-                          const dummyDoc = DUMMY_PDF_CATALOG[0];
-                          await generateAndSharePDF(dummyDoc);
+                        onPress={() => {
+                          const matchedDoc = DUMMY_PDF_CATALOG.find((d) => d.subject.toLowerCase() === item.subject.toLowerCase()) || DUMMY_PDF_CATALOG[0];
+                          setPreviewDoc(matchedDoc);
                         }}
                         className="flex-1 bg-blue-600 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95 shadow-xs"
                       >
@@ -566,8 +569,8 @@ export default function PinterestCommunityScreen() {
                       <TouchableOpacity
                         activeOpacity={0.85}
                         onPress={async () => {
-                          const dummyDoc = DUMMY_PDF_CATALOG[0];
-                          await generateAndSharePDF(dummyDoc);
+                          const matchedDoc = DUMMY_PDF_CATALOG.find((d) => d.subject.toLowerCase() === item.subject.toLowerCase()) || DUMMY_PDF_CATALOG[0];
+                          await generateAndSharePDF(matchedDoc);
                         }}
                         className="flex-1 bg-slate-100 border border-slate-200/80 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95"
                       >
@@ -585,7 +588,10 @@ export default function PinterestCommunityScreen() {
 
       {/* ================= MODAL: DISCUSSION REPLIES & TEACHER VERIFICATION ================= */}
       <Modal visible={!!activeDiscussionPost} transparent animationType="slide">
-        <View className="flex-1 justify-end bg-black/50">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1 justify-end bg-black/50"
+        >
           <View className="bg-white rounded-t-3xl p-6 gap-3.5 max-h-[85%] border-t border-slate-200">
             <View className="flex-row items-center justify-between">
               <View className="flex-1 pr-2">
@@ -601,7 +607,7 @@ export default function PinterestCommunityScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView className="max-h-64 gap-2">
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="max-h-64 gap-2">
               <Text className="text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed">
                 {activeDiscussionPost?.content}
               </Text>
@@ -667,12 +673,15 @@ export default function PinterestCommunityScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* ================= MODAL: UPLOAD PDF NOTE ================= */}
       <Modal visible={isUploadingPdf} transparent animationType="slide">
-        <View className="flex-1 justify-end bg-black/50">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1 justify-end bg-black/50"
+        >
           <View className="bg-white rounded-t-3xl p-6 gap-3.5 max-h-[85%] border-t border-slate-200">
             <View className="flex-row items-center justify-between">
               <Text className="text-base font-extrabold text-slate-900">Upload PDF Study Material</Text>
@@ -681,58 +690,67 @@ export default function PinterestCommunityScreen() {
               </TouchableOpacity>
             </View>
 
-            <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Document Title</Text>
-              <TextInput
-                placeholder="e.g. Organic Reaction Mechanisms Cheat Sheet"
-                placeholderTextColor="#94a3b8"
-                value={pdfUploadTitle}
-                onChangeText={setPdfUploadTitle}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
-              />
-            </View>
-
-            <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Subject</Text>
-              <View className="flex-row flex-wrap gap-1.5">
-                {['Physics', 'Chemistry', 'Mathematics', 'Biology'].map((sub) => (
-                  <TouchableOpacity
-                    key={sub}
-                    onPress={() => setPdfUploadSubject(sub)}
-                    className={`px-3 py-1.5 rounded-xl border ${
-                      pdfUploadSubject === sub ? 'bg-blue-600 border-blue-600' : 'bg-slate-50 border-slate-200'
-                    }`}
-                  >
-                    <Text className={`text-[11px] font-bold ${pdfUploadSubject === sub ? 'text-white' : 'text-slate-700'}`}>
-                      {sub}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3.5">
+              <View>
+                <Text className="text-xs font-bold text-slate-700 mb-1">Document Title</Text>
+                <TextInput
+                  placeholder="e.g. Organic Reaction Mechanisms Cheat Sheet"
+                  placeholderTextColor="#94a3b8"
+                  value={pdfUploadTitle}
+                  onChangeText={setPdfUploadTitle}
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
+                />
               </View>
-            </View>
 
-            <TouchableOpacity
-              onPress={handlePickNoteFile}
-              className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex-row items-center justify-between"
-            >
-              <View className="flex-row items-center gap-2 flex-1 pr-2">
-                <FileText size={18} color="#2563EB" />
-                <Text className="text-xs font-bold text-slate-800" numberOfLines={1}>
-                  {selectedUploadFile ? selectedUploadFile.name : 'Select PDF from Device'}
-                </Text>
+              <View>
+                <Text className="text-xs font-bold text-slate-700 mb-1">Subject</Text>
+                <View className="flex-row flex-wrap gap-1.5">
+                  {['Physics', 'Chemistry', 'Mathematics', 'Biology'].map((sub) => (
+                    <TouchableOpacity
+                      key={sub}
+                      onPress={() => setPdfUploadSubject(sub)}
+                      className={`px-3 py-1.5 rounded-xl border ${
+                        pdfUploadSubject === sub ? 'bg-blue-600 border-blue-600' : 'bg-slate-50 border-slate-200'
+                      }`}
+                    >
+                      <Text className={`text-[11px] font-bold ${pdfUploadSubject === sub ? 'text-white' : 'text-slate-700'}`}>
+                        {sub}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-              <Text className="text-xs font-bold text-blue-600">Browse</Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={handleConfirmPdfUpload}
-              className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-1 active:scale-98"
-            >
-              <Text className="text-xs font-bold text-white">Publish PDF to Library</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handlePickNoteFile}
+                className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex-row items-center justify-between"
+              >
+                <View className="flex-row items-center gap-2 flex-1 pr-2">
+                  <FileText size={18} color="#2563EB" />
+                  <Text className="text-xs font-bold text-slate-800" numberOfLines={1}>
+                    {selectedUploadFile ? selectedUploadFile.name : 'Select PDF from Device'}
+                  </Text>
+                </View>
+                <Text className="text-xs font-bold text-blue-600">Browse</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleConfirmPdfUpload}
+                className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-2 mb-4 active:scale-98"
+              >
+                <Text className="text-xs font-bold text-white">Publish PDF to Library</Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
+
+      {/* IN-APP DOCUMENT READER MODAL */}
+      <DocumentReaderModal
+        document={previewDoc}
+        visible={Boolean(previewDoc)}
+        onClose={() => setPreviewDoc(null)}
+      />
     </ScreenWrapper>
   );
 }

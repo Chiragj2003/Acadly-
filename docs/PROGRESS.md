@@ -203,3 +203,30 @@
     - Fixed nested vertical `ScrollView` conflicts in `community.tsx`, `join-institute.tsx`, `student-detail.tsx`, `verify-students.tsx`, and `chat.tsx` by setting `scrollable={false}` on `ScreenWrapper`.
     - Modernized `AssignmentsModule.tsx` with intentional academic blue theme (`#2563EB`) and clean status indicators.
   - TypeScript verification: `npx tsc --noEmit` passed with 0 errors across all screens.
+
+### Entry 008 - Teacher Desk Overhaul, In-App Interactive DPP Form Builder, Keyboard Fix & Crash Resolution
+- **Timestamp:** 2026-11-06T11:57:00+05:30
+- **Actions:**
+  - **Crash Resolution & Warning Fixes:**
+    - Diagnosed and resolved fatal `[Error: Couldn't find a LinkingContext context.]` caused by recursive stack overflow in `react-native-css-interop` (`render-component.js:135`) due to unsupported CSS `transition-*` properties (`transition-colors`, `transition-all`, `transition-transform`) on native components. Removed all `transition-*` styles from `Input.tsx`, `BottomTabBar.tsx`, `AttendanceToggle.tsx`, and `Card.tsx`.
+    - Eliminated Supabase Realtime deprecation warning (`Realtime send() is automatically falling back to REST API`) by checking `channel.httpSend` in `ChatContext.tsx`.
+  - **Keyboard Avoidance Across All Modals & Chat:**
+    - Solved keyboard overlap and sticking issues by wrapping all native `<Modal>` contents with dedicated `<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>` and `<ScrollView keyboardShouldPersistTaps="handled">` across `teacher.tsx`, `AssignmentsModule.tsx`, and `community.tsx`.
+    - Added dynamic `keyboardVerticalOffset` in `chat.tsx` based on `insets.top` so typing never obscures message inputs on iOS or Android.
+  - **Attendance Simplification & Roll Number Container:**
+    - Removed "Mark All Present" button from Teacher Attendance.
+    - Added live attendance status counters (`24 Present • 3 Absent • 1 Late`).
+    - Replaced fixed circle container with dynamic `min-w-[36px] h-8 px-1.5 rounded-xl` container formatting roll numbers (`#01`, `#02`, `#104`) with `numberOfLines={1}` so values never bleed or clip.
+  - **Active Batch & Timing Focus Switcher:**
+    - Added 3 realistic teacher batches (`Class 12 • JEE Advanced Morning`, `JEE Rankers Evening`, `Class 11 Foundation`) with timings and room info.
+    - Added an active batch focus selector strip on the Teacher Desk to declutter data across roster, tests, and homework.
+  - **In-App Interactive DPP / Quiz Form Builder:**
+    - Created `InteractiveDppBuilderModal.tsx` allowing teachers to create forms like Google Forms inside Acadly (MCQ with A/B/C/D correct key selector, True/False, and Short Answer / Numerical questions with marks per question).
+    - Integrated with `useAcademic` to publish interactive DPPs directly to the student portal.
+  - **Teacher Profile & Searchable Student Directory with Fee Status:**
+    - Redesigned Teacher Tab 5 (Profile & Settings) with teacher credential card, active batch schedule settings, and a searchable pupil directory.
+    - Filter students by `All`, `Paid`, or `Pending ₹3,500`.
+    - Student cards display roll numbers, attendance rate, rank, parent phone call button, one-tap fee status toggling, and quick navigation to 360° diagnostics (`/student-detail`).
+  - **In-App PDF Opening Across Tabs:**
+    - Integrated `DocumentReaderModal` across Teacher Desk (reviewing student homework submissions) and Community Library ("Read Document" opens in-app with offline reading and instant download).
+  - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.

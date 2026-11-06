@@ -52,7 +52,7 @@ export const Input: React.FC<InputProps> = ({
       )}
 
       <View
-        className={`flex-row items-center rounded-xl overflow-hidden transition-colors ${
+        className={`flex-row items-center rounded-xl overflow-hidden ${
           error
             ? 'bg-error-container/30 border border-error'
             : isFocused
