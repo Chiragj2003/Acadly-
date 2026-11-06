@@ -97,6 +97,7 @@ export default function VerifyStudentsScreen() {
 
   return (
     <ScreenWrapper
+      scrollable={false}
       headerProps={{
         title: 'Student Verification Queue',
         onBackPress: () => router.back(),

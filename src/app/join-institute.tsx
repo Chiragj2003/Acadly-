@@ -154,8 +154,9 @@ export default function JoinInstituteScreen() {
 
   return (
     <ScreenWrapper
+      scrollable={false}
       headerProps={{
-        title: 'Join Coaching or Teacher',
+        title: 'Join Classes or Mentor',
         onBackPress: () => router.back(),
       }}
     >

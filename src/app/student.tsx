@@ -41,6 +41,7 @@ import {
   ShieldCheck,
   Bell,
   ChevronRight,
+  Star,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useRoleGuard } from '@/hooks/useRoleGuard';
@@ -181,6 +182,7 @@ export default function PinterestStudentScreen() {
       headerProps={{
         title: 'Student Desk',
         instituteName: currentInstitute?.name || 'Bloom Science Academy',
+        profileInitials: 'AS',
         onNotificationPress: openNotificationDrawer,
         onProfilePress: () => setActiveTab('profile'),
         onLogoutPress: handleLogout,
@@ -402,12 +404,12 @@ export default function PinterestStudentScreen() {
           {activeTab === 'study' && (
             <View className="gap-5">
               {/* Category Filter Pills */}
-              <View className="flex-row bg-white p-1.5 rounded-2xl border border-slate-200 shadow-xs">
+              <View className="flex-row bg-white p-1 rounded-2xl border border-slate-200/90 shadow-xs">
                 {[
-                  { key: 'all', label: 'All Library' },
-                  { key: 'notes', label: 'Notes 📑' },
-                  { key: 'formula', label: 'Formula Sheets 📐' },
-                  { key: 'dpp', label: 'DPPs & Tasks ✏️' },
+                  { key: 'all', label: 'All Resources' },
+                  { key: 'notes', label: 'Lecture Notes' },
+                  { key: 'formula', label: 'Formula Sheets' },
+                  { key: 'dpp', label: 'DPPs & Tasks' },
                 ].map((f) => {
                   const isSelected = studyFilter === f.key;
                   return (
@@ -419,9 +421,10 @@ export default function PinterestStudentScreen() {
                       }`}
                     >
                       <Text
-                        className={`text-xs font-extrabold ${
+                        className={`text-xs font-bold ${
                           isSelected ? 'text-white' : 'text-slate-600'
                         }`}
+                        numberOfLines={1}
                       >
                         {f.label}
                       </Text>
@@ -430,54 +433,110 @@ export default function PinterestStudentScreen() {
                 })}
               </View>
 
-              {/* Study Materials & High-Yield PDF Downloads */}
+              {/* Study Materials & High-Yield PDF Catalog */}
               {(studyFilter === 'all' || studyFilter === 'notes' || studyFilter === 'formula') && (
                 <View className="gap-3">
-                  <Text className="text-xs font-black text-slate-800 uppercase tracking-wider">
-                    High-Yield Verified PDF Materials
-                  </Text>
-                  {DUMMY_PDF_CATALOG.map((pdfDoc) => (
-                    <View
-                      key={pdfDoc.id}
-                      className="bg-white rounded-3xl p-4 border border-slate-200/80 shadow-xs"
-                    >
-                      <View className="flex-row items-center justify-between mb-1.5">
-                        <View className="bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
-                          <Text className="text-[10px] font-bold text-blue-700 uppercase">
-                            {pdfDoc.subject} • {pdfDoc.category}
+                  <View className="flex-row items-center justify-between px-1">
+                    <Text className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                      Verified Study Library
+                    </Text>
+                    <Text className="text-[11px] font-semibold text-slate-500">
+                      {DUMMY_PDF_CATALOG.length} Documents Available
+                    </Text>
+                  </View>
+
+                  {DUMMY_PDF_CATALOG.map((pdfDoc, idx) => {
+                    const rating = idx === 0 ? '4.9' : idx === 1 ? '4.8' : '4.9';
+                    const readsCount = idx === 0 ? '1.4k reads' : idx === 1 ? '980 reads' : '1.1k reads';
+                    const pageCount = idx === 0 ? '12 Pgs' : idx === 1 ? '8 Pgs' : '16 Pgs';
+                    const isMath = pdfDoc.subject === 'Mathematics';
+                    const isChem = pdfDoc.subject === 'Chemistry';
+                    const badgeBg = isMath ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : isChem ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-blue-50 border-blue-200 text-blue-700';
+
+                    return (
+                      <View
+                        key={pdfDoc.id}
+                        className="bg-white rounded-3xl p-4 border border-slate-200/80 shadow-xs gap-3"
+                      >
+                        {/* Top Metadata Row: Subject Badge + Trust Signals */}
+                        <View className="flex-row items-center justify-between">
+                          <View className="flex-row items-center gap-2">
+                            <View className={`px-2.5 py-0.5 rounded-lg border ${badgeBg}`}>
+                              <Text className="text-[10px] font-extrabold uppercase">
+                                {pdfDoc.subject}
+                              </Text>
+                            </View>
+
+                            <View className="flex-row items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200/80">
+                              <Star size={11} color="#F59E0B" fill="#F59E0B" />
+                              <Text className="text-[10px] font-extrabold text-amber-800">
+                                {rating}
+                              </Text>
+                              <Text className="text-[10px] text-amber-600 font-medium">
+                                • {readsCount}
+                              </Text>
+                            </View>
+                          </View>
+
+                          <Text className="text-[11px] text-slate-400 font-medium">
+                            {pdfDoc.date}
                           </Text>
                         </View>
-                        <Text className="text-[11px] text-slate-400 font-semibold">{pdfDoc.date}</Text>
+
+                        {/* Middle Content Row: Visual Thumbnail Box + Title & Author */}
+                        <View className="flex-row gap-3 items-start">
+                          {/* Structured Product Thumbnail Box */}
+                          <View className="w-14 h-16 rounded-2xl bg-slate-50 border border-slate-200 items-center justify-between py-2 shrink-0">
+                            <FileText size={20} color="#2563EB" />
+                            <View className="bg-slate-200/80 px-1.5 py-0.5 rounded">
+                              <Text className="text-[8px] font-black text-slate-700 uppercase">
+                                {pageCount}
+                              </Text>
+                            </View>
+                          </View>
+
+                          {/* Info Zone */}
+                          <View className="flex-1 min-w-0">
+                            <Text className="text-sm font-extrabold text-slate-900 leading-snug" numberOfLines={2}>
+                              {pdfDoc.title}
+                            </Text>
+
+                            <View className="flex-row items-center gap-1 mt-1">
+                              <ShieldCheck size={12} color="#10B981" />
+                              <Text className="text-[11px] font-semibold text-slate-600" numberOfLines={1}>
+                                {pdfDoc.author}
+                              </Text>
+                            </View>
+
+                            <Text className="text-xs text-slate-500 mt-1 leading-relaxed" numberOfLines={2}>
+                              {pdfDoc.subtitle}
+                            </Text>
+                          </View>
+                        </View>
+
+                        {/* Refined Action Row: Open & Save */}
+                        <View className="flex-row gap-2 pt-2 border-t border-slate-100">
+                          <TouchableOpacity
+                            activeOpacity={0.85}
+                            onPress={() => setSelectedReaderDoc(pdfDoc)}
+                            className="flex-1 bg-blue-600 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95 shadow-xs"
+                          >
+                            <BookOpen size={14} color="#FFFFFF" />
+                            <Text className="text-xs font-bold text-white">Open & Read</Text>
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            activeOpacity={0.85}
+                            onPress={() => generateAndSharePDF(pdfDoc)}
+                            className="flex-1 bg-slate-100 border border-slate-200/80 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95"
+                          >
+                            <DownloadCloud size={14} color="#334155" />
+                            <Text className="text-xs font-bold text-slate-700">Save PDF</Text>
+                          </TouchableOpacity>
+                        </View>
                       </View>
-
-                      <Text className="text-sm font-extrabold text-slate-800 mt-1">
-                        {pdfDoc.title}
-                      </Text>
-                      <Text className="text-xs text-slate-500 mt-0.5 leading-relaxed" numberOfLines={2}>
-                        {pdfDoc.subtitle}
-                      </Text>
-
-                      <View className="flex-row gap-2 mt-3 pt-2.5 border-t border-slate-100">
-                        <TouchableOpacity
-                          activeOpacity={0.85}
-                          onPress={() => setSelectedReaderDoc(pdfDoc)}
-                          className="flex-1 bg-slate-100 py-2 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95"
-                        >
-                          <BookOpen size={13} color="#2563EB" />
-                          <Text className="text-xs font-bold text-blue-700">Open & Read</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                          activeOpacity={0.85}
-                          onPress={() => generateAndSharePDF(pdfDoc)}
-                          className="flex-1 bg-blue-600 py-2 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95 shadow-xs"
-                        >
-                          <DownloadCloud size={13} color="#FFFFFF" />
-                          <Text className="text-xs font-bold text-white">Save PDF</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  ))}
+                    );
+                  })}
                 </View>
               )}
 
@@ -677,12 +736,12 @@ export default function PinterestStudentScreen() {
               <View className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs">
                 <View className="flex-row items-center justify-between mb-3">
                   <View className="flex-row items-center gap-3">
-                    <View className="w-12 h-12 rounded-2xl bg-blue-100 border border-blue-200 items-center justify-center">
-                      <Text className="text-2xl">🌸</Text>
+                    <View className="w-12 h-12 rounded-2xl bg-blue-600 items-center justify-center shadow-xs">
+                      <Text className="text-base font-black text-white">AS</Text>
                     </View>
                     <View>
-                      <Text className="text-base font-black text-slate-900">{profileNameInput}</Text>
-                      <Text className="text-xs text-slate-500">{studentProfile.grade} • {studentProfile.board}</Text>
+                      <Text className="text-base font-black text-slate-900">{profileNameInput.replace(' 🌸', '')}</Text>
+                      <Text className="text-xs text-slate-500 font-medium">{studentProfile.grade} • {studentProfile.board}</Text>
                     </View>
                   </View>
                   <TouchableOpacity
@@ -693,21 +752,21 @@ export default function PinterestStudentScreen() {
                   </TouchableOpacity>
                 </View>
 
-                <View className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 gap-2">
+                <View className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 gap-2">
                   <View className="flex-row items-center justify-between">
-                    <Text className="text-xs text-slate-500 font-medium">🏫 School / Junior College:</Text>
+                    <Text className="text-xs text-slate-500 font-medium">School / College</Text>
                     <Text className="text-xs font-bold text-slate-800">{profileSchoolInput}</Text>
                   </View>
                   <View className="flex-row items-center justify-between">
-                    <Text className="text-xs text-slate-500 font-medium">🎯 Target Exam:</Text>
+                    <Text className="text-xs text-slate-500 font-medium">Target Exam</Text>
                     <Text className="text-xs font-bold text-slate-800">{studentProfile.targetExam}</Text>
                   </View>
                   <View className="flex-row items-center justify-between">
-                    <Text className="text-xs text-slate-500 font-medium">📚 Enrolled Batch:</Text>
+                    <Text className="text-xs text-slate-500 font-medium">Current Batch</Text>
                     <Text className="text-xs font-bold text-blue-600">{studentProfile.batchName}</Text>
                   </View>
                   <View className="flex-row items-center justify-between">
-                    <Text className="text-xs text-slate-500 font-medium">🆔 Admission Number:</Text>
+                    <Text className="text-xs text-slate-500 font-medium">Roll Number</Text>
                     <Text className="text-xs font-bold font-mono text-slate-800">{studentProfile.rollNumber}</Text>
                   </View>
                 </View>

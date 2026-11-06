@@ -180,7 +180,8 @@ export default function PinterestParentScreen() {
     <ScreenWrapper
       headerProps={{
         title: 'Parent Portal',
-        instituteName: currentInstitute?.name || 'Bloom Academy',
+        instituteName: currentInstitute?.name || 'Bloom Science Academy',
+        profileInitials: 'RS',
         onNotificationPress: openNotificationDrawer,
         onProfilePress: () => {
           Alert.alert(

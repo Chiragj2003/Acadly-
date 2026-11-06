@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -128,6 +128,7 @@ export default function StudentDetailScreen() {
 
   return (
     <ScreenWrapper
+      scrollable={false}
       headerProps={{
         title: student.name,
         instituteName: student.batchName,

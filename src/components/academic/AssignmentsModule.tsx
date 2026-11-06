@@ -126,12 +126,12 @@ export const AssignmentsModule: React.FC = () => {
           <Pressable
             onPress={() => setActiveTab('pending')}
             className={`px-3 py-1.5 rounded-xl ${
-              activeTab === 'pending' ? 'bg-primary' : 'bg-surface-container'
+              activeTab === 'pending' ? 'bg-blue-600' : 'bg-slate-100'
             }`}
           >
             <Text
-              className={`text-xs font-semibold ${
-                activeTab === 'pending' ? 'text-on-primary' : 'text-on-surface-variant'
+              className={`text-xs font-bold ${
+                activeTab === 'pending' ? 'text-white' : 'text-slate-600'
               }`}
             >
               Pending ({assignments.filter((a) => a.submission_status !== 'submitted').length})
@@ -141,12 +141,12 @@ export const AssignmentsModule: React.FC = () => {
           <Pressable
             onPress={() => setActiveTab('submitted')}
             className={`px-3 py-1.5 rounded-xl ${
-              activeTab === 'submitted' ? 'bg-primary' : 'bg-surface-container'
+              activeTab === 'submitted' ? 'bg-blue-600' : 'bg-slate-100'
             }`}
           >
             <Text
-              className={`text-xs font-semibold ${
-                activeTab === 'submitted' ? 'text-on-primary' : 'text-on-surface-variant'
+              className={`text-xs font-bold ${
+                activeTab === 'submitted' ? 'text-white' : 'text-slate-600'
               }`}
             >
               Submissions ({submissions.length})
@@ -170,10 +170,10 @@ export const AssignmentsModule: React.FC = () => {
           {assignments.map((asg) => {
             const isSubmitted = asg.submission_status === 'submitted';
             return (
-              <Card key={asg.id} elevation="lowest" className="gap-2.5">
+              <Card key={asg.id} elevation="lowest" className="gap-2.5 border border-slate-200/80">
                 <View className="flex-row items-start justify-between gap-2">
-                  <View className="w-10 h-10 rounded-xl bg-error-container/30 items-center justify-center shrink-0">
-                    <FileCheck size={20} color="#ba1a1a" />
+                  <View className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 items-center justify-center shrink-0">
+                    <FileCheck size={18} color="#2563EB" />
                   </View>
 
                   <View className="flex-1 min-w-0">
@@ -182,30 +182,39 @@ export const AssignmentsModule: React.FC = () => {
                         label={asg.due_label}
                         variant={asg.due_label.includes('Tomorrow') ? 'due' : 'neutral'}
                       />
-                      <Text className="text-[11px] text-on-surface-variant">
+                      <Text className="text-[11px] text-slate-500 font-medium">
                         {asg.subject} • {asg.question_count} Questions
                       </Text>
                     </View>
-                    <Text className="text-sm font-bold text-on-surface">{asg.title}</Text>
-                    <Text className="text-xs text-on-surface-variant mt-0.5" numberOfLines={2}>
+                    <Text className="text-sm font-extrabold text-slate-900">{asg.title}</Text>
+                    <Text className="text-xs text-slate-500 mt-0.5 leading-relaxed" numberOfLines={2}>
                       {asg.instructions}
                     </Text>
                   </View>
                 </View>
 
-                <View className="flex-row items-center justify-between pt-2 border-t border-black/5">
-                  <Text className="text-[11px] text-on-surface-variant font-medium">
-                    Total Marks: <Text className="font-bold text-on-surface">{asg.total_marks}</Text>
+                <View className="flex-row items-center justify-between pt-2 border-t border-slate-100">
+                  <Text className="text-[11px] text-slate-500 font-medium">
+                    Total Marks: <Text className="font-bold text-slate-800">{asg.total_marks}</Text>
                   </Text>
 
                   {userRole === 'student' && (
-                    <Button
-                      size="sm"
-                      variant={isSubmitted ? 'surface' : 'primary'}
-                      title={isSubmitted ? 'Submitted' : 'Submit Work'}
+                    <TouchableOpacity
+                      activeOpacity={0.85}
                       disabled={isSubmitted}
                       onPress={() => setSelectedAsgId(asg.id)}
-                    />
+                      className={`px-3 py-1.5 rounded-xl ${
+                        isSubmitted ? 'bg-emerald-50 border border-emerald-200' : 'bg-blue-600 shadow-xs'
+                      }`}
+                    >
+                      <Text
+                        className={`text-xs font-bold ${
+                          isSubmitted ? 'text-emerald-700' : 'text-white'
+                        }`}
+                      >
+                        {isSubmitted ? 'Submitted ✓' : 'Submit Work'}
+                      </Text>
+                    </TouchableOpacity>
                   )}
 
                   {(userRole === 'teacher' || userRole === 'admin') && (

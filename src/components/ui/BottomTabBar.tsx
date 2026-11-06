@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export interface TabItem {
@@ -14,65 +14,75 @@ interface BottomTabBarProps {
   activeTab: string;
   onTabChange: (key: string) => void;
   accentColor?: string;
+  variant?: 'student' | 'calm' | 'default';
 }
 
 export const BottomTabBar: React.FC<BottomTabBarProps> = ({
   tabs,
   activeTab,
   onTabChange,
-  accentColor = '#2563EB', // Academic Indigo
+  accentColor = '#2563EB', // Academic Indigo / Blue
+  variant = 'default',
 }) => {
   const insets = useSafeAreaInsets();
-  const bottomPadding = Math.max(insets.bottom, Platform.OS === 'ios' ? 14 : 10);
+  // Safe bottom padding for modern iOS home indicator (~34pt) and Android gesture bar (~16-24pt)
+  const bottomPadding = insets.bottom > 0 ? insets.bottom : (Platform.OS === 'ios' ? 14 : 10);
 
   return (
     <View
       style={{
+        paddingTop: 6,
         paddingBottom: bottomPadding,
-        paddingTop: 8,
         backgroundColor: '#FFFFFF',
-        borderTopWidth: 1,
+        borderTopWidth: StyleSheet.hairlineWidth,
         borderTopColor: '#E2E8F0',
         shadowColor: '#0F172A',
-        shadowOffset: { width: 0, height: -3 },
-        shadowOpacity: 0.05,
-        shadowRadius: 10,
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
         elevation: 8,
       }}
-      className="px-2 flex-row items-center justify-around"
+      className="flex-row items-center w-full px-1"
     >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.key;
+        const tint = isActive ? accentColor : '#64748B';
+
         return (
           <TouchableOpacity
             key={tab.key}
-            activeOpacity={0.75}
+            activeOpacity={0.7}
             onPress={() => onTabChange(tab.key)}
-            className="items-center justify-center py-1 px-2.5 rounded-2xl relative min-w-[56px]"
+            hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+            className="flex-1 items-center justify-center py-1 relative"
           >
-            {/* Active Pill Glow */}
-            <View
-              className={`p-1.5 rounded-2xl items-center justify-center ${
-                isActive ? 'bg-blue-50/90' : 'bg-transparent'
-              }`}
-            >
-              {tab.icon(isActive ? accentColor : '#64748B', 20)}
+            {/* Active Pill / Icon Container */}
+            <View className="items-center justify-center relative">
+              <View
+                className={`px-3 py-1 rounded-full items-center justify-center transition-all ${
+                  isActive ? 'bg-blue-50/90' : 'bg-transparent'
+                }`}
+              >
+                {tab.icon(tint, 21)}
+              </View>
 
               {/* Notification Badge Dot */}
               {tab.badgeCount !== undefined && tab.badgeCount > 0 && (
-                <View className="absolute -top-1 -right-1 bg-rose-500 rounded-full min-w-[16px] h-4 px-1 items-center justify-center border-2 border-white">
-                  <Text className="text-[9px] font-black text-white">
+                <View className="absolute -top-1 -right-1 bg-rose-500 rounded-full min-w-[16px] h-4 px-1 items-center justify-center border-2 border-white shadow-xs">
+                  <Text className="text-[9px] font-black text-white leading-none">
                     {tab.badgeCount > 9 ? '9+' : tab.badgeCount}
                   </Text>
                 </View>
               )}
             </View>
 
+            {/* Tab Label */}
             <Text
-              style={{ color: isActive ? accentColor : '#64748B' }}
-              className={`text-[11px] mt-0.5 tracking-tight ${
+              style={{ color: tint }}
+              className={`text-[10px] mt-0.5 tracking-tight ${
                 isActive ? 'font-bold' : 'font-medium'
               }`}
+              numberOfLines={1}
             >
               {tab.label}
             </Text>

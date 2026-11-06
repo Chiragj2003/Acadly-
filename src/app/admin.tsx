@@ -189,12 +189,13 @@ export default function PinterestAdminScreen() {
     <ScreenWrapper
       headerProps={{
         title: 'Admin Command Desk',
-        instituteName: activeInstitute?.name || 'Bloom Academy',
+        instituteName: activeInstitute?.name || 'Bloom Science Academy',
+        profileInitials: 'AD',
         onNotificationPress: openNotificationDrawer,
         onProfilePress: () => {
           Alert.alert(
             coachingProfile.directorName || 'Director Sharma',
-            `${activeInstitute?.name || 'Bloom Academy'}\nInvite Code: ${coachingProfile.inviteCode}\nCity: ${coachingProfile.city}`,
+            `${activeInstitute?.name || 'Bloom Science Academy'}\nInvite Code: ${coachingProfile.inviteCode}\nCity: ${coachingProfile.city}`,
             [
               { text: 'Sign Out 🚪', style: 'destructive', onPress: handleLogout },
               { text: 'Close', style: 'cancel' },

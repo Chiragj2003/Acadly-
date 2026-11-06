@@ -186,3 +186,20 @@
     - Removed 1-on-1 direct faculty messaging.
     - Structured authentic group chat channels: `Class 12 • Mathematics Group`, `Class 12 • Physics Group`, `Class 12 • Chemistry Discussion`, `Batch Announcements & Circulars`, and `Community Student Lounge`.
   - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.
+
+### Entry 007 - UI/UX Alignment, Visual Hierarchy, iOS/Android Safe Area & Product Catalog Redesign
+- **Timestamp:** 2026-11-06T10:09:00+05:30
+- **Actions:**
+  - Header & Safe Area Overhaul:
+    - Redesigned `HeaderBar.tsx`: reduced height to balanced 56pt, replaced hardcoded childish emojis (`🌸`, `🍎`) with clean initials badges (`AS`, `RV`, `RS`, `AD`) and vector icons.
+    - Enhanced `ScreenWrapper.tsx` with status bar background continuity, `statusBarStyle`, and `keyboardAvoiding` toggle to prevent double keyboard offsets on iOS.
+    - Updated `auth.tsx` with dynamic safe area insets via `useSafeAreaInsets` to eliminate Dynamic Island / notch collisions on iPhone 15/16/17 and modern Android devices.
+  - Bottom Navigation & Footer Polish:
+    - Updated `BottomTabBar.tsx` to follow native iOS HIG & Android Material specifications: equidistant `flex-1` layout per tab, strict height calculation accounting for Home Indicator (`insets.bottom`), hairline top border, and refined badge positioning.
+  - Visual Hierarchy & Grid System:
+    - Upgraded Study Hub & Library catalog cards in `student.tsx` and `community.tsx`: added structured preview thumbnail boxes, rating trust signals (`★ 4.9 • 1.4k reads`) directly adjacent to subject badges, verified instructor shield checks, and refined primary/secondary action buttons.
+    - Eliminated heavy and distracting divider lines across cards, replacing them with subtle `border-slate-100` and balanced whitespace.
+    - Removed redundant labels (such as "Author:", "Price:", "Category:") where context is already clear.
+    - Fixed nested vertical `ScrollView` conflicts in `community.tsx`, `join-institute.tsx`, `student-detail.tsx`, `verify-students.tsx`, and `chat.tsx` by setting `scrollable={false}` on `ScreenWrapper`.
+    - Modernized `AssignmentsModule.tsx` with intentional academic blue theme (`#2563EB`) and clean status indicators.
+  - TypeScript verification: `npx tsc --noEmit` passed with 0 errors across all screens.

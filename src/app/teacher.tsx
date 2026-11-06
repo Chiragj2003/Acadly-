@@ -381,7 +381,8 @@ export default function PinterestTeacherScreen() {
     <ScreenWrapper
       headerProps={{
         title: teacherMode === 'solo' ? 'Solo Tutor Desk' : 'Faculty Command Desk',
-        instituteName: teacherMode === 'solo' ? 'Private Tuition' : (activeInstitute?.name || 'Bloom Academy'),
+        instituteName: teacherMode === 'solo' ? 'Private Tuition' : (activeInstitute?.name || 'Bloom Science Academy'),
+        profileInitials: 'RV',
         onNotificationPress: () => Alert.alert('Faculty Notices', 'Monthly syllabus benchmark review by Friday 6 PM.'),
         onProfilePress: () => {
           Alert.alert(
@@ -434,8 +435,8 @@ export default function PinterestTeacherScreen() {
               </View>
 
               <View className="flex-row items-center gap-3.5 mb-4">
-                <View className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 items-center justify-center">
-                  <Text className="text-2xl">👨‍🏫</Text>
+                <View className="w-14 h-14 rounded-2xl bg-blue-600 items-center justify-center shadow-xs">
+                  <Text className="text-lg font-black text-white">RV</Text>
                 </View>
                 <View className="flex-1 min-w-0">
                   <Text className="text-base font-extrabold text-slate-900" numberOfLines={1}>

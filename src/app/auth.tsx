@@ -39,9 +39,11 @@ import { useAcademic } from '@/context/AcademicContext';
 import { useChild } from '@/context/ChildContext';
 import { Mascot } from '@/components/ui/Mascot';
 import { UserRole } from '@/types/database';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function CleanAuthScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { signIn, signInWithGoogle, signUp, switchRole, loading } = useAuth();
   const { currentInstitute } = useInstitute();
   const {
@@ -270,7 +272,7 @@ export default function CleanAuthScreen() {
   }[] = [
     {
       id: 'student',
-      title: 'Student 🌸',
+      title: 'Student & Scholar',
       subtitle: 'Watch lectures, solve DPPs & access PDF notes',
       emoji: '🌱',
       badge: 'Learner',
@@ -279,8 +281,8 @@ export default function CleanAuthScreen() {
     },
     {
       id: 'teacher',
-      title: 'Tuition Teacher 🍎',
-      subtitle: 'Solo Tutor or Institute Faculty',
+      title: 'Teacher & Educator',
+      subtitle: 'Solo tutor, school faculty, or coaching mentor',
       emoji: '👨‍🏫',
       badge: 'Educator',
       bgColor: 'bg-rose-50',
@@ -288,8 +290,8 @@ export default function CleanAuthScreen() {
     },
     {
       id: 'admin',
-      title: 'Coaching Center / Academy 🏫',
-      subtitle: 'Multi-teacher institute, branches, staff & admissions',
+      title: 'School / College / Academy',
+      subtitle: 'Institutes, colleges, schools & academic centers',
       emoji: '🏫',
       badge: 'Director',
       bgColor: 'bg-indigo-50',
@@ -297,8 +299,8 @@ export default function CleanAuthScreen() {
     },
     {
       id: 'parent',
-      title: 'Parent / Guardian 🏡',
-      subtitle: 'Monitor attendance, report cards & pay fees via UPI',
+      title: 'Parent & Guardian',
+      subtitle: 'Track attendance, report cards & academic progress',
       emoji: '🏡',
       badge: 'Family',
       bgColor: 'bg-amber-50',
@@ -309,10 +311,15 @@ export default function CleanAuthScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
       className="flex-1 bg-[#F8FAFC]"
     >
       <ScrollView
-        contentContainerClassName="p-5 pt-12 pb-24"
+        contentContainerStyle={{
+          paddingTop: Math.max(insets.top + 12, 36),
+          paddingBottom: Math.max(insets.bottom + 24, 48),
+          paddingHorizontal: 20,
+        }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -332,7 +339,7 @@ export default function CleanAuthScreen() {
             Acadly
           </Text>
           <Text className="text-xs font-bold text-slate-500 text-center mt-1">
-            Tuition & Coaching Operating System
+            Schools, Colleges, Academies & Tutors
           </Text>
         </View>
 

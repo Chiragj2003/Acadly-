@@ -25,6 +25,8 @@ import {
   Check,
   Send,
   Award,
+  Star,
+  ShieldCheck,
 } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
@@ -40,11 +42,11 @@ import {
 const SUBJECTS = ['All', 'Physics', 'Mathematics', 'Chemistry', 'Biology'];
 
 const PDF_CATEGORIES: { id: 'all' | 'notes' | 'formula_sheet' | 'pyq' | 'dpp'; label: string }[] = [
-  { id: 'all', label: 'All Resources 📚' },
-  { id: 'formula_sheet', label: 'Formula Sheets 📐' },
-  { id: 'notes', label: 'Handwritten Notes 📖' },
-  { id: 'pyq', label: 'Solved PYQs 📝' },
-  { id: 'dpp', label: 'Daily DPPs ⚡' },
+  { id: 'all', label: 'All Resources' },
+  { id: 'formula_sheet', label: 'Formula Sheets' },
+  { id: 'notes', label: 'Handwritten Notes' },
+  { id: 'pyq', label: 'Solved PYQs' },
+  { id: 'dpp', label: 'Daily DPPs' },
 ];
 
 export default function PinterestCommunityScreen() {
@@ -193,6 +195,7 @@ export default function PinterestCommunityScreen() {
 
   return (
     <ScreenWrapper
+      scrollable={false}
       headerProps={{
         title: 'Community & Doubts',
         instituteName: 'Peer Doubt Wall & Library',
@@ -480,52 +483,101 @@ export default function PinterestCommunityScreen() {
             </TouchableOpacity>
 
             {/* PDF List */}
-            <View className="gap-2.5">
-              {filteredLibrary.map((item) => (
-                <View
-                  key={item.id}
-                  className="bg-white border border-slate-200/90 rounded-3xl p-4 shadow-xs flex-row items-center justify-between"
-                >
-                  <View className="flex-row items-center gap-3 flex-1 pr-2">
-                    <View className="w-11 h-11 rounded-2xl bg-blue-50 border border-blue-100 items-center justify-center">
-                      <Text className="text-xl">{item.emoji}</Text>
+            <View className="gap-3">
+              {filteredLibrary.map((item, idx) => {
+                const rating = idx % 2 === 0 ? '4.9' : '4.8';
+                const downloads = idx === 0 ? '520+ downloads' : idx === 1 ? '380+ downloads' : '260+ downloads';
+
+                return (
+                  <View
+                    key={item.id}
+                    className="bg-white border border-slate-200/80 rounded-3xl p-4 shadow-xs gap-3"
+                  >
+                    {/* Top Row: Subject Pill + Trust Rating */}
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-row items-center gap-2">
+                        <View className="bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-lg">
+                          <Text className="text-[10px] font-extrabold text-blue-700 uppercase">
+                            {item.subject}
+                          </Text>
+                        </View>
+
+                        <View className="flex-row items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200/80">
+                          <Star size={11} color="#F59E0B" fill="#F59E0B" />
+                          <Text className="text-[10px] font-extrabold text-amber-800">
+                            {rating}
+                          </Text>
+                          <Text className="text-[10px] text-amber-600 font-medium">
+                            • {downloads}
+                          </Text>
+                        </View>
+                      </View>
+
+                      <View className="bg-slate-100 px-2 py-0.5 rounded-md">
+                        <Text className="text-[10px] font-bold text-slate-600 uppercase">
+                          {item.category.replace('_', ' ')}
+                        </Text>
+                      </View>
                     </View>
-                    <View className="flex-1">
-                      <Text className="text-xs font-bold text-slate-900" numberOfLines={1}>
-                        {item.title}
-                      </Text>
-                      <Text className="text-[11px] text-slate-500" numberOfLines={1}>
-                        {item.subtitle} • {item.fileSizeBytes}
-                      </Text>
-                      <Text className="text-[10px] text-blue-600 font-semibold mt-0.5">
-                        {item.author}
-                      </Text>
+
+                    {/* Middle: Thumbnail + Title & Verified Author */}
+                    <View className="flex-row gap-3 items-start">
+                      <View className="w-14 h-16 rounded-2xl bg-slate-50 border border-slate-200 items-center justify-between py-2 shrink-0">
+                        <FileText size={20} color="#2563EB" />
+                        <View className="bg-slate-200/80 px-1.5 py-0.5 rounded">
+                          <Text className="text-[8px] font-black text-slate-700 uppercase">
+                            {item.fileSizeBytes}
+                          </Text>
+                        </View>
+                      </View>
+
+                      <View className="flex-1 min-w-0">
+                        <Text className="text-sm font-extrabold text-slate-900 leading-snug" numberOfLines={2}>
+                          {item.title}
+                        </Text>
+
+                        <View className="flex-row items-center gap-1 mt-1">
+                          <ShieldCheck size={12} color="#10B981" />
+                          <Text className="text-[11px] font-semibold text-slate-600" numberOfLines={1}>
+                            {item.author}
+                          </Text>
+                        </View>
+
+                        <Text className="text-xs text-slate-500 mt-1 leading-relaxed" numberOfLines={2}>
+                          {item.subtitle}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Bottom Action Row */}
+                    <View className="flex-row gap-2 pt-2 border-t border-slate-100">
+                      <TouchableOpacity
+                        activeOpacity={0.85}
+                        onPress={async () => {
+                          const dummyDoc = DUMMY_PDF_CATALOG[0];
+                          await generateAndSharePDF(dummyDoc);
+                        }}
+                        className="flex-1 bg-blue-600 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95 shadow-xs"
+                      >
+                        <BookOpen size={14} color="#FFFFFF" />
+                        <Text className="text-xs font-bold text-white">Read Document</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        activeOpacity={0.85}
+                        onPress={async () => {
+                          const dummyDoc = DUMMY_PDF_CATALOG[0];
+                          await generateAndSharePDF(dummyDoc);
+                        }}
+                        className="flex-1 bg-slate-100 border border-slate-200/80 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95"
+                      >
+                        <Download size={14} color="#334155" />
+                        <Text className="text-xs font-bold text-slate-700">Save PDF</Text>
+                      </TouchableOpacity>
                     </View>
                   </View>
-
-                  <View className="flex-row gap-1.5">
-                    <TouchableOpacity
-                      onPress={async () => {
-                        const dummyDoc = DUMMY_PDF_CATALOG[0];
-                        await generateAndSharePDF(dummyDoc);
-                      }}
-                      className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl active:scale-95"
-                    >
-                      <Download size={14} color="#2563EB" />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      onPress={async () => {
-                        const dummyDoc = DUMMY_PDF_CATALOG[0];
-                        await generateAndSharePDF(dummyDoc);
-                      }}
-                      className="p-2.5 bg-blue-600 rounded-xl active:scale-95 shadow-xs"
-                    >
-                      <Share2 size={14} color="#ffffff" />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ))}
+                );
+              })}
             </View>
           </View>
         )}
