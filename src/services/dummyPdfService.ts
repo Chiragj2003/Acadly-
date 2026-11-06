@@ -132,6 +132,61 @@ export const DUMMY_PDF_CATALOG: PDFDocumentContent[] = [
       },
     ],
   },
+  {
+    id: 'pdf-photoelectric-05',
+    title: 'Modern Physics & Quantum Optics - High Yield Bank',
+    subtitle: 'Einstein Photoelectric Equation, de Broglie Waves & Bohr Radii',
+    subject: 'Physics',
+    author: 'Prof. Vikram Joshi (IIT Bombay)',
+    category: 'formula_sheet',
+    date: 'JEE Advanced High-Yield Pack',
+    sections: [
+      {
+        heading: '1. Photoelectric Effect & Photons',
+        items: [
+          'Energy of photon: E = h·ν = (1240 / λ[nm]) eV',
+          'Einstein Equation: K_max = h·ν - Φ = e·V₀ (where V₀ is stopping potential)',
+          'de Broglie Wavelength: λ = h / p = h / √(2·m·K) = (12.27 / √V) Å for electrons',
+        ],
+      },
+      {
+        heading: '2. Bohr Model for Hydrogen-like Species',
+        items: [
+          'Radius of n-th orbit: r_n = 0.529 · (n² / Z) Å',
+          'Velocity in n-th orbit: v_n = (2.18 × 10⁶) · (Z / n) m/s',
+          'Total Energy: E_n = -13.6 · (Z² / n²) eV',
+          'Rydberg Formula: 1 / λ = R · Z² · (1/n₁² - 1/n₂²)',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'pdf-conics-06',
+    title: 'Coordinate Geometry: Conic Sections Fast Track',
+    subtitle: 'Parabola, Ellipse & Hyperbola Essentials, Tangents & Normals',
+    subject: 'Mathematics',
+    author: 'Dr. S. Ramanujan (Senior Faculty)',
+    category: 'notes',
+    date: 'JEE Rankers Special',
+    sections: [
+      {
+        heading: '1. Standard Conic Equations & Eccentricity',
+        items: [
+          'Parabola (e = 1): y² = 4ax. Tangent in slope form: y = mx + a/m.',
+          'Ellipse (e < 1): x²/a² + y²/b² = 1 where b² = a²(1 - e²). Tangent: y = mx ± √(a²m² + b²).',
+          'Hyperbola (e > 1): x²/a² - y²/b² = 1 where b² = a²(e² - 1). Director circle is x² + y² = a² - b².',
+        ],
+      },
+      {
+        heading: '2. Common Tangent & Chord Shortcuts',
+        items: [
+          'Equation of chord with midpoint (x₁, y₁): T = S₁.',
+          'Chord of contact from external point (x₁, y₁): T = 0.',
+          'Pair of tangents from external point (x₁, y₁): S·S₁ = T².',
+        ],
+      },
+    ],
+  },
 ];
 
 /**

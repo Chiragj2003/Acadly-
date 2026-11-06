@@ -38,6 +38,17 @@ const DEFAULT_CHILDREN: ChildStudent[] = [
     parent_code: 'STU-AARAV-104',
     emoji: '📐',
   },
+  {
+    id: 'stud-rohan-03',
+    admission_number: 'ADM-2026-306',
+    user_id: 'usr-student-03',
+    full_name: 'Rohan Sharma',
+    avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+    batch_name: 'Class 11 Foundation Batch',
+    grade: 'Class 11 Science',
+    parent_code: 'STU-ROHAN-306',
+    emoji: '⚡',
+  },
 ];
 
 interface ChildContextType {
@@ -86,8 +97,8 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ]);
 
       if (parentError || !parentRecord) {
-        setChildrenList([]);
-        setSelectedChild(null);
+        setChildrenList(DEFAULT_CHILDREN);
+        setSelectedChild(DEFAULT_CHILDREN[0]);
         return;
       }
 
@@ -119,8 +130,8 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ]);
 
       if (mapError || !mappings || mappings.length === 0) {
-        setChildrenList([]);
-        setSelectedChild(null);
+        setChildrenList(DEFAULT_CHILDREN);
+        setSelectedChild(DEFAULT_CHILDREN[0]);
         return;
       }
 

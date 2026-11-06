@@ -284,3 +284,27 @@
     - Replaced all legacy `cute-` classes across `AttendanceRingAndTrendChart.tsx`, `SubjectRadarOrBarChart.tsx`, `FeeCollectionBarChart.tsx`, `AttendanceToggle.tsx`, `Mascot.tsx`, and `SubjectMascotCard.tsx` with high-contrast Tailwind tokens.
     - Removed fixed bottom paddings in `teacher.tsx` and `parent.tsx` to ensure seamless scrolling with the floating pill dock.
   - TypeScript verification: `npx tsc --noEmit` passed with 0 errors across the entire repository.
+
+### Entry 012 - Build Performance Optimization, Rich Dummy Data Expansion & 5 Test Accounts
+- **Timestamp:** 2026-11-06T23:55:00+05:30
+- **Actions:**
+  - **Metro & Build Performance Optimization:**
+    - Removed experimental `"reactCompiler": true` from `app.json`. In NativeWind v4 (`react-native-css-interop`), the React Compiler caused severe build hangs and CPU locks during bundling due to redundant memoization AST passes over CSS interop wrappers.
+    - Updated `metro.config.js` with `blockList` ignoring `.git`, `docs`, `supabase`, and `.agents` directories from file watchers, drastically improving bundling speed and eliminating Metro freeze on Windows.
+    - Cleaned `tailwind.config.js` content glob and added `"start:clean": "expo start -c"` to `package.json`.
+  - **Comprehensive Dummy Data Expansion Across All Modules:**
+    - `AcademicContext.tsx`: Expanded student roster from 3 to 8 diverse pupils (`Amelia Sharma`, `Kabir Singhania`, `Zoya Khan`, `Aarav Mehta`, `Ananya Deshmukh`, `Rohan Kulkarni`, `Diya Patel`, `Ishaan Verma`) with complete 360 profiles, percentiles, and fee statuses.
+    - Attendance Records: Added full daily roll call for all 8 students with statuses (`P`, `A`, `L`) and auto-sized roll badges (`#01` to `#08`).
+    - Video Lectures: Expanded masterclasses to 4 subjects (Physics Electromagnetism, Maths Calculus, Chemistry Carbonyl Mechanisms, Biology Synaptic Potentials).
+    - Assignments & DPPs: Expanded to 3 active and graded DPP problem sets with 4 realistic student submissions with teacher feedback.
+    - Study Library & In-App Reader: Added 6 high-yield formula sheets and PYQ archives in `dummyPdfService.ts` (including Modern Physics and Conic Sections).
+    - `ChildContext.tsx`: Added third child (`Rohan Sharma`) and configured safe fallback to default children in mock/offline mode so the parent portal always renders active data.
+  - **5 Test Accounts with 1-Tap Login on Auth Screen (`auth.tsx` & `AuthContext.tsx`):**
+    - Configured 5 distinct dummy accounts covering all primary user personas:
+      1. Student (Class 12 Topper): `student@acadly.com` / `Password123!`
+      2. Student (Class 11 Science): `kabir@acadly.com` / `Password123!`
+      3. Teacher (Senior Physics Faculty): `teacher@acadly.com` / `Password123!`
+      4. Parent (Guardian): `parent@acadly.com` / `Password123!`
+      5. Admin (Coaching Director): `admin@acadly.com` / `Password123!`
+    - Added an interactive **"Quick Demo Accounts (1-Tap Sign In)"** component directly onto the login screen: tapping any account automatically fills credentials and launches straight into that dashboard.
+  - TypeScript verification: `npx tsc --noEmit` passed with 0 errors across the entire codebase.

@@ -95,6 +95,82 @@ const INITIAL_BATCHES: Batch[] = [
   },
 ];
 
+export interface DummyAccount {
+  id: string;
+  role: UserRole;
+  name: string;
+  email: string;
+  password: string;
+  roleLabel: string;
+  badge: string;
+  badgeColor: string;
+  avatarInitials: string;
+  description: string;
+}
+
+export const DUMMY_ACCOUNTS: DummyAccount[] = [
+  {
+    id: 'acc-student-amelia',
+    role: 'student',
+    name: 'Amelia Sharma',
+    email: 'student@acadly.com',
+    password: 'Password123!',
+    roleLabel: 'Student (Class 12 Topper)',
+    badge: 'JEE Advanced',
+    badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    avatarInitials: 'AS',
+    description: 'Top ranker, 96.4% attendance, all DPPs submitted, full analytics view.',
+  },
+  {
+    id: 'acc-student-kabir',
+    role: 'student',
+    name: 'Kabir Singhania',
+    email: 'kabir@acadly.com',
+    password: 'Password123!',
+    roleLabel: 'Student (Class 11 Science)',
+    badge: 'IIT-JEE 2026',
+    badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
+    avatarInitials: 'KS',
+    description: 'Active doubt poster, 89.2% attendance, 2 pending assignments.',
+  },
+  {
+    id: 'acc-teacher-joshi',
+    role: 'teacher',
+    name: 'Prof. Vikram Joshi',
+    email: 'teacher@acadly.com',
+    password: 'Password123!',
+    roleLabel: 'Senior Physics Faculty',
+    badge: 'Code: JOSHI-MATH-89',
+    badgeColor: 'bg-purple-50 text-purple-700 border-purple-200',
+    avatarInitials: 'VJ',
+    description: 'Manages batch roll call, interactive DPP builder, test marks, and doubt channels.',
+  },
+  {
+    id: 'acc-parent-rajesh',
+    role: 'parent',
+    name: 'Rajesh Sharma',
+    email: 'parent@acadly.com',
+    password: 'Password123!',
+    roleLabel: 'Parent / Guardian',
+    badge: 'Child: Amelia Sharma',
+    badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
+    avatarInitials: 'RS',
+    description: 'Tracks daughter attendance, downloads term report cards, links with tuition faculty.',
+  },
+  {
+    id: 'acc-admin-gupta',
+    role: 'admin',
+    name: 'Director Rajesh Gupta',
+    email: 'admin@acadly.com',
+    password: 'Password123!',
+    roleLabel: 'Academy Director & Admin',
+    badge: 'Apex Academy',
+    badgeColor: 'bg-slate-900 text-white border-slate-800',
+    avatarInitials: 'RG',
+    description: 'Center-wide admissions, teacher verification requests, batch schedules, faculty rosters.',
+  },
+];
+
 const ROLE_PROFILES: Record<UserRole, Profile> = {
   admin: {
     id: 'user-admin',
@@ -199,7 +275,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
-      const finalRole = role || userRole;
+      // Check if identifier matches one of the predefined dummy test accounts
+      const matchedDummy = DUMMY_ACCOUNTS.find(
+        (acc) => acc.email.toLowerCase() === cleanEmail || acc.id === cleanEmail
+      );
+
+      const finalRole = matchedDummy ? matchedDummy.role : (role || userRole);
+
+      if (matchedDummy) {
+        setUser({
+          id: matchedDummy.id,
+          email: matchedDummy.email,
+          phone: '+91 98290 41208',
+          full_name: matchedDummy.name,
+          default_role: matchedDummy.role,
+          created_at: '2025-01-01',
+        });
+        setUserRole(finalRole);
+        await AsyncStorage.setItem('@acadly_role', finalRole);
+        await AsyncStorage.setItem('@acadly_authenticated', 'true');
+        return { success: true, role: finalRole };
+      }
+
       await switchRole(finalRole);
       return { success: true, role: finalRole };
     } catch (e: any) {

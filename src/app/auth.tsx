@@ -33,7 +33,7 @@ import {
   Layers,
 } from 'lucide-react-native';
 
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, DUMMY_ACCOUNTS } from '@/context/AuthContext';
 import { useInstitute } from '@/context/InstituteContext';
 import { useAcademic } from '@/context/AcademicContext';
 import { useChild } from '@/context/ChildContext';
@@ -482,6 +482,65 @@ export default function CleanAuthScreen() {
                 {loading ? 'Authenticating...' : `Sign In as ${selectedRole.toUpperCase()} →`}
               </Text>
             </TouchableOpacity>
+
+            {/* Quick Demo Test Accounts (1-Tap Instant Sign-In) */}
+            <View className="mt-5 pt-4 border-t border-slate-100">
+              <View className="flex-row items-center justify-between mb-2">
+                <View className="flex-row items-center gap-1.5">
+                  <Sparkles size={13} color="#2563EB" />
+                  <Text className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                    Quick Demo Accounts (1-Tap Sign In)
+                  </Text>
+                </View>
+                <Text className="text-[10px] font-bold text-blue-600">5 Test Roles</Text>
+              </View>
+
+              <Text className="text-[11px] text-slate-500 mb-3">
+                Tap any test account below to auto-fill credentials and log in instantly:
+              </Text>
+
+              <View className="gap-2">
+                {DUMMY_ACCOUNTS.map((acc) => (
+                  <TouchableOpacity
+                    key={acc.id}
+                    activeOpacity={0.85}
+                    onPress={async () => {
+                      setEmail(acc.email);
+                      setPassword(acc.password);
+                      setSelectedRole(acc.role);
+                      const res = await signIn(acc.email, acc.password, acc.role);
+                      if (res.success) {
+                        navigateToRoleScreen(res.role || acc.role);
+                      }
+                    }}
+                    className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex-row items-center justify-between gap-2.5 active:scale-98"
+                  >
+                    <View className="flex-row items-center gap-2.5 flex-1 min-w-0">
+                      <View className="w-9 h-9 rounded-full bg-slate-900 items-center justify-center shrink-0">
+                        <Text className="text-xs font-black text-white">{acc.avatarInitials}</Text>
+                      </View>
+                      <View className="flex-1 min-w-0">
+                        <View className="flex-row items-center gap-1.5">
+                          <Text className="text-xs font-black text-slate-900" numberOfLines={1}>
+                            {acc.name}
+                          </Text>
+                          <View className={`px-1.5 py-0.5 rounded border ${acc.badgeColor}`}>
+                            <Text className="text-[9px] font-black uppercase">{acc.badge}</Text>
+                          </View>
+                        </View>
+                        <Text className="text-[10px] text-slate-500 mt-0.5" numberOfLines={1}>
+                          {acc.email} • {acc.roleLabel}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View className="bg-white border border-slate-200 px-2.5 py-1 rounded-xl shrink-0">
+                      <Text className="text-[11px] font-black text-blue-600">Login ⚡</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
 
             {/* Bottom Toggle Link */}
             <View className="mt-4 pt-3 border-t border-slate-200 items-center">
