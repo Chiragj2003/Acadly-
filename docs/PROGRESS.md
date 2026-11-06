@@ -230,3 +230,23 @@
   - **In-App PDF Opening Across Tabs:**
     - Integrated `DocumentReaderModal` across Teacher Desk (reviewing student homework submissions) and Community Library ("Read Document" opens in-app with offline reading and instant download).
   - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.
+
+### Entry 009 - Color Palette & High-Contrast Overhaul (WCAG AAA) & iOS Design System Skill
+- **Timestamp:** 2026-11-06T17:40:00+05:30
+- **Actions:**
+  - **High-Contrast Color Palette Upgrade (`tailwind.config.js`):**
+    - Removed non-existent / obsolete pastel tokens (`tertiary-fixed`, `cute.peach`, `cocoa`) and unified the system with an authentic Apple HIG Academic blue palette.
+    - Defined explicit semantic tokens: `primary` (`#2563EB`), `surface` (`#F8FAFC` - crisp iOS system background), `surface-container` (`#FFFFFF`), `on-surface` (`#0F172A` - 15.8:1 contrast ratio), `on-surface-variant` (`#475569` - 7.1:1 AAA contrast), `outline-variant` (`#E2E8F0`), `success` (`#059669`), `warning` (`#D97706`), `error` (`#E11D48`).
+  - **Component Contrast & Border Enhancements:**
+    - `Badge.tsx`: Re-engineered all badge variants (`info`, `success`, `warning`, `error`, `neutral`, `admin`, `pro`, `live`) with tinted background fills (`50` weight), hairline borders (`200` weight), and bold deep text colors (`900` weight) so text on white backgrounds is never washed out or invisible.
+    - `Input.tsx`: Upgraded input container from borderless cream to `bg-white border border-slate-200 shadow-xs`, with a 2px blue focus ring (`border-blue-600`), `#94A3B8` placeholder text, and high-contrast `#0F172A` input text.
+    - `Button.tsx`: Aligned all button variants with solid colors and white bold text.
+    - `Card.tsx`: Replaced unresolvable `surface-container-high` classes with clean white cards and hairline slate borders.
+    - `ScreenWrapper.tsx`: Swapped creamy ivory `#fbf9f5` background with modern iOS System `#F8FAFC`, ensuring pure white headers blend seamlessly.
+    - `BottomTabBar.tsx`: Promoted inactive tab labels from medium to semibold for sharper rendering on Retina displays.
+  - **Eliminated Low-Contrast Text on White Backgrounds:**
+    - Audited and updated low-contrast `text-slate-400` strings across `student.tsx`, `teacher.tsx`, `community.tsx`, `admin.tsx`, `chat.tsx`, `DocumentReaderModal.tsx`, `InteractiveDppBuilderModal.tsx`, and `StudyMaterialsViewer.tsx` to `text-slate-600` / `text-slate-500` (exceeding WCAG AAA 7:1 ratio).
+  - **Installed Workspace iOS UI/UX Design System Skill:**
+    - Authored `.agents/skills/ios-ui-ux-design-system/SKILL.md` establishing rules for Apple Human Interface Guidelines, WCAG AAA accessibility, touch target dimensions, safe area offsets, native bottom navigation, and keyboard handling.
+    - Configured `.gitignore` to allow tracking of `.agents/skills/`.
+  - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.

@@ -590,7 +590,7 @@ export default function PinterestTeacherScreen() {
               {/* Shareable Teacher Code Strip */}
               <View className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200 flex-row items-center justify-between">
                 <View>
-                  <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <Text className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">
                     Shareable Teacher Code
                   </Text>
                   <Text className="text-base font-black text-blue-600 tracking-wider">
@@ -673,7 +673,7 @@ export default function PinterestTeacherScreen() {
                           <Clock size={11} color="#64748B" />
                           <Text className="text-[10px] font-medium text-slate-500">{item.time}</Text>
                         </View>
-                        <Text className="text-[10px] text-slate-400">•</Text>
+                        <Text className="text-[10px] text-slate-500">•</Text>
                         <Text className="text-[10px] font-medium text-slate-500">{item.count}</Text>
                       </View>
                     </View>
@@ -691,7 +691,7 @@ export default function PinterestTeacherScreen() {
 
             {/* 3. Quick Action Navigation Cards */}
             <View className="gap-2">
-              <Text className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">
+              <Text className="text-xs font-bold text-slate-600 uppercase tracking-wider px-1">
                 Quick Shortcuts
               </Text>
               <View className="flex-row gap-2">
@@ -751,7 +751,7 @@ export default function PinterestTeacherScreen() {
               <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
                 <View className="flex-row items-center justify-between">
                   <View className="flex-1 pr-2">
-                    <Text className="text-xs font-semibold text-slate-400">Classroom Roll Call</Text>
+                    <Text className="text-xs font-bold text-slate-600 uppercase tracking-wider">Classroom Roll Call</Text>
                     <Text className="text-base font-extrabold text-slate-900" numberOfLines={1}>
                       {currentBatch.name}
                     </Text>
@@ -796,7 +796,7 @@ export default function PinterestTeacherScreen() {
                 {/* Student Roll List (Tapping ANY student row navigates to 360° diagnostics) */}
                 <View className="gap-2">
                   <View className="flex-row items-center justify-between px-1">
-                    <Text className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    <Text className="text-xs font-bold text-slate-600 uppercase tracking-wider">
                       Enrolled Students ({attendanceRecords.length})
                     </Text>
                     <Text className="text-[11px] text-slate-500 font-medium">
@@ -1050,7 +1050,7 @@ export default function PinterestTeacherScreen() {
               </View>
 
               <View className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
-                <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                <Text className="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1">
                   Pinned Class Announcement
                 </Text>
                 <Text className="text-xs text-slate-800 font-semibold">
@@ -1087,7 +1087,7 @@ export default function PinterestTeacherScreen() {
                     <View className="flex-1 pr-2">
                       <View className="flex-row items-center gap-2 mb-0.5">
                         <Text className="text-xs font-bold text-slate-900">{st.name}</Text>
-                        <Text className="text-[10px] text-slate-400">{st.rollNumber}</Text>
+                        <Text className="text-[10px] text-slate-500 font-semibold">{st.rollNumber}</Text>
                         {idx === 0 && (
                           <View className="bg-rose-100 px-1.5 py-0.2 rounded border border-rose-200">
                             <Text className="text-[9px] font-bold text-rose-800">PDF Doubt</Text>
@@ -1169,7 +1169,7 @@ export default function PinterestTeacherScreen() {
                 {/* Teacher Code Card */}
                 <View className="bg-slate-50 border border-slate-200 rounded-2xl p-3 flex-row items-center justify-between">
                   <View>
-                    <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    <Text className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">
                       Batch Enrollment Code
                     </Text>
                     <Text className="text-sm font-extrabold text-blue-600 font-mono">
@@ -1299,7 +1299,7 @@ export default function PinterestTeacherScreen() {
                 <View className="gap-2.5">
                   {filteredStudents.length === 0 ? (
                     <View className="py-8 items-center justify-center">
-                      <Text className="text-xs text-slate-400">No students match your filter.</Text>
+                      <Text className="text-xs text-slate-500 font-semibold">No students match your filter.</Text>
                     </View>
                   ) : (
                     filteredStudents.map((st) => {
@@ -1631,7 +1631,7 @@ export default function PinterestTeacherScreen() {
                   >
                     <View className="flex-1 pr-2">
                       <Text className="text-xs font-bold text-slate-800">{st.name}</Text>
-                      <Text className="text-[10px] text-slate-400">{st.rollNumber}</Text>
+                      <Text className="text-[10px] text-slate-500 font-semibold">{st.rollNumber}</Text>
                     </View>
 
                     <View className="w-20">

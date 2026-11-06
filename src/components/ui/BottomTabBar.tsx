@@ -80,7 +80,7 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
             <Text
               style={{ color: tint }}
               className={`text-[10px] mt-0.5 tracking-tight ${
-                isActive ? 'font-bold' : 'font-medium'
+                isActive ? 'font-extrabold' : 'font-semibold'
               }`}
               numberOfLines={1}
             >

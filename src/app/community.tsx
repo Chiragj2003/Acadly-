@@ -379,7 +379,7 @@ export default function PinterestCommunityScreen() {
                     </View>
                     <View>
                       <Text className="text-xs font-bold text-slate-900">{post.author}</Text>
-                      <Text className="text-[10px] text-slate-400">
+                      <Text className="text-[10px] text-slate-500 font-medium">
                         {post.role} • {post.timeAgo}
                       </Text>
                     </View>
@@ -629,7 +629,7 @@ export default function PinterestCommunityScreen() {
                     <View className="flex-row items-center justify-between">
                       <View className="flex-row items-center gap-1.5">
                         <Text className="text-xs font-bold text-slate-900">{comment.author}</Text>
-                        <Text className="text-[10px] text-slate-400">• {(comment as any).timeAgo || comment.createdAt}</Text>
+                        <Text className="text-[10px] text-slate-500 font-medium">• {(comment as any).timeAgo || comment.createdAt}</Text>
                         {comment.isTeacherVerified && (
                           <View className="bg-emerald-200/70 px-1.5 py-0.2 rounded border border-emerald-300">
                             <Text className="text-[9px] font-bold text-emerald-900">Verified Answer ✅</Text>
@@ -652,7 +652,7 @@ export default function PinterestCommunityScreen() {
                   </View>
                 ))
               ) : (
-                <Text className="text-xs text-slate-400 italic p-2">No replies yet. Be the first to answer!</Text>
+                <Text className="text-xs text-slate-500 font-medium italic p-2">No replies yet. Be the first to answer!</Text>
               )}
             </ScrollView>
 

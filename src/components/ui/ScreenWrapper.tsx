@@ -44,8 +44,7 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
   const applyBottomInset = !footer && withBottomInset;
 
   // Header background continuity for status bar area on modern iOS devices
-  const isStudentHeader = headerProps?.variant === 'student';
-  const headerBgColor = isStudentHeader ? '#fbf9f5' : '#FFFFFF';
+  const headerBgColor = '#FFFFFF';
 
   const bodyContent = scrollable ? (
     <ScrollView

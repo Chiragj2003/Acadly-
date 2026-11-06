@@ -33,38 +33,38 @@ export interface ButtonProps extends Omit<PressableProps, 'children'> {
 
 const variantStyles: Record<ButtonVariant, { container: string; text: string; spinner: string }> = {
   primary: {
-    container: 'bg-primary active:opacity-90 shadow-sm',
-    text: 'text-on-primary font-semibold',
+    container: 'bg-blue-600 active:bg-blue-700 shadow-xs',
+    text: 'text-white font-bold',
     spinner: '#ffffff',
   },
   secondary: {
-    container: 'bg-secondary active:opacity-90 shadow-sm',
-    text: 'text-on-secondary font-semibold',
+    container: 'bg-slate-900 active:bg-slate-800 shadow-xs',
+    text: 'text-white font-bold',
     spinner: '#ffffff',
   },
   secondaryContainer: {
-    container: 'bg-secondary-container active:scale-[0.99] shadow-sm',
-    text: 'text-on-secondary-container font-semibold',
-    spinner: '#fefcff',
+    container: 'bg-blue-50 border border-blue-200 active:bg-blue-100',
+    text: 'text-blue-900 font-bold',
+    spinner: '#2563EB',
   },
   outline: {
-    container: 'bg-transparent border border-outline-variant active:bg-surface-container-low',
-    text: 'text-on-surface font-semibold',
-    spinner: '#0051d5',
+    container: 'bg-white border border-slate-200 active:bg-slate-50',
+    text: 'text-slate-800 font-bold',
+    spinner: '#2563EB',
   },
   ghost: {
-    container: 'bg-transparent active:bg-surface-container-low',
-    text: 'text-secondary font-semibold',
-    spinner: '#0051d5',
+    container: 'bg-transparent active:bg-slate-100',
+    text: 'text-blue-600 font-bold',
+    spinner: '#2563EB',
   },
   surface: {
-    container: 'bg-surface-container active:bg-surface-container-high',
-    text: 'text-on-surface font-semibold',
-    spinner: '#0b1c30',
+    container: 'bg-slate-100 border border-slate-200 active:bg-slate-200',
+    text: 'text-slate-800 font-bold',
+    spinner: '#0F172A',
   },
   destructive: {
-    container: 'bg-error active:opacity-90 shadow-sm',
-    text: 'text-on-error font-semibold',
+    container: 'bg-rose-600 active:bg-rose-700 shadow-xs',
+    text: 'text-white font-bold',
     spinner: '#ffffff',
   },
 };

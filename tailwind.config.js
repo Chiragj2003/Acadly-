@@ -29,36 +29,59 @@ module.exports = {
           soft: "#a89993",
         },
 
-        // Core Palette
-        primary: "#ff7d6b",
-        "on-primary": "#ffffff",
-        "primary-container": "#fff0ec",
-        "on-primary-container": "#9e2a1b",
+        // Acadly iOS & Modern Mobile Academic Palette (HIG & WCAG AAA Compliant)
+        primary: "#2563EB", // iOS System Blue / Acadly Royal Blue
+        "on-primary": "#FFFFFF",
+        "primary-container": "#EFF6FF", // Blue 50
+        "on-primary-container": "#1E40AF", // Blue 800
 
-        secondary: "#52b788",
-        "on-secondary": "#ffffff",
-        "secondary-container": "#e8f8f0",
-        "on-secondary-container": "#185e3a",
+        secondary: "#0F172A", // Slate 900
+        "on-secondary": "#FFFFFF",
+        "secondary-container": "#F1F5F9", // Slate 100
+        "on-secondary-container": "#0F172A",
 
-        surface: "#fbf9f5",
-        "surface-container-lowest": "#ffffff",
-        "surface-container-low": "#f6f2ec",
-        "surface-container": "#f1ebe4",
+        surface: "#F8FAFC", // Slate 50 (Clean iOS System Background)
+        "surface-container-lowest": "#FFFFFF",
+        "surface-container-low": "#F8FAFC",
+        "surface-container": "#FFFFFF", // Pure crisp white card surface
+        "surface-container-high": "#F1F5F9",
+        "surface-container-highest": "#E2E8F0",
 
-        background: "#fbf9f5",
-        "on-background": "#2e2421",
-        "on-surface": "#2e2421",
-        "on-surface-variant": "#7d6f6a",
+        background: "#F8FAFC",
+        "on-background": "#0F172A",
+        "on-surface": "#0F172A", // High contrast readable dark slate
+        "on-surface-variant": "#475569", // Slate 600 (Exceeds 7:1 contrast ratio)
 
-        outline: "#e5ded7",
-        "outline-variant": "#f1ebe4",
+        outline: "#CBD5E1", // Slate 300
+        "outline-variant": "#E2E8F0", // Slate 200 hairline border
 
-        // Role-based Accents (Warm & Cheerful)
+        // Semantic Feedback Tokens (Guaranteed resolutions)
+        error: "#E11D48", // Rose 600
+        "error-container": "#FFE4E6", // Rose 100
+        "on-error": "#FFFFFF",
+        "on-error-container": "#9F1239", // Rose 800
+
+        success: "#059669", // Emerald 600
+        "success-container": "#ECFDF5", // Emerald 50
+        "on-success": "#FFFFFF",
+        "on-success-container": "#065F46", // Emerald 800
+
+        warning: "#D97706", // Amber 600
+        "warning-container": "#FEF3C7", // Amber 100
+        "on-warning": "#FFFFFF",
+        "on-warning-container": "#92400E", // Amber 800
+
+        info: "#2563EB", // Blue 600
+        "info-container": "#EFF6FF", // Blue 50
+        "on-info": "#FFFFFF",
+        "on-info-container": "#1E40AF", // Blue 800
+
+        // Role-based Accents
         role: {
-          admin: "#403d39",
-          teacher: "#ff7d6b",
-          student: "#52b788",
-          parent: "#ffc93c",
+          admin: "#0F172A",
+          teacher: "#2563EB",
+          student: "#059669",
+          parent: "#D97706",
         }
       },
       borderRadius: {

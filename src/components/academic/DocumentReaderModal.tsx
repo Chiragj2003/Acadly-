@@ -30,7 +30,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
               <Text className="text-xs font-bold text-white" numberOfLines={1}>
                 {document.title}
               </Text>
-              <Text className="text-[10px] text-slate-400 font-medium" numberOfLines={1}>
+              <Text className="text-[10px] text-slate-300 font-medium" numberOfLines={1}>
                 {document.subject} • {document.author}
               </Text>
             </View>
@@ -60,7 +60,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
           <View className="border-b border-slate-200 pb-4 mb-4">
             <View className="flex-row items-center justify-between mb-2">
               <Badge label={document.subject} variant="primary" />
-              <Text className="text-[11px] font-semibold text-slate-400">{document.date}</Text>
+              <Text className="text-[11px] font-semibold text-slate-500">{document.date}</Text>
             </View>
 
             <Text className="text-lg font-black text-slate-900 leading-snug">

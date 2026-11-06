@@ -263,7 +263,7 @@ export default function PinterestStudentScreen() {
                           </Text>
                           <Text
                             className={`text-[10px] font-semibold mt-1 ${
-                              isSelected ? 'text-blue-200' : 'text-slate-400'
+                              isSelected ? 'text-blue-100' : 'text-slate-500'
                             }`}
                           >
                             Code: {teach.teacherCode}
@@ -321,7 +321,7 @@ export default function PinterestStudentScreen() {
                   <View className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 items-center justify-center mb-2">
                     <CheckCircle2 size={16} color="#10B981" />
                   </View>
-                  <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                     Attendance
                   </Text>
                   <Text className="text-2xl font-black text-slate-800 mt-0.5">96.4%</Text>
@@ -337,7 +337,7 @@ export default function PinterestStudentScreen() {
                     <View className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 items-center justify-center mb-2">
                       <CreditCard size={16} color="#F59E0B" />
                     </View>
-                    <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                       Tuition Fee
                     </Text>
                     <Text className="text-2xl font-black text-slate-800 mt-0.5">₹3,500</Text>
@@ -352,7 +352,7 @@ export default function PinterestStudentScreen() {
                     <View className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 items-center justify-center mb-2">
                       <BookOpen size={16} color="#059669" />
                     </View>
-                    <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                       Assignments
                     </Text>
                     <Text className="text-2xl font-black text-slate-800 mt-0.5">12 / 12</Text>
@@ -478,7 +478,7 @@ export default function PinterestStudentScreen() {
                             </View>
                           </View>
 
-                          <Text className="text-[11px] text-slate-400 font-medium">
+                          <Text className="text-[11px] text-slate-500 font-semibold">
                             {pdfDoc.date}
                           </Text>
                         </View>

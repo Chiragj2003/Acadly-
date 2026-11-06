@@ -350,7 +350,7 @@ export default function PinterestAdminScreen() {
 
             {/* Quick Actions Panel */}
             <View className="gap-2">
-              <Text className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">
+              <Text className="text-xs font-bold text-slate-600 uppercase tracking-wider px-1">
                 Admin Controls
               </Text>
               <View className="flex-row gap-2">

@@ -43,10 +43,10 @@ export const Input: React.FC<InputProps> = ({
       {(label || rightLabel) && (
         <View className="flex-row items-center justify-between">
           {label && (
-            <Text className="text-sm font-semibold text-on-surface">{label}</Text>
+            <Text className="text-sm font-bold text-slate-800">{label}</Text>
           )}
           {rightLabel && (
-            <Text className="text-xs text-on-surface-variant">{rightLabel}</Text>
+            <Text className="text-xs text-slate-500 font-medium">{rightLabel}</Text>
           )}
         </View>
       )}
@@ -54,15 +54,15 @@ export const Input: React.FC<InputProps> = ({
       <View
         className={`flex-row items-center rounded-xl overflow-hidden ${
           error
-            ? 'bg-error-container/30 border border-error'
+            ? 'bg-rose-50 border border-rose-300'
             : isFocused
-            ? 'bg-surface-container-lowest border border-secondary shadow-sm'
-            : 'bg-surface-container-low border border-transparent'
+            ? 'bg-white border-2 border-blue-600 shadow-xs'
+            : 'bg-white border border-slate-200 shadow-xs'
         }`}
       >
         {showPhonePrefix && (
-          <View className="flex-row items-center px-3 py-3 bg-surface-container border-r border-outline-variant/30">
-            <Text className="text-sm font-semibold text-on-surface">🇮🇳 +91</Text>
+          <View className="flex-row items-center px-3 py-3 bg-slate-50 border-r border-slate-200">
+            <Text className="text-sm font-bold text-slate-900">🇮🇳 +91</Text>
           </View>
         )}
 
@@ -73,8 +73,8 @@ export const Input: React.FC<InputProps> = ({
         )}
 
         <TextInput
-          placeholderTextColor="#76777d"
-          className="flex-1 py-3 px-3.5 text-sm text-on-surface"
+          placeholderTextColor="#94a3b8"
+          className="flex-1 py-3 px-3.5 text-sm text-slate-900 font-medium"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           secureTextEntry={shouldSecureText}
@@ -89,9 +89,9 @@ export const Input: React.FC<InputProps> = ({
             className="p-3 items-center justify-center"
           >
             {isPasswordVisible ? (
-              <EyeOff size={18} color="#76777d" />
+              <EyeOff size={18} color="#64748B" />
             ) : (
-              <Eye size={18} color="#76777d" />
+              <Eye size={18} color="#64748B" />
             )}
           </Pressable>
         )}
@@ -104,9 +104,9 @@ export const Input: React.FC<InputProps> = ({
       </View>
 
       {error ? (
-        <Text className="text-xs text-error font-medium px-1">{error}</Text>
+        <Text className="text-xs text-rose-600 font-semibold px-1">{error}</Text>
       ) : helperText ? (
-        <Text className="text-xs text-on-surface-variant px-1">{helperText}</Text>
+        <Text className="text-xs text-slate-500 font-medium px-1">{helperText}</Text>
       ) : null}
     </View>
   );

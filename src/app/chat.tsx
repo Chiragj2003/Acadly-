@@ -364,8 +364,8 @@ export default function PinterestChatScreen() {
                       {/* Timestamp & Teacher Pin Action */}
                       <View className="flex-row items-center justify-end gap-1.5 mt-1.5">
                         <Text
-                          className={`text-[9px] ${
-                            isMine ? 'text-white/70' : 'text-slate-400'
+                          className={`text-[9px] font-medium ${
+                            isMine ? 'text-white/80' : 'text-slate-500'
                           }`}
                         >
                           {msg.timeFormatted}

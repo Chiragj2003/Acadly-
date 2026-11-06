@@ -191,7 +191,7 @@ export const StudyMaterialsViewer: React.FC = () => {
               <View className="flex-1 min-w-0">
                 <View className="flex-row items-center gap-1.5 mb-1">
                   <Badge label={item.subject} variant="info" />
-                  <Text className="text-[11px] text-slate-400">
+                  <Text className="text-[11px] text-slate-500 font-semibold">
                     {item.file_size_formatted} • {item.page_count} Pages
                   </Text>
                 </View>
@@ -207,7 +207,7 @@ export const StudyMaterialsViewer: React.FC = () => {
             </View>
 
             <View className="flex-row items-center justify-between pt-2.5 border-t border-slate-100">
-              <Text className="text-[11px] text-slate-400">
+              <Text className="text-[11px] text-slate-500 font-semibold">
                 Faculty: {item.uploaded_by}
               </Text>
 

@@ -201,7 +201,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
               <Text className="text-sm font-bold text-white" numberOfLines={1}>
                 In-App Form & DPP Builder
               </Text>
-              <Text className="text-[11px] text-slate-400 font-medium" numberOfLines={1}>
+              <Text className="text-[11px] text-slate-300 font-medium" numberOfLines={1}>
                 Create Interactive MCQ, True/False & Numerical Forms
               </Text>
             </View>
@@ -225,7 +225,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
           {/* Metadata Card */}
           <View className="bg-white border border-slate-200/90 rounded-2xl p-4 gap-3 shadow-xs mb-4">
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <Text className="text-xs font-bold text-slate-600 uppercase tracking-wider">
                 1. Assignment Settings
               </Text>
               <Badge label={`${totalCalculatedMarks} Total Marks`} variant="primary" />
@@ -273,7 +273,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
 
           {/* Questions Section */}
           <View className="flex-row items-center justify-between mb-2.5 px-1">
-            <Text className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <Text className="text-xs font-bold text-slate-600 uppercase tracking-wider">
               2. Questions ({questions.length})
             </Text>
             <Text className="text-[11px] text-slate-500 font-medium">
