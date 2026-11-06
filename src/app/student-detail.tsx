@@ -57,11 +57,9 @@ export default function StudentDetailScreen() {
     (params.studentId ? getStudentById(params.studentId) : null) ||
     studentsRoster[0];
 
-  if (!student) {
-    
   if (isLoading || !isAuthorized) {
     return (
-      <ScreenWrapper headerProps={{ title: 'Student Profile' }}>
+      <ScreenWrapper headerProps={{ title: 'Student Profile', onBackPress: () => router.back() }}>
         <View className="flex-1 items-center justify-center p-8">
           <ActivityIndicator size="small" color="#2563EB" />
           <Text className="text-xs text-slate-500 mt-2 font-medium">Verifying authorization...</Text>
@@ -70,8 +68,9 @@ export default function StudentDetailScreen() {
     );
   }
 
-  return (
-    <ScreenWrapper headerProps={{ title: 'Student Profile', onBackPress: () => router.back() }}>
+  if (!student) {
+    return (
+      <ScreenWrapper headerProps={{ title: 'Student Profile', onBackPress: () => router.back() }}>
         <View className="items-center justify-center p-8">
           <Text className="text-sm font-bold text-slate-700">Student record not found.</Text>
         </View>

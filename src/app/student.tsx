@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -202,8 +202,13 @@ export default function PinterestStudentScreen() {
   // Study Hub Sub-Category Filter
   const [studyFilter, setStudyFilter] = useState<'all' | 'notes' | 'formula' | 'dpp'>('all');
 
-  // Student Profile Info
-  const studentProfile = studentsRoster.find((s) => s.id === 'stud-amelia') || studentsRoster[0];
+  // Student Profile Info (Dynamic match based on signed-in user or topper fallback)
+  const studentProfile =
+    studentsRoster.find((s) =>
+      user?.email ? user.email.toLowerCase().includes(s.name.toLowerCase().split(' ')[0]) : false
+    ) ||
+    studentsRoster.find((s) => s.id === 'stud-amelia') ||
+    studentsRoster[0];
   const activeTeacher =
     enrolledTeachers.find((t) => t.id === activeTeacherId) || enrolledTeachers[0];
   const liveLecture = lectures.find((l) => l.is_live) || lectures[0];
@@ -212,6 +217,13 @@ export default function PinterestStudentScreen() {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [profileNameInput, setProfileNameInput] = useState(studentProfile?.name || 'Amelia Sharma 🌸');
   const [profileSchoolInput, setProfileSchoolInput] = useState(studentProfile?.school || 'Delhi Public School (R.K. Puram)');
+
+  useEffect(() => {
+    if (studentProfile) {
+      setProfileNameInput(studentProfile.name);
+      setProfileSchoolInput(studentProfile.school || 'Delhi Public School (R.K. Puram)');
+    }
+  }, [studentProfile?.id]);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
 

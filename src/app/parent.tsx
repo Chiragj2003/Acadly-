@@ -88,7 +88,13 @@ export default function PinterestParentScreen() {
 
   const currentFee = studentFees[0];
   const lastPayment = payments[0];
-  const matchedStudentProfile = studentsRoster.find((s) => s.id === 'stud-amelia') || studentsRoster[0];
+  const matchedStudentProfile =
+    studentsRoster.find((s) =>
+      selectedChild?.full_name?.toLowerCase().includes(s.name.toLowerCase().split(' ')[0]) ||
+      s.name.toLowerCase().includes(selectedChild?.full_name?.toLowerCase() || '')
+    ) ||
+    studentsRoster.find((s) => s.id === 'stud-amelia') ||
+    studentsRoster[0];
 
   const handleLogout = () => {
     Alert.alert(
@@ -280,11 +286,11 @@ export default function PinterestParentScreen() {
                     {selectedChild?.full_name} checked in at 09:28 AM
                   </Text>
                   <Text className="text-[11px] text-slate-500 mt-0.5">
-                    Class 12 • JEE Advanced (Morning) • Roll No: 08
+                    {selectedChild?.batch_name || 'Class 12 • JEE Advanced (Morning)'} • Roll No: {matchedStudentProfile.rollNumber}
                   </Text>
                 </View>
                 <View className="bg-emerald-100 px-2.5 py-1 rounded-full border border-emerald-200">
-                  <Text className="text-[10px] font-bold text-emerald-800">96.4% Overall</Text>
+                  <Text className="text-[10px] font-bold text-emerald-800">{matchedStudentProfile.overallAttendance}% Overall</Text>
                 </View>
               </View>
             </View>
@@ -296,7 +302,7 @@ export default function PinterestParentScreen() {
                   <Trophy size={18} color="#d97706" />
                   <Text className="text-sm font-bold text-slate-900">Academic Benchmarks</Text>
                 </View>
-                <Badge label="Rank #01 🏆" variant="warning" />
+                <Badge label={`Top ${100 - matchedStudentProfile.percentile}% (${matchedStudentProfile.percentile}th Pctl)`} variant="warning" />
               </View>
 
               <PerformanceComparisonChart data={comparisonChartData} />
@@ -365,7 +371,7 @@ export default function PinterestParentScreen() {
               </View>
 
               {/* Attendance Breakdown */}
-              <AttendanceRingAndTrendChart percentage={96.4} />
+              <AttendanceRingAndTrendChart percentage={matchedStudentProfile.overallAttendance} />
             </View>
           </View>
         )}

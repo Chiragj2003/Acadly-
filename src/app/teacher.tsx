@@ -356,12 +356,13 @@ export default function PinterestTeacherScreen() {
       Alert.alert('Required', 'Please enter the test assessment title.');
       return;
     }
-    const max = parseInt(examMaxScore) || 100;
+    const max = Math.max(1, parseInt(examMaxScore, 10) || 100);
     const marksList = studentsRoster.map((s) => {
-      const scoreVal = parseInt(studentMarksInput[s.id] || '85') || 0;
+      const rawScore = parseInt(studentMarksInput[s.id] || '85', 10);
+      const safeScore = isNaN(rawScore) ? 0 : Math.max(0, Math.min(rawScore, max));
       return {
         studentId: s.id,
-        score: Math.min(scoreVal, max),
+        score: safeScore,
       };
     });
 
@@ -406,7 +407,7 @@ export default function PinterestTeacherScreen() {
   // Grade Submission
   const handleConfirmGrade = async () => {
     if (!selectedSubmissionId) return;
-    const marks = parseInt(gradingScoreInput) || 0;
+    const marks = Math.max(0, parseInt(gradingScoreInput, 10) || 0);
     await gradeSubmission(selectedSubmissionId, marks, gradingFeedbackInput);
     setIsGradingModalOpen(false);
     setSelectedSubmissionId(null);

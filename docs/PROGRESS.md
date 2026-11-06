@@ -308,3 +308,17 @@
       5. Admin (Coaching Director): `admin@acadly.com` / `Password123!`
     - Added an interactive **"Quick Demo Accounts (1-Tap Sign In)"** component directly onto the login screen: tapping any account automatically fills credentials and launches straight into that dashboard.
   - TypeScript verification: `npx tsc --noEmit` passed with 0 errors across the entire codebase.
+
+---
+
+### [2026-11-07 00:06] - Entry 013: Full Deep-Dive Testing Suite, Bug Hunting & Verification
+- **Automated Deep Dive Suite:** Authored and verified `scripts/deep-dive-test.js` validating 71 assertions covering routes, dynamic router calls, dummy accounts, academic data depth, PDF catalog, parent multi-child support, JSX syntax safety, and legacy token elimination.
+- **Bugs Discovered & Resolved:**
+  1. **`student-detail.tsx` Structural Guard Bypass:** Resolved unclosed `if (!student)` block that inadvertently wrapped authorization checks.
+  2. **`parent.tsx` Static Student Link:** Fixed hardcoded reference to `stud-amelia`. Parent portal now dynamically resolves student profile vitals, roll numbers, percentile ranks, and attendance breakdown ring charts when toggling between children (Amelia, Aarav, and Rohan).
+  3. **`student.tsx` Profile Sync:** Fixed static student identification; student profile now dynamically matches signed-in user credentials (`student@acadly.com` vs `kabir@acadly.com`) and syncs profile fields with `useEffect`.
+  4. **`teacher.tsx` Marks Input Validation:** Added numeric clamping `Math.max(0, Math.min(rawScore, max))` to ensure negative or out-of-bounds scores cannot be entered during test evaluations or DPP homework gradings.
+  5. **`ChildContext.tsx` Offline Data Resilience:** Added instant fallback to `DEFAULT_CHILDREN` on offline network timeout or unlinked institutes, guaranteeing that parent demo accounts immediately load active children cards.
+- **Verification:**
+  - `node scripts/deep-dive-test.js`: **71 passed, 0 failed**.
+  - `npx tsc --noEmit`: **0 errors**.

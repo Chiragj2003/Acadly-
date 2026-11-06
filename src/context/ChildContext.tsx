@@ -70,9 +70,16 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchChildren = async () => {
-    if (!user || !currentInstitute) {
+    if (!user) {
       setChildrenList([]);
       setSelectedChild(null);
+      setIsLoading(false);
+      return;
+    }
+
+    if (!currentInstitute) {
+      setChildrenList(DEFAULT_CHILDREN);
+      setSelectedChild(DEFAULT_CHILDREN[0]);
       setIsLoading(false);
       return;
     }
@@ -154,8 +161,8 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setChildrenList(list);
       setSelectedChild(list[0]);
     } catch {
-      setChildrenList([]);
-      setSelectedChild(null);
+      setChildrenList(DEFAULT_CHILDREN);
+      setSelectedChild(DEFAULT_CHILDREN[0]);
     } finally {
       setIsLoading(false);
     }
