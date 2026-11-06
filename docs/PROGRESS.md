@@ -322,3 +322,24 @@
 - **Verification:**
   - `node scripts/deep-dive-test.js`: **71 passed, 0 failed**.
   - `npx tsc --noEmit`: **0 errors**.
+
+---
+
+### [2026-11-07 00:20] - Entry 014: Keyboard Overlap Fixes, Modal Resilience & Comprehensive Goal Fulfillment
+- **Keyboard Overlap & Stuck Inputs Fixed Across All Screens:**
+  1. Configured `"softwareKeyboardLayoutMode": "resize"` in `app.json` for Android, eliminating soft keyboard overlap issues.
+  2. Wrapped Admin Create Batch Modal (`src/app/admin.tsx`) with `KeyboardAvoidingView` and `ScrollView keyboardShouldPersistTaps="handled"`.
+  3. Wrapped Parent Link Child Modal (`src/app/parent.tsx`) with `KeyboardAvoidingView` and `ScrollView keyboardShouldPersistTaps="handled"`.
+  4. Wrapped Student Profile Edit Modal (`src/app/student.tsx`) with `KeyboardAvoidingView`.
+  5. Added `keyboardShouldPersistTaps="handled"` to Chat Messages ScrollView (`src/app/chat.tsx`).
+  6. Added bottom scroll padding clearance (`contentContainerStyle={{ paddingBottom: 60 }}`) to all Teacher modals (`src/app/teacher.tsx`), Community doubt modals (`src/app/community.tsx`), and DPP Builder (`InteractiveDppBuilderModal.tsx`).
+  7. Added `keyboardShouldPersistTaps="handled"` and extended scroll padding to `src/app/join-institute.tsx` and `src/app/student-detail.tsx`.
+- **Attendance & UI Simplification Verified:**
+  1. Completely removed unused `markBatchAllPresent` button and references in `src/app/teacher.tsx`.
+  2. Verified auto-sizing roll container (`min-w-[36px]`) preventing roll number text clipping.
+  3. Verified teacher batch & timing switcher and searchable student directory with fee tracking.
+- **Deep-Dive Automated Test Suite Expanded:**
+  - Expanded `scripts/deep-dive-test.js` to 84 automated tests across 11 test suites.
+  - Result: **84 passed, 0 failed**.
+- **TypeScript Verification:**
+  - `npx tsc --noEmit`: **0 errors**.

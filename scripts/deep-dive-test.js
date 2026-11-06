@@ -193,6 +193,38 @@ const metroConfigPath = path.join(__dirname, '..', 'metro.config.js');
 const metroConfigContent = fs.readFileSync(metroConfigPath, 'utf8');
 assert(metroConfigContent.includes('blockList'), 'metro.config.js contains blockList for watcher performance on Windows');
 
+// 9. Audit Keyboard Experience & Form Resilience
+console.log('\n--- 9. KEYBOARD EXPERIENCE & MODAL RESILIENCE AUDIT ---');
+assert(appJson.expo?.android?.softwareKeyboardLayoutMode === 'resize', 'Android softwareKeyboardLayoutMode is set to "resize" in app.json');
+
+const adminTsx = fs.readFileSync(path.join(appDir, 'admin.tsx'), 'utf8');
+assert(adminTsx.includes('KeyboardAvoidingView') && adminTsx.includes('keyboardShouldPersistTaps="handled"'), 'Admin Create Batch modal uses KeyboardAvoidingView & handles taps');
+
+const parentTsx = fs.readFileSync(path.join(appDir, 'parent.tsx'), 'utf8');
+assert(parentTsx.includes('KeyboardAvoidingView') && parentTsx.includes('Link Another Child'), 'Parent Link Child modal uses KeyboardAvoidingView');
+
+const studentTsx = fs.readFileSync(path.join(appDir, 'student.tsx'), 'utf8');
+assert(studentTsx.includes('KeyboardAvoidingView') && studentTsx.includes('Edit Academic Profile'), 'Student Edit Profile modal uses KeyboardAvoidingView');
+
+const chatTsx = fs.readFileSync(path.join(appDir, 'chat.tsx'), 'utf8');
+assert(chatTsx.includes('keyboardShouldPersistTaps="handled"'), 'Chat messages list includes keyboardShouldPersistTaps="handled"');
+
+const teacherTsx = fs.readFileSync(path.join(appDir, 'teacher.tsx'), 'utf8');
+assert(teacherTsx.includes('contentContainerStyle={{ paddingBottom: 60 }}'), 'Teacher modals include scroll padding clearance for keyboard');
+
+// 10. Audit Teacher Roll Call & Attendance Simplification
+console.log('\n--- 10. TEACHER ATTENDANCE & BATCH SETTINGS AUDIT ---');
+assert(!teacherTsx.includes('markBatchAllPresent'), 'Mark All Present button is eliminated from teacher roll call (attendance simplified)');
+assert(teacherTsx.includes('min-w-[36px]') && teacherTsx.includes('roll_number.replace'), 'Student roll number container auto-sizes to prevent text cutoff');
+assert(teacherTsx.includes('directorySearchQuery') && teacherTsx.includes('directoryFeeFilter'), 'Teacher settings includes searchable student directory with fee tracking');
+assert(teacherTsx.includes('TEACHER_BATCHES') && teacherTsx.includes('setSelectedBatchId'), 'Teacher settings allows switching active batch and timings');
+
+// 11. Audit Dynamic Data & Identity Synchronization
+console.log('\n--- 11. DYNAMIC DATA & IDENTITY BINDING AUDIT ---');
+assert(parentTsx.includes('matchedStudentProfile.overallAttendance') && parentTsx.includes('matchedStudentProfile.percentile'), 'Parent screen dynamically displays attendance ring & percentile per child');
+assert(studentTsx.includes('studentProfile') && studentTsx.includes('user.email.toLowerCase'), 'Student screen dynamically matches signed-in student account');
+assert(teacherTsx.includes('Math.max(0, Math.min(rawScore, max))'), 'Teacher marks input clamps scores safely to 0-max range');
+
 console.log('\n====================================================');
 console.log(`TEST RESULTS: ${passCount} PASSED | ${failCount} FAILED`);
 console.log('====================================================\n');

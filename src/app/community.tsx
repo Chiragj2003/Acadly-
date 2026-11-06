@@ -590,6 +590,7 @@ export default function PinterestCommunityScreen() {
       <Modal visible={!!activeDiscussionPost} transparent animationType="slide">
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 24 : 0}
           className="flex-1 justify-end bg-black/50"
         >
           <View className="bg-white rounded-t-3xl p-6 gap-3.5 max-h-[85%] border-t border-slate-200">
@@ -680,6 +681,7 @@ export default function PinterestCommunityScreen() {
       <Modal visible={isUploadingPdf} transparent animationType="slide">
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 24 : 0}
           className="flex-1 justify-end bg-black/50"
         >
           <View className="bg-white rounded-t-3xl p-6 gap-3.5 max-h-[85%] border-t border-slate-200">
@@ -690,7 +692,7 @@ export default function PinterestCommunityScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3.5">
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3.5" contentContainerStyle={{ paddingBottom: 60 }}>
               <View>
                 <Text className="text-xs font-bold text-slate-700 mb-1">Document Title</Text>
                 <TextInput

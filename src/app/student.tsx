@@ -10,6 +10,8 @@ import {
   TextInput,
   Switch,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import {
   Trophy,
@@ -1234,7 +1236,10 @@ export default function PinterestStudentScreen() {
           animationType="fade"
           onRequestClose={() => setIsEditProfileOpen(false)}
         >
-          <View className="flex-1 bg-black/60 items-center justify-center p-5">
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            className="flex-1 bg-black/60 items-center justify-center p-5"
+          >
             <View className="bg-white rounded-3xl p-5 w-full max-w-sm border border-slate-200 shadow-xl">
               <View className="flex-row items-center justify-between mb-3">
                 <Text className="text-base font-black text-slate-900">Edit Academic Profile</Text>
@@ -1267,7 +1272,7 @@ export default function PinterestStudentScreen() {
                 <Text className="text-xs font-bold text-white">Save Changes</Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </KeyboardAvoidingView>
         </Modal>
 
         {/* Global Modals */}

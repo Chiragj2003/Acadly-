@@ -247,6 +247,7 @@ export default function PinterestChatScreen() {
           ref={scrollViewRef}
           contentContainerClassName="gap-3 pb-4"
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
           {messages.length === 0 ? (
             <View className="items-center justify-center py-12">

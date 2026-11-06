@@ -218,7 +218,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
         {/* Scrollable Form Body */}
         <ScrollView
           className="flex-1 bg-[#F8FAFC]"
-          contentContainerStyle={{ padding: 16, paddingBottom: 60 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >

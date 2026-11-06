@@ -9,6 +9,8 @@ import {
   TextInput,
   Linking,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useRoleGuard } from '@/hooks/useRoleGuard';
@@ -643,7 +645,11 @@ export default function PinterestAdminScreen() {
 
       {/* ================= CREATE BATCH MODAL ================= */}
       <Modal visible={isCreateBatchModalOpen} transparent animationType="slide">
-        <View className="flex-1 justify-end bg-black/50">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 24 : 0}
+          className="flex-1 justify-end bg-black/50"
+        >
           <View className="bg-white rounded-t-3xl p-6 gap-3 max-h-[85%] border-t border-slate-200">
             <View className="flex-row items-center justify-between">
               <Text className="text-base font-extrabold text-slate-900">Create New Academic Batch</Text>
@@ -652,71 +658,77 @@ export default function PinterestAdminScreen() {
               </TouchableOpacity>
             </View>
 
-            <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Batch Title</Text>
-              <TextInput
-                placeholder="e.g. JEE Target 2026 Batch Alpha"
-                placeholderTextColor="#94a3b8"
-                value={batchName}
-                onChangeText={setBatchName}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
-              />
-            </View>
-
-            <View className="flex-row gap-2">
-              <View className="flex-1">
-                <Text className="text-[11px] font-bold text-slate-700 mb-1">Subject Domain</Text>
-                <TextInput
-                  placeholder="Physics / Mathematics"
-                  placeholderTextColor="#94a3b8"
-                  value={batchSubject}
-                  onChangeText={setBatchSubject}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
-                />
-              </View>
-              <View className="flex-1">
-                <Text className="text-[11px] font-bold text-slate-700 mb-1">Target Exam</Text>
-                <TextInput
-                  placeholder="JEE Advanced"
-                  placeholderTextColor="#94a3b8"
-                  value={batchExam}
-                  onChangeText={setBatchExam}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
-                />
-              </View>
-            </View>
-
-            <View className="flex-row gap-2">
-              <View className="flex-1">
-                <Text className="text-[11px] font-bold text-slate-700 mb-1">Classroom / Room No.</Text>
-                <TextInput
-                  placeholder="Room 204 or Hall A"
-                  placeholderTextColor="#94a3b8"
-                  value={batchRoom}
-                  onChangeText={setBatchRoom}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
-                />
-              </View>
-              <View className="flex-1">
-                <Text className="text-[11px] font-bold text-slate-700 mb-1">Lead Teacher</Text>
-                <TextInput
-                  placeholder="Er. Alok Saxena"
-                  placeholderTextColor="#94a3b8"
-                  value={batchTeacher}
-                  onChangeText={setBatchTeacher}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
-                />
-              </View>
-            </View>
-
-            <TouchableOpacity
-              onPress={handleCreateBatch}
-              className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-1 active:scale-98"
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ gap: 12, paddingBottom: 40 }}
             >
-              <Text className="text-xs font-bold text-white">Save & Launch Batch 🚀</Text>
-            </TouchableOpacity>
+              <View>
+                <Text className="text-xs font-bold text-slate-700 mb-1">Batch Title</Text>
+                <TextInput
+                  placeholder="e.g. JEE Target 2026 Batch Alpha"
+                  placeholderTextColor="#94a3b8"
+                  value={batchName}
+                  onChangeText={setBatchName}
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
+                />
+              </View>
+
+              <View className="flex-row gap-2">
+                <View className="flex-1">
+                  <Text className="text-[11px] font-bold text-slate-700 mb-1">Subject Domain</Text>
+                  <TextInput
+                    placeholder="Physics / Mathematics"
+                    placeholderTextColor="#94a3b8"
+                    value={batchSubject}
+                    onChangeText={setBatchSubject}
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
+                  />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-[11px] font-bold text-slate-700 mb-1">Target Exam</Text>
+                  <TextInput
+                    placeholder="JEE Advanced"
+                    placeholderTextColor="#94a3b8"
+                    value={batchExam}
+                    onChangeText={setBatchExam}
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
+                  />
+                </View>
+              </View>
+
+              <View className="flex-row gap-2">
+                <View className="flex-1">
+                  <Text className="text-[11px] font-bold text-slate-700 mb-1">Classroom / Room No.</Text>
+                  <TextInput
+                    placeholder="Room 204 or Hall A"
+                    placeholderTextColor="#94a3b8"
+                    value={batchRoom}
+                    onChangeText={setBatchRoom}
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
+                  />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-[11px] font-bold text-slate-700 mb-1">Lead Teacher</Text>
+                  <TextInput
+                    placeholder="Er. Alok Saxena"
+                    placeholderTextColor="#94a3b8"
+                    value={batchTeacher}
+                    onChangeText={setBatchTeacher}
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
+                  />
+                </View>
+              </View>
+
+              <TouchableOpacity
+                onPress={handleCreateBatch}
+                className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-1 active:scale-98"
+              >
+                <Text className="text-xs font-bold text-white">Save & Launch Batch 🚀</Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Modals */}

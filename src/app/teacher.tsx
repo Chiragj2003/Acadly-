@@ -108,7 +108,6 @@ export default function PinterestTeacherScreen() {
   const {
     attendanceRecords,
     markAttendance,
-    markBatchAllPresent,
     addLecture,
     joinRequests,
     teacherProfile,
@@ -1499,7 +1498,7 @@ export default function PinterestTeacherScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3">
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3" contentContainerStyle={{ paddingBottom: 60 }}>
               <View>
                 <Text className="text-xs font-bold text-slate-700 mb-1">Document Title</Text>
                 <TextInput
@@ -1595,7 +1594,7 @@ export default function PinterestTeacherScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60 }}>
               <View className="flex-row gap-2 mb-3">
                 <View className="flex-1">
                   <Text className="text-[11px] font-bold text-slate-700 mb-1">Test Title</Text>
@@ -1672,7 +1671,7 @@ export default function PinterestTeacherScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3.5">
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3.5" contentContainerStyle={{ paddingBottom: 60 }}>
               <View>
                 <Text className="text-xs font-bold text-slate-700 mb-1">Marks Awarded (out of 25)</Text>
                 <TextInput
@@ -1722,7 +1721,7 @@ export default function PinterestTeacherScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3">
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3" contentContainerStyle={{ paddingBottom: 60 }}>
               <View>
                 <Text className="text-xs font-bold text-slate-700 mb-1">Title</Text>
                 <TextInput
@@ -1803,7 +1802,7 @@ export default function PinterestTeacherScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3">
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3" contentContainerStyle={{ paddingBottom: 60 }}>
               <View>
                 <Text className="text-xs font-bold text-slate-700 mb-1">Lecture Title</Text>
                 <TextInput

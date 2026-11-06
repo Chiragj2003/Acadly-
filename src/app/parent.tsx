@@ -10,6 +10,8 @@ import {
   Linking,
   Switch,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import {
   Users,
@@ -585,7 +587,11 @@ export default function PinterestParentScreen() {
 
       {/* ================= MODAL: LINK ANOTHER CHILD ================= */}
       <Modal visible={isLinkChildModalOpen} transparent animationType="slide">
-        <View className="flex-1 justify-end bg-black/50">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 24 : 0}
+          className="flex-1 justify-end bg-black/50"
+        >
           <View className="bg-white rounded-t-3xl p-6 gap-3.5 max-h-[85%] border-t border-slate-200">
             <View className="flex-row items-center justify-between">
               <Text className="text-base font-extrabold text-slate-900">Link Another Child</Text>
@@ -594,30 +600,36 @@ export default function PinterestParentScreen() {
               </TouchableOpacity>
             </View>
 
-            <Text className="text-xs text-slate-500 leading-relaxed">
-              Enter your ward's unique Student Link Code (provided by their tuition teacher, e.g. STU-AMELIA-902) or the student's registered mobile number.
-            </Text>
-
-            <TextInput
-              placeholder="e.g. STU-AMELIA-902 or 9823044551"
-              placeholderTextColor="#94a3b8"
-              value={childCodeInput}
-              onChangeText={setChildCodeInput}
-              autoCapitalize="characters"
-              className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-bold"
-            />
-
-            <TouchableOpacity
-              onPress={handleLinkChild}
-              disabled={isLinkingChild}
-              className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-1 active:scale-98"
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ gap: 14, paddingBottom: 36 }}
             >
-              <Text className="text-xs font-bold text-white">
-                {isLinkingChild ? 'Verifying Student Code...' : 'Verify & Link Child'}
+              <Text className="text-xs text-slate-500 leading-relaxed">
+                Enter your ward's unique Student Link Code (provided by their tuition teacher, e.g. STU-AMELIA-902) or the student's registered mobile number.
               </Text>
-            </TouchableOpacity>
+
+              <TextInput
+                placeholder="e.g. STU-AMELIA-902 or 9823044551"
+                placeholderTextColor="#94a3b8"
+                value={childCodeInput}
+                onChangeText={setChildCodeInput}
+                autoCapitalize="characters"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-bold"
+              />
+
+              <TouchableOpacity
+                onPress={handleLinkChild}
+                disabled={isLinkingChild}
+                className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-1 active:scale-98"
+              >
+                <Text className="text-xs font-bold text-white">
+                  {isLinkingChild ? 'Verifying Student Code...' : 'Verify & Link Child'}
+                </Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Modals */}

@@ -262,6 +262,7 @@ export default function JoinInstituteScreen() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerClassName="gap-4 pb-16"
+          contentContainerStyle={{ paddingBottom: 100 }}
           keyboardShouldPersistTaps="handled"
         >
           {/* 1. Teacher Code & Live Preview */}
