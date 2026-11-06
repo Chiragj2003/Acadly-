@@ -10,17 +10,17 @@ export default function RootIndex() {
   // Show cute splash state while determining authentication status
   if (loading) {
     return (
-      <View className="flex-1 bg-[#FAF7F2] items-center justify-center p-6">
+      <View className="flex-1 bg-[#F8FAFC] items-center justify-center p-6">
         <Mascot mood="happy" size="lg" />
         <View className="mt-5 items-center">
-          <Text className="text-2xl font-black text-[#2D1F1D] tracking-tight">
-            Acadly 🌸
+          <Text className="text-2xl font-black text-slate-900 tracking-tight">
+            Acadly
           </Text>
-          <Text className="text-sm font-semibold text-[#8C7A78] mt-1 text-center">
-            Where learning feels like joy ✨
+          <Text className="text-sm font-semibold text-slate-600 mt-1 text-center">
+            Empowering students, educators & parents
           </Text>
         </View>
-        <ActivityIndicator size="small" color="#FF7D6B" style={{ marginTop: 24 }} />
+        <ActivityIndicator size="small" color="#2563EB" style={{ marginTop: 24 }} />
       </View>
     );
   }

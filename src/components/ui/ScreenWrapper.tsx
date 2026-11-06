@@ -77,33 +77,36 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
       className={`flex-1 bg-surface ${className}`}
       style={{
         paddingBottom: applyBottomInset ? insets.bottom : 0,
+        alignItems: 'center',
       }}
     >
       <StatusBar style={statusBarStyle} />
 
-      {/* Top Safe Area & Header Zone */}
-      {headerProps ? (
-        <View style={{ paddingTop: insets.top, backgroundColor: headerBgColor }}>
-          <HeaderBar {...headerProps} />
-        </View>
-      ) : (
-        <View style={{ paddingTop: insets.top }} />
-      )}
+      <View className="flex-1 w-full max-w-2xl bg-surface">
+        {/* Top Safe Area & Header Zone */}
+        {headerProps ? (
+          <View style={{ paddingTop: insets.top, backgroundColor: headerBgColor }}>
+            <HeaderBar {...headerProps} />
+          </View>
+        ) : (
+          <View style={{ paddingTop: insets.top }} />
+        )}
 
-      {/* Content Area with optional Keyboard Avoiding */}
-      {keyboardAvoiding ? (
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          className="flex-1"
-        >
-          {bodyContent}
-        </KeyboardAvoidingView>
-      ) : (
-        bodyContent
-      )}
+        {/* Content Area with optional Keyboard Avoiding */}
+        {keyboardAvoiding ? (
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            className="flex-1"
+          >
+            {bodyContent}
+          </KeyboardAvoidingView>
+        ) : (
+          bodyContent
+        )}
 
-      {/* Persistent Docked Footer (e.g. Bottom Tab Bar) */}
-      {footer}
+        {/* Persistent Docked Footer (e.g. Bottom Tab Bar) */}
+        {footer}
+      </View>
     </View>
   );
 };

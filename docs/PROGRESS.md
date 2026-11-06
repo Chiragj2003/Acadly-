@@ -250,3 +250,14 @@
     - Authored `.agents/skills/ios-ui-ux-design-system/SKILL.md` establishing rules for Apple Human Interface Guidelines, WCAG AAA accessibility, touch target dimensions, safe area offsets, native bottom navigation, and keyboard handling.
     - Configured `.gitignore` to allow tracking of `.agents/skills/`.
   - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.
+
+### Entry 010 - UI Psychology & Cognitive Layout Principles for Web & Mobile
+- **Timestamp:** 2026-11-06T17:45:00+05:30
+- **Actions:**
+  - **Fitts's Law & Desktop Web Centering (`ScreenWrapper.tsx`):**
+    - Prevented wide desktop monitors and iPads from stretching mobile cards 2000px wide. Added responsive `max-w-2xl` centering with `alignItems: 'center'`, creating an intentional, focused desktop and web layout.
+  - **Cognitive Load Reduction & Miller's Chunking (`auth.tsx`):**
+    - Constrained auth cards to a maximum width of 520px with centered alignment on web browsers, preventing eye-scanning fatigue.
+  - **Brand Consistency & Sensory Priming (`index.tsx`):**
+    - Replaced lingering `#FAF7F2` beige splash screen and peach spinner with refined `#F8FAFC` background, official academic headline, and royal blue `#2563EB` activity indicator.
+  - TypeScript verification: `npx tsc --noEmit` passed with 0 errors.

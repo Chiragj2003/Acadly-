@@ -319,6 +319,9 @@ export default function CleanAuthScreen() {
           paddingTop: Math.max(insets.top + 12, 36),
           paddingBottom: Math.max(insets.bottom + 24, 48),
           paddingHorizontal: 20,
+          maxWidth: 520,
+          width: '100%',
+          alignSelf: 'center',
         }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
