@@ -29,14 +29,14 @@ export const AttendanceRingAndTrendChart: React.FC<AttendanceRingAndTrendChartPr
   const trendPoints = "10,50 35,45 60,30 85,38 110,22 135,15";
 
   return (
-    <View className="bg-white border-2 border-cute-border rounded-[28px] p-5 shadow-xs mb-4">
+    <View className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs mb-4">
       <View className="flex-row items-center justify-between mb-4">
         <View>
-          <Text className="text-base font-black text-cute-cocoa">Attendance Consistency</Text>
-          <Text className="text-xs text-cute-muted">Monthly ring + 6-month trend</Text>
+          <Text className="text-base font-black text-slate-900">Attendance Consistency</Text>
+          <Text className="text-xs text-slate-600">Monthly ring + 6-month trend</Text>
         </View>
-        <View className="bg-cute-mint-light px-2.5 py-1 rounded-full border border-cute-mint">
-          <Text className="text-[10px] font-bold text-cute-mint">
+        <View className="bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+          <Text className="text-[10px] font-bold text-emerald-700">
             {effectiveRate >= 90 ? 'Target 90%+ Met 🎯' : `${effectiveRate}% Current`}
           </Text>
         </View>
@@ -51,7 +51,7 @@ export const AttendanceRingAndTrendChart: React.FC<AttendanceRingAndTrendChartPr
               cx="55"
               cy="55"
               r={radius}
-              stroke="#f1ebe4"
+              stroke="#E2E8F0"
               strokeWidth={strokeWidth}
               fill="transparent"
             />
@@ -60,7 +60,7 @@ export const AttendanceRingAndTrendChart: React.FC<AttendanceRingAndTrendChartPr
               cx="55"
               cy="55"
               r={radius}
-              stroke="#52b788"
+              stroke="#10B981"
               strokeWidth={strokeWidth}
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
@@ -70,28 +70,28 @@ export const AttendanceRingAndTrendChart: React.FC<AttendanceRingAndTrendChartPr
             />
           </Svg>
           <View className="absolute items-center">
-            <Text className="text-xl font-black text-cute-cocoa">{effectiveRate}%</Text>
-            <Text className="text-[9px] font-bold text-cute-muted uppercase">Rate</Text>
+            <Text className="text-xl font-black text-slate-900">{effectiveRate}%</Text>
+            <Text className="text-[9px] font-bold text-slate-600 uppercase">Rate</Text>
           </View>
         </View>
 
         {/* 6-Month Trend Curve */}
-        <View className="flex-1 bg-cute-cream/70 rounded-2xl p-3 border border-cute-border">
-          <Text className="text-[10px] font-bold text-cute-muted uppercase mb-1">
+        <View className="flex-1 bg-slate-50 rounded-2xl p-3 border border-slate-200/80">
+          <Text className="text-[10px] font-bold text-slate-600 uppercase mb-1">
             6-Month Attendance Streak
           </Text>
           <Svg width="100%" height={60} viewBox="0 0 145 60">
-            <Line x1="10" y1="55" x2="140" y2="55" stroke="#e5ded7" strokeWidth="1" />
+            <Line x1="10" y1="55" x2="140" y2="55" stroke="#CBD5E1" strokeWidth="1" />
             <Polyline
               points={trendPoints}
               fill="none"
-              stroke="#ff7d6b"
+              stroke="#2563EB"
               strokeWidth="3"
               strokeLinecap="round"
             />
-            <SvgText x="10" y="58" fontSize="8" fill="#a89993">Jun</SvgText>
-            <SvgText x="70" y="58" fontSize="8" fill="#a89993">Aug</SvgText>
-            <SvgText x="130" y="58" fontSize="8" fill="#a89993">Nov</SvgText>
+            <SvgText x="10" y="58" fontSize="8" fill="#64748B">Jun</SvgText>
+            <SvgText x="70" y="58" fontSize="8" fill="#64748B">Aug</SvgText>
+            <SvgText x="130" y="58" fontSize="8" fill="#64748B">Nov</SvgText>
           </Svg>
         </View>
       </View>

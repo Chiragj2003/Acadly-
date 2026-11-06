@@ -33,18 +33,10 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   variant = 'default',
   className = '',
 }) => {
-  const isStudent = variant === 'student';
-
-  // Background and border styling based on theme variant
-  const bgClass = isStudent ? 'bg-cute-cream/95' : 'bg-white';
-  const borderClass = isStudent ? 'border-cute-border' : 'border-slate-200/80';
-  const titleClass = isStudent ? 'text-cute-cocoa' : 'text-slate-900';
-  const instituteColor = isStudent ? '#ff7d6b' : '#2563EB';
-
   return (
     <View
       style={{ height: 56 }}
-      className={`px-4 flex-row items-center justify-between border-b ${bgClass} ${borderClass} ${className}`}
+      className={`px-4 flex-row items-center justify-between border-b border-slate-100 bg-white ${className}`}
     >
       {/* Left & Title Zone */}
       <View className="flex-row items-center gap-2.5 flex-1 min-w-0 mr-2">
@@ -54,9 +46,9 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             accessibilityLabel="Go back"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             onPress={onBackPress}
-            className="w-9 h-9 rounded-xl bg-white border border-slate-200/90 items-center justify-center active:scale-95 shadow-xs"
+            className="w-9 h-9 rounded-full bg-slate-50 border border-slate-200/80 items-center justify-center active:scale-95 shadow-2xs"
           >
-            <ArrowLeft size={18} color="#334155" />
+            <ArrowLeft size={17} color="#334155" />
           </Pressable>
         )}
 
@@ -69,18 +61,17 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
               className="flex-row items-center gap-1 self-start"
             >
               <Text
-                style={{ color: instituteColor }}
-                className="text-[11px] font-bold tracking-tight"
+                className="text-[11px] font-bold tracking-tight text-blue-600"
                 numberOfLines={1}
               >
                 {instituteName}
               </Text>
-              {onInstitutePress && <ChevronDown size={11} color={instituteColor} />}
+              {onInstitutePress && <ChevronDown size={11} color="#2563EB" />}
             </Pressable>
           )}
 
           <Text
-            className={`text-base font-extrabold tracking-tight ${titleClass}`}
+            className="text-base font-black tracking-tight text-slate-900"
             numberOfLines={1}
           >
             {title}
@@ -95,7 +86,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
       </View>
 
       {/* Right Action Icons Zone */}
-      <View className="flex-row items-center gap-1.5 shrink-0">
+      <View className="flex-row items-center gap-2 shrink-0">
         {rightAction}
 
         {onNotificationPress && (
@@ -104,9 +95,9 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             accessibilityLabel="Notifications"
             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
             onPress={onNotificationPress}
-            className="w-9 h-9 rounded-xl bg-white border border-slate-200/90 items-center justify-center relative active:scale-95 shadow-xs"
+            className="w-9 h-9 rounded-full bg-slate-50 border border-slate-200/80 items-center justify-center relative active:scale-95 shadow-2xs"
           >
-            <Bell size={17} color="#475569" />
+            <Bell size={16} color="#475569" />
             {hasUnreadNotifications && (
               <View className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 border border-white" />
             )}
@@ -119,25 +110,14 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             accessibilityLabel="User profile"
             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
             onPress={onProfilePress}
-            className={`w-9 h-9 rounded-xl items-center justify-center border active:scale-95 shadow-xs ${
-              isStudent
-                ? 'bg-rose-50 border-rose-200'
-                : 'bg-indigo-50 border-indigo-200'
-            }`}
+            className="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 items-center justify-center active:scale-95 shadow-2xs"
           >
             {profileInitials ? (
-              <Text
-                className={`text-[11px] font-black ${
-                  isStudent ? 'text-rose-600' : 'text-indigo-600'
-                }`}
-              >
+              <Text className="text-[11px] font-black text-white">
                 {profileInitials.toUpperCase().slice(0, 2)}
               </Text>
             ) : (
-              <User
-                size={16}
-                color={isStudent ? '#E11D48' : '#4F46E5'}
-              />
+              <User size={16} color="#FFFFFF" />
             )}
           </Pressable>
         )}
@@ -148,9 +128,9 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             accessibilityLabel="Log out"
             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
             onPress={onLogoutPress}
-            className="w-9 h-9 rounded-xl bg-rose-50 border border-rose-200/90 items-center justify-center active:scale-95 shadow-xs"
+            className="w-9 h-9 rounded-full bg-rose-50 border border-rose-200/80 items-center justify-center active:scale-95 shadow-2xs"
           >
-            <LogOut size={15} color="#E11D48" />
+            <LogOut size={14} color="#E11D48" />
           </Pressable>
         )}
       </View>

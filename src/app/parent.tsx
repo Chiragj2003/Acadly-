@@ -197,7 +197,6 @@ export default function PinterestParentScreen() {
         hasUnreadNotifications: unreadCount > 0,
       }}
       contentContainerClassName="gap-3.5 px-4 py-4"
-      contentContainerStyle={{ paddingBottom: 24 }}
       footer={
         <BottomTabBar
           tabs={tabs}

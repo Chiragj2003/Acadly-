@@ -110,7 +110,7 @@ export const SubjectMascotCard: React.FC<SubjectMascotCardProps> = ({
           {/* Googly Eyes Badge from Aptivo Inspiration */}
           <View className="bg-white px-2 py-0.5 rounded-full border border-black/10 flex-row items-center gap-1">
             <Text className="text-xs">👀</Text>
-            <Text className="text-[11px] font-bold text-cute-cocoa">{subject.mascotName}</Text>
+            <Text className="text-[11px] font-bold text-slate-900">{subject.mascotName}</Text>
           </View>
         </View>
 
@@ -124,10 +124,10 @@ export const SubjectMascotCard: React.FC<SubjectMascotCardProps> = ({
       {/* Main Title & Catchphrase */}
       <View className="flex-row items-center justify-between">
         <View className="flex-1 pr-2">
-          <Text className="text-base font-extrabold text-cute-cocoa leading-tight">
+          <Text className="text-base font-extrabold text-slate-900 leading-tight">
             {subject.topic}
           </Text>
-          <Text className="text-xs text-cute-muted italic mt-1">
+          <Text className="text-xs text-slate-600 italic mt-1">
             {subject.characterCatchphrase}
           </Text>
         </View>
@@ -142,12 +142,12 @@ export const SubjectMascotCard: React.FC<SubjectMascotCardProps> = ({
       <View className="flex-row items-center justify-between mt-3.5 pt-2.5 border-t border-black/5">
         <View className="flex-row items-center gap-3">
           <View className="flex-row items-center gap-1">
-            <BookOpen size={12} color="#7d6f6a" />
-            <Text className="text-[11px] font-semibold text-cute-muted">{subject.lessonCount} lessons</Text>
+            <BookOpen size={12} color="#64748B" />
+            <Text className="text-[11px] font-semibold text-slate-600">{subject.lessonCount} lessons</Text>
           </View>
           <View className="flex-row items-center gap-1">
-            <Clock size={12} color="#7d6f6a" />
-            <Text className="text-[11px] font-semibold text-cute-muted">{subject.duration}</Text>
+            <Clock size={12} color="#64748B" />
+            <Text className="text-[11px] font-semibold text-slate-600">{subject.duration}</Text>
           </View>
         </View>
 
@@ -155,7 +155,7 @@ export const SubjectMascotCard: React.FC<SubjectMascotCardProps> = ({
           onPress={onPlayPress || onPress}
           className="w-8 h-8 rounded-full bg-white border border-black/10 items-center justify-center shadow-xs"
         >
-          <ArrowRight size={14} color="#2e2421" />
+          <ArrowRight size={14} color="#0F172A" />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>

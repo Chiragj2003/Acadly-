@@ -230,8 +230,8 @@ export const Mascot: React.FC<MascotProps> = ({
     <View className="items-center justify-center">
       {/* Optional Speech Bubble */}
       {showSpeechBubble && (
-        <View className="bg-white border-2 border-cute-cocoa px-4 py-2.5 rounded-2xl mb-2 max-w-[260px] shadow-sm relative">
-          <Text className="text-xs font-bold text-cute-cocoa text-center leading-relaxed">
+        <View className="bg-white border border-slate-900 px-4 py-2.5 rounded-2xl mb-2 max-w-[260px] shadow-sm relative">
+          <Text className="text-xs font-bold text-slate-900 text-center leading-relaxed">
             {speechText}
           </Text>
           {/* Downward triangle arrow */}

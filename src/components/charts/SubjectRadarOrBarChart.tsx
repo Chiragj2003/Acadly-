@@ -31,28 +31,28 @@ export const SubjectRadarOrBarChart: React.FC<SubjectRadarOrBarChartProps> = ({
   const avg = Math.round(safeData.reduce((acc, curr) => acc + curr.percentage, 0) / safeData.length);
 
   return (
-    <View className="bg-white border-2 border-cute-border rounded-[28px] p-5 shadow-xs mb-4">
+    <View className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs mb-4">
       <View className="flex-row items-center justify-between mb-3">
         <View>
-          <Text className="text-base font-black text-cute-cocoa">{title}</Text>
-          <Text className="text-xs text-cute-muted">Based on quizzes, assignments & unit tests</Text>
+          <Text className="text-base font-black text-slate-900">{title}</Text>
+          <Text className="text-xs text-slate-600">Based on quizzes, assignments & unit tests</Text>
         </View>
-        <View className="bg-cute-peach-light px-2.5 py-1 rounded-full border border-cute-peach">
-          <Text className="text-[10px] font-bold text-cute-peach">Avg {avg}% ⭐</Text>
+        <View className="bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
+          <Text className="text-[10px] font-bold text-blue-700">Avg {avg}% ⭐</Text>
         </View>
       </View>
 
       <View className="gap-3 mt-1">
         {safeData.map((item) => (
-          <View key={item.subject} className="bg-cute-cream/70 p-3 rounded-2xl border border-cute-border">
+          <View key={item.subject} className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
             <View className="flex-row items-center justify-between mb-1.5">
               <View className="flex-row items-center gap-2">
                 <Text className="text-lg">{item.emoji}</Text>
-                <Text className="text-xs font-black text-cute-cocoa">{item.subject}</Text>
+                <Text className="text-xs font-black text-slate-900">{item.subject}</Text>
               </View>
 
               <View className="flex-row items-center gap-2">
-                <Text className="text-xs font-black text-cute-cocoa">{item.percentage}%</Text>
+                <Text className="text-xs font-black text-slate-900">{item.percentage}%</Text>
                 <View
                   style={{ backgroundColor: item.bgLight, borderColor: item.color }}
                   className="px-2 py-0.5 rounded-md border"
@@ -65,7 +65,7 @@ export const SubjectRadarOrBarChart: React.FC<SubjectRadarOrBarChartProps> = ({
             </View>
 
             {/* Custom rounded progress bar */}
-            <View className="h-2.5 bg-white rounded-full overflow-hidden border border-cute-border/60">
+            <View className="h-2.5 bg-slate-200/70 rounded-full overflow-hidden">
               <View
                 style={{
                   width: `${item.percentage}%`,

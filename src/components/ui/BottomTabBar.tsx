@@ -21,74 +21,71 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
   tabs,
   activeTab,
   onTabChange,
-  accentColor = '#2563EB', // Academic Indigo / Blue
+  accentColor = '#2563EB',
   variant = 'default',
 }) => {
   const insets = useSafeAreaInsets();
-  // Safe bottom padding for modern iOS home indicator (~34pt) and Android gesture bar (~16-24pt)
-  const bottomPadding = insets.bottom > 0 ? insets.bottom : (Platform.OS === 'ios' ? 14 : 10);
+  // Safe floating bottom margin accounting for Home Indicator
+  const bottomMargin = insets.bottom > 0 ? insets.bottom + 6 : 18;
 
   return (
     <View
       style={{
-        paddingTop: 6,
-        paddingBottom: bottomPadding,
-        backgroundColor: '#FFFFFF',
-        borderTopWidth: StyleSheet.hairlineWidth,
-        borderTopColor: '#E2E8F0',
-        shadowColor: '#0F172A',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.04,
-        shadowRadius: 8,
-        elevation: 8,
+        position: 'absolute',
+        bottom: bottomMargin,
+        left: 0,
+        right: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        pointerEvents: 'box-none',
+        zIndex: 50,
       }}
-      className="flex-row items-center w-full px-1"
+      className="px-4"
     >
-      {tabs.map((tab) => {
-        const isActive = activeTab === tab.key;
-        const tint = isActive ? accentColor : '#64748B';
-
-        return (
-          <TouchableOpacity
-            key={tab.key}
-            activeOpacity={0.7}
-            onPress={() => onTabChange(tab.key)}
-            hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
-            className="flex-1 items-center justify-center py-1 relative"
-          >
-            {/* Active Pill / Icon Container */}
-            <View className="items-center justify-center relative">
-              <View
-                className={`px-3 py-1 rounded-full items-center justify-center ${
-                  isActive ? 'bg-blue-50/90' : 'bg-transparent'
-                }`}
-              >
-                {tab.icon(tint, 21)}
-              </View>
-
-              {/* Notification Badge Dot */}
-              {tab.badgeCount !== undefined && tab.badgeCount > 0 && (
-                <View className="absolute -top-1 -right-1 bg-rose-500 rounded-full min-w-[16px] h-4 px-1 items-center justify-center border-2 border-white shadow-xs">
-                  <Text className="text-[9px] font-black text-white leading-none">
-                    {tab.badgeCount > 9 ? '9+' : tab.badgeCount}
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            {/* Tab Label */}
-            <Text
-              style={{ color: tint }}
-              className={`text-[10px] mt-0.5 tracking-tight ${
-                isActive ? 'font-extrabold' : 'font-semibold'
+      <View
+        style={{
+          shadowColor: '#000000',
+          shadowOffset: { width: 0, height: 10 },
+          shadowOpacity: 0.22,
+          shadowRadius: 20,
+          elevation: 16,
+        }}
+        className="bg-slate-950/95 border border-white/10 rounded-full p-1.5 flex-row items-center justify-between gap-1 max-w-sm w-full"
+      >
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.key;
+          return (
+            <TouchableOpacity
+              key={tab.key}
+              activeOpacity={0.8}
+              onPress={() => onTabChange(tab.key)}
+              hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+              className={`flex-1 items-center justify-center py-2 px-2 rounded-full flex-row gap-1.5 ${
+                isActive ? 'bg-white shadow-sm' : 'bg-transparent'
               }`}
-              numberOfLines={1}
             >
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
+              <View className="relative">
+                {tab.icon(isActive ? '#0F172A' : '#94A3B8', 19)}
+                {tab.badgeCount !== undefined && tab.badgeCount > 0 && (
+                  <View className="absolute -top-1.5 -right-2 bg-rose-500 rounded-full min-w-[14px] h-3.5 px-0.5 items-center justify-center border border-slate-950">
+                    <Text className="text-[8px] font-black text-white leading-none">
+                      {tab.badgeCount > 9 ? '9+' : tab.badgeCount}
+                    </Text>
+                  </View>
+                )}
+              </View>
+              {isActive && (
+                <Text
+                  className="text-[11px] font-black text-slate-900 leading-none"
+                  numberOfLines={1}
+                >
+                  {tab.label}
+                </Text>
+              )}
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </View>
   );
 };

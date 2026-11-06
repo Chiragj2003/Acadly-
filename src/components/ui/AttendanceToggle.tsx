@@ -21,8 +21,8 @@ export const AttendanceToggle: React.FC<AttendanceToggleProps> = ({
 
     if (!isSelected) {
       return {
-        container: 'bg-cute-cream border border-cute-border',
-        text: 'text-cute-muted font-bold',
+        container: 'bg-white border border-slate-200/90',
+        text: 'text-slate-600 font-bold',
       };
     }
 
