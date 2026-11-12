@@ -1,5 +1,5 @@
 import 'react-native-url-polyfill/auto';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { createClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 
@@ -15,32 +15,68 @@ if (!supabaseUrl || !supabaseKey) {
 
 export const isSupabaseConfigured = true;
 
-// Universal safe storage adapter preventing SSR window undefined errors
-const safeStorage = {
+const isTestEnv =
+  process.env.NODE_ENV === 'test' || typeof (globalThis as Record<string, unknown>).jest !== 'undefined';
+
+/**
+ * Production-grade Secure Storage Adapter:
+ * - Uses expo-secure-store on native (iOS & Android) with encrypted keystore/keychain persistence.
+ * - Gracefully falls back to browser localStorage on web, or no-op on SSR.
+ */
+const ExpoSecureStoreAdapter = {
   getItem: async (key: string): Promise<string | null> => {
-    if (Platform.OS === 'web' && typeof window === 'undefined') {
+    if (Platform?.OS === 'web') {
+      if (typeof window === 'undefined') return null;
+      try {
+        return window.localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    }
+    try {
+      return await SecureStore.getItemAsync(key);
+    } catch {
       return null;
     }
-    return AsyncStorage.getItem(key);
   },
   setItem: async (key: string, value: string): Promise<void> => {
-    if (Platform.OS === 'web' && typeof window === 'undefined') {
+    if (Platform?.OS === 'web') {
+      if (typeof window === 'undefined') return;
+      try {
+        window.localStorage.setItem(key, value);
+      } catch {
+        // Safe catch for storage quota or privacy mode errors
+      }
       return;
     }
-    return AsyncStorage.setItem(key, value);
+    try {
+      await SecureStore.setItemAsync(key, value);
+    } catch (e) {
+      console.warn('[SecureStore] Failed to persist secure token:', e);
+    }
   },
   removeItem: async (key: string): Promise<void> => {
-    if (Platform.OS === 'web' && typeof window === 'undefined') {
+    if (Platform?.OS === 'web') {
+      if (typeof window === 'undefined') return;
+      try {
+        window.localStorage.removeItem(key);
+      } catch {
+        // Safe catch for storage quota or privacy mode errors
+      }
       return;
     }
-    return AsyncStorage.removeItem(key);
+    try {
+      await SecureStore.deleteItemAsync(key);
+    } catch (e) {
+      console.warn('[SecureStore] Failed to remove secure token:', e);
+    }
   },
 };
 
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
-    storage: safeStorage,
-    autoRefreshToken: true,
+    storage: ExpoSecureStoreAdapter,
+    autoRefreshToken: !isTestEnv,
     persistSession: true,
     detectSessionInUrl: false,
   },

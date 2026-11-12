@@ -62,8 +62,9 @@ export const AttendanceToggle: React.FC<AttendanceToggleProps> = ({
             }`}
             accessibilityState={{ selected: isSelected, disabled }}
             disabled={disabled}
+            hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}
             onPress={() => onChange(status)}
-            className={`min-w-[34px] h-8 items-center justify-center px-2.5 rounded-xl ${
+            className={`min-w-[40px] h-9 items-center justify-center px-2.5 rounded-xl ${
               style.container
             } ${disabled ? 'opacity-50' : 'active:scale-95'}`}
           >

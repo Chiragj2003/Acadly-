@@ -35,27 +35,46 @@ import {
   SubjectRadarOrBarChart,
   AttendanceRingAndTrendChart,
 } from '@/components/charts';
-import { useAcademic } from '@/context/AcademicContext';
+import { useUI } from '@/context/UIContext';
+import { useStudentProfile } from '@/hooks/queries/useStudentQueries';
 
 export default function StudentDetailScreen() {
   const { isAuthorized, isLoading } = useRoleGuard(["teacher","admin","parent"]);
   const router = useRouter();
   const params = useLocalSearchParams<{ studentId?: string }>();
-  const {
-    studentsRoster,
-    getStudentById,
-    updateStudentRemarks,
-    updateStudentFeeStatus,
-    comparisonChartData,
-  } = useAcademic();
+  const { comparisonChartData } = useUI();
+  const { data: studentProfile, isLoading: isStudentLoading } = useStudentProfile(params.studentId || 'stud-amelia');
+  const [localRemarks, setLocalRemarks] = useState<string[]>([]);
+  const [localFeeStatus, setLocalFeeStatus] = useState<string>('');
 
   const [activeTab, setActiveTab] = useState<'analytics' | 'attendance' | 'bio'>('analytics');
   const [newRemarkText, setNewRemarkText] = useState('');
 
-  // Find student by ID param or default to first in roster
-  const student =
-    (params.studentId ? getStudentById(params.studentId) : null) ||
-    studentsRoster[0];
+  const student = studentProfile || {
+    id: params.studentId || 'stud-amelia',
+    name: 'Amelia Sharma',
+    rollNumber: '#01',
+    grade: 'Class 12 Science',
+    board: 'CBSE',
+    school: 'Delhi Public School (R.K. Puram)',
+    targetExam: 'IIT-JEE 2026',
+    batchName: 'Class 12 • JEE Advanced (Morning)',
+    parentLinkCode: 'STU-AMELIA-902',
+    guardianName: 'Rajesh Sharma (Father)',
+    guardianPhone: '+91 98230 44551',
+    address: 'Flat 402, Lotus Towers, Pune, Maharashtra',
+    bloodGroup: 'B+',
+    previousPercentage: '96.2% in Class 10',
+    weakSubjects: ['Rotational Mechanics', 'Ionic Equilibrium'],
+    overallAttendance: 96.4,
+    feeStatus: 'Paid Full (₹45,000)',
+    rank: 1,
+    percentile: 98.8,
+    teacherRemarks: ['Exceptionally strong in calculus.', 'Active class contributor & doubt helper.'],
+  };
+
+  const remarks = localRemarks.length > 0 ? localRemarks : student.teacherRemarks;
+  const currentFeeStatus = localFeeStatus || student.feeStatus;
 
   if (isLoading || !isAuthorized) {
     return (
@@ -108,7 +127,7 @@ export default function StudentDetailScreen() {
   // Add teacher remark
   const handleAddRemark = () => {
     if (!newRemarkText.trim()) return;
-    updateStudentRemarks(student.id, newRemarkText.trim());
+    setLocalRemarks((prev) => [...(prev.length ? prev : student.teacherRemarks), newRemarkText.trim()]);
     setNewRemarkText('');
     Alert.alert('Observation Saved 📝', 'Teacher remark recorded in student 360 diagnostic profile.');
   };
@@ -120,9 +139,9 @@ export default function StudentDetailScreen() {
       'Partially Paid (₹15,000 remaining)',
       'Pending Installment (Due in 5 days)',
     ];
-    const currentIndex = statuses.indexOf(student.feeStatus);
+    const currentIndex = statuses.indexOf(currentFeeStatus);
     const nextIndex = (currentIndex + 1) % statuses.length;
-    updateStudentFeeStatus(student.id, statuses[nextIndex]);
+    setLocalFeeStatus(statuses[nextIndex]);
   };
 
   return (
@@ -140,7 +159,7 @@ export default function StudentDetailScreen() {
           <View className="flex-row items-center justify-between mb-3">
             <View className="flex-row items-center gap-3">
               <View className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
-                <Text className="text-2xl">🎓</Text>
+                <GraduationCap size={24} color="#2563EB" />
               </View>
               <View>
                 <Text className="text-base font-extrabold text-slate-900">{student.name}</Text>
@@ -152,7 +171,7 @@ export default function StudentDetailScreen() {
 
             <View className="bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
               <Text className="text-[11px] font-bold text-amber-800">
-                Rank #{student.rank} 🏆 ({student.percentile}%ile)
+                Rank #{student.rank} ({student.percentile}%ile)
               </Text>
             </View>
           </View>
@@ -365,7 +384,7 @@ export default function StudentDetailScreen() {
                 </TouchableOpacity>
               </View>
               <View className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
-                <Text className="text-xs font-bold text-slate-800">{student.feeStatus}</Text>
+                <Text className="text-xs font-bold text-slate-800">{currentFeeStatus}</Text>
                 <Text className="text-[10px] text-slate-500 mt-0.5">
                   UPI payments automatically reconcile via parent notifications.
                 </Text>
@@ -382,7 +401,7 @@ export default function StudentDetailScreen() {
               </View>
 
               <View className="gap-2">
-                {student.teacherRemarks.map((remark, idx) => (
+                {remarks.map((remark, idx) => (
                   <View
                     key={idx}
                     className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex-row items-start gap-2"

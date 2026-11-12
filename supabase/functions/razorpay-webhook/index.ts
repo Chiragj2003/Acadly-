@@ -65,8 +65,8 @@ serve(async (req) => {
 
       // Fetch current fee record
       const { data: feeRecord, error: feeError } = await supabaseAdmin
-        .from("student_fee_records")
-        .select("id, total_amount, discount_amount, paid_amount, remaining_balance")
+        .from("student_fees")
+        .select("id, total_amount, discount_amount, paid_amount, pending_amount")
         .eq("id", studentFeeRecordId)
         .single();
 
@@ -76,20 +76,21 @@ serve(async (req) => {
       }
 
       const newPaidAmount = Number(feeRecord.paid_amount) + amountInRupees;
-      const netPayable = Number(feeRecord.total_amount) - Number(feeRecord.discount_amount);
+      const netPayable = Number(feeRecord.total_amount) - Number(feeRecord.discount_amount || 0);
       const newRemainingBalance = Math.max(0, netPayable - newPaidAmount);
-      const newStatus = newRemainingBalance <= 0 ? "paid" : "partially_paid";
+      const newStatus = newRemainingBalance <= 0 ? "paid" : "partial";
 
       // 1. Insert payment record
       const receiptNumber = `RCPT-${Date.now().toString().slice(-8)}`;
       const { error: insertPayError } = await supabaseAdmin.from("payments").insert({
         institute_id: instituteId,
-        student_fee_record_id: studentFeeRecordId,
+        student_fee_id: studentFeeRecordId,
         student_id: studentId,
         receipt_number: receiptNumber,
         amount: amountInRupees,
         gst_amount: gstAmount,
         payment_method: "razorpay",
+        payment_mode: "razorpay",
         razorpay_order_id: orderId,
         razorpay_payment_id: paymentId,
         razorpay_signature: signature,
@@ -104,10 +105,10 @@ serve(async (req) => {
 
       // 2. Update student fee record
       const { error: updateFeeError } = await supabaseAdmin
-        .from("student_fee_records")
+        .from("student_fees")
         .update({
           paid_amount: newPaidAmount,
-          remaining_balance: newRemainingBalance,
+          pending_amount: newRemainingBalance,
           status: newStatus,
           updated_at: new Date().toISOString(),
         })

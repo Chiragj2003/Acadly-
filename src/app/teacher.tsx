@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -53,12 +53,29 @@ import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
 import { useRoleGuard } from '@/hooks/useRoleGuard';
 import { useAuth } from '@/context/AuthContext';
-import { useAcademic } from '@/context/AcademicContext';
+import { useUI } from '@/context/UIContext';
+import {
+  useAttendance,
+  useCommitAttendance,
+  useCorrectAttendance,
+  useOfflineAttendanceSync,
+} from '@/hooks/queries/useAttendanceQueries';
+import { useBatches } from '@/hooks/queries/useBatchQueries';
+import { useStudentsRoster } from '@/hooks/queries/useStudentQueries';
+import { useJoinRequests } from '@/hooks/queries/useAdmissionQueries';
+import {
+  useAssignments,
+  useCreateAssignment,
+  useSubmissions,
+  useGradeSubmission,
+} from '@/hooks/queries/useAssignmentQueries';
+import { useUploadMaterial } from '@/hooks/queries/useMaterialQueries';
 import {
   ScreenWrapper,
   AttendanceToggle,
   Badge,
   BottomTabBar,
+  LanguageSwitcher,
   type TabItem,
   type AttendanceStatus,
 } from '@/components/ui';
@@ -72,11 +89,12 @@ import {
   type InteractiveQuestion,
 } from '@/components/academic';
 import { DUMMY_PDF_CATALOG, type PDFDocumentContent } from '@/services/dummyPdfService';
-import { type AttendanceRecord } from '@/types/database';
+import { type AttendanceRecord, type Student360Profile } from '@/types/database';
+import { notifyHomeworkPublished } from '@/services/notificationService';
 
-const TEACHER_BATCHES = [
+const DEV_TEACHER_BATCHES = [
   {
-    id: 'batch-01',
+    id: 'b0000000-0000-0000-0000-000000000001',
     name: 'Class 12 • JEE Advanced (Morning)',
     time: '04:30 PM - 06:00 PM',
     subject: 'Physics • Rotational Dynamics',
@@ -84,7 +102,7 @@ const TEACHER_BATCHES = [
     count: 28,
   },
   {
-    id: 'batch-02',
+    id: 'b0000000-0000-0000-0000-000000000002',
     name: 'JEE Rankers Cohort (Evening)',
     time: '06:15 PM - 07:45 PM',
     subject: 'Physics • Electromagnetic Induction',
@@ -92,7 +110,7 @@ const TEACHER_BATCHES = [
     count: 18,
   },
   {
-    id: 'batch-03',
+    id: 'b0000000-0000-0000-0000-000000000003',
     name: 'Class 11 Foundation Batch',
     time: '08:00 PM - 09:15 PM',
     subject: 'Mechanics • Laws of Motion',
@@ -101,29 +119,125 @@ const TEACHER_BATCHES = [
   },
 ];
 
+interface AttendanceRosterRowProps {
+  student: Student360Profile;
+  status: AttendanceStatus;
+  onStatusChange: (studentId: string, status: AttendanceStatus) => void;
+  onCorrect: (record: AttendanceRecord) => void;
+  onViewDetail: (studentId: string) => void;
+}
+
+const AttendanceRosterRow = React.memo(function AttendanceRosterRow({
+  student,
+  status,
+  onStatusChange,
+  onCorrect,
+  onViewDetail,
+}: AttendanceRosterRowProps) {
+  return (
+    <View className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex-row items-center justify-between gap-2">
+      <TouchableOpacity
+        onPress={() => onViewDetail(student.id)}
+        className="flex-row items-center gap-2.5 flex-1 min-w-0"
+      >
+        <View className="min-w-[36px] h-8 px-1.5 rounded-xl bg-white border border-slate-200 items-center justify-center shrink-0">
+          <Text className="text-[11px] font-bold text-blue-600 font-mono" numberOfLines={1}>
+            {(student as any).roll_number ? (student as any).roll_number.replace('ROLL-', '#') : student.rollNumber.replace('ROLL-', '#').replace('STU-', '#')}
+          </Text>
+        </View>
+        <View className="flex-1 min-w-0">
+          <View className="flex-row items-center gap-1.5">
+            <Text className="text-xs font-bold text-slate-900" numberOfLines={1}>
+              {student.name}
+            </Text>
+            <TouchableOpacity
+              onPress={() =>
+                onCorrect({
+                  id: `att-${student.id}`,
+                  institute_id: 'a0000000-0000-0000-0000-000000000001',
+                  student_id: student.id,
+                  student_name: student.name,
+                  roll_number: student.rollNumber,
+                  status,
+                  batch_id: 'b0000000-0000-0000-0000-000000000001',
+                  date: new Date().toISOString().split('T')[0],
+                  created_at: new Date().toISOString(),
+                })
+              }
+              hitSlop={8}
+            >
+              <Edit2 size={12} color="#64748B" />
+            </TouchableOpacity>
+          </View>
+          <Text className="text-[11px] text-slate-500" numberOfLines={1}>
+            {student.teacherRemarks?.[0] || 'Tap to inspect diagnostic report & marks'}
+          </Text>
+        </View>
+      </TouchableOpacity>
+
+      <AttendanceToggle
+        value={status}
+        onChange={(newStatus) => onStatusChange(student.id, newStatus)}
+      />
+    </View>
+  );
+});
+
 export default function PinterestTeacherScreen() {
   const { isAuthorized, isLoading } = useRoleGuard(["teacher","admin"]);
   const router = useRouter();
-  const { activeInstitute, signOut } = useAuth();
+  const { user, activeInstitute, signOut } = useAuth();
   const {
-    attendanceRecords,
-    markAttendance,
-    addLecture,
-    joinRequests,
-    teacherProfile,
-    studentsRoster,
-    updateStudentFeeStatus,
-    recordTestMarks,
-    uploadPDFMaterial,
     teacherMode,
     setTeacherMode,
     linkedCoachingCode,
     linkToCoachingCenter,
-    assignments,
-    submissions,
-    gradeSubmission,
-    createAssignment,
-  } = useAcademic();
+    teacherProfile,
+    addLecture,
+    recordTestMarks,
+  } = useUI();
+
+  // Dynamic Batches from DB or DEV Fallback
+  const { data: dbBatches = [] } = useBatches(activeInstitute?.id);
+  const batchesList = dbBatches.length > 0 ? dbBatches.map(b => ({
+    id: b.id,
+    name: b.name,
+    time: `${b.start_time || '04:30 PM'} - ${b.end_time || '06:00 PM'}`,
+    subject: b.subject || 'Physics',
+    room: b.room_number || 'Room 204',
+    count: b.student_count || 28,
+  })) : DEV_TEACHER_BATCHES;
+
+  const [selectedBatchId, setSelectedBatchId] = useState<string>(DEV_TEACHER_BATCHES[0].id);
+  const currentBatch = batchesList.find((b) => b.id === selectedBatchId) || batchesList[0] || DEV_TEACHER_BATCHES[0];
+
+  // Domain Queries & Mutations
+  const todayStr = new Date().toISOString().split('T')[0];
+  const { data: dbAttendance = [], isLoading: isAttendanceLoading } = useAttendance(currentBatch.id, todayStr);
+  const commitAttendanceMutation = useCommitAttendance();
+  const correctAttendanceMutation = useCorrectAttendance();
+  const { pendingCount, flush: flushOfflineQueue, isSyncing: isOfflineSyncing } = useOfflineAttendanceSync();
+
+  const { data: studentsRoster = [] } = useStudentsRoster(activeInstitute?.id, currentBatch.id);
+  const { data: joinRequests = [] } = useJoinRequests(activeInstitute?.id);
+  const { data: assignments = [] } = useAssignments(currentBatch.id);
+  const { data: submissions = [] } = useSubmissions();
+  const createAssignmentMutation = useCreateAssignment();
+  const gradeSubmissionMutation = useGradeSubmission();
+  const uploadMaterialMutation = useUploadMaterial();
+
+  const [localAttendance, setLocalAttendance] = useState<Record<string, AttendanceStatus>>({});
+  const [localFeeOverrides, setLocalFeeOverrides] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (dbAttendance && dbAttendance.length > 0) {
+      const initialMap: Record<string, AttendanceStatus> = {};
+      dbAttendance.forEach((rec) => {
+        initialMap[rec.student_id] = rec.status === 'E' ? 'P' : (rec.status as AttendanceStatus);
+      });
+      setLocalAttendance(initialMap);
+    }
+  }, [dbAttendance]);
 
   // Bottom Navigation Tabs (5 Tabs)
   const [activeTab, setActiveTab] = useState<'home' | 'roster' | 'publish' | 'exams_chat' | 'profile'>('home');
@@ -149,7 +263,7 @@ export default function PinterestTeacherScreen() {
   const [pdfTitle, setPdfTitle] = useState('');
   const [pdfSubject, setPdfSubject] = useState('Physics');
   const [pdfCategory, setPdfCategory] = useState<'notes' | 'formula_sheet' | 'pyq' | 'dpp'>('notes');
-  const [pickedPdfFile, setPickedPdfFile] = useState<{ name: string; size?: string } | null>(null);
+  const [pickedPdfFile, setPickedPdfFile] = useState<{ name: string; size?: string; uri?: string } | null>(null);
 
   // Exam Marks & Auto-Rank Modal
   const [isExamMarksModalOpen, setIsExamMarksModalOpen] = useState(false);
@@ -176,9 +290,25 @@ export default function PinterestTeacherScreen() {
   const [newAssignDueDays, setNewAssignDueDays] = useState('2');
   const [newAssignPdfName, setNewAssignPdfName] = useState<string | null>(null);
 
-  // Active Batch Filter
-  const [selectedBatchId, setSelectedBatchId] = useState('batch-01');
-  const currentBatch = TEACHER_BATCHES.find((b) => b.id === selectedBatchId) || TEACHER_BATCHES[0];
+  // Stable callbacks for AttendanceRosterRow (re-renders only changed row)
+  const handleStatusChange = useCallback((studentId: string, status: AttendanceStatus) => {
+    setLocalAttendance((prev) => ({
+      ...prev,
+      [studentId]: status,
+    }));
+  }, []);
+
+  const handleViewDetail = useCallback((studentId: string) => {
+    router.push({ pathname: '/student-detail', params: { studentId } });
+  }, [router]);
+
+  const handleOpenCorrection = useCallback((record: AttendanceRecord) => {
+    setSelectedRecordForCorrection(record);
+  }, []);
+
+  const updateStudentFeeStatus = (studentId: string, status: string) => {
+    setLocalFeeOverrides((prev) => ({ ...prev, [studentId]: status }));
+  };
 
   // In-App PDF Reader Modal State
   const [selectedReaderDoc, setSelectedReaderDoc] = useState<PDFDocumentContent | null>(null);
@@ -235,15 +365,10 @@ export default function PinterestTeacherScreen() {
     const res = await linkToCoachingCenter(instituteCodeInput);
     if (res.success) {
       setIsDualModeModalOpen(false);
-      Alert.alert('Coaching Linked! 🏫', `Connected as faculty to ${res.instituteName}`);
+      Alert.alert('Coaching Linked', `Connected as faculty to ${res.instituteName}`);
     } else {
       Alert.alert('Not Found', res.error || 'Could not verify that coaching code.');
     }
-  };
-
-  // Attendance Handlers
-  const handleStatusChange = async (studentId: string, status: AttendanceStatus) => {
-    await markAttendance(studentId, status);
   };
 
   const handlePublishInteractiveDpp = async (dppData: {
@@ -256,8 +381,9 @@ export default function PinterestTeacherScreen() {
     const due = new Date();
     due.setDate(due.getDate() + 2);
 
-    await createAssignment({
+    await createAssignmentMutation.mutateAsync({
       batch_id: selectedBatchId,
+      institute_id: activeInstitute?.id || 'a0000000-0000-0000-0000-000000000001',
       title: dppData.title,
       subject: dppData.subject,
       instructions: `Interactive Quiz Form (${dppData.questions.length} Questions: MCQ, True/False & Numerical). Answer directly in app.`,
@@ -265,10 +391,18 @@ export default function PinterestTeacherScreen() {
       due_date: due.toISOString(),
       due_label: 'Due in 2 days',
       total_marks: dppData.totalMarks,
-      max_marks: dppData.totalMarks,
+      type: 'quiz',
+      questions: dppData.questions,
       question_count: dppData.questions.length,
       created_by: teacherProfile.fullName,
     });
+
+    notifyHomeworkPublished({
+      instituteId: activeInstitute?.id || 'a0000000-0000-0000-0000-000000000001',
+      batchId: selectedBatchId,
+      title: dppData.title,
+      subject: dppData.subject,
+    }).catch(() => null);
 
     Alert.alert(
       'In-App Quiz Published! ⚡',
@@ -279,15 +413,28 @@ export default function PinterestTeacherScreen() {
   const handleCommitAttendance = async () => {
     setIsSyncing(true);
     try {
-      if (waParentPing) {
-        Alert.alert(
-          'Roll Call Recorded',
-          'Attendance recorded in the roster. Absentee SMS & WhatsApp gateway dispatch is scheduled for v2.',
-          [{ text: 'OK' }]
-        );
-      } else {
-        Alert.alert('Attendance Recorded', 'Attendance recorded safely in the roster.');
-      }
+      const records = studentsRoster.map((st) => ({
+        studentId: st.id,
+        status: (localAttendance[st.id] === 'A' ? 'A' : localAttendance[st.id] === 'L' ? 'L' : 'P') as 'P' | 'A' | 'L',
+        remarks: st.teacherRemarks?.[0],
+      }));
+
+      await commitAttendanceMutation.mutateAsync({
+        batchId: currentBatch.id,
+        date: todayStr,
+        instituteId: activeInstitute?.id || 'a0000000-0000-0000-0000-000000000001',
+        records,
+      });
+
+      Alert.alert(
+        'Attendance Committed ✅',
+        `Roll call for ${currentBatch.name} (${records.length} students) has been successfully saved to database.`
+      );
+    } catch (err: any) {
+      Alert.alert(
+        'Offline Queue Active',
+        err?.message || 'Attendance queued locally for background sync.'
+      );
     } finally {
       setIsSyncing(false);
     }
@@ -303,7 +450,7 @@ export default function PinterestTeacherScreen() {
       if (!res.canceled && res.assets && res.assets.length > 0) {
         const file = res.assets[0];
         const sizeMb = file.size ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` : '1.8 MB';
-        setPickedPdfFile({ name: file.name, size: sizeMb });
+        setPickedPdfFile({ name: file.name, size: sizeMb, uri: file.uri });
         if (!pdfTitle.trim()) {
           setPdfTitle(file.name.replace('.pdf', '').replace(/_/g, ' '));
         }
@@ -319,8 +466,17 @@ export default function PinterestTeacherScreen() {
       return;
     }
     const fileName = pickedPdfFile?.name || `${pdfTitle.replace(/\s+/g, '_')}.pdf`;
-    const fileSize = pickedPdfFile?.size || '2.4 MB';
-    await uploadPDFMaterial(pdfTitle, pdfSubject, pdfCategory, fileName, fileSize);
+    if (pickedPdfFile?.uri) {
+      await uploadMaterialMutation.mutateAsync({
+        fileUri: pickedPdfFile.uri,
+        fileName,
+        title: pdfTitle,
+        batchId: selectedBatchId,
+        category: pdfCategory,
+        instituteId: activeInstitute?.id || 'a0000000-0000-0000-0000-000000000001',
+        uploadedBy: user?.id || 'u0000000-0000-0000-0000-000000000001',
+      });
+    }
     setIsUploadPdfOpen(false);
     setPdfTitle('');
     setPickedPdfFile(null);
@@ -334,7 +490,7 @@ export default function PinterestTeacherScreen() {
       return;
     }
     await addLecture({
-      batch_id: 'batch-01',
+      batch_id: selectedBatchId,
       title: lectureTitle,
       subject: lectureSubject,
       provider: 'youtube',
@@ -368,7 +524,7 @@ export default function PinterestTeacherScreen() {
     await recordTestMarks(examTestName, examSubject, max, marksList);
     setIsExamMarksModalOpen(false);
     Alert.alert(
-      'Exam Marks Recorded! 🏆',
+      'Exam Marks Recorded',
       'Batch average, topper, and student percentile ranks computed. Live comparison charts updated across all student dashboards.'
     );
   };
@@ -382,8 +538,9 @@ export default function PinterestTeacherScreen() {
     const due = new Date();
     due.setDate(due.getDate() + (parseInt(newAssignDueDays) || 2));
 
-    await createAssignment({
-      batch_id: 'batch-01',
+    await createAssignmentMutation.mutateAsync({
+      batch_id: selectedBatchId,
+      institute_id: activeInstitute?.id || 'a0000000-0000-0000-0000-000000000001',
       title: newAssignTitle,
       subject: newAssignSubject,
       instructions: 'Solve all problem sets and upload handwritten PDF solution.',
@@ -391,7 +548,7 @@ export default function PinterestTeacherScreen() {
       due_date: due.toISOString(),
       due_label: `Due in ${newAssignDueDays} days`,
       total_marks: parseInt(newAssignMaxMarks) || 25,
-      max_marks: parseInt(newAssignMaxMarks) || 25,
+      type: 'file',
       question_count: 5,
       created_by: teacherProfile.fullName,
       question_paper_url: newAssignPdfName ? `https://storage.acadly.app/${newAssignPdfName}` : undefined,
@@ -407,7 +564,12 @@ export default function PinterestTeacherScreen() {
   const handleConfirmGrade = async () => {
     if (!selectedSubmissionId) return;
     const marks = Math.max(0, parseInt(gradingScoreInput, 10) || 0);
-    await gradeSubmission(selectedSubmissionId, marks, gradingFeedbackInput);
+    await gradeSubmissionMutation.mutateAsync({
+      submissionId: selectedSubmissionId,
+      marks,
+      feedback: gradingFeedbackInput,
+      graderId: user?.id || 'teacher',
+    });
     setIsGradingModalOpen(false);
     setSelectedSubmissionId(null);
     Alert.alert('Submission Graded ✅', `Recorded ${marks} marks with teacher observation.`);
@@ -461,7 +623,7 @@ export default function PinterestTeacherScreen() {
     <ScreenWrapper
       headerProps={{
         title: teacherMode === 'solo' ? 'Solo Tutor Desk' : 'Faculty Command Desk',
-        instituteName: teacherMode === 'solo' ? 'Private Tuition' : (activeInstitute?.name || 'Bloom Science Academy'),
+        instituteName: teacherMode === 'solo' ? 'Private Tuition' : (activeInstitute?.name || 'Academy Hub'),
         profileInitials: 'RV',
         onNotificationPress: () => Alert.alert('Faculty Notices', 'Monthly syllabus benchmark review by Friday 6 PM.'),
         onProfilePress: () => {
@@ -471,7 +633,7 @@ export default function PinterestTeacherScreen() {
               teacherMode === 'solo' ? 'Solo Individual Tutor' : 'Coaching Institute Faculty'
             }`,
             [
-              { text: 'Sign Out 🚪', style: 'destructive', onPress: handleLogout },
+              { text: 'Sign Out', style: 'destructive', onPress: handleLogout },
               { text: 'Close', style: 'cancel' },
             ]
           );
@@ -506,7 +668,7 @@ export default function PinterestTeacherScreen() {
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View className="flex-row gap-2">
-            {TEACHER_BATCHES.map((b) => {
+            {batchesList.map((b) => {
               const isSelected = selectedBatchId === b.id;
               return (
                 <TouchableOpacity
@@ -740,12 +902,45 @@ export default function PinterestTeacherScreen() {
 
         {/* ================= TAB 2: ROSTER & ATTENDANCE ================= */}
         {activeTab === 'roster' && (() => {
-          const presentCount = attendanceRecords.filter((r) => r.status === 'P' || r.status === 'E').length;
-          const absentCount = attendanceRecords.filter((r) => r.status === 'A').length;
-          const lateCount = attendanceRecords.filter((r) => r.status === 'L').length;
+          const presentCount = studentsRoster.filter(
+            (s) => (localAttendance[s.id] || 'P') === 'P'
+          ).length;
+          const absentCount = studentsRoster.filter(
+            (s) => localAttendance[s.id] === 'A'
+          ).length;
+          const lateCount = studentsRoster.filter(
+            (s) => localAttendance[s.id] === 'L'
+          ).length;
 
           return (
             <View className="gap-3.5">
+              {/* Offline Pending Sync Badge */}
+              {pendingCount > 0 && (
+                <View className="bg-amber-50 border border-amber-300 p-3.5 rounded-2xl flex-row items-center justify-between shadow-xs">
+                  <View className="flex-row items-center gap-2 flex-1 mr-2">
+                    <AlertTriangle size={16} color="#D97706" />
+                    <View className="flex-1">
+                      <Text className="text-xs font-bold text-amber-900">
+                        {pendingCount} attendance record{pendingCount > 1 ? 's' : ''} pending sync
+                      </Text>
+                      <Text className="text-[10px] text-amber-700">
+                        Queued offline. Will sync automatically when connected.
+                      </Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => flushOfflineQueue()}
+                    disabled={isOfflineSyncing}
+                    className="bg-amber-600 px-3 py-1.5 rounded-xl active:scale-95 flex-row items-center gap-1.5"
+                  >
+                    {isOfflineSyncing && <ActivityIndicator size="small" color="#ffffff" />}
+                    <Text className="text-xs font-bold text-white">
+                      {isOfflineSyncing ? 'Syncing...' : 'Sync Now'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
               {/* Roll Call Hub Card */}
               <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
                 <View className="flex-row items-center justify-between">
@@ -796,52 +991,33 @@ export default function PinterestTeacherScreen() {
                 <View className="gap-2">
                   <View className="flex-row items-center justify-between px-1">
                     <Text className="text-xs font-bold text-slate-600 uppercase tracking-wider">
-                      Enrolled Students ({attendanceRecords.length})
+                      Enrolled Students ({studentsRoster.length})
                     </Text>
                     <Text className="text-[11px] text-slate-500 font-medium">
                       Tap name for 360° diagnostics
                     </Text>
                   </View>
 
-                  {attendanceRecords.map((record) => (
-                    <View
-                      key={record.id}
-                      className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex-row items-center justify-between gap-2"
-                    >
-                      <TouchableOpacity
-                        onPress={() => router.push({ pathname: '/student-detail', params: { studentId: record.student_id } })}
-                        className="flex-row items-center gap-2.5 flex-1 min-w-0"
-                      >
-                        {/* Auto-sized Roll Container that NEVER overflows */}
-                        <View className="min-w-[36px] h-8 px-1.5 rounded-xl bg-white border border-slate-200 items-center justify-center shrink-0">
-                          <Text className="text-[11px] font-bold text-blue-600 font-mono" numberOfLines={1}>
-                            {record.roll_number.replace('ROLL-', '#').replace('STU-', '#')}
-                          </Text>
-                        </View>
-                        <View className="flex-1 min-w-0">
-                          <View className="flex-row items-center gap-1.5">
-                            <Text className="text-xs font-bold text-slate-900" numberOfLines={1}>
-                              {record.student_name}
-                            </Text>
-                            <TouchableOpacity
-                              onPress={() => setSelectedRecordForCorrection(record)}
-                              hitSlop={8}
-                            >
-                              <Edit2 size={12} color="#64748B" />
-                            </TouchableOpacity>
-                          </View>
-                          <Text className="text-[11px] text-slate-500" numberOfLines={1}>
-                            {record.remarks || 'Tap to inspect diagnostic report & marks'}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-
-                      <AttendanceToggle
-                        value={record.status === 'E' ? 'P' : record.status}
-                        onChange={(status) => handleStatusChange(record.student_id, status)}
-                      />
+                  {isAttendanceLoading && studentsRoster.length === 0 ? (
+                    <View className="py-8 items-center justify-center">
+                      <ActivityIndicator size="small" color="#2563EB" />
+                      <Text className="text-xs text-slate-500 mt-2 font-medium">Loading roster...</Text>
                     </View>
-                  ))}
+                  ) : (
+                    studentsRoster.map((student) => {
+                      const status = localAttendance[student.id] || 'P';
+                      return (
+                        <AttendanceRosterRow
+                          key={student.id}
+                          student={student}
+                          status={status}
+                          onStatusChange={handleStatusChange}
+                          onCorrect={handleOpenCorrection}
+                          onViewDetail={handleViewDetail}
+                        />
+                      );
+                    })
+                  )}
                 </View>
 
                 {/* Commit & Broadcast Roll Call */}
@@ -850,9 +1026,13 @@ export default function PinterestTeacherScreen() {
                   disabled={isSyncing}
                   className="bg-blue-600 py-3 rounded-2xl items-center flex-row justify-center gap-2 shadow-xs active:scale-98"
                 >
-                  <Save size={16} color="#ffffff" />
+                  {isSyncing ? (
+                    <ActivityIndicator size="small" color="#ffffff" />
+                  ) : (
+                    <Save size={16} color="#ffffff" />
+                  )}
                   <Text className="text-sm font-bold text-white">
-                    {isSyncing ? 'Syncing to Database...' : 'Commit & Dispatch Roll Call'}
+                    {isSyncing ? 'Saving to Database...' : 'Commit & Dispatch Roll Call'}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -1194,14 +1374,14 @@ export default function PinterestTeacherScreen() {
                     <Clock size={16} color="#2563EB" />
                     <Text className="text-sm font-bold text-slate-900">Active Batch & Schedule Filter</Text>
                   </View>
-                  <Badge label={`${TEACHER_BATCHES.length} Batches`} variant="info" />
+                  <Badge label={`${batchesList.length} Batches`} variant="info" />
                 </View>
                 <Text className="text-xs text-slate-500 leading-relaxed">
                   Select which batch and timing you want to manage. The roll call, DPP assignments, and diagnostics across Acadly adapt automatically.
                 </Text>
 
                 <View className="gap-2 mt-1">
-                  {TEACHER_BATCHES.map((batch) => {
+                  {batchesList.map((batch) => {
                     const isSelected = selectedBatchId === batch.id;
                     return (
                       <TouchableOpacity
@@ -1302,7 +1482,8 @@ export default function PinterestTeacherScreen() {
                     </View>
                   ) : (
                     filteredStudents.map((st) => {
-                      const isFeePaid = st.feeStatus.toLowerCase().includes('paid');
+                      const effectiveStatus = localFeeOverrides[st.id] || st.feeStatus;
+                      const isFeePaid = effectiveStatus.toLowerCase().includes('paid');
                       return (
                         <View
                           key={st.id}
@@ -1359,10 +1540,10 @@ export default function PinterestTeacherScreen() {
                           <View className="flex-row items-center justify-between pt-1 border-t border-slate-200/60">
                             <View className="flex-row items-center gap-2">
                               <Text className="text-[10px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded-md border border-slate-200">
-                                📊 {st.overallAttendance}% Attendance
+                                {st.overallAttendance}% Attendance
                               </Text>
                               <Text className="text-[10px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded-md border border-slate-200">
-                                🏆 Rank #{st.rank}
+                                Rank #{st.rank}
                               </Text>
                             </View>
 
@@ -1405,6 +1586,9 @@ export default function PinterestTeacherScreen() {
                 <ChevronRight size={16} color="#2563EB" />
               </TouchableOpacity>
 
+              {/* Language Selector */}
+              <LanguageSwitcher className="mb-4" />
+
               {/* Sign Out Button */}
               <TouchableOpacity
                 onPress={handleLogout}
@@ -1446,7 +1630,7 @@ export default function PinterestTeacherScreen() {
               } flex-row items-center justify-between`}
             >
               <View className="flex-1 pr-2">
-                <Text className="text-sm font-bold text-slate-900">Solo Tutor Mode 🍎</Text>
+                <Text className="text-sm font-bold text-slate-900">Solo Tutor Mode</Text>
                 <Text className="text-xs text-slate-500 mt-0.5">
                   Direct student enrollment via your unique Teacher Code. Full ownership of schedule & fees.
                 </Text>
@@ -1460,7 +1644,7 @@ export default function PinterestTeacherScreen() {
               } gap-2.5`}
             >
               <View className="flex-row items-center justify-between">
-                <Text className="text-sm font-bold text-slate-900">Coaching Center Faculty 🏫</Text>
+                <Text className="text-sm font-bold text-slate-900">Coaching Center Faculty</Text>
                 {teacherMode === 'coaching_faculty' && <Check size={18} color="#2563EB" />}
               </View>
               <Text className="text-xs text-slate-500">
@@ -1650,7 +1834,7 @@ export default function PinterestTeacherScreen() {
                 onPress={handleSaveExamMarks}
                 className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mb-4"
               >
-                <Text className="text-xs font-bold text-white">Save Marks & Compute Ranks 🏆</Text>
+                <Text className="text-xs font-bold text-white">Save Marks & Compute Ranks</Text>
               </TouchableOpacity>
             </ScrollView>
           </View>
@@ -1868,6 +2052,7 @@ export default function PinterestTeacherScreen() {
         visible={isInteractiveDppOpen}
         onClose={() => setIsInteractiveDppOpen(false)}
         onPublish={handlePublishInteractiveDpp}
+        batchId={selectedBatchId}
         defaultBatchName={currentBatch.name}
         defaultSubject={currentBatch.subject}
       />

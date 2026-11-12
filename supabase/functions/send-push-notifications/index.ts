@@ -44,7 +44,12 @@ serve(async (req) => {
       });
     }
 
-    // Fetch Expo Push tokens for requested users
+    // Fetch Expo Push tokens from both push_tokens table and profiles
+    const { data: pushTokenRows } = await supabaseAdmin
+      .from("push_tokens")
+      .select("user_id, token")
+      .in("user_id", userIds);
+
     const { data: profiles, error: profileError } = await supabaseAdmin
       .from("profiles")
       .select("id, expo_push_token")
@@ -60,19 +65,30 @@ serve(async (req) => {
     // Filter valid tokens
     const validTokens: { token: string; userId: string }[] = [];
     const notificationInserts = [];
+    const seenTokens = new Set<string>();
+
+    for (const pt of pushTokenRows || []) {
+      if (pt.token && (pt.token.startsWith("ExponentPushToken[") || pt.token.startsWith("ExpoPushToken["))) {
+        validTokens.push({ token: pt.token, userId: pt.user_id });
+        seenTokens.add(pt.token);
+      }
+    }
 
     for (const p of profiles || []) {
       notificationInserts.push({
         institute_id: instituteId,
         user_id: p.id,
+        recipient_id: p.id,
         title,
         body,
+        message: body,
         type,
         data,
       });
 
-      if (p.expo_push_token && (p.expo_push_token.startsWith("ExponentPushToken[") || p.expo_push_token.startsWith("ExpoPushToken["))) {
+      if (p.expo_push_token && !seenTokens.has(p.expo_push_token) && (p.expo_push_token.startsWith("ExponentPushToken[") || p.expo_push_token.startsWith("ExpoPushToken["))) {
         validTokens.push({ token: p.expo_push_token, userId: p.id });
+        seenTokens.add(p.expo_push_token);
       }
     }
 

@@ -2,11 +2,11 @@ import React from 'react';
 import { View, Text, Modal, Pressable, Platform, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { X, Play, Clock, User, Download, Check } from 'lucide-react-native';
-import { useAcademic } from '@/context/AcademicContext';
+import { useUI } from '@/context/UIContext';
 import { Badge, Button } from '@/components/ui';
 
 export const VideoPlayerModal: React.FC = () => {
-  const { activeLecture, closePlayer } = useAcademic();
+  const { activeLecture, closePlayer } = useUI();
 
   if (!activeLecture) return null;
 

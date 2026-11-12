@@ -51,7 +51,7 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
       className="flex-1"
       contentContainerClassName={contentContainerClassName}
       contentContainerStyle={[
-        footer ? { paddingBottom: 110 } : null,
+        footer ? { paddingBottom: 120 } : { paddingBottom: Math.max(32, insets.bottom + 16) },
         contentContainerStyle,
       ]}
       showsVerticalScrollIndicator={false}
@@ -64,7 +64,7 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
     <View
       className={`flex-1 ${contentContainerClassName}`}
       style={[
-        footer ? { paddingBottom: 110 } : null,
+        footer ? { paddingBottom: 120 } : { paddingBottom: Math.max(32, insets.bottom + 16) },
         contentContainerStyle,
       ]}
     >

@@ -9,6 +9,8 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Platform,
+  ActivityIndicator,
+  TextInput,
 } from 'react-native';
 import {
   FileCheck,
@@ -21,16 +23,41 @@ import {
   Award,
   FileText,
   Download,
+  Sparkles,
+  BarChart3,
+  TrendingUp,
 } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import { useAcademic } from '@/context/AcademicContext';
 import { useAuth } from '@/context/AuthContext';
-import { Card, Button, Input, Badge, type BadgeVariant } from '@/components/ui';
-import { generateAndSharePDF } from '@/services/dummyPdfService';
+import { useUI } from '@/context/UIContext';
+import {
+  useAssignments,
+  useCreateAssignment,
+  useSubmissions,
+  useSubmitHomework,
+  useGradeSubmission,
+} from '@/hooks/queries/useAssignmentQueries';
+import { useBatches } from '@/hooks/queries/useBatchQueries';
+import { Card, Button, Input, Badge } from '@/components/ui';
+import { QuizRunner } from './QuizRunner';
+import {
+  getQuizAnalytics,
+  type QuizAnalyticsSummary,
+} from '@/services/submissionService';
+import { type Assignment } from '@/types/database';
 
 export const AssignmentsModule: React.FC = () => {
-  const { assignments, submissions, createAssignment, submitAssignment, gradeSubmission } = useAcademic();
-  const { userRole } = useAuth();
+  const { user, userRole, activeInstitute } = useAuth();
+  const { selectedBatchId } = useUI();
+
+  const { data: batches = [] } = useBatches(activeInstitute?.id);
+  const activeBatch = batches.find((b) => b.id === selectedBatchId) || batches[0];
+  const activeBatchId = activeBatch?.id;
+
+  const {
+    data: assignments = [],
+    isLoading: isAssignmentsLoading,
+  } = useAssignments(activeBatchId);
 
   const [activeTab, setActiveTab] = useState<'pending' | 'submitted'>('pending');
 
@@ -45,42 +72,73 @@ export const AssignmentsModule: React.FC = () => {
   // Submit Solution Modal
   const [selectedAsgId, setSelectedAsgId] = useState<string | null>(null);
   const [solutionNotes, setSolutionNotes] = useState('');
-  const [pickedFileName, setPickedFileName] = useState('amelia_gauss_solution.pdf');
+  const [pickedFileName, setPickedFileName] = useState('');
   const [pickedFileUri, setPickedFileUri] = useState<string | null>(null);
+
+  // Submissions Query for the selected assignment (or first available)
+  const currentAssignmentForSubmissions = selectedAsgId || assignments[0]?.id;
+  const {
+    data: submissions = [],
+    isLoading: isSubmissionsLoading,
+  } = useSubmissions(currentAssignmentForSubmissions);
 
   // Grade Modal
   const [gradingSubId, setGradingSubId] = useState<string | null>(null);
-  const [gradeMarks, setGradeMarks] = useState('54');
-  const [gradeFeedback, setGradeFeedback] = useState('Excellent spherical shell derivations and step-by-step clarity.');
+  const [gradeMarks, setGradeMarks] = useState('85');
+  const [gradeFeedback, setGradeFeedback] = useState('Solid derivation and accurate final answer.');
+
+  // Quiz Runner & Analytics State
+  const [activeQuizForRunner, setActiveQuizForRunner] = useState<Assignment | null>(null);
+  const [activeQuizAnalytics, setActiveQuizAnalytics] = useState<QuizAnalyticsSummary | null>(null);
+  const [isAnalyticsLoading, setIsAnalyticsLoading] = useState(false);
+
+  const createAssignmentMutation = useCreateAssignment();
+  const submitHomeworkMutation = useSubmitHomework();
+  const gradeSubmissionMutation = useGradeSubmission();
+
+  const handleOpenAnalytics = async (asgId: string) => {
+    setIsAnalyticsLoading(true);
+    try {
+      const data = await getQuizAnalytics(asgId);
+      if (data) {
+        setActiveQuizAnalytics(data);
+      } else {
+        Alert.alert('Analytics', 'No quiz submission analytics available yet.');
+      }
+    } catch {
+      Alert.alert('Error', 'Failed to load quiz analytics.');
+    } finally {
+      setIsAnalyticsLoading(false);
+    }
+  };
 
   const handlePickQuestionPdf = async () => {
     try {
       const res = await DocumentPicker.getDocumentAsync({
-        type: ['application/pdf', 'image/*'],
+        type: ['application/pdf'],
         copyToCacheDirectory: true,
       });
       if (!res.canceled && res.assets && res.assets.length > 0) {
         setAsgAttachedPdfName(res.assets[0].name);
       }
     } catch {
-      Alert.alert('File Picker', 'Selected demo Question Sheet PDF.');
-      setAsgAttachedPdfName('Physics_DPP_Question_Sheet.pdf');
+      Alert.alert('File Picker', 'Unable to pick PDF document.');
     }
   };
 
   const handlePickSolutionDocument = async () => {
     try {
       const res = await DocumentPicker.getDocumentAsync({
-        type: ['application/pdf', 'image/*'],
+        type: ['application/pdf'],
         copyToCacheDirectory: true,
       });
       if (!res.canceled && res.assets && res.assets.length > 0) {
         setPickedFileName(res.assets[0].name);
         setPickedFileUri(res.assets[0].uri);
-        Alert.alert('File Attached 📄', `Attached: ${res.assets[0].name}`);
+        Alert.alert('File Attached', `Attached: ${res.assets[0].name}`);
       }
     } catch {
-      setPickedFileName('amelia_gauss_solution.pdf');
+      Alert.alert('File Picker', 'Unable to select file.');
     }
   };
 
@@ -90,42 +148,78 @@ export const AssignmentsModule: React.FC = () => {
       return;
     }
 
-    await createAssignment({
-      batch_id: 'batch-01',
-      title: asgTitle,
-      subject: asgSubject,
-      instructions: asgInstructions || 'Solve all questions and upload work.',
-      due_date: new Date(Date.now() + 86400000 * 7).toISOString(),
-      due_label: 'Due in 7 Days',
-      due_date_formatted: 'Due in 7 Days',
-      total_marks: parseInt(asgMarks, 10) || 100,
-      max_marks: parseInt(asgMarks, 10) || 100,
-      question_count: 20,
-      created_by: userRole === 'teacher' ? 'Er. Rakesh Verma' : 'Director Sharma',
-    });
+    if (!activeBatchId || !user || !activeInstitute) {
+      Alert.alert('Error', 'Please select an active batch.');
+      return;
+    }
 
-    setIsCreateOpen(false);
-    setAsgTitle('');
-    setAsgInstructions('');
-    setAsgAttachedPdfName(null);
-    Alert.alert('Assignment Created 🎉', 'Assignment and question sheet published to batch.');
+    try {
+      await createAssignmentMutation.mutateAsync({
+        institute_id: activeInstitute.id,
+        batch_id: activeBatchId,
+        title: asgTitle.trim(),
+        subject: 'General',
+        instructions: asgInstructions.trim() || 'Solve all questions and upload your working.',
+        description: asgInstructions.trim() || 'Solve all questions and upload your working.',
+        due_date: new Date(Date.now() + 86400000 * 7).toISOString(),
+        due_label: 'Due in 7 Days',
+        total_marks: parseInt(asgMarks, 10) || 100,
+        type: 'file',
+        question_count: 5,
+        created_by: user.id,
+      });
+
+      setIsCreateOpen(false);
+      setAsgTitle('');
+      setAsgInstructions('');
+      setAsgAttachedPdfName(null);
+      Alert.alert('Assignment Created', 'Assignment and question sheet published to batch.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to create assignment';
+      Alert.alert('Error', msg);
+    }
   };
 
   const handleSubmitSolution = async () => {
-    if (!selectedAsgId) return;
+    if (!selectedAsgId || !user) return;
 
-    await submitAssignment(selectedAsgId, solutionNotes || 'Submitted solutions PDF', pickedFileName, pickedFileUri || undefined);
-    setSelectedAsgId(null);
-    setSolutionNotes('');
-    Alert.alert('Solution Submitted 🎉', 'Your assignment has been submitted to faculty for evaluation.');
+    try {
+      await submitHomeworkMutation.mutateAsync({
+        assignmentId: selectedAsgId,
+        studentId: user.id,
+        notes: solutionNotes.trim() || 'Solution PDF submission',
+        fileUri: pickedFileUri || undefined,
+        fileName: pickedFileName || undefined,
+      });
+
+      setSelectedAsgId(null);
+      setSolutionNotes('');
+      setPickedFileName('');
+      setPickedFileUri(null);
+      Alert.alert('Solution Submitted', 'Your assignment has been submitted to faculty for evaluation.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Submission failed';
+      Alert.alert('Submission Error', msg);
+    }
   };
 
   const handleGrade = async () => {
-    if (!gradingSubId) return;
+    if (!gradingSubId || !user) return;
 
-    await gradeSubmission(gradingSubId, parseFloat(gradeMarks) || 54, gradeFeedback);
-    setGradingSubId(null);
-    Alert.alert('Graded & Saved ⭐', 'Marks and feedback published to student profile.');
+    try {
+      await gradeSubmissionMutation.mutateAsync({
+        submissionId: gradingSubId,
+        marks: parseFloat(gradeMarks) || 0,
+        feedback: gradeFeedback.trim(),
+        graderId: user.id,
+      });
+
+      setGradingSubId(null);
+      Alert.alert('Graded & Saved', 'Marks and feedback published to student profile.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Grading failed';
+      Alert.alert('Grading Error', msg);
+    }
   };
 
   return (
@@ -144,7 +238,7 @@ export const AssignmentsModule: React.FC = () => {
                 activeTab === 'pending' ? 'text-white' : 'text-slate-600'
               }`}
             >
-              Pending ({assignments.filter((a) => a.submission_status !== 'submitted').length})
+              Assignments ({assignments.length})
             </Text>
           </Pressable>
 
@@ -174,12 +268,27 @@ export const AssignmentsModule: React.FC = () => {
         )}
       </View>
 
-      {/* TAB 1: PENDING ASSIGNMENTS */}
-      {activeTab === 'pending' && (
+      {/* Loading State */}
+      {isAssignmentsLoading && (
+        <View className="p-8 items-center justify-center bg-white rounded-2xl border border-slate-200">
+          <ActivityIndicator size="small" color="#2563EB" />
+          <Text className="text-xs text-slate-500 mt-2 font-medium">Loading batch assignments...</Text>
+        </View>
+      )}
+
+      {/* TAB 1: ASSIGNMENTS */}
+      {!isAssignmentsLoading && activeTab === 'pending' && (
         <View className="gap-2.5">
-          {assignments.map((asg) => {
-            const isSubmitted = asg.submission_status === 'submitted';
-            return (
+          {assignments.length === 0 ? (
+            <View className="p-8 items-center justify-center bg-white rounded-2xl border border-slate-200">
+              <FileCheck size={28} color="#94A3B8" />
+              <Text className="text-sm font-bold text-slate-800 mt-2">No Assignments Created</Text>
+              <Text className="text-xs text-slate-500 text-center mt-1">
+                Active assignments published by faculty will appear here.
+              </Text>
+            </View>
+          ) : (
+            assignments.map((asg) => (
               <Card key={asg.id} elevation="lowest" className="gap-2.5 border border-slate-200/80">
                 <View className="flex-row items-start justify-between gap-2">
                   <View className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 items-center justify-center shrink-0">
@@ -189,303 +298,441 @@ export const AssignmentsModule: React.FC = () => {
                   <View className="flex-1 min-w-0">
                     <View className="flex-row items-center gap-1.5 mb-0.5">
                       <Badge
-                        label={asg.due_label}
-                        variant={asg.due_label.includes('Tomorrow') ? 'due' : 'neutral'}
+                        label={asg.due_label || 'Due Soon'}
+                        variant={asg.due_label?.includes('Tomorrow') ? 'due' : 'neutral'}
                       />
                       <Text className="text-[11px] text-slate-500 font-medium">
-                        {asg.subject} • {asg.question_count} Questions
+                        Total {asg.total_marks} Marks
                       </Text>
                     </View>
                     <Text className="text-sm font-extrabold text-slate-900">{asg.title}</Text>
-                    <Text className="text-xs text-slate-500 mt-0.5 leading-relaxed" numberOfLines={2}>
-                      {asg.instructions}
-                    </Text>
+                    {asg.description ? (
+                      <Text className="text-xs text-slate-500 mt-0.5 leading-relaxed" numberOfLines={2}>
+                        {asg.description}
+                      </Text>
+                    ) : null}
                   </View>
                 </View>
 
                 <View className="flex-row items-center justify-between pt-2 border-t border-slate-100">
                   <Text className="text-[11px] text-slate-500 font-medium">
-                    Total Marks: <Text className="font-bold text-slate-800">{asg.total_marks}</Text>
+                    Max Marks: <Text className="font-bold text-slate-800">{asg.total_marks}</Text>
                   </Text>
 
-                  {userRole === 'student' && (
+                  {userRole === 'student' && asg.type === 'quiz' && (
                     <TouchableOpacity
                       activeOpacity={0.85}
-                      disabled={isSubmitted}
-                      onPress={() => setSelectedAsgId(asg.id)}
-                      className={`px-3 py-1.5 rounded-xl ${
-                        isSubmitted ? 'bg-emerald-50 border border-emerald-200' : 'bg-blue-600 shadow-xs'
-                      }`}
+                      onPress={() => setActiveQuizForRunner(asg)}
+                      className="px-3.5 py-1.5 rounded-xl bg-purple-600 shadow-xs flex-row items-center gap-1.5"
                     >
-                      <Text
-                        className={`text-xs font-bold ${
-                          isSubmitted ? 'text-emerald-700' : 'text-white'
-                        }`}
-                      >
-                        {isSubmitted ? 'Submitted ✓' : 'Submit Work'}
-                      </Text>
+                      <Sparkles size={13} color="#FFFFFF" />
+                      <Text className="text-xs font-bold text-white">Start Quiz</Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {userRole === 'student' && asg.type !== 'quiz' && (
+                    <TouchableOpacity
+                      activeOpacity={0.85}
+                      onPress={() => setSelectedAsgId(asg.id)}
+                      className="px-3 py-1.5 rounded-xl bg-blue-600 shadow-xs"
+                    >
+                      <Text className="text-xs font-bold text-white">Submit Work</Text>
                     </TouchableOpacity>
                   )}
 
                   {(userRole === 'teacher' || userRole === 'admin') && (
-                    <Badge label={`Assigned by ${asg.created_by}`} variant="info" />
+                    <View className="flex-row items-center gap-2">
+                      {asg.type === 'quiz' && (
+                        <TouchableOpacity
+                          onPress={() => handleOpenAnalytics(asg.id)}
+                          className="px-2.5 py-1 rounded-lg bg-purple-50 border border-purple-200 flex-row items-center gap-1 active:scale-95"
+                        >
+                          <BarChart3 size={12} color="#7C3AED" />
+                          <Text className="text-[11px] font-bold text-purple-700">Analytics</Text>
+                        </TouchableOpacity>
+                      )}
+                      <TouchableOpacity
+                        onPress={() => {
+                          setSelectedAsgId(asg.id);
+                          setActiveTab('submitted');
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 active:scale-95"
+                      >
+                        <Text className="text-[11px] font-bold text-blue-600">Review Submissions →</Text>
+                      </TouchableOpacity>
+                    </View>
                   )}
                 </View>
               </Card>
-            );
-          })}
+            ))
+          )}
         </View>
       )}
 
       {/* TAB 2: SUBMISSIONS */}
-      {activeTab === 'submitted' && (
+      {!isAssignmentsLoading && activeTab === 'submitted' && (
         <View className="gap-2.5">
-          {submissions.map((sub) => (
-            <Card key={sub.id} elevation="lowest" className="gap-2.5">
-              <View className="flex-row items-start justify-between">
-                <View>
-                  <View className="flex-row items-center gap-1.5 mb-0.5">
-                    <Badge
-                      label={sub.status === 'graded' ? 'Graded' : 'Pending Review'}
-                      variant={sub.status === 'graded' ? 'success' : 'warning'}
-                    />
-                    <Text className="text-[11px] text-on-surface-variant">{sub.roll_number}</Text>
+          {isSubmissionsLoading ? (
+            <ActivityIndicator size="small" color="#2563EB" className="my-4" />
+          ) : submissions.length === 0 ? (
+            <View className="p-8 items-center justify-center bg-white rounded-2xl border border-slate-200">
+              <FileText size={28} color="#94A3B8" />
+              <Text className="text-sm font-bold text-slate-800 mt-2">No Submissions Yet</Text>
+              <Text className="text-xs text-slate-500 text-center mt-1">
+                Student homework uploads will display here for review and grading.
+              </Text>
+            </View>
+          ) : (
+            submissions.map((sub) => (
+              <Card key={sub.id} elevation="lowest" className="gap-2.5">
+                <View className="flex-row items-start justify-between">
+                  <View>
+                    <View className="flex-row items-center gap-1.5 mb-0.5">
+                      <Badge
+                        label={sub.status === 'graded' ? 'Graded' : 'Pending Review'}
+                        variant={sub.status === 'graded' ? 'success' : 'warning'}
+                      />
+                      <Text className="text-[11px] text-slate-500 font-medium">
+                        Roll {sub.roll_number || '#01'}
+                      </Text>
+                    </View>
+                    <Text className="text-sm font-extrabold text-slate-900">{sub.student_name}</Text>
                   </View>
-                  <Text className="text-sm font-bold text-on-surface">{sub.student_name}</Text>
+
+                  {sub.score !== undefined && sub.score !== null ? (
+                    <View className="items-end">
+                      <Text className="text-base font-black text-blue-600">{sub.score} Marks</Text>
+                      <Text className="text-[10px] text-emerald-600 font-bold">Evaluated</Text>
+                    </View>
+                  ) : null}
                 </View>
 
-                {sub.marks_obtained !== undefined && (
-                  <View className="items-end">
-                    <Text className="text-base font-bold text-on-tertiary-container">
-                      {sub.marks_obtained} / 100
-                    </Text>
-                    <Text className="text-[11px] text-on-surface-variant">Score</Text>
+                {sub.feedback ? (
+                  <View className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                    <Text className="text-[11px] text-slate-600 italic">"{sub.feedback}"</Text>
+                  </View>
+                ) : null}
+
+                {(userRole === 'teacher' || userRole === 'admin') && (
+                  <View className="flex-row items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <TouchableOpacity
+                      onPress={() => {
+                        setGradingSubId(sub.id);
+                        if (sub.score) setGradeMarks(String(sub.score));
+                        if (sub.feedback) setGradeFeedback(sub.feedback);
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-blue-600 active:scale-95"
+                    >
+                      <Text className="text-xs font-bold text-white">
+                        {sub.status === 'graded' ? 'Edit Marks' : 'Grade Submission'}
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                 )}
-              </View>
-
-              <Text className="text-xs text-on-surface-variant bg-surface-container-low p-2 rounded-lg">
-                "{sub.submission_text}"
-              </Text>
-
-              {sub.file_name && (
-                <View className="flex-row items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                  <View className="flex-row items-center gap-1.5 flex-1 min-w-0 pr-2">
-                    <FileText size={14} color="#2563EB" />
-                    <Text className="text-xs font-semibold text-slate-800" numberOfLines={1}>
-                      {sub.file_name}
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() =>
-                      generateAndSharePDF({
-                        id: sub.id,
-                        title: `${sub.student_name} - ${sub.file_name}`,
-                        subtitle: `Coursework Submission • Roll: ${sub.roll_number}`,
-                        subject: 'Physics',
-                        author: sub.student_name,
-                        category: 'dpp',
-                        date: sub.submitted_at_formatted || 'Recently',
-                        sections: [
-                          {
-                            heading: 'Student Submission Notes & Solution Work',
-                            items: [
-                              sub.submission_text || 'Submitted homework solution sheet.',
-                              `Submission ID: ${sub.id}`,
-                              `Status: ${sub.status === 'graded' ? `Graded (${sub.marks_obtained}/100)` : 'Pending Faculty Review'}`,
-                              sub.feedback ? `Faculty Feedback: ${sub.feedback}` : 'No instructor notes yet.',
-                            ],
-                          },
-                        ],
-                      })
-                    }
-                    className="bg-blue-600 px-2.5 py-1 rounded-lg flex-row items-center gap-1 active:scale-95 shadow-xs"
-                  >
-                    <Download size={11} color="#ffffff" />
-                    <Text className="text-[10px] font-bold text-white">Open File</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-
-              {sub.feedback && (
-                <View className="p-2 rounded-lg bg-tertiary-fixed/30 flex-row items-center gap-1.5">
-                  <Award size={14} color="#069669" />
-                  <Text className="text-xs text-on-tertiary-container font-medium">
-                    Faculty Feedback: {sub.feedback}
-                  </Text>
-                </View>
-              )}
-
-              {(userRole === 'teacher' || userRole === 'admin') && sub.status !== 'graded' && (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  title="Review & Grade"
-                  fullWidth
-                  onPress={() => setGradingSubId(sub.id)}
-                />
-              )}
-            </Card>
-          ))}
+              </Card>
+            ))
+          )}
         </View>
       )}
 
-      {/* MODAL 1: CREATE ASSIGNMENT */}
+      {/* ================= MODAL 1: CREATE ASSIGNMENT ================= */}
       <Modal visible={isCreateOpen} transparent animationType="slide">
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          className="flex-1 justify-end bg-black/50"
+          className="flex-1 bg-black/50 justify-end"
         >
-          <View className="bg-white rounded-t-3xl p-5 gap-3 max-h-[85%] border-t border-slate-200">
-            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-              <View className="flex-row items-center justify-between mb-3">
-                <Text className="text-lg font-bold text-slate-900">Create Batch Assignment</Text>
-                <Pressable onPress={() => setIsCreateOpen(false)} hitSlop={8}>
-                  <X size={20} color="#64748B" />
-                </Pressable>
-              </View>
+          <View className="bg-white rounded-t-3xl p-5 gap-3.5 max-h-[85%]">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-base font-black text-slate-900">Create Batch Assignment</Text>
+              <TouchableOpacity onPress={() => setIsCreateOpen(false)}>
+                <X size={20} color="#64748B" />
+              </TouchableOpacity>
+            </View>
 
-              <View className="gap-3">
-                <Input
-                  label="Assignment Title"
-                  placeholder="e.g. Kinematics Daily Practice Problem #05"
-                  value={asgTitle}
-                  onChangeText={setAsgTitle}
-                />
+            <View className="gap-1">
+              <Text className="text-xs font-bold text-slate-700">Assignment Title</Text>
+              <TextInput
+                value={asgTitle}
+                onChangeText={setAsgTitle}
+                placeholder="e.g. Gauss Law & Electric Flux Numerical DPP"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium"
+              />
+            </View>
 
-                <Input
-                  label="Subject Domain"
-                  placeholder="Physics / Chemistry / Mathematics"
-                  value={asgSubject}
-                  onChangeText={setAsgSubject}
-                />
+            <View className="gap-1">
+              <Text className="text-xs font-bold text-slate-700">Instructions</Text>
+              <TextInput
+                value={asgInstructions}
+                onChangeText={setAsgInstructions}
+                placeholder="Instructions for students (due date, step by step requirements)..."
+                multiline
+                numberOfLines={2}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium"
+              />
+            </View>
 
-                <Input
-                  label="Instructions & Focus Topics"
-                  placeholder="e.g. Complete questions 1 to 30. Show diagrams for problem 12."
-                  value={asgInstructions}
-                  onChangeText={setAsgInstructions}
-                  multiline
-                  numberOfLines={3}
-                />
+            <View className="gap-1">
+              <Text className="text-xs font-bold text-slate-700">Total Marks</Text>
+              <TextInput
+                value={asgMarks}
+                onChangeText={setAsgMarks}
+                keyboardType="numeric"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium"
+              />
+            </View>
 
-                <Input
-                  label="Total Marks"
-                  placeholder="100"
-                  keyboardType="numeric"
-                  value={asgMarks}
-                  onChangeText={setAsgMarks}
-                />
+            <TouchableOpacity
+              onPress={handlePickQuestionPdf}
+              className="p-3 rounded-xl border border-dashed border-slate-200 items-center justify-center bg-slate-50"
+            >
+              <Text className="text-xs font-bold text-blue-600">
+                {asgAttachedPdfName ? `Attached: ${asgAttachedPdfName}` : '+ Attach Question Sheet PDF'}
+              </Text>
+            </TouchableOpacity>
 
-                <Button
-                  variant="primary"
-                  title="Publish Assignment"
-                  fullWidth
-                  onPress={handleCreateAssignment}
-                  className="mt-2"
-                />
-              </View>
-            </ScrollView>
+            <TouchableOpacity
+              onPress={handleCreateAssignment}
+              disabled={createAssignmentMutation.isPending}
+              className={`py-3.5 bg-blue-600 rounded-xl items-center justify-center ${
+                createAssignmentMutation.isPending ? 'opacity-60' : ''
+              }`}
+            >
+              {createAssignmentMutation.isPending ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text className="text-sm font-black text-white">Publish Assignment</Text>
+              )}
+            </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
       </Modal>
 
-      {/* MODAL 2: SUBMIT WORK */}
+      {/* ================= MODAL 2: SUBMIT HOMEWORK ================= */}
       <Modal visible={Boolean(selectedAsgId)} transparent animationType="slide">
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          className="flex-1 justify-end bg-black/50"
+          className="flex-1 bg-black/50 justify-end"
         >
-          <View className="bg-white rounded-t-3xl p-5 gap-3 max-h-[85%] border-t border-slate-200">
-            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-              <View className="flex-row items-center justify-between mb-3">
-                <Text className="text-lg font-bold text-slate-900">Submit Assignment Work</Text>
-                <Pressable onPress={() => setSelectedAsgId(null)} hitSlop={8}>
-                  <X size={20} color="#64748B" />
-                </Pressable>
-              </View>
+          <View className="bg-white rounded-t-3xl p-5 gap-3.5 max-h-[85%]">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-base font-black text-slate-900">Submit Solutions</Text>
+              <TouchableOpacity onPress={() => setSelectedAsgId(null)}>
+                <X size={20} color="#64748B" />
+              </TouchableOpacity>
+            </View>
 
-              <View className="gap-3">
-                <Input
-                  label="Submission Notes / Steps"
-                  placeholder="Brief summary of derivations, steps or attached solution sheets"
-                  value={solutionNotes}
-                  onChangeText={setSolutionNotes}
-                  multiline
-                  numberOfLines={3}
-                />
+            <View className="gap-1">
+              <Text className="text-xs font-bold text-slate-700">Submission Notes (Optional)</Text>
+              <TextInput
+                value={solutionNotes}
+                onChangeText={setSolutionNotes}
+                placeholder="Notes for faculty evaluation..."
+                multiline
+                numberOfLines={2}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium"
+              />
+            </View>
 
-                <TouchableOpacity
-                  onPress={handlePickSolutionDocument}
-                  activeOpacity={0.8}
-                  className="bg-blue-50 border border-blue-200 p-3 rounded-2xl flex-row items-center justify-between"
-                >
-                  <View className="flex-row items-center gap-2">
-                    <FileCheck size={18} color="#2563EB" />
-                    <View>
-                      <Text className="text-xs font-bold text-slate-800">{pickedFileName}</Text>
-                      <Text className="text-[10px] text-slate-500">Tap to pick another PDF or photo</Text>
-                    </View>
-                  </View>
-                  <Badge label="Pick File 📄" variant="primary" />
-                </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handlePickSolutionDocument}
+              className="p-4 rounded-xl border-2 border-dashed border-blue-200 bg-blue-50/50 items-center justify-center"
+            >
+              <Upload size={24} color="#2563EB" />
+              <Text className="text-xs font-bold text-blue-600 mt-1">
+                {pickedFileName ? pickedFileName : 'Attach Solution PDF'}
+              </Text>
+            </TouchableOpacity>
 
-                <Button
-                  variant="primary"
-                  title="Confirm & Submit Solution"
-                  fullWidth
-                  onPress={handleSubmitSolution}
-                  className="mt-2"
-                />
-              </View>
-            </ScrollView>
+            <TouchableOpacity
+              onPress={handleSubmitSolution}
+              disabled={submitHomeworkMutation.isPending}
+              className={`py-3.5 bg-blue-600 rounded-xl items-center justify-center ${
+                submitHomeworkMutation.isPending ? 'opacity-60' : ''
+              }`}
+            >
+              {submitHomeworkMutation.isPending ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text className="text-sm font-black text-white">Upload & Submit Homework</Text>
+              )}
+            </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
       </Modal>
 
-      {/* MODAL 3: GRADE SUBMISSION */}
+      {/* ================= MODAL 3: GRADE SUBMISSION ================= */}
       <Modal visible={Boolean(gradingSubId)} transparent animationType="slide">
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          className="flex-1 justify-end bg-black/50"
+          className="flex-1 bg-black/50 justify-end"
         >
-          <View className="bg-white rounded-t-3xl p-5 gap-3 max-h-[85%] border-t border-slate-200">
-            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-              <View className="flex-row items-center justify-between mb-3">
-                <Text className="text-lg font-bold text-slate-900">Grade Student Submission</Text>
-                <Pressable onPress={() => setGradingSubId(null)} hitSlop={8}>
-                  <X size={20} color="#64748B" />
-                </Pressable>
-              </View>
+          <View className="bg-white rounded-t-3xl p-5 gap-3.5 max-h-[85%]">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-base font-black text-slate-900">Evaluate Homework</Text>
+              <TouchableOpacity onPress={() => setGradingSubId(null)}>
+                <X size={20} color="#64748B" />
+              </TouchableOpacity>
+            </View>
 
-              <View className="gap-3">
-                <Input
-                  label="Marks Awarded (out of 100)"
-                  placeholder="e.g. 95"
-                  keyboardType="numeric"
-                  value={gradeMarks}
-                  onChangeText={setGradeMarks}
-                />
+            <View className="gap-1">
+              <Text className="text-xs font-bold text-slate-700">Score / Marks</Text>
+              <TextInput
+                value={gradeMarks}
+                onChangeText={setGradeMarks}
+                keyboardType="numeric"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-bold"
+              />
+            </View>
 
-                <Input
-                  label="Faculty Feedback & Remark"
-                  placeholder="e.g. Great technique. Revise question 14 formula."
-                  value={gradeFeedback}
-                  onChangeText={setGradeFeedback}
-                  multiline
-                  numberOfLines={3}
-                />
+            <View className="gap-1">
+              <Text className="text-xs font-bold text-slate-700">Faculty Feedback</Text>
+              <TextInput
+                value={gradeFeedback}
+                onChangeText={setGradeFeedback}
+                multiline
+                numberOfLines={3}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium"
+              />
+            </View>
 
-                <Button
-                  variant="primary"
-                  title="Publish Grade & Notify Student"
-                  fullWidth
-                  onPress={handleGrade}
-                  className="mt-2"
-                />
-              </View>
-            </ScrollView>
+            <TouchableOpacity
+              onPress={handleGrade}
+              disabled={gradeSubmissionMutation.isPending}
+              className={`py-3.5 bg-blue-600 rounded-xl items-center justify-center ${
+                gradeSubmissionMutation.isPending ? 'opacity-60' : ''
+              }`}
+            >
+              {gradeSubmissionMutation.isPending ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text className="text-sm font-black text-white">Save Evaluation & Notify Student</Text>
+              )}
+            </TouchableOpacity>
           </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* QUIZ RUNNER MODAL FOR STUDENTS */}
+      <QuizRunner
+        assignment={activeQuizForRunner}
+        visible={Boolean(activeQuizForRunner)}
+        onClose={() => setActiveQuizForRunner(null)}
+      />
+
+      {/* QUIZ ANALYTICS MODAL FOR TEACHERS */}
+      <Modal
+        visible={Boolean(activeQuizAnalytics)}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setActiveQuizAnalytics(null)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1 bg-slate-900"
+        >
+          <View className="bg-slate-900 border-b border-slate-800 px-4 py-3.5 flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
+              <View className="w-8 h-8 rounded-xl bg-purple-500/20 items-center justify-center border border-purple-500/40">
+                <BarChart3 size={16} color="#C084FC" />
+              </View>
+              <View>
+                <Text className="text-sm font-extrabold text-white">Quiz Analytics</Text>
+                <Text className="text-[11px] text-slate-400">
+                  {activeQuizAnalytics?.assignmentTitle || 'Assignment Overview'}
+                </Text>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              onPress={() => setActiveQuizAnalytics(null)}
+              className="w-8 h-8 rounded-full bg-slate-800 items-center justify-center border border-slate-700"
+            >
+              <X size={16} color="#94A3B8" />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView className="flex-1 px-4 py-5" contentContainerStyle={{ paddingBottom: 60 }}>
+            {activeQuizAnalytics && (
+              <View className="gap-5">
+                {/* Metrics Cards */}
+                <View className="flex-row gap-3">
+                  <View className="flex-1 bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/80">
+                    <Text className="text-[11px] text-slate-400 font-bold uppercase">Submissions</Text>
+                    <Text className="text-xl font-black text-white mt-1">
+                      {activeQuizAnalytics.submittedCount}
+                    </Text>
+                    <Text className="text-[10px] text-slate-500 mt-0.5">Students Completed</Text>
+                  </View>
+
+                  <View className="flex-1 bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/80">
+                    <Text className="text-[11px] text-slate-400 font-bold uppercase">Average Score</Text>
+                    <Text className="text-xl font-black text-purple-400 mt-1">
+                      {activeQuizAnalytics.averageScore}
+                    </Text>
+                    <Text className="text-[10px] text-slate-500 mt-0.5">Batch Mean</Text>
+                  </View>
+
+                  <View className="flex-1 bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/80">
+                    <Text className="text-[11px] text-slate-400 font-bold uppercase">Pass Rate</Text>
+                    <Text className="text-xl font-black text-emerald-400 mt-1">
+                      {activeQuizAnalytics.passRate}%
+                    </Text>
+                    <Text className="text-[10px] text-slate-500 mt-0.5">≥40% Threshold</Text>
+                  </View>
+                </View>
+
+                {/* Per-Question Accuracy Breakdown */}
+                <View className="gap-3">
+                  <Text className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    Per-Question Performance
+                  </Text>
+
+                  {activeQuizAnalytics.questions.map((q, idx) => (
+                    <View
+                      key={q.questionId || idx}
+                      className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 gap-2"
+                    >
+                      <View className="flex-row items-center justify-between">
+                        <Text className="text-xs font-bold text-purple-400">
+                          Question #{idx + 1}
+                        </Text>
+                        <Badge
+                          label={`${q.percentCorrect}% Accuracy`}
+                          variant={q.percentCorrect >= 70 ? 'success' : q.percentCorrect >= 40 ? 'warning' : 'error'}
+                          size="sm"
+                        />
+                      </View>
+
+                      <Text className="text-sm font-semibold text-white leading-relaxed">
+                        {q.questionText}
+                      </Text>
+
+                      <View className="mt-1 gap-1">
+                        <View className="flex-row justify-between text-[11px]">
+                          <Text className="text-[11px] text-emerald-400 font-bold">
+                            {q.correctCount} Correct
+                          </Text>
+                          <Text className="text-[11px] text-rose-400 font-bold">
+                            {q.incorrectCount} Incorrect
+                          </Text>
+                        </View>
+                        <View className="w-full h-2 bg-slate-700/80 rounded-full overflow-hidden flex-row">
+                          <View
+                            className="h-full bg-emerald-500"
+                            style={{ width: `${q.percentCorrect}%` }}
+                          />
+                          <View
+                            className="h-full bg-rose-500"
+                            style={{ width: `${100 - q.percentCorrect}%` }}
+                          />
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
     </View>

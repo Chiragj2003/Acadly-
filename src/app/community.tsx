@@ -34,7 +34,16 @@ import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
 import { ScreenWrapper, Badge } from '@/components/ui';
 import { DocumentReaderModal } from '@/components/academic';
-import { useAcademic, CommunityPost, PDFMaterialItem } from '@/context/AcademicContext';
+import { CommunityPost } from '@/services/communityService';
+import { PDFMaterialItem } from '@/services/materialService';
+import {
+  useCommunityPosts,
+  useCreateCommunityPost,
+  useUpvoteCommunityPost,
+  useAddCommunityComment,
+  useVerifyCommunityAnswer,
+} from '@/hooks/queries/useCommunityQueries';
+import { useStudyMaterials, useUploadMaterial } from '@/hooks/queries/useMaterialQueries';
 import { useAuth } from '@/context/AuthContext';
 import {
   DUMMY_PDF_CATALOG,
@@ -54,16 +63,15 @@ const PDF_CATEGORIES: { id: 'all' | 'notes' | 'formula_sheet' | 'pyq' | 'dpp'; l
 
 export default function PinterestCommunityScreen() {
   const router = useRouter();
-  const { userRole } = useAuth();
-  const {
-    communityPosts,
-    addCommunityPost,
-    upvoteCommunityPost,
-    addCommunityComment,
-    verifyCommunityComment,
-    pdfMaterials,
-    uploadPDFMaterial,
-  } = useAcademic();
+  const { user, userRole, activeInstitute } = useAuth();
+  const { data: communityPosts = [] } = useCommunityPosts(activeInstitute?.id);
+  const { data: pdfMaterials = [] } = useStudyMaterials(activeInstitute?.id);
+
+  const createPostMutation = useCreateCommunityPost();
+  const upvotePostMutation = useUpvoteCommunityPost();
+  const addCommentMutation = useAddCommunityComment();
+  const verifyAnswerMutation = useVerifyCommunityAnswer();
+  const uploadMaterialMutation = useUploadMaterial();
 
   const [activeTab, setActiveTab] = useState<'doubts' | 'library'>('doubts');
   const [selectedSubject, setSelectedSubject] = useState('All');
@@ -85,7 +93,7 @@ export default function PinterestCommunityScreen() {
   const [pdfUploadTitle, setPdfUploadTitle] = useState('');
   const [pdfUploadSubject, setPdfUploadSubject] = useState('Physics');
   const [pdfUploadCategory, setPdfUploadCategory] = useState<'notes' | 'formula_sheet' | 'pyq' | 'dpp'>('notes');
-  const [selectedUploadFile, setSelectedUploadFile] = useState<{ name: string; size?: string } | null>(null);
+  const [selectedUploadFile, setSelectedUploadFile] = useState<{ name: string; size?: string; uri?: string } | null>(null);
 
   // Active Discussion Modal (Replies & Teacher Verification)
   const [activeDiscussionPost, setActiveDiscussionPost] = useState<CommunityPost | null>(null);
@@ -114,13 +122,23 @@ export default function PinterestCommunityScreen() {
       return;
     }
     const subject = selectedSubject === 'All' ? 'Physics' : selectedSubject;
-    await addCommunityPost(newTitle, newContent, subject, attachedFileName, attachedFileUri);
+    await createPostMutation.mutateAsync({
+      instituteId: activeInstitute?.id || 'a0000000-0000-0000-0000-000000000001',
+      authorId: user?.id || 'u0000000-0000-0000-0000-000000000001',
+      authorName: user?.full_name || 'Amelia Sharma',
+      authorRole: (userRole as any) || 'student',
+      title: newTitle,
+      content: newContent,
+      subject,
+      attachmentName: attachedFileName,
+      attachmentUrl: attachedFileUri,
+    });
     setNewTitle('');
     setNewContent('');
     setAttachedFileName(undefined);
     setAttachedFileUri(undefined);
     setIsAsking(false);
-    Alert.alert('Question Published! 🎓', 'Your peer group and teachers have been notified in the forum.');
+    Alert.alert('Question Published', 'Your peer group and teachers have been notified in the forum.');
   };
 
   // Pick PDF for Uploading Note
@@ -133,7 +151,7 @@ export default function PinterestCommunityScreen() {
       if (!res.canceled && res.assets && res.assets.length > 0) {
         const file = res.assets[0];
         const sizeMb = file.size ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` : '1.8 MB';
-        setSelectedUploadFile({ name: file.name, size: sizeMb });
+        setSelectedUploadFile({ name: file.name, size: sizeMb, uri: file.uri });
       }
     } catch {
       Alert.alert('File Picker', 'Could not open document picker.');
@@ -147,8 +165,16 @@ export default function PinterestCommunityScreen() {
       return;
     }
     const fileName = selectedUploadFile?.name || `${pdfUploadTitle.replace(/\s+/g, '_')}.pdf`;
-    const fileSize = selectedUploadFile?.size || '2.4 MB';
-    await uploadPDFMaterial(pdfUploadTitle, pdfUploadSubject, pdfUploadCategory, fileName, fileSize);
+    if (selectedUploadFile?.uri) {
+      await uploadMaterialMutation.mutateAsync({
+        fileUri: selectedUploadFile.uri,
+        fileName,
+        title: pdfUploadTitle,
+        category: pdfUploadCategory,
+        instituteId: activeInstitute?.id || 'a0000000-0000-0000-0000-000000000001',
+        uploadedBy: user?.id || 'u0000000-0000-0000-0000-000000000001',
+      });
+    }
     setIsUploadingPdf(false);
     setPdfUploadTitle('');
     setSelectedUploadFile(null);
@@ -158,9 +184,15 @@ export default function PinterestCommunityScreen() {
   // Submit Reply
   const handleSubmitReply = async () => {
     if (!activeDiscussionPost || !newReplyText.trim()) return;
-    await addCommunityComment(activeDiscussionPost.id, newReplyText.trim(), userRole === 'teacher');
+    await addCommentMutation.mutateAsync({
+      postId: activeDiscussionPost.id,
+      authorId: user?.id || 'u0000000-0000-0000-0000-000000000001',
+      authorName: user?.full_name || (userRole === 'teacher' ? 'Prof. Vikram Joshi' : 'Amelia Sharma'),
+      authorRole: (userRole as any) || 'student',
+      content: newReplyText.trim(),
+      isTeacherVerified: userRole === 'teacher',
+    });
     setNewReplyText('');
-    // refresh active discussion post
     const updated = communityPosts.find((p) => p.id === activeDiscussionPost.id);
     if (updated) {
       setActiveDiscussionPost(updated);
@@ -170,7 +202,16 @@ export default function PinterestCommunityScreen() {
   // Toggle Verification on Comment
   const handleToggleVerifyComment = async (commentId: string) => {
     if (!activeDiscussionPost) return;
-    verifyCommunityComment(activeDiscussionPost.id, commentId);
+    const targetComment = activeDiscussionPost.comments.find((c) => c.id === commentId);
+    const nextVerified = !targetComment?.isTeacherVerified;
+
+    await verifyAnswerMutation.mutateAsync({
+      commentId,
+      postId: activeDiscussionPost.id,
+      verifiedBy: user?.full_name || 'Prof. Vikram Joshi',
+      answerText: targetComment?.text || 'Verified Faculty Solution',
+      isVerified: nextVerified,
+    });
     const updated = communityPosts.find((p) => p.id === activeDiscussionPost.id);
     if (updated) {
       setActiveDiscussionPost(updated);
@@ -416,7 +457,13 @@ export default function PinterestCommunityScreen() {
                 {/* Bottom Actions Bar */}
                 <View className="flex-row items-center justify-between pt-2.5 border-t border-slate-100">
                   <TouchableOpacity
-                    onPress={() => upvoteCommunityPost(post.id)}
+                    onPress={() =>
+                      upvotePostMutation.mutate({
+                        postId: post.id,
+                        userId: user?.id || 'u0000000-0000-0000-0000-000000000001',
+                        instituteId: activeInstitute?.id,
+                      })
+                    }
                     className="flex-row items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 active:scale-95"
                   >
                     <ThumbsUp size={12} color="#2563EB" />

@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { useAuth } from './AuthContext';
-import { useAcademic } from './AcademicContext';
+import { useUI } from './UIContext';
+import { sendChatMessage, togglePinMessage } from '@/services/chatService';
 
 export interface ChatMessage {
   id: string;
@@ -19,6 +20,7 @@ export interface ChatMessage {
   attachmentType?: 'image' | 'pdf';
   attachmentSize?: string;
   isPinned?: boolean;
+  failed?: boolean;
 }
 
 export interface ChatRoom {
@@ -217,11 +219,15 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, userRole } = useAuth();
-  const { teacherProfile } = useAcademic();
+  const { teacherProfile } = useUI();
 
   const [rooms, setRooms] = useState<ChatRoom[]>(INITIAL_ROOMS);
   const [activeRoomId, setActiveRoomId] = useState<string>('room-batch-sakura');
   const [messagesMap, setMessagesMap] = useState<Record<string, ChatMessage[]>>(INITIAL_MESSAGES);
+
+  // Single persistent active Realtime channel reference per room
+  const channelRef = useRef<any>(null);
+  const activeSubscriptionRoomIdRef = useRef<string | null>(null);
 
   // Load persisted rooms & messages from AsyncStorage
   useEffect(() => {
@@ -253,14 +259,26 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Supabase Realtime Subscription per active room
+  // Supabase Realtime Subscription per active room (Depends ONLY on activeRoomId)
   useEffect(() => {
     if (!activeRoomId) return;
 
-    // Listen to real-time broadcast events on channel
+    // If channel is already subscribed to this room, reuse it without teardown
+    if (activeSubscriptionRoomIdRef.current === activeRoomId && channelRef.current) {
+      return;
+    }
+
+    // Clean up previous channel if any
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+
+    activeSubscriptionRoomIdRef.current = activeRoomId;
     const channel = supabase.channel(`chat_${activeRoomId}`, {
       config: { broadcast: { self: false } },
     });
+    channelRef.current = channel;
 
     channel
       .on('broadcast', { event: 'new_message' }, (payload) => {
@@ -269,9 +287,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setMessagesMap((prev) => {
             const list = prev[activeRoomId] || [];
             if (list.some((m) => m.id === incomingMsg.id)) return prev;
-            const updated = { ...prev, [activeRoomId]: [...list, incomingMsg] };
-            persistState(rooms, updated);
-            return updated;
+            return { ...prev, [activeRoomId]: [...list, incomingMsg] };
           });
         }
       })
@@ -285,25 +301,23 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
               id: row.id,
               roomId: row.room_id || row.roomId,
               senderId: row.sender_id || row.senderId,
-              senderName: row.sender_role === 'teacher' ? 'Prof. Vikram Joshi ⚡' : 'Student',
+              senderName: row.sender_name || (row.sender_role === 'teacher' ? 'Prof. Vikram Joshi ⚡' : 'Student'),
               senderRole: row.sender_role || 'student',
               senderAvatarEmoji: row.sender_role === 'teacher' ? '👨‍🏫' : '🌸',
-              text: row.message_text || '',
+              text: row.text || row.message_text || '',
               createdAt: row.created_at || new Date().toISOString(),
               timeFormatted: new Date(row.created_at || Date.now()).toLocaleTimeString([], {
                 hour: '2-digit',
                 minute: '2-digit',
               }),
-              attachmentName: row.attachment_url ? 'Attachment.pdf' : undefined,
+              attachmentName: row.attachment_name || (row.attachment_url ? 'Attachment.pdf' : undefined),
               attachmentType: row.attachment_type,
               isPinned: row.is_pinned || false,
             };
             setMessagesMap((prev) => {
               const list = prev[activeRoomId] || [];
               if (list.some((m) => m.id === incomingMsg.id)) return prev;
-              const updated = { ...prev, [activeRoomId]: [...list, incomingMsg] };
-              persistState(rooms, updated);
-              return updated;
+              return { ...prev, [activeRoomId]: [...list, incomingMsg] };
             });
           }
         }
@@ -325,9 +339,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+        activeSubscriptionRoomIdRef.current = null;
+      }
     };
-  }, [activeRoomId, rooms, messagesMap]);
+  }, [activeRoomId]);
 
   // Active room data
   const activeRoom = rooms.find((r) => r.id === activeRoomId) || rooms[0];
@@ -360,7 +378,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: `msg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       roomId: activeRoomId,
       senderId: isTeacher ? 'prof-vikram' : (user?.id || 'stud-amelia'),
-      senderName: isTeacher ? teacherProfile.fullName : (user?.full_name || 'Amelia Sharma 🌸'),
+      senderName: isTeacher ? teacherProfile.fullName : (user?.full_name || 'Amelia Sharma'),
       senderRole: isTeacher ? 'teacher' : 'student',
       senderAvatarEmoji: isTeacher ? '👨‍🏫' : '🌸',
       text: text.trim(),
@@ -372,7 +390,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       attachmentSize: attachment?.size,
     };
 
-    // Update local state
+    // Update local state optimistically
     const currentList = messagesMap[activeRoomId] || [];
     const updatedMessages = {
       ...messagesMap,
@@ -397,21 +415,43 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRooms(updatedRooms);
     await persistState(updatedRooms, updatedMessages);
 
-    // Broadcast in real-time via Supabase channel
+    // Broadcast via existing active room channel without creating new channels
     try {
-      const channel = supabase.channel(`chat_${activeRoomId}`);
-      const payload = {
-        type: 'broadcast' as const,
-        event: 'new_message',
-        payload: newMsg,
-      };
-      if (typeof (channel as any).httpSend === 'function') {
-        await (channel as any).httpSend(payload);
-      } else {
-        await channel.send(payload);
+      if (channelRef.current) {
+        const payload = {
+          type: 'broadcast' as const,
+          event: 'new_message',
+          payload: newMsg,
+        };
+        if (typeof (channelRef.current as any).httpSend === 'function') {
+          await (channelRef.current as any).httpSend(payload);
+        } else {
+          await channelRef.current.send(payload);
+        }
+      }
+
+      // If Supabase is active and activeRoomId is UUID, persist to Postgres
+      if (isSupabaseConfigured && activeRoomId.includes('-') && activeRoomId.length === 36) {
+        await sendChatMessage({
+          roomId: activeRoomId,
+          senderId: user?.id || 'u0000000-0000-0000-0000-000000000001',
+          senderName: newMsg.senderName,
+          senderRole: isTeacher ? 'teacher' : 'student',
+          text: newMsg.text,
+          attachmentUrl: attachment?.uri,
+          attachmentName: attachment?.name,
+        });
       }
     } catch (err) {
       console.warn('Realtime broadcast note (using local state fallback):', err);
+      // Mark failed for retry
+      setMessagesMap((prev) => {
+        const list = prev[activeRoomId] || [];
+        return {
+          ...prev,
+          [activeRoomId]: list.map((m) => (m.id === newMsg.id ? { ...m, failed: true } : m)),
+        };
+      });
     }
   };
 
@@ -433,18 +473,23 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRooms(updatedRooms);
     await persistState(updatedRooms, messagesMap);
 
-    // Broadcast pin to all participants
+    // Broadcast pin via existing active channel
     try {
-      const channel = supabase.channel(`chat_${activeRoomId}`);
-      const payload = {
-        type: 'broadcast' as const,
-        event: 'pin_message',
-        payload: { messageId, roomId: activeRoomId },
-      };
-      if (typeof (channel as any).httpSend === 'function') {
-        await (channel as any).httpSend(payload);
-      } else {
-        await channel.send(payload);
+      if (channelRef.current) {
+        const payload = {
+          type: 'broadcast' as const,
+          event: 'pin_message',
+          payload: { messageId, roomId: activeRoomId },
+        };
+        if (typeof (channelRef.current as any).httpSend === 'function') {
+          await (channelRef.current as any).httpSend(payload);
+        } else {
+          await channelRef.current.send(payload);
+        }
+      }
+
+      if (isSupabaseConfigured && messageId.includes('-') && messageId.length === 36) {
+        await togglePinMessage(messageId, true, user?.id || 'u0000000-0000-0000-0000-000000000001');
       }
     } catch (err) {
       console.warn('Realtime pin note:', err);
@@ -461,6 +506,23 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     setRooms(updatedRooms);
     await persistState(updatedRooms, messagesMap);
+
+    try {
+      if (channelRef.current) {
+        const payload = {
+          type: 'broadcast' as const,
+          event: 'unpin_message',
+          payload: { roomId },
+        };
+        if (typeof (channelRef.current as any).httpSend === 'function') {
+          await (channelRef.current as any).httpSend(payload);
+        } else {
+          await channelRef.current.send(payload);
+        }
+      }
+    } catch (err) {
+      console.warn('Realtime unpin note:', err);
+    }
   };
 
   // Create new direct chat

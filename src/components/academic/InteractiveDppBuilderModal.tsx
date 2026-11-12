@@ -46,6 +46,7 @@ interface InteractiveDppBuilderModalProps {
     totalMarks: number;
     questions: InteractiveQuestion[];
   }) => Promise<void>;
+  batchId?: string;
   defaultBatchName?: string;
   defaultSubject?: string;
 }
@@ -54,6 +55,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
   visible,
   onClose,
   onPublish,
+  batchId,
   defaultBatchName = 'Class 12 • JEE Advanced (Morning)',
   defaultSubject = 'Physics',
 }) => {
@@ -160,11 +162,54 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
       Alert.alert('Required Field', 'Please enter a title for the interactive DPP.');
       return;
     }
+
+    if (!questions || questions.length === 0) {
+      Alert.alert('Validation Error', 'A quiz must contain at least 1 question.');
+      return;
+    }
+
     for (let i = 0; i < questions.length; i++) {
-      if (!questions[i].questionText.trim()) {
+      const q = questions[i];
+      if (!q.questionText.trim()) {
         Alert.alert('Incomplete Question', `Please fill in Question #${i + 1} text before publishing.`);
         return;
       }
+
+      if (!q.marks || Number(q.marks) <= 0) {
+        Alert.alert('Invalid Marks', `Question #${i + 1} must have marks greater than 0.`);
+        return;
+      }
+
+      if (q.type === 'mcq') {
+        if (!q.options || q.options.length < 2) {
+          Alert.alert('Invalid MCQ', `Question #${i + 1} must have at least 2 options.`);
+          return;
+        }
+        for (let j = 0; j < q.options.length; j++) {
+          if (!q.options[j].trim()) {
+            Alert.alert('Incomplete Option', `Option ${String.fromCharCode(65 + j)} for Question #${i + 1} cannot be blank.`);
+            return;
+          }
+        }
+        if (q.correctOptionIndex < 0 || q.correctOptionIndex >= q.options.length) {
+          Alert.alert('Invalid Correct Option', `Please select a valid correct option for Question #${i + 1}.`);
+          return;
+        }
+      } else if (q.type === 'true_false') {
+        if (!q.options || q.options.length !== 2) {
+          Alert.alert('Invalid True/False', `Question #${i + 1} must have exactly 2 options (True and False).`);
+          return;
+        }
+        if (q.correctOptionIndex !== 0 && q.correctOptionIndex !== 1) {
+          Alert.alert('Invalid Correct Option', `Please select True or False for Question #${i + 1}.`);
+          return;
+        }
+      }
+    }
+
+    if (totalCalculatedMarks <= 0) {
+      Alert.alert('Invalid Marks', 'Total quiz marks must be greater than 0.');
+      return;
     }
 
     setIsSubmitting(true);
@@ -172,7 +217,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
       await onPublish({
         title: title.trim(),
         subject,
-        batchId: 'batch-01',
+        batchId: batchId || 'b0000000-0000-0000-0000-000000000001',
         totalMarks: totalCalculatedMarks,
         questions,
       });

@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, Pressable, Platform, StyleSheet } from 'react-native';
-import { Bell, ChevronDown, ArrowLeft, User, LogOut } from 'lucide-react-native';
+import { Bell, ChevronDown, ArrowLeft, User, LogOut, Languages } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
+import { setAppLanguage } from '@/i18n';
 
 export interface HeaderBarProps {
   title: string;
@@ -20,7 +22,7 @@ export interface HeaderBarProps {
 
 export const HeaderBar: React.FC<HeaderBarProps> = ({
   title,
-  instituteName = 'Bloom Science Academy',
+  instituteName = 'Academy Hub',
   instituteSubtitle,
   profileInitials,
   onInstitutePress,
@@ -33,6 +35,14 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   variant = 'default',
   className = '',
 }) => {
+  const { i18n } = useTranslation();
+  const isHindi = i18n.language ? i18n.language.startsWith('hi') : false;
+
+  const handleToggleLanguage = async () => {
+    const nextLang = isHindi ? 'en' : 'hi';
+    await setAppLanguage(nextLang);
+  };
+
   return (
     <View
       style={{ height: 56 }}
@@ -87,6 +97,19 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 
       {/* Right Action Icons Zone */}
       <View className="flex-row items-center gap-2 shrink-0">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Toggle app language"
+          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+          onPress={handleToggleLanguage}
+          className="h-8 px-2 rounded-full bg-blue-50 border border-blue-200 flex-row items-center gap-1 active:scale-95 shadow-2xs"
+        >
+          <Languages size={13} color="#2563EB" />
+          <Text className="text-[10px] font-black text-blue-700 uppercase">
+            {isHindi ? 'हिन्दी' : 'EN'}
+          </Text>
+        </Pressable>
+
         {rightAction}
 
         {onNotificationPress && (

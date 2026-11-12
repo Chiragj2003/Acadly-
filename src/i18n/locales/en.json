@@ -8,7 +8,11 @@
     "loading": "Loading...",
     "signOut": "Sign Out",
     "search": "Search",
-    "comingSoon": "Coming Soon"
+    "comingSoon": "Coming Soon",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit"
   },
   "roles": {
     "student": "Student",
@@ -35,6 +39,18 @@
     "markAllPresent": "Mark All Present",
     "recordSuccess": "Attendance recorded successfully"
   },
+  "academic": {
+    "quiz": "Interactive Quiz",
+    "startQuiz": "Start Quiz",
+    "submitQuiz": "Submit Quiz",
+    "quizCompleted": "Quiz Completed",
+    "totalMarks": "Total Marks",
+    "question": "Question",
+    "score": "Score",
+    "accuracy": "Accuracy",
+    "assignments": "Assignments",
+    "submissions": "Submissions"
+  },
   "navigation": {
     "home": "Home",
     "study": "Study Vault",
@@ -42,5 +58,12 @@
     "roster": "Class Roster",
     "chat": "Messages",
     "profile": "Profile"
+  },
+  "settings": {
+    "language": "App Language",
+    "english": "English",
+    "hindi": "हिन्दी (Hindi)",
+    "darkMode": "Dark Mode",
+    "notifications": "Push Notifications"
   }
 }

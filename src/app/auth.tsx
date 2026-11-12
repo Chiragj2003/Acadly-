@@ -33,9 +33,9 @@ import {
   Layers,
 } from 'lucide-react-native';
 
-import { useAuth, DUMMY_ACCOUNTS } from '@/context/AuthContext';
-import { useInstitute } from '@/context/InstituteContext';
-import { useAcademic } from '@/context/AcademicContext';
+import { useAuth, useInstitute, DUMMY_ACCOUNTS } from '@/context/AuthContext';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { useUI } from '@/context/UIContext';
 import { useChild } from '@/context/ChildContext';
 import { Mascot } from '@/components/ui/Mascot';
 import { UserRole } from '@/types/database';
@@ -53,7 +53,7 @@ export default function CleanAuthScreen() {
     setCoachingProfile,
     setTeacherMode,
     linkToCoachingCenter,
-  } = useAcademic();
+  } = useUI();
   const { addChildByCodeOrPhone } = useChild();
 
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
@@ -182,19 +182,41 @@ export default function CleanAuthScreen() {
         });
         setTeacherMode('solo');
 
-        await signUp(fullName, email, 'teacher');
+        const res = await signUp(fullName, email, 'teacher', password);
+        if (!res.success) {
+          Alert.alert('Sign Up Failed', res.error || 'Could not register teacher account.');
+          return;
+        }
         Alert.alert(
-          'Solo Teacher Account Ready! 🍎',
+          'Solo Teacher Account Ready',
           `Your shareable Teacher Code is: ${generatedCode}\nStudents can join your batches directly with this code.`,
           [{ text: 'Open Teacher Desk', onPress: () => navigateToRoleScreen('teacher') }]
         );
       } else {
         // Faculty joining an institute
         setTeacherMode('coaching_faculty');
+        const res = await signUp(fullName, email, 'teacher', password);
+        if (!res.success) {
+          Alert.alert('Sign Up Failed', res.error || 'Could not link faculty account.');
+          return;
+        }
+        if (isSupabaseConfigured && facultyCoachingCode.trim()) {
+          const { error: rpcErr } = await supabase.rpc('join_institute_as_teacher', {
+            p_code: facultyCoachingCode.trim(),
+            p_qualification: teacherQualification,
+            p_specialization: teacherSubjects,
+            p_specialization_subjects: teacherSubjects.split(',').map((s) => s.trim()),
+            p_experience_years: parseFloat(teacherExperience) || 0,
+            p_monthly_fee_rate: parseFloat(teacherFeeRate) || 0,
+            p_bio: teacherBio,
+          });
+          if (rpcErr) {
+            console.warn('[Teacher SignUp RPC Warning]:', rpcErr.message);
+          }
+        }
         await linkToCoachingCenter(facultyCoachingCode);
-        await signUp(fullName, email, 'teacher');
         Alert.alert(
-          'Coaching Faculty Account Connected! 🏫',
+          'Coaching Faculty Account Connected',
           `Linked to Institute Code: ${facultyCoachingCode.toUpperCase()}`,
           [{ text: 'Open Faculty Desk', onPress: () => navigateToRoleScreen('teacher') }]
         );
@@ -204,9 +226,9 @@ export default function CleanAuthScreen() {
 
     // Coaching Center / Admin Sign Up
     if (selectedRole === 'admin') {
-      const generatedInvite = `${instituteName.substring(0, 4).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const generatedInvite = `${(instituteName || 'ACAD').substring(0, 4).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
       setCoachingProfile({
-        name: instituteName,
+        name: instituteName || 'Academy Center',
         city: instituteCity,
         subjectsOffered: instituteSubjects.split(',').map((s) => s.trim()),
         directorName: fullName,
@@ -214,9 +236,27 @@ export default function CleanAuthScreen() {
         inviteCode: generatedInvite,
       });
 
-      await signUp(fullName, email, 'admin');
+      const res = await signUp(fullName, email, 'admin', password);
+      if (!res.success) {
+        Alert.alert('Sign Up Failed', res.error || 'Could not create academy account.');
+        return;
+      }
+
+      if (isSupabaseConfigured) {
+        const { error: rpcErr } = await supabase.rpc('create_institute_and_admin', {
+          p_name: instituteName || 'Academy Center',
+          p_center_code: generatedInvite,
+          p_city: instituteCity || 'City',
+          p_phone: directorPhone,
+          p_subjects: instituteSubjects.split(',').map((s) => s.trim()),
+        });
+        if (rpcErr) {
+          console.warn('[Admin SignUp RPC Warning]:', rpcErr.message);
+        }
+      }
+
       Alert.alert(
-        'Coaching Academy Created! 🏫',
+        'Coaching Academy Created',
         `Your Institute Invite Code is: ${generatedInvite}\nTeachers & Students can join under this code.`,
         [{ text: 'Open Admin Command', onPress: () => navigateToRoleScreen('admin') }]
       );
@@ -225,39 +265,62 @@ export default function CleanAuthScreen() {
 
     // Student Sign Up
     if (selectedRole === 'student') {
-      const res = await signUp(fullName, email, 'student');
+      const res = await signUp(fullName, email, 'student', password);
       if (res.success) {
         Alert.alert(
-          'Student Account Created! 🌸',
+          'Student Account Created',
           'Now enter your Teacher Code or Coaching Code to connect with your classes.',
-          [{ text: 'Connect Teacher Code', onPress: () => router.push('/join-institute') }]
+          [{ text: 'Connect Code', onPress: () => router.push('/join-institute') }]
         );
+      } else {
+        Alert.alert('Sign Up Failed', res.error || 'Could not register student account.');
       }
       return;
     }
 
     // Parent Sign Up
     if (selectedRole === 'parent') {
-      const res = await signUp(fullName, email, 'parent');
+      const res = await signUp(fullName, email, 'parent', password);
       if (res.success) {
         if (parentChildCode.trim()) {
+          if (isSupabaseConfigured) {
+            const { error: rpcErr } = await supabase.rpc('link_child_by_code', {
+              p_student_code: parentChildCode.trim(),
+              p_relationship: 'Parent',
+            });
+            if (rpcErr) {
+              console.warn('[Parent SignUp RPC Warning]:', rpcErr.message);
+            }
+          }
           await addChildByCodeOrPhone(parentChildCode);
         }
-        Alert.alert('Parent Account Ready! 🏡', `Welcome, ${fullName}! Your child profile is linked.`);
+        Alert.alert('Parent Account Ready', `Welcome, ${fullName}! Your child profile is linked.`);
         navigateToRoleScreen('parent');
+      } else {
+        Alert.alert('Sign Up Failed', res.error || 'Could not register parent account.');
       }
     }
   };
 
-  const handleForgotPasswordSubmit = () => {
-    if (!forgotEmail.trim() || !forgotEmail.includes('@')) {
+  const handleForgotPasswordSubmit = async () => {
+    const cleanForgotEmail = forgotEmail.trim().toLowerCase();
+    if (!cleanForgotEmail || !cleanForgotEmail.includes('@')) {
       Alert.alert('Validation Error', 'Please enter a valid email address.');
       return;
     }
+    if (isSupabaseConfigured) {
+      const { error } = await supabase.auth.resetPasswordForEmail(cleanForgotEmail, {
+        redirectTo: 'acadly://reset-password',
+      });
+      if (error) {
+        Alert.alert('Password Reset Failed', error.message);
+        return;
+      }
+    }
     setIsForgotPasswordOpen(false);
     Alert.alert(
-      'Reset Link Dispatched 📬',
-      `A password reset link has been sent to: ${forgotEmail}. Please check your inbox to update your password.`
+      'Reset Link Dispatched',
+      `A password reset link has been sent to: ${cleanForgotEmail}. Please check your inbox to update your password.`
     );
   };
 
@@ -265,7 +328,8 @@ export default function CleanAuthScreen() {
     id: UserRole;
     title: string;
     subtitle: string;
-    emoji: string;
+    icon: any;
+    iconColor: string;
     badge: string;
     bgColor: string;
     borderColor: string;
@@ -274,7 +338,8 @@ export default function CleanAuthScreen() {
       id: 'student',
       title: 'Student & Scholar',
       subtitle: 'Watch lectures, solve DPPs & access PDF notes',
-      emoji: '🌱',
+      icon: GraduationCap,
+      iconColor: '#059669',
       badge: 'Learner',
       bgColor: 'bg-emerald-50',
       borderColor: 'border-emerald-300',
@@ -283,7 +348,8 @@ export default function CleanAuthScreen() {
       id: 'teacher',
       title: 'Teacher & Educator',
       subtitle: 'Solo tutor, school faculty, or coaching mentor',
-      emoji: '👨‍🏫',
+      icon: BookOpen,
+      iconColor: '#E11D48',
       badge: 'Educator',
       bgColor: 'bg-rose-50',
       borderColor: 'border-rose-300',
@@ -292,7 +358,8 @@ export default function CleanAuthScreen() {
       id: 'admin',
       title: 'School / College / Academy',
       subtitle: 'Institutes, colleges, schools & academic centers',
-      emoji: '🏫',
+      icon: Building,
+      iconColor: '#4F46E5',
       badge: 'Director',
       bgColor: 'bg-indigo-50',
       borderColor: 'border-indigo-300',
@@ -301,7 +368,8 @@ export default function CleanAuthScreen() {
       id: 'parent',
       title: 'Parent & Guardian',
       subtitle: 'Track attendance, report cards & academic progress',
-      emoji: '🏡',
+      icon: Users,
+      iconColor: '#D97706',
       badge: 'Family',
       bgColor: 'bg-amber-50',
       borderColor: 'border-amber-300',
@@ -483,64 +551,68 @@ export default function CleanAuthScreen() {
               </Text>
             </TouchableOpacity>
 
-            {/* Quick Demo Test Accounts (1-Tap Instant Sign-In) */}
-            <View className="mt-5 pt-4 border-t border-slate-100">
-              <View className="flex-row items-center justify-between mb-2">
-                <View className="flex-row items-center gap-1.5">
-                  <Sparkles size={13} color="#2563EB" />
-                  <Text className="text-xs font-black text-slate-800 uppercase tracking-wider">
-                    Quick Demo Accounts (1-Tap Sign In)
-                  </Text>
+            {/* Quick Demo Test Accounts (1-Tap Instant Sign-In) - Gated behind __DEV__ */}
+            {Boolean(__DEV__) && (
+              <View className="mt-5 pt-4 border-t border-slate-100">
+                <View className="flex-row items-center justify-between mb-2">
+                  <View className="flex-row items-center gap-1.5">
+                    <Sparkles size={13} color="#2563EB" />
+                    <Text className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                      Quick Demo Accounts (1-Tap Sign In)
+                    </Text>
+                  </View>
+                  <Text className="text-[10px] font-bold text-blue-600">Dev Mode</Text>
                 </View>
-                <Text className="text-[10px] font-bold text-blue-600">5 Test Roles</Text>
-              </View>
 
-              <Text className="text-[11px] text-slate-500 mb-3">
-                Tap any test account below to auto-fill credentials and log in instantly:
-              </Text>
+                <Text className="text-[11px] text-slate-500 mb-3">
+                  Tap any test account below to auto-fill credentials and log in instantly:
+                </Text>
 
-              <View className="gap-2">
-                {DUMMY_ACCOUNTS.map((acc) => (
-                  <TouchableOpacity
-                    key={acc.id}
-                    activeOpacity={0.85}
-                    onPress={async () => {
-                      setEmail(acc.email);
-                      setPassword(acc.password);
-                      setSelectedRole(acc.role);
-                      const res = await signIn(acc.email, acc.password, acc.role);
-                      if (res.success) {
-                        navigateToRoleScreen(res.role || acc.role);
-                      }
-                    }}
-                    className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex-row items-center justify-between gap-2.5 active:scale-98"
-                  >
-                    <View className="flex-row items-center gap-2.5 flex-1 min-w-0">
-                      <View className="w-9 h-9 rounded-full bg-slate-900 items-center justify-center shrink-0">
-                        <Text className="text-xs font-black text-white">{acc.avatarInitials}</Text>
-                      </View>
-                      <View className="flex-1 min-w-0">
-                        <View className="flex-row items-center gap-1.5">
-                          <Text className="text-xs font-black text-slate-900" numberOfLines={1}>
-                            {acc.name}
-                          </Text>
-                          <View className={`px-1.5 py-0.5 rounded border ${acc.badgeColor}`}>
-                            <Text className="text-[9px] font-black uppercase">{acc.badge}</Text>
-                          </View>
+                <View className="gap-2">
+                  {DUMMY_ACCOUNTS.map((acc) => (
+                    <TouchableOpacity
+                      key={acc.id}
+                      activeOpacity={0.85}
+                      onPress={async () => {
+                        setEmail(acc.email);
+                        setPassword(acc.password);
+                        setSelectedRole(acc.role);
+                        const res = await signIn(acc.email, acc.password, acc.role);
+                        if (res.success) {
+                          navigateToRoleScreen(res.role || acc.role);
+                        } else {
+                          Alert.alert('Sign In Failed', res.error || 'Failed to authenticate.');
+                        }
+                      }}
+                      className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex-row items-center justify-between gap-2.5 active:scale-98"
+                    >
+                      <View className="flex-row items-center gap-2.5 flex-1 min-w-0">
+                        <View className="w-9 h-9 rounded-full bg-slate-900 items-center justify-center shrink-0">
+                          <Text className="text-xs font-black text-white">{acc.avatarInitials}</Text>
                         </View>
-                        <Text className="text-[10px] text-slate-500 mt-0.5" numberOfLines={1}>
-                          {acc.email} • {acc.roleLabel}
-                        </Text>
+                        <View className="flex-1 min-w-0">
+                          <View className="flex-row items-center gap-1.5">
+                            <Text className="text-xs font-black text-slate-900" numberOfLines={1}>
+                              {acc.name}
+                            </Text>
+                            <View className={`px-1.5 py-0.5 rounded border ${acc.badgeColor}`}>
+                              <Text className="text-[9px] font-black uppercase">{acc.badge}</Text>
+                            </View>
+                          </View>
+                          <Text className="text-[10px] text-slate-500 mt-0.5" numberOfLines={1}>
+                            {acc.email} • {acc.roleLabel}
+                          </Text>
+                        </View>
                       </View>
-                    </View>
 
-                    <View className="bg-white border border-slate-200 px-2.5 py-1 rounded-xl shrink-0">
-                      <Text className="text-[11px] font-black text-blue-600">Login ⚡</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
+                      <View className="bg-white border border-slate-200 px-2.5 py-1 rounded-xl shrink-0">
+                        <Text className="text-[11px] font-black text-blue-600">Login ⚡</Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
+            )}
 
             {/* Bottom Toggle Link */}
             <View className="mt-4 pt-3 border-t border-slate-200 items-center">
@@ -584,7 +656,7 @@ export default function CleanAuthScreen() {
                     >
                       <View className="flex-row items-center gap-3 flex-1 pr-2">
                         <View className="w-11 h-11 rounded-2xl bg-white border border-black/10 items-center justify-center shadow-xs">
-                          <Text className="text-2xl">{role.emoji}</Text>
+                          <role.icon size={22} color={role.iconColor} />
                         </View>
                         <View className="flex-1">
                           <View className="flex-row items-center gap-1.5">
@@ -687,7 +759,7 @@ export default function CleanAuthScreen() {
                           teacherOption === 'solo' ? 'text-white' : 'text-slate-800'
                         }`}
                       >
-                        🍎 Solo Tuition Tutor
+                        Solo Tuition Tutor
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -701,7 +773,7 @@ export default function CleanAuthScreen() {
                           teacherOption === 'coaching_faculty' ? 'text-white' : 'text-slate-800'
                         }`}
                       >
-                        🏫 Institute Faculty
+                        Institute Faculty
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -905,11 +977,11 @@ export default function CleanAuthScreen() {
                     ? 'Creating Account...'
                     : selectedRole === 'teacher'
                     ? teacherOption === 'solo'
-                      ? 'Launch Solo Teacher Desk 🍎'
-                      : 'Connect to Institute Faculty 🏫'
+                      ? 'Launch Solo Teacher Desk'
+                      : 'Connect to Institute Faculty'
                     : selectedRole === 'admin'
-                    ? 'Register Coaching Center 🏫'
-                    : `Complete ${selectedRole.toUpperCase()} Registration 🌸`}
+                    ? 'Register Coaching Center'
+                    : `Complete ${selectedRole.toUpperCase()} Registration`}
                 </Text>
               </TouchableOpacity>
 

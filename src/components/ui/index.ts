@@ -11,3 +11,5 @@ export * from './Mascot';
 export * from './SubjectMascotCard';
 export * from './CuteProgressChart';
 export * from './BottomTabBar';
+export * from './LanguageSwitcher';
+

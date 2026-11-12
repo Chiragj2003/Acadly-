@@ -52,8 +52,8 @@ serve(async (req) => {
 
     // Fetch student fee record to verify balance
     const { data: feeRecord, error: feeError } = await supabaseClient
-      .from("student_fee_records")
-      .select("id, remaining_balance, student_id, title")
+      .from("student_fees")
+      .select("id, pending_amount, student_id, title")
       .eq("id", studentFeeRecordId)
       .eq("institute_id", instituteId)
       .single();
@@ -65,9 +65,9 @@ serve(async (req) => {
       });
     }
 
-    if (amount > Number(feeRecord.remaining_balance)) {
+    if (amount > Number(feeRecord.pending_amount)) {
       return new Response(
-        JSON.stringify({ error: `Amount ₹${amount} exceeds outstanding balance ₹${feeRecord.remaining_balance}` }),
+        JSON.stringify({ error: `Amount ₹${amount} exceeds outstanding balance ₹${feeRecord.pending_amount}` }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

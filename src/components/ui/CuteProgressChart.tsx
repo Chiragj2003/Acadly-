@@ -42,13 +42,13 @@ export const CuteProgressChart: React.FC = () => {
         <View className="flex-1 bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 items-center">
           <Text className="text-xs font-semibold text-slate-500">Time Invested</Text>
           <Text className="text-2xl font-black text-slate-900 mt-0.5">14.5</Text>
-          <Text className="text-[10px] font-bold text-blue-600 mt-0.5">Hours Studied ⏳</Text>
+          <Text className="text-[10px] font-bold text-blue-600 mt-0.5">Hours Studied</Text>
         </View>
 
         <View className="flex-1 bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 items-center">
           <Text className="text-xs font-semibold text-slate-500">Accuracy</Text>
           <Text className="text-2xl font-black text-slate-900 mt-0.5">94%</Text>
-          <Text className="text-[10px] font-bold text-purple-600 mt-0.5">Quiz Score 🎯</Text>
+          <Text className="text-[10px] font-bold text-purple-600 mt-0.5">Quiz Score</Text>
         </View>
       </View>
 

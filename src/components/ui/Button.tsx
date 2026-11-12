@@ -107,7 +107,9 @@ export const Button: React.FC<ButtonProps> = ({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={pressableProps.accessibilityLabel || title || undefined}
       accessibilityState={{ disabled: isDisabled, busy: loading }}
+      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       disabled={isDisabled}
       className={`flex-row items-center justify-center ${currentSize.container} ${currentVariant.container} ${
         currentSize.iconGap

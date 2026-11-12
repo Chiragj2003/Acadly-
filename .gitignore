@@ -48,5 +48,6 @@ yarn-error.*
 example
 
 # generated native folders
+coverage/
 /ios
 /android

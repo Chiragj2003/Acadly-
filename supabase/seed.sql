@@ -4,8 +4,13 @@
 -- NEVER RUN THIS FILE IN A PRODUCTION DATABASE ENVIRONMENT!
 -- ==============================================================================
 
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Guard check: Abort if explicitly flagged as production
+DO $$
+BEGIN
+    IF current_setting('app.environment', true) = 'production' THEN
+        RAISE EXCEPTION 'CANNOT RUN DEV SEED DATA IN PRODUCTION ENVIRONMENT!';
+    END IF;
+END $$;
 
 -- Define deterministic UUIDs for relational consistency
 DO $$
@@ -40,6 +45,9 @@ DECLARE
     v_parent_rec_1 UUID := '44444444-4444-4444-4444-444444444401';
     v_parent_rec_2 UUID := '44444444-4444-4444-4444-444444444402';
 
+    v_subject_1_id UUID := '55555555-5555-5555-5555-555555555511';
+    v_subject_2_id UUID := '55555555-5555-5555-5555-555555555512';
+
     v_batch_1_id UUID := '55555555-5555-5555-5555-555555555501';
     v_batch_2_id UUID := '55555555-5555-5555-5555-555555555502';
 
@@ -73,24 +81,21 @@ BEGIN
     -- --------------------------------------------------------------------------
     -- 2. Create Users in auth.users and auth.identities
     -- --------------------------------------------------------------------------
-    
-    -- Helper insertion for auth.users
     INSERT INTO auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
     VALUES
-        (v_admin_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin.dev@acadly.com', v_password_hash, NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Director Rajesh Gupta","role":"admin"}', NOW(), NOW()),
-        (v_teach_1_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'teacher.joshi@acadly.com', v_password_hash, NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Prof. Vikram Joshi","role":"teacher"}', NOW(), NOW()),
-        (v_teach_2_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'teacher.sen@acadly.com', v_password_hash, NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Dr. Meera Sen","role":"teacher"}', NOW(), NOW()),
-        (v_stud_1_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'student.amelia@acadly.com', v_password_hash, NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Amelia Sharma","role":"student"}', NOW(), NOW()),
-        (v_stud_2_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'student.kabir@acadly.com', v_password_hash, NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Kabir Singhania","role":"student"}', NOW(), NOW()),
-        (v_stud_3_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'student.zoya@acadly.com', v_password_hash, NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Zoya Khan","role":"student"}', NOW(), NOW()),
-        (v_stud_4_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'student.rohan@acadly.com', v_password_hash, NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Rohan Verma","role":"student"}', NOW(), NOW()),
-        (v_stud_5_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'student.aarav@acadly.com', v_password_hash, NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Aarav Sharma","role":"student"}', NOW(), NOW()),
-        (v_stud_6_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'student.ananya@acadly.com', v_password_hash, NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Ananya Patel","role":"student"}', NOW(), NOW()),
-        (v_parent_1_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'parent.sharma@acadly.com', v_password_hash, NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Rajesh Sharma","role":"parent"}', NOW(), NOW()),
-        (v_parent_2_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'parent.singhania@acadly.com', v_password_hash, NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Sanjay Singhania","role":"parent"}', NOW(), NOW())
+        (v_admin_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin.dev@acadly.com', v_password_hash, NOW(), json_build_object('provider','email','providers',json_build_array('email'),'role','admin','institute_id',v_inst_id), '{"full_name":"Director Rajesh Gupta","role":"admin"}', NOW(), NOW()),
+        (v_teach_1_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'teacher.joshi@acadly.com', v_password_hash, NOW(), json_build_object('provider','email','providers',json_build_array('email'),'role','teacher','institute_id',v_inst_id), '{"full_name":"Prof. Vikram Joshi","role":"teacher"}', NOW(), NOW()),
+        (v_teach_2_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'teacher.sen@acadly.com', v_password_hash, NOW(), json_build_object('provider','email','providers',json_build_array('email'),'role','teacher','institute_id',v_inst_id), '{"full_name":"Dr. Meera Sen","role":"teacher"}', NOW(), NOW()),
+        (v_stud_1_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'student.amelia@acadly.com', v_password_hash, NOW(), json_build_object('provider','email','providers',json_build_array('email'),'role','student','institute_id',v_inst_id), '{"full_name":"Amelia Sharma","role":"student"}', NOW(), NOW()),
+        (v_stud_2_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'student.kabir@acadly.com', v_password_hash, NOW(), json_build_object('provider','email','providers',json_build_array('email'),'role','student','institute_id',v_inst_id), '{"full_name":"Kabir Singhania","role":"student"}', NOW(), NOW()),
+        (v_stud_3_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'student.zoya@acadly.com', v_password_hash, NOW(), json_build_object('provider','email','providers',json_build_array('email'),'role','student','institute_id',v_inst_id), '{"full_name":"Zoya Khan","role":"student"}', NOW(), NOW()),
+        (v_stud_4_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'student.rohan@acadly.com', v_password_hash, NOW(), json_build_object('provider','email','providers',json_build_array('email'),'role','student','institute_id',v_inst_id), '{"full_name":"Rohan Verma","role":"student"}', NOW(), NOW()),
+        (v_stud_5_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'student.aarav@acadly.com', v_password_hash, NOW(), json_build_object('provider','email','providers',json_build_array('email'),'role','student','institute_id',v_inst_id), '{"full_name":"Aarav Sharma","role":"student"}', NOW(), NOW()),
+        (v_stud_6_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'student.ananya@acadly.com', v_password_hash, NOW(), json_build_object('provider','email','providers',json_build_array('email'),'role','student','institute_id',v_inst_id), '{"full_name":"Ananya Patel","role":"student"}', NOW(), NOW()),
+        (v_parent_1_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'parent.sharma@acadly.com', v_password_hash, NOW(), json_build_object('provider','email','providers',json_build_array('email'),'role','parent','institute_id',v_inst_id), '{"full_name":"Rajesh Sharma","role":"parent"}', NOW(), NOW()),
+        (v_parent_2_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'parent.singhania@acadly.com', v_password_hash, NOW(), json_build_object('provider','email','providers',json_build_array('email'),'role','parent','institute_id',v_inst_id), '{"full_name":"Sanjay Singhania","role":"parent"}', NOW(), NOW())
     ON CONFLICT (id) DO UPDATE SET encrypted_password = EXCLUDED.encrypted_password;
 
-    -- Helper insertion for auth.identities
     INSERT INTO auth.identities (id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
     VALUES
         (v_admin_id, v_admin_id, json_build_object('sub', v_admin_id, 'email', 'admin.dev@acadly.com'), 'email', NOW(), NOW(), NOW()),
@@ -124,76 +129,77 @@ BEGIN
         (v_parent_2_id, 'parent.singhania@acadly.com', 'Sanjay Singhania', '+91 98110 33440', 'parent')
     ON CONFLICT (id) DO UPDATE SET full_name = EXCLUDED.full_name;
 
-    -- Institute Members
-    INSERT INTO public.institute_members (institute_id, user_id, role)
+    -- --------------------------------------------------------------------------
+    -- 4. Institute Members
+    -- --------------------------------------------------------------------------
+    INSERT INTO public.institute_members (institute_id, user_id, role, status)
     VALUES
-        (v_inst_id, v_admin_id, 'admin'),
-        (v_inst_id, v_teach_1_id, 'teacher'),
-        (v_inst_id, v_teach_2_id, 'teacher'),
-        (v_inst_id, v_stud_1_id, 'student'),
-        (v_inst_id, v_stud_2_id, 'student'),
-        (v_inst_id, v_stud_3_id, 'student'),
-        (v_inst_id, v_stud_4_id, 'student'),
-        (v_inst_id, v_stud_5_id, 'student'),
-        (v_inst_id, v_stud_6_id, 'student'),
-        (v_inst_id, v_parent_1_id, 'parent'),
-        (v_inst_id, v_parent_2_id, 'parent')
-    ON CONFLICT (institute_id, user_id) DO NOTHING;
+        (v_inst_id, v_admin_id, 'admin', 'active'),
+        (v_inst_id, v_teach_1_id, 'teacher', 'active'),
+        (v_inst_id, v_teach_2_id, 'teacher', 'active'),
+        (v_inst_id, v_stud_1_id, 'student', 'active'),
+        (v_inst_id, v_stud_2_id, 'student', 'active'),
+        (v_inst_id, v_stud_3_id, 'student', 'active'),
+        (v_inst_id, v_stud_4_id, 'student', 'active'),
+        (v_inst_id, v_stud_5_id, 'student', 'active'),
+        (v_inst_id, v_stud_6_id, 'student', 'active'),
+        (v_inst_id, v_parent_1_id, 'parent', 'active'),
+        (v_inst_id, v_parent_2_id, 'parent', 'active')
+    ON CONFLICT (institute_id, user_id, role) DO NOTHING;
 
     -- --------------------------------------------------------------------------
-    -- 4. Role Specific Entities (Teachers, Students, Parents)
+    -- 5. Role Entities (Teachers, Students, Parents, Parent-Students)
     -- --------------------------------------------------------------------------
-    
-    -- Teachers
-    INSERT INTO public.teachers (id, institute_id, user_id, teacher_code, mode, qualification, specialization_subjects, experience_years, monthly_fee_rate, bio)
+    INSERT INTO public.teachers (id, institute_id, user_id, teacher_code, mode, qualification, specialization, specialization_subjects, experience_years, monthly_fee_rate, bio)
     VALUES
-        (v_teacher_rec_1, v_inst_id, v_teach_1_id, 'JOSHI-MATH-89', 'solo', 'M.Sc Physics (IIT Bombay)', ARRAY['Physics', 'Mathematics', 'Calculus'], 12.0, 3500.00, 'Passionate about conceptual mechanics and Olympiad derivations.'),
-        (v_teacher_rec_2, v_inst_id, v_teach_2_id, 'SEN-CHEM-26', 'coaching_faculty', 'Ph.D Organic Chemistry (IISc Bangalore)', ARRAY['Organic Chemistry', 'Physical Chemistry'], 9.5, 3200.00, 'Specializing in reaction mechanisms and NEET high-yield prep.')
+        (v_teacher_rec_1, v_inst_id, v_teach_1_id, 'JOSHI-MATH-89', 'solo', 'M.Sc Physics (IIT Bombay)', 'Mechanics', ARRAY['Physics', 'Mathematics', 'Calculus'], 12.0, 3500.00, 'Passionate about conceptual mechanics and Olympiad derivations.'),
+        (v_teacher_rec_2, v_inst_id, v_teach_2_id, 'SEN-CHEM-26', 'coaching_faculty', 'Ph.D Organic Chemistry (IISc Bangalore)', 'Organic Chemistry', ARRAY['Organic Chemistry', 'Physical Chemistry'], 9.5, 3200.00, 'Specializing in reaction mechanisms and NEET high-yield prep.')
     ON CONFLICT (id) DO NOTHING;
 
-    -- Students
-    INSERT INTO public.students (id, institute_id, user_id, admission_number, parent_link_code, grade, target_exam, school_name, previous_percentage, guardian_name, guardian_phone, weak_topics)
+    INSERT INTO public.students (id, institute_id, user_id, roll_number, admission_number, parent_link_code, class_grade, grade, target_exam, school_name, previous_percentage, guardian_name, guardian_phone, weak_topics)
     VALUES
-        (v_student_rec_1, v_inst_id, v_stud_1_id, 'ADM-2026-088', 'STU-AMELIA-902', 'Class 12', 'IIT-JEE Advanced 2026', 'Delhi Public School (R.K. Puram)', '96.4%', 'Rajesh Sharma', '+91 98230 44550', ARRAY['Rotational Dynamics', 'Wave Optics']),
-        (v_student_rec_2, v_inst_id, v_stud_2_id, 'ADM-2026-089', 'STU-KABIR-118', 'Class 12', 'IIT-JEE Advanced 2026', 'Modern School (Barakhamba)', '94.8%', 'Sanjay Singhania', '+91 98110 33440', ARRAY['Thermodynamics', 'Coordinate Geometry']),
-        (v_student_rec_3, v_inst_id, v_stud_3_id, 'ADM-2026-090', 'STU-ZOYA-204', 'Class 12', 'NEET UG 2026', 'St. Xavier High School', '95.2%', 'Farooq Khan', '+91 98900 22119', ARRAY['Electromagnetism']),
-        (v_student_rec_4, v_inst_id, v_stud_4_id, 'ADM-2026-091', 'STU-ROHAN-305', 'Class 12', 'IIT-JEE 2026', 'Sanskriti School', '92.6%', 'Anil Verma', '+91 98450 77112', ARRAY['Ionic Equilibrium']),
-        (v_student_rec_5, v_inst_id, v_stud_5_id, 'ADM-2026-092', 'STU-AARAV-104', 'Class 11', 'IIT-JEE Foundation', 'Delhi Public School', '97.0%', 'Rajesh Sharma', '+91 98230 44550', ARRAY['Calculus & Limits']),
-        (v_student_rec_6, v_inst_id, v_stud_6_id, 'ADM-2026-093', 'STU-ANANYA-501', 'Class 11', 'NEET UG Foundation', 'National Public School', '93.5%', 'Deepak Patel', '+91 98770 99221', ARRAY['Plant Physiology'])
+        (v_student_rec_1, v_inst_id, v_stud_1_id, 'ROL-101', 'ADM-2026-088', 'STU-AMELIA-902', 'Class 12', 'Class 12', 'IIT-JEE Advanced 2026', 'Delhi Public School (R.K. Puram)', '96.4%', 'Rajesh Sharma', '+91 98230 44550', ARRAY['Rotational Dynamics', 'Wave Optics']),
+        (v_student_rec_2, v_inst_id, v_stud_2_id, 'ROL-102', 'ADM-2026-089', 'STU-KABIR-118', 'Class 12', 'Class 12', 'IIT-JEE Advanced 2026', 'Modern School (Barakhamba)', '94.8%', 'Sanjay Singhania', '+91 98110 33440', ARRAY['Thermodynamics', 'Coordinate Geometry']),
+        (v_student_rec_3, v_inst_id, v_stud_3_id, 'ROL-103', 'ADM-2026-090', 'STU-ZOYA-204', 'Class 12', 'Class 12', 'NEET UG 2026', 'St. Xavier High School', '95.2%', 'Farooq Khan', '+91 98900 22119', ARRAY['Electromagnetism']),
+        (v_student_rec_4, v_inst_id, v_stud_4_id, 'ROL-104', 'ADM-2026-091', 'STU-ROHAN-305', 'Class 12', 'Class 12', 'IIT-JEE 2026', 'Sanskriti School', '92.6%', 'Anil Verma', '+91 98450 77112', ARRAY['Ionic Equilibrium']),
+        (v_student_rec_5, v_inst_id, v_stud_5_id, 'ROL-105', 'ADM-2026-092', 'STU-AARAV-104', 'Class 11', 'Class 11', 'IIT-JEE Foundation', 'Delhi Public School', '97.0%', 'Rajesh Sharma', '+91 98230 44550', ARRAY['Calculus & Limits']),
+        (v_student_rec_6, v_inst_id, v_stud_6_id, 'ROL-106', 'ADM-2026-093', 'STU-ANANYA-501', 'Class 11', 'Class 11', 'NEET UG Foundation', 'National Public School', '93.5%', 'Deepak Patel', '+91 98770 99221', ARRAY['Plant Physiology'])
     ON CONFLICT (id) DO NOTHING;
 
-    -- Parents
-    INSERT INTO public.parents (id, institute_id, user_id, phone)
+    INSERT INTO public.parents (id, institute_id, user_id, phone, occupation)
     VALUES
-        (v_parent_rec_1, v_inst_id, v_parent_1_id, '+91 98230 44550'),
-        (v_parent_rec_2, v_inst_id, v_parent_2_id, '+91 98110 33440')
+        (v_parent_rec_1, v_inst_id, v_parent_1_id, '+91 98230 44550', 'Architect'),
+        (v_parent_rec_2, v_inst_id, v_parent_2_id, '+91 98110 33440', 'Chartered Accountant')
     ON CONFLICT (id) DO NOTHING;
 
-    -- Parent-Student Links
-    INSERT INTO public.parent_students (institute_id, parent_id, student_id)
+    INSERT INTO public.parent_students (institute_id, parent_id, student_id, relationship)
     VALUES
-        (v_inst_id, v_parent_rec_1, v_student_rec_1), -- Rajesh Sharma -> Amelia Sharma
-        (v_inst_id, v_parent_rec_1, v_student_rec_5), -- Rajesh Sharma -> Aarav Sharma
-        (v_inst_id, v_parent_rec_2, v_student_rec_2)  -- Sanjay Singhania -> Kabir Singhania
+        (v_inst_id, v_parent_rec_1, v_student_rec_1, 'Daughter'), -- Rajesh -> Amelia
+        (v_inst_id, v_parent_rec_1, v_student_rec_5, 'Son'),      -- Rajesh -> Aarav
+        (v_inst_id, v_parent_rec_2, v_student_rec_2, 'Son')       -- Sanjay -> Kabir
     ON CONFLICT (parent_id, student_id) DO NOTHING;
 
     -- --------------------------------------------------------------------------
-    -- 5. Batches & Enrollments
+    -- 6. Subjects, Batches & Enrollments
     -- --------------------------------------------------------------------------
-    INSERT INTO public.batches (id, institute_id, name, subject, target_exam, room_number, start_time, end_time, status)
+    INSERT INTO public.subjects (id, institute_id, name, code, color_hex)
     VALUES
-        (v_batch_1_id, v_inst_id, 'Class 12 • JEE Advanced (Morning)', 'Physics & Calculus', 'JEE Advanced', 'Hall A (Senior Wing)', '07:30 AM', '10:00 AM', 'in_progress'),
-        (v_batch_2_id, v_inst_id, 'Class 11 • Physics & Calculus Mastery', 'Mechanics & Chemistry', 'Foundation', 'Einstein Hall 204', '04:30 PM', '07:00 PM', 'in_progress')
+        (v_subject_1_id, v_inst_id, 'Physics & Mathematics', 'PHY-MATH', '#ff7d6b'),
+        (v_subject_2_id, v_inst_id, 'Chemistry & Biology', 'CHEM-BIO', '#38bdf8')
+    ON CONFLICT (institute_id, code) DO NOTHING;
+
+    INSERT INTO public.batches (id, institute_id, name, subject, subject_id, teacher_id, target_exam, room_number, start_time, end_time, status)
+    VALUES
+        (v_batch_1_id, v_inst_id, 'Class 12 • JEE Advanced (Morning)', 'Physics & Calculus', v_subject_1_id, v_teacher_rec_1, 'JEE Advanced', 'Hall A (Senior Wing)', '07:30 AM', '10:00 AM', 'in_progress'),
+        (v_batch_2_id, v_inst_id, 'Class 11 • Physics & Calculus Mastery', 'Mechanics & Chemistry', v_subject_2_id, v_teacher_rec_2, 'Foundation', 'Einstein Hall 204', '04:30 PM', '07:00 PM', 'in_progress')
     ON CONFLICT (id) DO NOTHING;
 
-    -- Batch Teachers
-    INSERT INTO public.batch_teachers (institute_id, batch_id, teacher_id)
+    INSERT INTO public.batch_teachers (institute_id, batch_id, teacher_id, subject_id)
     VALUES
-        (v_inst_id, v_batch_1_id, v_teacher_rec_1),
-        (v_inst_id, v_batch_2_id, v_teacher_rec_2)
+        (v_inst_id, v_batch_1_id, v_teacher_rec_1, v_subject_1_id),
+        (v_inst_id, v_batch_2_id, v_teacher_rec_2, v_subject_2_id)
     ON CONFLICT (batch_id, teacher_id) DO NOTHING;
 
-    -- Batch Enrollments
     INSERT INTO public.batch_students (institute_id, batch_id, student_id, status)
     VALUES
         (v_inst_id, v_batch_1_id, v_student_rec_1, 'enrolled'),
@@ -205,7 +211,7 @@ BEGIN
     ON CONFLICT (batch_id, student_id) DO NOTHING;
 
     -- --------------------------------------------------------------------------
-    -- 6. Attendance Sample Records
+    -- 7. Attendance
     -- --------------------------------------------------------------------------
     INSERT INTO public.attendance (institute_id, batch_id, student_id, date, status, marked_by)
     VALUES
@@ -218,9 +224,9 @@ BEGIN
     ON CONFLICT (batch_id, student_id, date) DO NOTHING;
 
     -- --------------------------------------------------------------------------
-    -- 7. Homework & Submissions
+    -- 8. Assignments & Submissions
     -- --------------------------------------------------------------------------
-    INSERT INTO public.assignments (id, institute_id, batch_id, teacher_id, title, subject, description, due_date, max_marks)
+    INSERT INTO public.assignments (id, institute_id, batch_id, teacher_id, title, subject, instructions, description, type, questions, due_date, max_marks, total_marks)
     VALUES (
         v_assignment_id,
         v_inst_id,
@@ -229,45 +235,51 @@ BEGIN
         'Rotational Dynamics & Torque DPP #14',
         'Physics',
         'Solve problems 1-15 on rigid body planar motion and center of mass torque derivations.',
+        'Comprehensive physics practice on rotation.',
+        'file',
+        '[{"id":"q1","prompt":"Derive moment of inertia of a solid cylinder","marks":5}]'::jsonb,
         NOW() + INTERVAL '2 days',
-        25
+        25.00,
+        25.00
     ) ON CONFLICT (id) DO NOTHING;
 
-    INSERT INTO public.submissions (institute_id, assignment_id, student_id, status, marks_obtained, feedback, submitted_at, graded_at)
+    INSERT INTO public.submissions (institute_id, assignment_id, student_id, status, marks_obtained, score, feedback, submitted_at, graded_at)
     VALUES
-        (v_inst_id, v_assignment_id, v_student_rec_1, 'graded', 24.00, 'Flawless step-by-step vector derivation on problem 4.', NOW() - INTERVAL '1 day', NOW()),
-        (v_inst_id, v_assignment_id, v_student_rec_2, 'submitted', NULL, NULL, NOW() - INTERVAL '2 hours', NULL)
+        (v_inst_id, v_assignment_id, v_student_rec_1, 'graded', 24.00, 24.00, 'Flawless step-by-step vector derivation on problem 4.', NOW() - INTERVAL '1 day', NOW()),
+        (v_inst_id, v_assignment_id, v_student_rec_2, 'submitted', NULL, NULL, NULL, NOW() - INTERVAL '2 hours', NULL)
     ON CONFLICT (assignment_id, student_id) DO NOTHING;
 
     -- --------------------------------------------------------------------------
-    -- 8. Fees, Payments & GST Receipts
+    -- 9. Fees, Payments & GST Receipts
     -- --------------------------------------------------------------------------
-    INSERT INTO public.fee_plans (id, institute_id, name, amount, frequency, description)
+    INSERT INTO public.fee_plans (id, institute_id, name, amount, total_amount, frequency, description)
     VALUES (
         v_fee_plan_id,
         v_inst_id,
         'Class 12 JEE Advanced Dropper Program',
         125000.00,
+        125000.00,
         'annual',
         'Full year comprehensive tuition, test series, mentorship, and library access.'
     ) ON CONFLICT (id) DO NOTHING;
 
-    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'student_fees') THEN
-        INSERT INTO public.student_fees (id, institute_id, student_id, fee_plan_id, gross_amount, scholarship_amount, net_payable, due_date, status)
-        VALUES (
-            v_fee_record_1,
-            v_inst_id,
-            v_student_rec_1,
-            v_fee_plan_id,
-            45000.00,
-            5000.00,
-            47200.00,
-            CURRENT_DATE + 12,
-            'paid'
-        ) ON CONFLICT (id) DO NOTHING;
-    END IF;
+    INSERT INTO public.student_fees (id, institute_id, student_id, fee_plan_id, title, total_amount, paid_amount, pending_amount, discount_amount, net_payable, status, due_date)
+    VALUES (
+        v_fee_record_1,
+        v_inst_id,
+        v_student_rec_1,
+        v_fee_plan_id,
+        'Term 2 Tuition & Lab Fee',
+        47200.00,
+        47200.00,
+        0.00,
+        0.00,
+        47200.00,
+        'paid',
+        CURRENT_DATE + 12
+    ) ON CONFLICT (id) DO NOTHING;
 
-    INSERT INTO public.payments (id, institute_id, student_fee_id, student_id, amount_paid, payment_mode, razorpay_order_id, razorpay_payment_id, status)
+    INSERT INTO public.payments (id, institute_id, student_fee_id, student_id, amount, payment_mode, payment_method, gst_amount, razorpay_order_id, razorpay_payment_id, receipt_number, status, notes)
     VALUES (
         v_payment_1,
         v_inst_id,
@@ -275,9 +287,13 @@ BEGIN
         v_student_rec_1,
         47200.00,
         'razorpay',
+        'razorpay',
+        7200.00,
         'order_N8s9vQ2kL1',
         'pay_M9k2P1x8Q0',
-        'success'
+        'APX-REC-2026-9021',
+        'paid',
+        'Full payment for Term 2'
     ) ON CONFLICT (id) DO NOTHING;
 
     INSERT INTO public.receipts (institute_id, payment_id, receipt_number, student_id, taxable_amount, gst_rate, gst_amount, total_amount, signed_hash)
@@ -294,30 +310,30 @@ BEGIN
     ) ON CONFLICT (payment_id) DO NOTHING;
 
     -- --------------------------------------------------------------------------
-    -- 9. Real-Time Chat Rooms & Messages
+    -- 10. Chat Rooms & Messages
     -- --------------------------------------------------------------------------
-    INSERT INTO public.chat_rooms (id, institute_id, batch_id, type, teacher_id, title)
+    INSERT INTO public.chat_rooms (id, institute_id, batch_id, type, teacher_id, name)
     VALUES (
         v_room_batch_id,
         v_inst_id,
         v_batch_1_id,
         'batch_group',
-        v_teacher_rec_1,
+        v_teach_1_id,
         'Class 12 • JEE Advanced (Morning)'
     ) ON CONFLICT (id) DO NOTHING;
 
-    INSERT INTO public.chat_rooms (id, institute_id, batch_id, type, teacher_id, student_id, title)
+    INSERT INTO public.chat_rooms (id, institute_id, batch_id, type, teacher_id, student_id, name)
     VALUES (
         v_room_doubt_id,
         v_inst_id,
         v_batch_1_id,
-        'direct',
-        v_teacher_rec_1,
-        v_student_rec_2,
+        'direct_doubt',
+        v_teach_1_id,
+        v_stud_2_id,
         'Doubt Room: Kabir Singhania'
     ) ON CONFLICT (id) DO NOTHING;
 
-    INSERT INTO public.chat_messages (room_id, sender_id, sender_role, text, is_pinned, created_at)
+    INSERT INTO public.chat_messages (room_id, sender_id, sender_role, message_text, is_pinned, created_at)
     VALUES
         (v_room_batch_id, v_teach_1_id, 'teacher', 'Class starts tomorrow morning at 07:30 AM sharp. Please review DPP #14 solutions beforehand.', TRUE, NOW() - INTERVAL '3 hours'),
         (v_room_batch_id, v_stud_1_id, 'student', 'Sir, in question 3 of the formula sheet, should we use moment of inertia about the center of mass or the hinge point?', FALSE, NOW() - INTERVAL '1 hour'),
@@ -326,20 +342,19 @@ BEGIN
         (v_room_doubt_id, v_teach_1_id, 'teacher', 'Since external torque about the fixed point is zero, total angular momentum L = I*omega remains strictly constant.', FALSE, NOW() - INTERVAL '15 mins');
 
     -- --------------------------------------------------------------------------
-    -- 10. Community Discussion Feed
+    -- 11. Community Discussions
     -- --------------------------------------------------------------------------
-    INSERT INTO public.community_posts (id, institute_id, author_id, subject, title, content, upvotes)
+    INSERT INTO public.community_posts (id, institute_id, author_id, title, content, upvotes_count)
     VALUES (
         v_post_id,
         v_inst_id,
         v_stud_1_id,
-        'Physics',
         'Why is electric field inside a hollow spherical conductor strictly zero?',
         'In Gauss law we take a Gaussian sphere inside radius R. Since enclosed charge q=0, flux is 0. But how does charge on the outer shell cancel out the field at EVERY non-central point?',
         18
     ) ON CONFLICT (id) DO NOTHING;
 
-    INSERT INTO public.community_comments (institute_id, post_id, author_id, text, is_teacher_verified)
+    INSERT INTO public.community_comments (institute_id, post_id, author_id, comment_text, is_teacher_verified_answer)
     VALUES (
         v_inst_id,
         v_post_id,
@@ -349,55 +364,40 @@ BEGIN
     );
 
     -- --------------------------------------------------------------------------
-    -- 11. Study Materials & Video Lectures
+    -- 12. Study Materials & Video Lectures
     -- --------------------------------------------------------------------------
-    INSERT INTO public.study_materials (institute_id, batch_id, uploader_id, title, subject, category, file_url, file_name, file_size_bytes)
+    INSERT INTO public.study_materials (institute_id, batch_id, uploaded_by, title, subject, category, file_url, file_size_bytes)
     VALUES (
         v_inst_id,
         v_batch_1_id,
         v_teach_1_id,
         'Rotational Dynamics & Inertia Mastery Sheet',
         'Physics',
-        'Formula Sheet',
+        'formula_sheet',
         'https://cwxuwaljqrqdogsyqhwc.supabase.co/storage/v1/object/public/study_materials/rotational_dynamics_mastery.pdf',
-        'Rotational_Dynamics_Mastery.pdf',
         2450000
     );
 
-    INSERT INTO public.lectures (institute_id, batch_id, teacher_id, title, subject, chapter, youtube_video_id, duration_minutes)
+    INSERT INTO public.lectures (institute_id, batch_id, uploaded_by, faculty_name, title, subject, provider, video_id_or_url, duration_minutes)
     VALUES (
         v_inst_id,
         v_batch_1_id,
-        v_teacher_rec_1,
+        v_teach_1_id,
+        'Prof. Vikram Joshi',
         'Advanced Mechanics: Angular Momentum & Gyroscopic Precession',
         'Physics',
-        'Rotational Dynamics',
+        'youtube',
         'dQw4w9WgXcQ',
         75
     );
 
     -- --------------------------------------------------------------------------
-    -- 12. Join Requests & In-App Notifications
+    -- 13. Notifications
     -- --------------------------------------------------------------------------
-    INSERT INTO public.join_requests (institute_id, student_name, grade, board, target_exam, school, previous_percentage, guardian_name, guardian_phone, code_used, status)
-    VALUES (
-        v_inst_id,
-        'Aarav Sharma',
-        'Class 11',
-        'CBSE',
-        'IIT-JEE 2026',
-        'Delhi Public School',
-        '97.0%',
-        'Rajesh Sharma',
-        '+91 98230 44550',
-        'JOSHI-MATH-89',
-        'pending'
-    );
-
-    INSERT INTO public.notifications (institute_id, recipient_user_id, title, message, type)
+    INSERT INTO public.notifications (institute_id, user_id, recipient_id, recipient_role, title, message, body, type)
     VALUES
-        (v_inst_id, v_stud_1_id, 'Homework Graded', 'Prof. Vikram Joshi scored your DPP #14: 24/25 with feedback.', 'homework'),
-        (v_inst_id, v_parent_1_id, 'Attendance Check-in', 'Amelia Sharma checked in for Class 12 JEE Advanced at 07:28 AM.', 'attendance'),
-        (v_inst_id, v_parent_1_id, 'Fee Receipt Generated', 'Official GST invoice APX-REC-2026-9021 available for download.', 'fee');
+        (v_inst_id, v_stud_1_id, v_stud_1_id, 'student', 'Homework Graded', 'Prof. Vikram Joshi scored your DPP #14: 24/25 with feedback.', 'Prof. Vikram Joshi scored your DPP #14: 24/25 with feedback.', 'assignment'),
+        (v_inst_id, v_parent_1_id, v_parent_1_id, 'parent', 'Attendance Check-in', 'Amelia Sharma checked in for Class 12 JEE Advanced at 07:28 AM.', 'Amelia Sharma checked in for Class 12 JEE Advanced at 07:28 AM.', 'attendance'),
+        (v_inst_id, v_parent_1_id, v_parent_1_id, 'parent', 'Fee Receipt Generated', 'Official GST invoice APX-REC-2026-9021 available for download.', 'Official GST invoice APX-REC-2026-9021 available for download.', 'fee');
 
 END $$;

@@ -50,7 +50,7 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
           shadowRadius: 20,
           elevation: 16,
         }}
-        className="bg-slate-950/95 border border-white/10 rounded-full p-1.5 flex-row items-center justify-between gap-1 max-w-sm w-full"
+        className="bg-slate-950/95 border border-white/10 rounded-full p-1.5 flex-row items-center justify-between gap-1 w-full max-w-sm md:max-w-2xl"
       >
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
@@ -59,8 +59,11 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
               key={tab.key}
               activeOpacity={0.8}
               onPress={() => onTabChange(tab.key)}
-              hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
-              className={`flex-1 items-center justify-center py-2 px-2 rounded-full flex-row gap-1.5 ${
+              accessibilityRole="tab"
+              accessibilityLabel={tab.label}
+              accessibilityState={{ selected: isActive }}
+              hitSlop={{ top: 10, bottom: 10, left: 6, right: 6 }}
+              className={`flex-1 items-center justify-center min-h-[44px] min-w-[44px] py-2 px-2 rounded-full flex-row gap-1.5 ${
                 isActive ? 'bg-white shadow-sm' : 'bg-transparent'
               }`}
             >

@@ -1,26 +1,44 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, Alert, ScrollView, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  Alert,
+  ScrollView,
+  TextInput,
+  ActivityIndicator,
+} from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import {
   FileText,
   Download,
   Upload,
   X,
-  Plus,
   BookOpen,
   CheckCircle,
-  Share2,
 } from 'lucide-react-native';
-import { useAcademic } from '@/context/AcademicContext';
 import { useAuth } from '@/context/AuthContext';
+import { useUI } from '@/context/UIContext';
+import { useStudyMaterials, useUploadMaterial } from '@/hooks/queries/useMaterialQueries';
 import { Badge } from '@/components/ui';
 import { generateAndSharePDF, DUMMY_PDF_CATALOG, type PDFDocumentContent } from '@/services/dummyPdfService';
 import { type StudyMaterial } from '@/types/database';
+import { type PDFMaterialItem } from '@/services/materialService';
 import { DocumentReaderModal } from './DocumentReaderModal';
 
 export const StudyMaterialsViewer: React.FC = () => {
-  const { materials, uploadMaterial } = useAcademic();
-  const { userRole } = useAuth();
+  const { user, userRole, activeInstitute } = useAuth();
+  const { selectedBatchId } = useUI();
+
+  const {
+    data: materials = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useStudyMaterials(activeInstitute?.id, selectedBatchId || undefined);
+
+  const uploadMutation = useUploadMaterial();
 
   const [selectedSubject, setSelectedSubject] = useState<string>('All');
   const [downloadedIds, setDownloadedIds] = useState<string[]>([]);
@@ -41,7 +59,7 @@ export const StudyMaterialsViewer: React.FC = () => {
 
   const filtered = selectedSubject === 'All'
     ? materials
-    : materials.filter((m) => m.subject.toLowerCase() === selectedSubject.toLowerCase());
+    : materials.filter((m) => (m.subject || '').toLowerCase() === selectedSubject.toLowerCase());
 
   const handlePickFile = async () => {
     try {
@@ -66,17 +84,17 @@ export const StudyMaterialsViewer: React.FC = () => {
     }
   };
 
-  const getItemDoc = (item: StudyMaterial): PDFDocumentContent => {
+  const getItemDoc = (item: PDFMaterialItem): PDFDocumentContent => {
     const matched = DUMMY_PDF_CATALOG.find(
-      (d) => d.subject.toLowerCase() === item.subject.toLowerCase()
+      (d) => d.subject.toLowerCase() === (item.subject || '').toLowerCase()
     );
     return (
       matched || {
         id: item.id,
         title: item.title,
-        subtitle: item.description || 'Verified Classroom Reference Document',
-        subject: item.subject,
-        author: item.uploaded_by,
+        subtitle: item.subtitle || 'Verified Classroom Reference Document',
+        subject: item.subject || 'Physics',
+        author: item.author || 'Faculty Mentor',
         category: 'notes',
         date: 'Class 12 • JEE Advanced 2026',
         sections: [
@@ -93,7 +111,7 @@ export const StudyMaterialsViewer: React.FC = () => {
     );
   };
 
-  const handleDownload = async (item: StudyMaterial) => {
+  const handleDownload = async (item: PDFMaterialItem) => {
     try {
       const doc = getItemDoc(item);
       await generateAndSharePDF(doc);
@@ -103,7 +121,7 @@ export const StudyMaterialsViewer: React.FC = () => {
     }
   };
 
-  const handleOpenReader = (item: StudyMaterial) => {
+  const handleOpenReader = (item: PDFMaterialItem) => {
     const doc = getItemDoc(item);
     setActiveReaderDoc(doc);
   };
@@ -115,26 +133,37 @@ export const StudyMaterialsViewer: React.FC = () => {
     }
 
     if (!selectedFile) {
-      Alert.alert('Document Required', 'Please attach a real PDF document to publish.');
+      Alert.alert('Document Required', 'Please attach a real PDF document (Max 20 MB).');
       return;
     }
 
-    await uploadMaterial({
-      title,
-      subject,
-      description,
-      file_url: selectedFile.uri,
-      file_type: 'pdf',
-      file_size_formatted: selectedFile.sizeFormatted,
-      page_count: 12,
-      uploaded_by: userRole === 'teacher' ? 'Prof. Vikram Joshi' : 'Director Sharma',
-    });
+    if (!user || !activeInstitute) {
+      Alert.alert('Authentication Required', 'Please verify your active institute session.');
+      return;
+    }
 
-    setIsUploadOpen(false);
-    setTitle('');
-    setDescription('');
-    setSelectedFile(null);
-    Alert.alert('Published! 📄', 'Study material is now accessible to all enrolled batches.');
+    try {
+      await uploadMutation.mutateAsync({
+        fileUri: selectedFile.uri,
+        fileName: selectedFile.name,
+        title: title.trim(),
+        subjectId: undefined,
+        batchId: selectedBatchId || undefined,
+        instituteId: activeInstitute.id,
+        category: 'notes',
+        description: description.trim(),
+        uploadedBy: user.id,
+      });
+
+      setIsUploadOpen(false);
+      setTitle('');
+      setDescription('');
+      setSelectedFile(null);
+      Alert.alert('Published', 'Study material is now accessible to all enrolled batches.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Upload failed';
+      Alert.alert('Upload Error', msg);
+    }
   };
 
   return (
@@ -165,165 +194,211 @@ export const StudyMaterialsViewer: React.FC = () => {
           </View>
         </ScrollView>
 
-        {(userRole === 'admin' || userRole === 'teacher') && (
+        {(userRole === 'teacher' || userRole === 'admin') && (
           <TouchableOpacity
             onPress={() => setIsUploadOpen(true)}
-            className="bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl flex-row items-center gap-1 active:scale-95"
+            className="flex-row items-center gap-1.5 bg-blue-600 px-3 py-1.5 rounded-xl shadow-xs active:scale-95"
           >
-            <Plus size={13} color="#2563EB" />
-            <Text className="text-xs font-bold text-blue-600">Upload Note</Text>
+            <Upload size={13} color="#FFFFFF" />
+            <Text className="text-xs font-bold text-white">Upload Notes</Text>
           </TouchableOpacity>
         )}
       </View>
 
-      {/* Material List */}
-      <View className="gap-2.5">
-        {filtered.map((item) => (
-          <View
-            key={item.id}
-            className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs gap-3"
-          >
-            <View className="flex-row items-start justify-between gap-2">
-              <View className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 items-center justify-center shrink-0">
-                <FileText size={18} color="#2563EB" />
-              </View>
+      {/* Loading Skeleton */}
+      {isLoading && (
+        <View className="p-8 items-center justify-center bg-white rounded-2xl border border-slate-200">
+          <ActivityIndicator size="small" color="#2563EB" />
+          <Text className="text-xs text-slate-500 mt-2 font-medium">Loading PDF repository...</Text>
+        </View>
+      )}
 
-              <View className="flex-1 min-w-0">
-                <View className="flex-row items-center gap-1.5 mb-1">
-                  <Badge label={item.subject} variant="info" />
-                  <Text className="text-[11px] text-slate-500 font-semibold">
-                    {item.file_size_formatted} • {item.page_count} Pages
-                  </Text>
+      {/* Empty State */}
+      {!isLoading && filtered.length === 0 && (
+        <View className="p-8 items-center justify-center bg-white rounded-2xl border border-slate-200">
+          <FileText size={28} color="#94A3B8" />
+          <Text className="text-sm font-bold text-slate-800 mt-2">No Study Materials Found</Text>
+          <Text className="text-xs text-slate-500 text-center mt-1">
+            {selectedSubject === 'All'
+              ? 'No notes or DPPs published yet. Tap Upload Notes to publish PDF materials.'
+              : `No published materials for ${selectedSubject}.`}
+          </Text>
+        </View>
+      )}
+
+      {/* Materials List */}
+      {!isLoading && (
+        <View className="gap-2.5">
+          {filtered.map((item) => {
+            const isDownloaded = downloadedIds.includes(item.id);
+            return (
+              <View
+                key={item.id}
+                className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs"
+              >
+                <View className="flex-row items-start justify-between gap-3">
+                  <View className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 items-center justify-center shrink-0">
+                    <FileText size={20} color="#2563EB" />
+                  </View>
+
+                  <View className="flex-1 min-w-0">
+                    <View className="flex-row items-center gap-2 mb-1">
+                      <Badge label={item.subject || 'Physics'} variant="info" />
+                      <Text className="text-[10px] text-slate-400 font-bold">
+                        {item.fileSizeBytes || '1.8 MB'}
+                      </Text>
+                    </View>
+
+                    <Text className="text-sm font-extrabold text-slate-900" numberOfLines={1}>
+                      {item.title}
+                    </Text>
+
+                    {item.subtitle ? (
+                      <Text className="text-xs text-slate-500 mt-0.5" numberOfLines={2}>
+                        {item.subtitle}
+                      </Text>
+                    ) : null}
+                  </View>
                 </View>
-                <Text className="text-sm font-bold text-slate-900 leading-snug">
-                  {item.title}
-                </Text>
-                {item.description && (
-                  <Text className="text-xs text-slate-500 mt-1" numberOfLines={2}>
-                    {item.description}
-                  </Text>
-                )}
+
+                {/* Actions */}
+                <View className="flex-row items-center justify-end gap-2 mt-3 pt-3 border-t border-slate-100">
+                  <TouchableOpacity
+                    onPress={() => handleOpenReader(item)}
+                    className="flex-row items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 active:scale-95"
+                  >
+                    <BookOpen size={13} color="#334155" />
+                    <Text className="text-xs font-bold text-slate-700">Preview</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => handleDownload(item)}
+                    className={`flex-row items-center gap-1.5 px-3 py-1.5 rounded-xl ${
+                      isDownloaded ? 'bg-emerald-50 border border-emerald-200' : 'bg-blue-600'
+                    } active:scale-95`}
+                  >
+                    {isDownloaded ? (
+                      <>
+                        <CheckCircle size={13} color="#059669" />
+                        <Text className="text-xs font-bold text-emerald-800">Downloaded</Text>
+                      </>
+                    ) : (
+                      <>
+                        <Download size={13} color="#FFFFFF" />
+                        <Text className="text-xs font-bold text-white">Save PDF</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
+            );
+          })}
+        </View>
+      )}
 
-            <View className="flex-row items-center justify-between pt-2.5 border-t border-slate-100">
-              <Text className="text-[11px] text-slate-500 font-semibold">
-                Faculty: {item.uploaded_by}
-              </Text>
-
-              <View className="flex-row gap-1.5">
-                <TouchableOpacity
-                  onPress={() => handleOpenReader(item)}
-                  className="bg-slate-100 px-2.5 py-1.5 rounded-xl flex-row items-center gap-1 active:scale-95"
-                >
-                  <BookOpen size={12} color="#2563EB" />
-                  <Text className="text-xs font-bold text-blue-700">Open</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => handleDownload(item)}
-                  className="bg-blue-600 px-2.5 py-1.5 rounded-xl flex-row items-center gap-1 active:scale-95 shadow-xs"
-                >
-                  <Download size={12} color="#ffffff" />
-                  <Text className="text-xs font-bold text-white">Save PDF</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        ))}
-      </View>
-
-      {/* UPLOAD MATERIAL MODAL */}
+      {/* Upload Modal */}
       <Modal visible={isUploadOpen} transparent animationType="slide">
-        <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white rounded-t-3xl p-6 gap-3.5 max-h-[85%] border-t border-slate-200">
+        <View className="flex-1 bg-black/50 justify-end">
+          <View className="bg-white rounded-t-3xl p-5 gap-3.5 max-h-[85%]">
             <View className="flex-row items-center justify-between">
-              <Text className="text-base font-extrabold text-slate-900">Upload Study Material</Text>
+              <Text className="text-base font-black text-slate-900">Upload Study Material</Text>
               <TouchableOpacity onPress={() => setIsUploadOpen(false)}>
                 <X size={20} color="#64748B" />
               </TouchableOpacity>
             </View>
 
-            <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Document Title</Text>
+            <View className="gap-1">
+              <Text className="text-xs font-bold text-slate-700">Title</Text>
               <TextInput
-                placeholder="e.g. Thermodynamics Chapter Notes & Formula Sheet"
-                placeholderTextColor="#94a3b8"
                 value={title}
                 onChangeText={setTitle}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
+                placeholder="e.g. Rotational Mechanics Complete Formula Sheet"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium"
               />
             </View>
 
-            <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Subject Domain</Text>
-              <TextInput
-                placeholder="Physics / Chemistry / Mathematics"
-                placeholderTextColor="#94a3b8"
-                value={subject}
-                onChangeText={setSubject}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
-              />
+            <View className="gap-1">
+              <Text className="text-xs font-bold text-slate-700">Subject</Text>
+              <View className="flex-row gap-2">
+                {['Physics', 'Chemistry', 'Mathematics'].map((s) => (
+                  <TouchableOpacity
+                    key={s}
+                    onPress={() => setSubject(s)}
+                    className={`px-3 py-1.5 rounded-xl border ${
+                      subject === s ? 'bg-blue-50 border-blue-500' : 'bg-slate-50 border-slate-200'
+                    }`}
+                  >
+                    <Text
+                      className={`text-xs font-bold ${
+                        subject === s ? 'text-blue-600' : 'text-slate-600'
+                      }`}
+                    >
+                      {s}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
 
-            <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Description / Syllabus Coverage</Text>
+            <View className="gap-1">
+              <Text className="text-xs font-bold text-slate-700">Description (Optional)</Text>
               <TextInput
-                placeholder="e.g. Derivations, summary notes, and 2024 questions"
-                placeholderTextColor="#94a3b8"
                 value={description}
                 onChangeText={setDescription}
+                placeholder="Brief summary of what this document covers..."
                 multiline
-                numberOfLines={3}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 min-h-[70px]"
+                numberOfLines={2}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium"
               />
             </View>
 
-            <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Attached PDF File</Text>
-              <TouchableOpacity
-                onPress={handlePickFile}
-                className={`p-3 rounded-xl border flex-row items-center justify-between active:scale-98 ${
-                  selectedFile
-                    ? 'bg-emerald-50 border-emerald-300'
-                    : 'bg-slate-50 border-dashed border-slate-300'
-                }`}
-              >
-                <View className="flex-row items-center gap-2 flex-1 pr-2">
-                  <FileText size={16} color={selectedFile ? '#059669' : '#64748B'} />
-                  <Text
-                    className={`text-xs font-semibold ${
-                      selectedFile ? 'text-emerald-900 font-bold' : 'text-slate-600'
-                    }`}
-                    numberOfLines={1}
-                  >
-                    {selectedFile ? `${selectedFile.name} (${selectedFile.sizeFormatted})` : 'Choose PDF from device...'}
+            {/* Document Picker */}
+            <TouchableOpacity
+              onPress={handlePickFile}
+              className="p-4 rounded-xl border-2 border-dashed border-slate-200 items-center justify-center bg-slate-50"
+            >
+              {selectedFile ? (
+                <View className="items-center">
+                  <FileText size={24} color="#059669" />
+                  <Text className="text-xs font-bold text-slate-900 mt-1" numberOfLines={1}>
+                    {selectedFile.name}
                   </Text>
+                  <Text className="text-[10px] text-slate-500">{selectedFile.sizeFormatted}</Text>
                 </View>
-                {selectedFile ? (
-                  <CheckCircle size={16} color="#059669" />
-                ) : (
-                  <Upload size={14} color="#64748B" />
-                )}
-              </TouchableOpacity>
-            </View>
+              ) : (
+                <View className="items-center">
+                  <Upload size={24} color="#64748B" />
+                  <Text className="text-xs font-bold text-slate-700 mt-1">Tap to select PDF</Text>
+                  <Text className="text-[10px] text-slate-400">PDF documents up to 20 MB</Text>
+                </View>
+              )}
+            </TouchableOpacity>
 
             <TouchableOpacity
               onPress={handleUpload}
-              className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-1 active:scale-98"
+              disabled={uploadMutation.isPending}
+              className={`py-3.5 bg-blue-600 rounded-xl items-center justify-center ${
+                uploadMutation.isPending ? 'opacity-60' : ''
+              }`}
             >
-              <Text className="text-xs font-bold text-white">Publish PDF Document</Text>
+              {uploadMutation.isPending ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text className="text-sm font-black text-white">Publish Study Material</Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/* In-App Document Reader Modal */}
-      <DocumentReaderModal
-        document={activeReaderDoc}
-        visible={Boolean(activeReaderDoc)}
-        onClose={() => setActiveReaderDoc(null)}
-      />
+      {/* Native In-App Document Reader */}
+      {activeReaderDoc && (
+        <DocumentReaderModal
+          document={activeReaderDoc}
+          visible={Boolean(activeReaderDoc)}
+          onClose={() => setActiveReaderDoc(null)}
+        />
+      )}
     </View>
   );
 };

@@ -3,6 +3,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { useAuth } from './AuthContext';
+import { generateUUID, isDevEnvironment, DEV_INSTITUTE_ID } from '@/lib/devSeedHelper';
 import {
   type FeePlan,
   type StudentFee,
@@ -53,7 +54,7 @@ export interface FeeNotificationContextType {
 const INITIAL_FEE_PLANS: FeePlan[] = [
   {
     id: 'plan-01',
-    institute_id: 'inst-01',
+    institute_id: DEV_INSTITUTE_ID,
     name: 'Class 12 JEE Advanced Dropper Program',
     amount: 125000,
     frequency: 'annual',
@@ -62,7 +63,7 @@ const INITIAL_FEE_PLANS: FeePlan[] = [
   },
   {
     id: 'plan-02',
-    institute_id: 'inst-01',
+    institute_id: DEV_INSTITUTE_ID,
     name: 'Term 2 Academic & Lab Instalment',
     amount: 15000,
     frequency: 'term',
@@ -74,7 +75,7 @@ const INITIAL_FEE_PLANS: FeePlan[] = [
 const INITIAL_STUDENT_FEES: StudentFee[] = [
   {
     id: 'fee-01',
-    institute_id: 'inst-01',
+    institute_id: DEV_INSTITUTE_ID,
     student_id: 's4',
     student_name: 'Aryan Kapoor',
     roll_number: '#JEE-2025-104',
@@ -89,7 +90,7 @@ const INITIAL_STUDENT_FEES: StudentFee[] = [
   },
   {
     id: 'fee-02',
-    institute_id: 'inst-01',
+    institute_id: DEV_INSTITUTE_ID,
     student_id: 's2',
     student_name: 'Ananya Iyer',
     roll_number: '#JEE-2025-102',
@@ -104,7 +105,7 @@ const INITIAL_STUDENT_FEES: StudentFee[] = [
   },
   {
     id: 'fee-03',
-    institute_id: 'inst-01',
+    institute_id: DEV_INSTITUTE_ID,
     student_id: 's1',
     student_name: 'Aditya Sharma',
     roll_number: '#JEE-2025-101',
@@ -122,7 +123,7 @@ const INITIAL_STUDENT_FEES: StudentFee[] = [
 const INITIAL_PAYMENTS: PaymentRecord[] = [
   {
     id: 'pay-01',
-    institute_id: 'inst-01',
+    institute_id: DEV_INSTITUTE_ID,
     student_fee_id: 'fee-03',
     student_id: 's1',
     student_name: 'Aditya Sharma',
@@ -136,7 +137,7 @@ const INITIAL_PAYMENTS: PaymentRecord[] = [
   },
   {
     id: 'pay-02',
-    institute_id: 'inst-01',
+    institute_id: DEV_INSTITUTE_ID,
     student_fee_id: 'fee-00',
     student_id: 's5',
     student_name: 'Aarav Patel',
@@ -151,7 +152,7 @@ const INITIAL_PAYMENTS: PaymentRecord[] = [
 const INITIAL_NOTIFICATIONS: InAppNotification[] = [
   {
     id: 'notif-01',
-    institute_id: 'inst-01',
+    institute_id: DEV_INSTITUTE_ID,
     recipient_role: 'all',
     title: 'Electromagnetism Masterclass LIVE',
     message: 'Er. Rakesh Verma is live in 35 minutes in Room 204 & Hybrid Stream.',
@@ -161,7 +162,7 @@ const INITIAL_NOTIFICATIONS: InAppNotification[] = [
   },
   {
     id: 'notif-02',
-    institute_id: 'inst-01',
+    institute_id: DEV_INSTITUTE_ID,
     recipient_role: 'student',
     title: 'Rotational Dynamics DPP-04 Due',
     message: 'Submission deadline tomorrow 06:00 PM for physics homework sheet.',
@@ -171,7 +172,7 @@ const INITIAL_NOTIFICATIONS: InAppNotification[] = [
   },
   {
     id: 'notif-03',
-    institute_id: 'inst-01',
+    institute_id: DEV_INSTITUTE_ID,
     recipient_role: 'parent',
     title: 'Attendance Confirmed',
     message: 'Aryan Kapoor marked Present for Physics Class 12-A at 10:02 AM.',
@@ -181,7 +182,7 @@ const INITIAL_NOTIFICATIONS: InAppNotification[] = [
   },
   {
     id: 'notif-04',
-    institute_id: 'inst-01',
+    institute_id: DEV_INSTITUTE_ID,
     recipient_role: 'admin',
     title: 'Batch Fee Cycle Overdue',
     message: '34 parents pending reminders. WhatsApp templates ready for dispatch.',
@@ -253,8 +254,8 @@ export const FeeNotificationProvider: React.FC<{ children: React.ReactNode }> = 
     const receiptNum = `APX-REC-2025-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const newPayment: PaymentRecord = {
-      id: `payment-${Date.now()}`,
-      institute_id: activeInstitute?.id || 'inst-01',
+      id: generateUUID(),
+      institute_id: activeInstitute?.id || (isDevEnvironment() ? DEV_INSTITUTE_ID : generateUUID()),
       student_fee_id: fee.id,
       student_id: fee.student_id,
       student_name: fee.student_name,
@@ -329,8 +330,8 @@ export const FeeNotificationProvider: React.FC<{ children: React.ReactNode }> = 
     frequency: FeePlan['frequency']
   ) => {
     const newPlan: FeePlan = {
-      id: `plan-${Date.now()}`,
-      institute_id: activeInstitute?.id || 'inst-01',
+      id: generateUUID(),
+      institute_id: activeInstitute?.id || (isDevEnvironment() ? DEV_INSTITUTE_ID : generateUUID()),
       name,
       amount,
       frequency,
@@ -346,8 +347,8 @@ export const FeeNotificationProvider: React.FC<{ children: React.ReactNode }> = 
     type: InAppNotification['type'] = 'broadcast'
   ) => {
     const newNotif: InAppNotification = {
-      id: `notif-${Date.now()}`,
-      institute_id: activeInstitute?.id || 'inst-01',
+      id: generateUUID(),
+      institute_id: activeInstitute?.id || (isDevEnvironment() ? DEV_INSTITUTE_ID : generateUUID()),
       recipient_role: role,
       title,
       message,

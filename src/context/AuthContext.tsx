@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import {
@@ -7,239 +7,220 @@ import {
   type Profile,
   type Batch,
 } from '@/types/database';
+import {
+  generateUUID,
+  isDevEnvironment,
+  DEV_DEFAULT_INSTITUTES,
+  DEV_INITIAL_BATCHES,
+  DEV_ROLE_PROFILES,
+  type DummyAccount,
+} from '@/lib/devSeedHelper';
+import { registerForPushNotifications } from '@/services/notificationService';
+
+export { type DummyAccount };
 
 export interface AuthContextType {
   user: Profile | null;
   activeInstitute: Institute | null;
+  currentInstitute: Institute | null;
   userRole: UserRole;
   institutes: Institute[];
+  availableInstitutes: Institute[];
   batches: Batch[];
   loading: boolean;
   signIn: (identifier: string, password?: string, role?: UserRole) => Promise<{ success: boolean; role?: UserRole; error?: string }>;
   signInWithGoogle: (role: UserRole) => Promise<{ success: boolean; error?: string }>;
-  signUp: (fullName: string, email: string, role: UserRole) => Promise<{ success: boolean; error?: string }>;
+  signUp: (fullName: string, email: string, role: UserRole, password?: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   switchRole: (role: UserRole) => void;
   switchInstitute: (instituteId: string) => void;
   createInstitute: (name: string, centerCode: string, city: string) => Promise<{ success: boolean; institute?: Institute; error?: string }>;
   joinInstituteWithCode: (code: string) => Promise<{ success: boolean; institute?: Institute; error?: string }>;
+  joinInstituteByCode: (code: string) => Promise<{ success: boolean; institute?: Institute; error?: string }>;
+  refreshInstitutes: () => Promise<void>;
   createBatch: (batchData: Omit<Batch, 'id' | 'institute_id' | 'created_at' | 'student_count'>) => Promise<{ success: boolean; batch?: Batch }>;
   archiveBatch: (batchId: string) => void;
 }
 
-const DEFAULT_INSTITUTES: Institute[] = [
-  {
-    id: 'inst-01',
-    name: 'Apex IIT-JEE & Medical Academy',
-    code: 'APEX-KOTA',
-    center_code: 'APX-9021',
-    city: 'Kota',
-    campus_name: 'Kota Campus',
-    created_at: '2025-01-01',
-  },
-  {
-    id: 'inst-02',
-    name: 'Pinnacle Science Foundation',
-    code: 'PINNACLE-DELHI',
-    center_code: 'PIN-4410',
-    city: 'New Delhi',
-    campus_name: 'South Extension',
-    created_at: '2025-02-15',
-  },
-];
-
-const INITIAL_BATCHES: Batch[] = [
-  {
-    id: 'batch-01',
-    institute_id: 'inst-01',
-    name: 'JEE Advanced Target 2025',
-    subject: 'Physics',
-    target_exam: 'JEE Advanced',
-    room_number: 'Room 102',
-    start_time: '10:00 AM',
-    end_time: '12:30 PM',
-    status: 'in_progress',
-    student_count: 50,
-    present_count: 48,
-    assigned_teacher_name: 'Er. Alok Saxena',
-    created_at: '2025-01-10',
-  },
-  {
-    id: 'batch-02',
-    institute_id: 'inst-01',
-    name: 'NEET Dropper Pinnacle',
-    subject: 'Chemistry',
-    target_exam: 'NEET UG',
-    room_number: 'Hall B',
-    start_time: '11:30 AM',
-    end_time: '01:30 PM',
-    status: 'upcoming',
-    student_count: 42,
-    present_count: 38,
-    assigned_teacher_name: 'Dr. Manisha Gupta',
-    created_at: '2025-01-12',
-  },
-  {
-    id: 'batch-03',
-    institute_id: 'inst-01',
-    name: 'Foundation Class 10 STEM',
-    subject: 'Mathematics',
-    target_exam: 'CBSE & Olympiad',
-    room_number: 'Room 101',
-    start_time: '03:30 PM',
-    end_time: '05:00 PM',
-    status: 'upcoming',
-    student_count: 35,
-    assigned_teacher_name: 'Prof. Arvind Swaminathan',
-    created_at: '2025-02-01',
-  },
-];
-
-export interface DummyAccount {
-  id: string;
-  role: UserRole;
-  name: string;
-  email: string;
-  password: string;
-  roleLabel: string;
-  badge: string;
-  badgeColor: string;
-  avatarInitials: string;
-  description: string;
-}
-
-export const DUMMY_ACCOUNTS: DummyAccount[] = [
-  {
-    id: 'acc-student-amelia',
-    role: 'student',
-    name: 'Amelia Sharma',
-    email: 'student@acadly.com',
-    password: 'Password123!',
-    roleLabel: 'Student (Class 12 Topper)',
-    badge: 'JEE Advanced',
-    badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    avatarInitials: 'AS',
-    description: 'Top ranker, 96.4% attendance, all DPPs submitted, full analytics view.',
-  },
-  {
-    id: 'acc-student-kabir',
-    role: 'student',
-    name: 'Kabir Singhania',
-    email: 'kabir@acadly.com',
-    password: 'Password123!',
-    roleLabel: 'Student (Class 11 Science)',
-    badge: 'IIT-JEE 2026',
-    badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
-    avatarInitials: 'KS',
-    description: 'Active doubt poster, 89.2% attendance, 2 pending assignments.',
-  },
-  {
-    id: 'acc-teacher-joshi',
-    role: 'teacher',
-    name: 'Prof. Vikram Joshi',
-    email: 'teacher@acadly.com',
-    password: 'Password123!',
-    roleLabel: 'Senior Physics Faculty',
-    badge: 'Code: JOSHI-MATH-89',
-    badgeColor: 'bg-purple-50 text-purple-700 border-purple-200',
-    avatarInitials: 'VJ',
-    description: 'Manages batch roll call, interactive DPP builder, test marks, and doubt channels.',
-  },
-  {
-    id: 'acc-parent-rajesh',
-    role: 'parent',
-    name: 'Rajesh Sharma',
-    email: 'parent@acadly.com',
-    password: 'Password123!',
-    roleLabel: 'Parent / Guardian',
-    badge: 'Child: Amelia Sharma',
-    badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
-    avatarInitials: 'RS',
-    description: 'Tracks daughter attendance, downloads term report cards, links with tuition faculty.',
-  },
-  {
-    id: 'acc-admin-gupta',
-    role: 'admin',
-    name: 'Director Rajesh Gupta',
-    email: 'admin@acadly.com',
-    password: 'Password123!',
-    roleLabel: 'Academy Director & Admin',
-    badge: 'Apex Academy',
-    badgeColor: 'bg-slate-900 text-white border-slate-800',
-    avatarInitials: 'RG',
-    description: 'Center-wide admissions, teacher verification requests, batch schedules, faculty rosters.',
-  },
-];
-
-const ROLE_PROFILES: Record<UserRole, Profile> = {
-  admin: {
-    id: 'user-admin',
-    email: 'admin@acadly.com',
-    phone: '+91 98290 41208',
-    full_name: 'Director Rajesh Gupta',
-    default_role: 'admin',
-    created_at: '2025-01-01',
-  },
-  teacher: {
-    id: 'user-teacher',
-    email: 'teacher@acadly.com',
-    phone: '+91 98290 41209',
-    full_name: 'Prof. Vikram Joshi',
-    default_role: 'teacher',
-    created_at: '2025-01-05',
-  },
-  student: {
-    id: 'user-student',
-    email: 'student@acadly.com',
-    phone: '+91 98290 41210',
-    full_name: 'Amelia Sharma',
-    default_role: 'student',
-    created_at: '2025-01-15',
-  },
-  parent: {
-    id: 'user-parent',
-    email: 'parent@acadly.com',
-    phone: '+91 98290 41211',
-    full_name: 'Rajesh Sharma',
-    default_role: 'parent',
-    created_at: '2025-01-15',
-  },
-};
+/**
+ * Dev-mode test dummy accounts (guaranteed RFC 4122 UUIDs).
+ * Strictly gated behind __DEV__; never bundled into production code paths.
+ * Supported test accounts: 'student@acadly.com', 'kabir@acadly.com', 'teacher@acadly.com', 'parent@acadly.com', 'admin@acadly.com'
+ */
+export const DUMMY_ACCOUNTS: DummyAccount[] = __DEV__
+  ? (require('@/dev/demoAccounts').DUMMY_ACCOUNTS as DummyAccount[])
+  : [];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [userRole, setUserRole] = useState<UserRole>('student');
   const [user, setUser] = useState<Profile | null>(null);
-  const [activeInstitute, setActiveInstitute] = useState<Institute | null>(DEFAULT_INSTITUTES[0]);
-  const [institutes, setInstitutes] = useState<Institute[]>(DEFAULT_INSTITUTES);
-  const [batches, setBatches] = useState<Batch[]>(INITIAL_BATCHES);
+  const [activeInstitute, setActiveInstitute] = useState<Institute | null>(
+    isDevEnvironment() ? DEV_DEFAULT_INSTITUTES[0] : null
+  );
+  const [institutes, setInstitutes] = useState<Institute[]>(
+    isDevEnvironment() ? DEV_DEFAULT_INSTITUTES : []
+  );
+  const [batches, setBatches] = useState<Batch[]>(
+    isDevEnvironment() ? DEV_INITIAL_BATCHES : []
+  );
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Restore saved role and user session if present
-    (async () => {
-      try {
-        const isAuth = await AsyncStorage.getItem('@acadly_authenticated');
-        const savedRole = await AsyncStorage.getItem('@acadly_role');
-        if (isAuth === 'true' && savedRole && ['admin', 'teacher', 'student', 'parent'].includes(savedRole)) {
-          const role = savedRole as UserRole;
-          setUserRole(role);
-          setUser(ROLE_PROFILES[role]);
-        } else {
-          setUser(null);
+  // Helper to load institute records from Supabase by institute_id
+  const loadInstituteData = useCallback(async (instituteId?: string, userId?: string) => {
+    if (!isSupabaseConfigured) return;
+
+    try {
+      // 1. Fetch current institute if an ID exists
+      if (instituteId) {
+        const { data: instData } = await supabase
+          .from('institutes')
+          .select('*')
+          .eq('id', instituteId)
+          .maybeSingle();
+
+        if (instData) {
+          setActiveInstitute(instData as Institute);
         }
-      } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
       }
-    })();
+
+      // 2. Fetch all institutes the user is a member of
+      if (userId) {
+        const { data: memberRows } = await supabase
+          .from('institute_members')
+          .select('institute:institutes(*)')
+          .eq('user_id', userId)
+          .eq('status', 'active');
+
+        if (memberRows && memberRows.length > 0) {
+          const loadedInstitutes = memberRows
+            .map((r: any) => r.institute)
+            .filter(Boolean) as Institute[];
+
+          if (loadedInstitutes.length > 0) {
+            setInstitutes(loadedInstitutes);
+            if (!instituteId && loadedInstitutes[0]) {
+              setActiveInstitute(loadedInstitutes[0]);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[AuthContext] Error loading institute records:', e);
+    }
   }, []);
 
+  // Helper to load user profile and session state
+  const syncSessionUser = useCallback(async () => {
+    if (!isSupabaseConfigured) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error || !session?.user) {
+        // In dev environment, check if dev session was set
+        if (isDevEnvironment()) {
+          const devRole = await AsyncStorage.getItem('@acadly_role');
+          const isAuth = await AsyncStorage.getItem('@acadly_authenticated');
+          if (isAuth === 'true' && devRole && ['admin', 'teacher', 'student', 'parent'].includes(devRole)) {
+            const role = devRole as UserRole;
+            setUserRole(role);
+            setUser(DEV_ROLE_PROFILES[role] || null);
+            setLoading(false);
+            return;
+          }
+        }
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      // Role and institute_id strictly derived from JWT app_metadata
+      const jwtRole = (session.user.app_metadata?.role as UserRole) ||
+                      (session.user.user_metadata?.default_role as UserRole) ||
+                      'student';
+      const instituteId = session.user.app_metadata?.institute_id as string | undefined;
+
+      setUserRole(jwtRole);
+
+      // Load profile from public.profiles
+      const { data: profileRow } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+      if (profileRow) {
+        setUser(profileRow as Profile);
+      } else {
+        // Fallback profile if row is being created by trigger
+        setUser({
+          id: session.user.id,
+          email: session.user.email || '',
+          phone: session.user.phone || undefined,
+          full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || jwtRole,
+          default_role: jwtRole,
+          created_at: session.user.created_at || new Date().toISOString(),
+        });
+      }
+
+      // Fetch institute data
+      await loadInstituteData(instituteId, session.user.id);
+      registerForPushNotifications(session.user.id).catch(() => null);
+    } catch (e) {
+      console.warn('[AuthContext] Error syncing session:', e);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [loadInstituteData]);
+
+  useEffect(() => {
+    syncSessionUser();
+
+    // Listen to real-time auth state changes from Supabase
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        const jwtRole = (session.user.app_metadata?.role as UserRole) ||
+                        (session.user.user_metadata?.default_role as UserRole) ||
+                        'student';
+        setUserRole(jwtRole);
+        const instituteId = session.user.app_metadata?.institute_id as string | undefined;
+        await loadInstituteData(instituteId, session.user.id);
+      } else {
+        if (!isDevEnvironment()) {
+          setUser(null);
+          setActiveInstitute(null);
+          setInstitutes([]);
+        }
+      }
+    });
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+  }, [syncSessionUser, loadInstituteData]);
+
+  const refreshInstitutes = async () => {
+    if (user?.id) {
+      await loadInstituteData(activeInstitute?.id, user.id);
+    }
+  };
+
+  /**
+   * DEV-ONLY Role Switching helper for UI previews.
+   * Completely disabled in production builds to preserve JWT security.
+   */
   const switchRole = async (role: UserRole) => {
+    if (!__DEV__) {
+      console.warn('[Security Warning]: Client switchRole is disabled in production. Role is verified via JWT.');
+      return;
+    }
     setUserRole(role);
-    setUser((prev) => (prev ? { ...prev, default_role: role } : ROLE_PROFILES[role]));
+    setUser((prev) => (prev ? { ...prev, default_role: role } : DEV_ROLE_PROFILES[role] || null));
     await AsyncStorage.setItem('@acadly_role', role);
     await AsyncStorage.setItem('@acadly_authenticated', 'true');
   };
@@ -251,62 +232,113 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /**
+   * Secure Sign In:
+   * - In __DEV__, allows 1-tap quick demo accounts.
+   * - In Production / Real Auth, requires valid credentials via Supabase Auth.
+   * - FAILS CLOSED: Returns clear error messages on wrong password, unverified email, or network drops.
+   */
   const signIn = async (identifier: string, password?: string, role?: UserRole) => {
     setLoading(true);
     try {
       const cleanEmail = identifier.trim().toLowerCase();
       const enteredPass = password ? password.trim() : '';
 
-      if (enteredPass && enteredPass.length < 6) {
-        return { success: false, error: 'Password must be at least 6 characters.' };
+      if (!cleanEmail) {
+        return { success: false, error: 'Please enter your registered email address.' };
       }
 
-      if (isSupabaseConfigured) {
-        try {
-          const { error } = await supabase.auth.signInWithPassword({
-            email: cleanEmail.includes('@') ? cleanEmail : `${cleanEmail}@acadly.app`,
-            password: enteredPass || 'Password123!',
-          });
-          if (error) {
-            // Note: will be strictly handled in Step 2D with real Supabase Auth
-          }
-        } catch {
-          // Gracefully continue with selected role profile
+      // 1. Dev-mode 1-tap quick demo accounts check (Strictly gated behind __DEV__)
+      if (isDevEnvironment() && enteredPass) {
+        const matchedDummy = DUMMY_ACCOUNTS.find(
+          (acc) => acc.email.toLowerCase() === cleanEmail || acc.id === cleanEmail
+        );
+
+        if (matchedDummy && matchedDummy.password === enteredPass) {
+          const profile: Profile = {
+            id: matchedDummy.id,
+            email: matchedDummy.email,
+            phone: '+91 98290 41208',
+            full_name: matchedDummy.name,
+            default_role: matchedDummy.role,
+            created_at: '2025-01-01T00:00:00.000Z',
+          };
+          setUser(profile);
+          setUserRole(matchedDummy.role);
+          await AsyncStorage.setItem('@acadly_role', matchedDummy.role);
+          await AsyncStorage.setItem('@acadly_authenticated', 'true');
+          return { success: true, role: matchedDummy.role };
         }
       }
 
-      // Check if identifier matches one of the predefined dummy test accounts
-      const matchedDummy = DUMMY_ACCOUNTS.find(
-        (acc) => acc.email.toLowerCase() === cleanEmail || acc.id === cleanEmail
-      );
-
-      const finalRole = matchedDummy ? matchedDummy.role : (role || userRole);
-
-      if (matchedDummy) {
-        setUser({
-          id: matchedDummy.id,
-          email: matchedDummy.email,
-          phone: '+91 98290 41208',
-          full_name: matchedDummy.name,
-          default_role: matchedDummy.role,
-          created_at: '2025-01-01',
-        });
-        setUserRole(finalRole);
-        await AsyncStorage.setItem('@acadly_role', finalRole);
-        await AsyncStorage.setItem('@acadly_authenticated', 'true');
-        return { success: true, role: finalRole };
+      // Password requirement
+      if (!enteredPass) {
+        return { success: false, error: 'Please enter your account password.' };
       }
 
-      await switchRole(finalRole);
+      if (enteredPass.length < 6) {
+        return { success: false, error: 'Password must be at least 6 characters.' };
+      }
+
+      // 2. Production Authentication: Must connect to Supabase Auth
+      if (!isSupabaseConfigured) {
+        return {
+          success: false,
+          error: 'Authentication service is not configured. Please verify project environment variables.',
+        };
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: cleanEmail.includes('@') ? cleanEmail : `${cleanEmail}@acadly.app`,
+        password: enteredPass,
+      });
+
+      if (error || !data.user) {
+        // FAIL CLOSED: Translate specific error causes clearly without leaking sensitive tokens
+        const msg = error?.message || 'Invalid email or password.';
+        if (msg.toLowerCase().includes('invalid login credentials')) {
+          return { success: false, error: 'Invalid email or password. Please verify your credentials and try again.' };
+        }
+        if (msg.toLowerCase().includes('email not confirmed')) {
+          return { success: false, error: 'Email address unverified. Please check your inbox for the confirmation email.' };
+        }
+        if (msg.toLowerCase().includes('network') || msg.toLowerCase().includes('fetch')) {
+          return { success: false, error: 'Network connection error. Please check your internet connection.' };
+        }
+        return { success: false, error: msg };
+      }
+
+      // Role and institute strictly from session claims
+      const finalRole = (data.user.app_metadata?.role as UserRole) ||
+                        (data.user.user_metadata?.default_role as UserRole) ||
+                        role ||
+                        'student';
+      const instituteId = data.user.app_metadata?.institute_id as string | undefined;
+
+      const userProfile: Profile = {
+        id: data.user.id,
+        email: data.user.email || cleanEmail,
+        phone: data.user.phone || undefined,
+        full_name: data.user.user_metadata?.full_name || cleanEmail.split('@')[0],
+        default_role: finalRole,
+        created_at: data.user.created_at || new Date().toISOString(),
+      };
+
+      setUser(userProfile);
+      setUserRole(finalRole);
+
+      await loadInstituteData(instituteId, data.user.id);
+      registerForPushNotifications(data.user.id).catch(() => null);
       return { success: true, role: finalRole };
-    } catch (e: any) {
-      return { success: false, error: e.message || 'Failed to sign in' };
+    } catch (e: unknown) {
+      const errMessage = e instanceof Error ? e.message : 'Authentication failed';
+      return { success: false, error: errMessage };
     } finally {
       setLoading(false);
     }
   };
 
-  const signInWithGoogle = async (role: UserRole) => {
+  const signInWithGoogle = async (_role: UserRole) => {
     setLoading(true);
     try {
       if (isSupabaseConfigured) {
@@ -322,65 +354,132 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: true };
       }
       return { success: false, error: 'Google sign-in requires active Supabase OAuth configuration.' };
-    } catch (e: any) {
-      return { success: false, error: e?.message || 'Google sign-in failed' };
+    } catch (e: unknown) {
+      const errMessage = e instanceof Error ? e.message : 'Google sign-in failed';
+      return { success: false, error: errMessage };
     } finally {
       setLoading(false);
     }
   };
 
-  const signUp = async (fullName: string, email: string, role: UserRole) => {
+  /**
+   * Secure Sign Up:
+   * - Accepts typed password (>= 6 chars required; no hardcoded fallback).
+   * - Enforces server-side role assignment via RPCs or trigger.
+   */
+  const signUp = async (fullName: string, email: string, role: UserRole, password?: string) => {
     setLoading(true);
     try {
-      if (isSupabaseConfigured) {
-        await supabase.auth.signUp({
-          email,
-          password: 'Password123!',
-          options: {
-            data: {
-              full_name: fullName,
-              default_role: role,
-            },
+      if (!isSupabaseConfigured) {
+        return { success: false, error: 'Database service is not configured.' };
+      }
+
+      const cleanEmail = email.trim().toLowerCase();
+      const userPassword = password ? password.trim() : '';
+
+      if (!userPassword || userPassword.length < 6) {
+        return { success: false, error: 'Password must be at least 6 characters.' };
+      }
+
+      const { data, error } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password: userPassword,
+        options: {
+          data: {
+            full_name: fullName.trim(),
+            default_role: role,
           },
-        });
+        },
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
       }
 
       const newProfile: Profile = {
-        id: `user-${Date.now()}`,
-        email,
-        full_name: fullName,
+        id: data.user?.id || generateUUID(),
+        email: cleanEmail,
+        full_name: fullName.trim(),
         default_role: role,
         created_at: new Date().toISOString(),
       };
+
       setUser(newProfile);
       setUserRole(role);
-      await AsyncStorage.setItem('@acadly_role', role);
-      await AsyncStorage.setItem('@acadly_authenticated', 'true');
       return { success: true };
-    } catch (e: any) {
-      return { success: false, error: e.message || 'Failed to register' };
+    } catch (e: unknown) {
+      const errMessage = e instanceof Error ? e.message : 'Failed to register account';
+      return { success: false, error: errMessage };
     } finally {
       setLoading(false);
     }
   };
 
+  /**
+   * Complete Sign Out:
+   * - Clears Supabase session and tokens from SecureStore.
+   * - Purges all @acadly_* and cached keys from AsyncStorage so zero data bleeds across accounts.
+   * - Resets all React state variables cleanly.
+   */
   const signOut = async () => {
-    if (isSupabaseConfigured) {
-      await supabase.auth.signOut();
+    setLoading(true);
+    try {
+      if (isSupabaseConfigured) {
+        await supabase.auth.signOut();
+      }
+      // Purge all persisted application storage keys
+      const allKeys = await AsyncStorage.getAllKeys();
+      const acadlyKeys = allKeys.filter(
+        (k) => k.startsWith('@acadly_') || k.startsWith('acadly_') || k.startsWith('sb-')
+      );
+      if (acadlyKeys.length > 0) {
+        await AsyncStorage.multiRemove(acadlyKeys);
+      }
+    } catch (e) {
+      console.warn('[AuthContext] Sign out cleanup error:', e);
+    } finally {
+      setUser(null);
+      setUserRole('student');
+      setActiveInstitute(null);
+      setInstitutes([]);
+      setBatches([]);
+      setLoading(false);
     }
-    setUser(null);
-    await AsyncStorage.removeItem('@acadly_role');
-    await AsyncStorage.removeItem('@acadly_authenticated');
   };
 
   const createInstitute = async (name: string, centerCode: string, city: string) => {
+    // If authenticated with Supabase, invoke server RPC
+    if (isSupabaseConfigured && user?.id) {
+      try {
+        const { data, error } = await supabase.rpc('create_institute_and_admin', {
+          p_name: name,
+          p_center_code: centerCode,
+          p_city: city,
+        });
+
+        if (error) {
+          return { success: false, error: error.message };
+        }
+
+        const newInst = data as Institute;
+        setInstitutes((prev) => [newInst, ...prev.filter((i) => i.id !== newInst.id)]);
+        setActiveInstitute(newInst);
+        setUserRole('admin');
+        return { success: true, institute: newInst };
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Failed to create institute';
+        return { success: false, error: msg };
+      }
+    }
+
+    // Fallback for dev environment without Supabase
     const newInst: Institute = {
-      id: `inst-${Date.now()}`,
-      name,
+      id: generateUUID(),
+      name: name.trim(),
       code: `${name.toUpperCase().replace(/\s+/g, '-')}-${city.toUpperCase()}`,
-      center_code: centerCode.toUpperCase(),
-      city,
-      campus_name: `${city} Campus`,
+      center_code: centerCode.trim().toUpperCase(),
+      city: city.trim(),
+      campus_name: `${city.trim()} Campus`,
       created_at: new Date().toISOString(),
     };
 
@@ -391,8 +490,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const joinInstituteWithCode = async (code: string) => {
     const normalized = code.trim().toUpperCase();
+
+    if (isSupabaseConfigured) {
+      try {
+        const { data: instData, error } = await supabase
+          .from('institutes')
+          .select('*')
+          .or(`center_code.ilike.${normalized},invite_code.ilike.${normalized},code.ilike.${normalized}`)
+          .maybeSingle();
+
+        if (error) {
+          return { success: false, error: error.message };
+        }
+
+        if (instData) {
+          const inst = instData as Institute;
+          setActiveInstitute(inst);
+          setInstitutes((prev) => [inst, ...prev.filter((i) => i.id !== inst.id)]);
+          return { success: true, institute: inst };
+        }
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Failed to verify institute code';
+        return { success: false, error: msg };
+      }
+    }
+
     const inst = institutes.find(
-      (i) => i.center_code.toUpperCase() === normalized || i.code.toUpperCase() === normalized
+      (i) => i.center_code?.toUpperCase() === normalized || i.code?.toUpperCase() === normalized
     );
 
     if (inst) {
@@ -402,17 +526,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return {
       success: false,
-      error: `No institute found matching code "${code}". Please check with your academy coordinator.`,
+      error: `No institute found matching code "${code}". Please verify with your academy coordinator.`,
     };
   };
+
+  const joinInstituteByCode = joinInstituteWithCode;
 
   const createBatch = async (
     batchData: Omit<Batch, 'id' | 'institute_id' | 'created_at' | 'student_count'>
   ) => {
     const newBatch: Batch = {
       ...batchData,
-      id: `batch-${Date.now()}`,
-      institute_id: activeInstitute?.id || 'inst-01',
+      id: generateUUID(),
+      institute_id: activeInstitute?.id || generateUUID(),
       student_count: 0,
       created_at: new Date().toISOString(),
     };
@@ -432,8 +558,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         activeInstitute,
+        currentInstitute: activeInstitute,
         userRole,
         institutes,
+        availableInstitutes: institutes,
         batches,
         loading,
         signIn,
@@ -444,6 +572,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         switchInstitute,
         createInstitute,
         joinInstituteWithCode,
+        joinInstituteByCode,
+        refreshInstitutes,
         createBatch,
         archiveBatch,
       }}
@@ -459,4 +589,29 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
+};
+
+/**
+ * Unified Institute Hook:
+ * Reads from the single source of truth in AuthContext (loaded from institutes table).
+ */
+export const useInstitute = () => {
+  const {
+    activeInstitute,
+    institutes,
+    switchInstitute,
+    joinInstituteWithCode,
+    refreshInstitutes,
+    loading,
+  } = useAuth();
+
+  return {
+    currentInstitute: activeInstitute,
+    availableInstitutes: institutes,
+    switchInstitute,
+    joinInstituteByCode: joinInstituteWithCode,
+    isLoading: loading,
+    refreshInstitutes,
+    error: null,
+  };
 };

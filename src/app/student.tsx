@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -50,11 +50,14 @@ import {
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useRoleGuard } from '@/hooks/useRoleGuard';
-import { useAuth } from '@/context/AuthContext';
-import { useInstitute } from '@/context/InstituteContext';
-import { useAcademic } from '@/context/AcademicContext';
+import { useAuth, useInstitute } from '@/context/AuthContext';
+import { useUI } from '@/context/UIContext';
+import { useStudentsRoster } from '@/hooks/queries/useStudentQueries';
+import { useBatches } from '@/hooks/queries/useBatchQueries';
+import { useAssignments } from '@/hooks/queries/useAssignmentQueries';
+import { useStudyMaterials } from '@/hooks/queries/useMaterialQueries';
 import { useFeeNotification } from '@/context/FeeNotificationContext';
-import { ScreenWrapper, Badge, BottomTabBar, type TabItem } from '@/components/ui';
+import { ScreenWrapper, Badge, BottomTabBar, LanguageSwitcher, type TabItem } from '@/components/ui';
 import {
   PerformanceComparisonChart,
   SubjectRadarOrBarChart,
@@ -70,7 +73,7 @@ import {
   FeeReceiptModal,
   NotificationDrawer,
   RazorpayCheckoutModal,
-} from '@/components/finance';
+} from '@/features/fees';
 import { generateAndSharePDF, DUMMY_PDF_CATALOG, type PDFDocumentContent } from '@/services/dummyPdfService';
 import { DAILY_AFFIRMATIONS } from '@/data/dummyAcademicData';
 import { FEATURE_FEES } from '@/config/features';
@@ -194,8 +197,12 @@ export default function PinterestStudentScreen() {
     enrolledTeachers,
     activeTeacherId,
     switchActiveTeacher,
-    studentsRoster,
-  } = useAcademic();
+  } = useUI();
+  const { data: studentsRoster = [] } = useStudentsRoster(currentInstitute?.id);
+  const { data: batches = [] } = useBatches(currentInstitute?.id);
+  const activeBatch = batches[0];
+  const { data: batchAssignments = [] } = useAssignments(activeBatch?.id);
+  const { data: studyMaterialsList = [] } = useStudyMaterials(activeBatch?.id);
   const { openNotificationDrawer, unreadCount, openRazorpayCheckout, studentFees } = useFeeNotification();
 
   // Bottom Navigation Bar State (5 Tabs)
@@ -217,7 +224,7 @@ export default function PinterestStudentScreen() {
 
   // Profile Edit Modal State
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
-  const [profileNameInput, setProfileNameInput] = useState(studentProfile?.name || 'Amelia Sharma 🌸');
+  const [profileNameInput, setProfileNameInput] = useState(studentProfile?.name || 'Amelia Sharma');
   const [profileSchoolInput, setProfileSchoolInput] = useState(studentProfile?.school || 'Delhi Public School (R.K. Puram)');
 
   useEffect(() => {
@@ -233,13 +240,196 @@ export default function PinterestStudentScreen() {
   const [selectedDay, setSelectedDay] = useState('Tue 19');
   const [taskFilter, setTaskFilter] = useState<'all' | 'todo' | 'in_progress' | 'done'>('all');
   const [homeSearchQuery, setHomeSearchQuery] = useState('');
-  const [studentTasks, setStudentTasks] = useState(INITIAL_STUDENT_TASKS);
+
+  // Debounced search query & matching results across lectures, notes, assignments
+  const [debouncedQuery, setDebouncedQuery] = useState(homeSearchQuery);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(homeSearchQuery);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [homeSearchQuery]);
+
+  const searchResults = useMemo(() => {
+    const q = debouncedQuery.trim().toLowerCase();
+    if (!q) return [];
+
+    const matchedLectures = lectures
+      .filter((l) => l.title?.toLowerCase().includes(q) || (l.subject && l.subject.toLowerCase().includes(q)))
+      .map((l) => ({ type: 'lecture' as const, id: l.id, title: l.title, subtitle: `Live Lecture • ${l.subject || 'Physics'}`, raw: l }));
+
+    const matchedMaterials = studyMaterialsList
+      .filter((m) => m.title?.toLowerCase().includes(q) || (m.subject && m.subject.toLowerCase().includes(q)))
+      .map((m) => ({ type: 'material' as const, id: m.id, title: m.title, subtitle: `Study Note • ${m.subject || 'Document'}`, raw: m }));
+
+    const matchedAssignments = batchAssignments
+      .filter((a) => a.title?.toLowerCase().includes(q) || (a.subject && a.subject.toLowerCase().includes(q)))
+      .map((a) => ({ type: 'assignment' as const, id: a.id, title: a.title, subtitle: `DPP / Quiz • ${a.due_label || 'Due Soon'}`, raw: a }));
+
+    return [...matchedLectures, ...matchedMaterials, ...matchedAssignments];
+  }, [debouncedQuery, lectures, studyMaterialsList, batchAssignments]);
+
+  // Dynamically compute subjects & mastery cards from enrolled batches and teachers
+  const dynamicSubjectProgressCards = useMemo(() => {
+    if (!batches || batches.length === 0) {
+      return SUBJECT_PROGRESS_CARDS;
+    }
+
+    const palettes = [
+      {
+        badge: 'Mechanics',
+        bgClass: 'bg-[#DCFCE7]',
+        borderClass: 'border-emerald-300',
+        barClass: 'bg-emerald-500',
+        textColor: 'text-emerald-950',
+        subtextColor: 'text-emerald-700',
+      },
+      {
+        badge: 'Calculus',
+        bgClass: 'bg-[#EDE9FE]',
+        borderClass: 'border-purple-300',
+        barClass: 'bg-purple-600',
+        textColor: 'text-purple-950',
+        subtextColor: 'text-purple-700',
+      },
+      {
+        badge: 'Chemistry',
+        bgClass: 'bg-[#FEF3C7]',
+        borderClass: 'border-amber-300',
+        barClass: 'bg-amber-500',
+        textColor: 'text-amber-950',
+        subtextColor: 'text-amber-700',
+      },
+    ];
+
+    return batches.map((b, idx) => {
+      const palette = palettes[idx % palettes.length];
+      return {
+        id: b.id,
+        title: b.name,
+        teacher: b.assigned_teacher_name || activeTeacher.name,
+        lessons: `${b.student_count || 22} Lessons`,
+        hours: `${b.start_time || '04:30 PM'} - ${b.end_time || '06:00 PM'}`,
+        progress: 72 + ((idx * 8) % 25),
+        badge: b.subject || palette.badge,
+        bgClass: palette.bgClass,
+        borderClass: palette.borderClass,
+        barClass: palette.barClass,
+        textColor: palette.textColor,
+        subtextColor: palette.subtextColor,
+      };
+    });
+  }, [batches, activeTeacher.name]);
+
+  // Tasks computed from real assignments
+  const dynamicStudentTasks = useMemo(() => {
+    if (!batchAssignments || batchAssignments.length === 0) {
+      return INITIAL_STUDENT_TASKS;
+    }
+
+    return batchAssignments.map((asg, idx) => {
+      const isFirst = idx === 0;
+      const status: 'todo' | 'in_progress' | 'done' = isFirst ? 'in_progress' : (idx > 2 ? 'done' : 'todo');
+      const statusLabel = status === 'in_progress' ? 'In progress' : status === 'done' ? 'Done' : 'To do';
+      const statusColor =
+        status === 'in_progress'
+          ? 'bg-amber-100 text-amber-800 border-amber-300'
+          : status === 'done'
+          ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+          : 'bg-purple-100 text-purple-800 border-purple-300';
+
+      return {
+        id: asg.id,
+        title: asg.title,
+        subject: asg.subject || 'Academic Module',
+        status,
+        statusLabel,
+        statusColor,
+        dueDate: asg.due_label || 'Due this week',
+        comments: asg.type === 'quiz' ? 6 : 2,
+        progress: status === 'done' ? 3 : status === 'in_progress' ? 1 : 0,
+        totalBlocks: 3,
+      };
+    });
+  }, [batchAssignments]);
 
   // Filtered Tasks for Home screen
-  const filteredTasks = studentTasks.filter((t) => {
+  const filteredTasks = dynamicStudentTasks.filter((t) => {
     if (taskFilter === 'all') return true;
     return t.status === taskFilter;
   });
+
+  // Filter timetable / sessions according to selected week day
+  const dayPrefix = selectedDay.split(' ')[0] || 'Tue';
+  const activeDaySchedule = useMemo(() => {
+    const SCHEDULE_MAP: Record<string, { title: string; time: string; subject: string; room: string; faculty: string; isLive: boolean; tag: string }> = {
+      Mon: {
+        title: 'Electromagnetism & Circuit Flow',
+        time: '04:30 PM - 06:00 PM',
+        subject: 'Physics',
+        room: 'Lecture Hall A',
+        faculty: activeTeacher.name,
+        isLive: true,
+        tag: 'Live Stream',
+      },
+      Tue: {
+        title: 'Problem Solving & Mechanics Lab',
+        time: '10:30 AM - 12:00 PM',
+        subject: 'Physics Lab',
+        room: 'B2, Room 158',
+        faculty: 'Prof. Vikram Joshi',
+        isLive: false,
+        tag: 'Lab Session',
+      },
+      Wed: {
+        title: 'Differential Calculus & Derivatives Masterclass',
+        time: '04:30 PM - 06:00 PM',
+        subject: 'Mathematics',
+        room: 'Room 204',
+        faculty: 'Dr. Ramanujan',
+        isLive: true,
+        tag: 'Live Stream',
+      },
+      Thu: {
+        title: 'Organic Chemistry: Aldehydes & Ketones',
+        time: '11:00 AM - 12:30 PM',
+        subject: 'Chemistry',
+        room: 'Chem Lab 1',
+        faculty: 'Dr. Sen',
+        isLive: false,
+        tag: 'Classroom',
+      },
+      Fri: {
+        title: 'Rotational Mechanics Problem Drill & PYQ',
+        time: '04:30 PM - 06:00 PM',
+        subject: 'Physics',
+        room: 'Main Auditorium',
+        faculty: activeTeacher.name,
+        isLive: true,
+        tag: 'Live Stream',
+      },
+      Sat: {
+        title: 'Weekly Full-Length JEE Advanced Mock Exam',
+        time: '09:00 AM - 12:00 PM',
+        subject: 'All Subjects Test',
+        room: 'Examination Centre',
+        faculty: 'Exam Controller',
+        isLive: false,
+        tag: 'Proctored Test',
+      },
+      Sun: {
+        title: 'Doubt Clearing & Formula Revision Clinic',
+        time: '11:00 AM - 01:00 PM',
+        subject: 'Mentorship',
+        room: 'Seminar Room 3',
+        faculty: 'Senior Faculty Panel',
+        isLive: false,
+        tag: 'Doubt Clinic',
+      },
+    };
+
+    return SCHEDULE_MAP[dayPrefix] || SCHEDULE_MAP.Tue;
+  }, [dayPrefix, activeTeacher.name]);
 
   // Parent Link Code Copier / Share
   const handleShareParentCode = async () => {
@@ -316,7 +506,7 @@ export default function PinterestStudentScreen() {
     <ScreenWrapper
       headerProps={{
         title: 'Student Desk',
-        instituteName: currentInstitute?.name || 'Bloom Science Academy',
+        instituteName: currentInstitute?.name || 'Academy Hub',
         profileInitials: 'AS',
         onNotificationPress: openNotificationDrawer,
         onProfilePress: () => setActiveTab('profile'),
@@ -376,6 +566,61 @@ export default function PinterestStudentScreen() {
               <SlidersHorizontal size={13} color="#475569" />
             </TouchableOpacity>
           </View>
+
+          {/* Search Results Dropdown / Panel */}
+          {homeSearchQuery.trim().length > 0 && (
+            <View className="bg-white rounded-3xl p-4 border border-blue-200 shadow-md gap-3">
+              <View className="flex-row items-center justify-between">
+                <Text className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                  Search Results ({searchResults.length})
+                </Text>
+                <TouchableOpacity onPress={() => setHomeSearchQuery('')}>
+                  <Text className="text-xs font-bold text-slate-400">Clear</Text>
+                </TouchableOpacity>
+              </View>
+
+              {searchResults.length === 0 ? (
+                <View className="py-4 items-center justify-center">
+                  <Text className="text-xs font-bold text-slate-600">No matching items found</Text>
+                  <Text className="text-[11px] text-slate-400 text-center mt-1">
+                    Try searching with another keyword like "Physics", "Mechanics", or "DPP".
+                  </Text>
+                </View>
+              ) : (
+                <View className="gap-2">
+                  {searchResults.slice(0, 5).map((item) => (
+                    <TouchableOpacity
+                      key={`${item.type}-${item.id}`}
+                      activeOpacity={0.85}
+                      onPress={() => {
+                        setHomeSearchQuery('');
+                        if (item.type === 'lecture') {
+                          openPlayer(item.raw);
+                        } else {
+                          setActiveTab('study');
+                        }
+                      }}
+                      className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex-row items-center justify-between"
+                    >
+                      <View className="flex-1 mr-2">
+                        <Text className="text-xs font-extrabold text-slate-900" numberOfLines={1}>
+                          {item.title}
+                        </Text>
+                        <Text className="text-[10px] text-slate-500 font-medium mt-0.5">
+                          {item.subtitle}
+                        </Text>
+                      </View>
+                      <Badge
+                        label={item.type.toUpperCase()}
+                        variant={item.type === 'lecture' ? 'live' : item.type === 'assignment' ? 'due' : 'neutral'}
+                        size="sm"
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
+          )}
 
           {/* 3. Horizontal Weekly Day-Picker Strip (Inspiration: Image 1 & 3) */}
           <View className="bg-white rounded-3xl p-3 border border-slate-200/80 shadow-xs">
@@ -437,26 +682,26 @@ export default function PinterestStudentScreen() {
               <View className="flex-row items-center gap-2">
                 <View className="bg-white/15 px-2.5 py-1 rounded-xl">
                   <Text className="text-[10px] font-black text-white uppercase tracking-wider">
-                    MON 26
+                    {selectedDay.toUpperCase()}
                   </Text>
                 </View>
                 <Text className="text-xs font-semibold text-rose-200">
-                  04:30 PM • Live Stream
+                  {activeDaySchedule.time} • {activeDaySchedule.tag}
                 </Text>
               </View>
 
               <View className="bg-white/10 px-2.5 py-1 rounded-full border border-white/10">
                 <Text className="text-[10px] font-bold text-rose-100">
-                  Physics • Hybrid
+                  {activeDaySchedule.subject}
                 </Text>
               </View>
             </View>
 
             <Text className="text-xl font-black text-white tracking-tight mt-1">
-              Electromagnetism & Circuit Flow
+              {activeDaySchedule.title}
             </Text>
             <Text className="text-xs text-rose-200/80 mt-1 leading-relaxed">
-              With {activeTeacher.name} • 45m problem solving & derivation
+              With {activeDaySchedule.faculty} • {activeDaySchedule.room}
             </Text>
 
             <View className="flex-row items-center justify-between mt-5 pt-3 border-t border-white/10">
@@ -536,7 +781,7 @@ export default function PinterestStudentScreen() {
 
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-1 px-1">
               <View className="flex-row gap-3">
-                {SUBJECT_PROGRESS_CARDS.map((card) => (
+                {dynamicSubjectProgressCards.map((card) => (
                   <TouchableOpacity
                     key={card.id}
                     activeOpacity={0.88}
@@ -750,7 +995,7 @@ export default function PinterestStudentScreen() {
                 Attendance
               </Text>
               <Text className="text-2xl font-black text-slate-800 mt-0.5">96.4%</Text>
-              <Text className="text-[10px] text-emerald-600 font-bold mt-1">Above 90% Target 🎯</Text>
+              <Text className="text-[10px] text-emerald-600 font-bold mt-1">Above 90% Target</Text>
             </TouchableOpacity>
 
             {FEATURE_FEES ? (
@@ -1130,7 +1375,7 @@ export default function PinterestStudentScreen() {
                       <Text className="text-base font-black text-white">AS</Text>
                     </View>
                     <View>
-                      <Text className="text-base font-black text-slate-900">{profileNameInput.replace(' 🌸', '')}</Text>
+                      <Text className="text-base font-black text-slate-900">{profileNameInput}</Text>
                       <Text className="text-xs text-slate-500 font-medium">{studentProfile.grade} • {studentProfile.board}</Text>
                     </View>
                   </View>
@@ -1215,6 +1460,9 @@ export default function PinterestStudentScreen() {
                     <Text className="text-xs font-bold text-blue-600">Contact</Text>
                   </TouchableOpacity>
                 </View>
+
+                {/* In-App Language Selector */}
+                <LanguageSwitcher className="mt-2" />
 
                 {/* Sign Out Action */}
                 <TouchableOpacity

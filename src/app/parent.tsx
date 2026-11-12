@@ -37,15 +37,16 @@ import {
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useRoleGuard } from '@/hooks/useRoleGuard';
-import { useAuth } from '@/context/AuthContext';
-import { useInstitute } from '@/context/InstituteContext';
+import { useAuth, useInstitute } from '@/context/AuthContext';
 import { useChild, ChildStudent } from '@/context/ChildContext';
 import { useFeeNotification } from '@/context/FeeNotificationContext';
-import { useAcademic } from '@/context/AcademicContext';
+import { useUI } from '@/context/UIContext';
+import { useStudentsRoster } from '@/hooks/queries/useStudentQueries';
 import {
   ScreenWrapper,
   Badge,
   BottomTabBar,
+  LanguageSwitcher,
   type TabItem,
 } from '@/components/ui';
 import {
@@ -56,7 +57,7 @@ import {
   RazorpayCheckoutModal,
   FeeReceiptModal,
   NotificationDrawer,
-} from '@/components/finance';
+} from '@/features/fees';
 import { generateAndSharePDF, DUMMY_PDF_CATALOG } from '@/services/dummyPdfService';
 import { FEATURE_FEES } from '@/config/features';
 
@@ -74,7 +75,8 @@ export default function PinterestParentScreen() {
     openNotificationDrawer,
     unreadCount,
   } = useFeeNotification();
-  const { comparisonChartData, studentsRoster } = useAcademic();
+  const { comparisonChartData } = useUI();
+  const { data: studentsRoster = [] } = useStudentsRoster(currentInstitute?.id);
 
   // Bottom Navigation Tabs (4 Tabs)
   const [activeTab, setActiveTab] = useState<'home' | 'children' | 'fees_reports' | 'profile'>('home');
@@ -128,7 +130,7 @@ export default function PinterestParentScreen() {
     if (res.success && res.child) {
       setIsLinkChildModalOpen(false);
       setChildCodeInput('');
-      Alert.alert('Child Linked! 🎓', `Successfully connected ${res.child.full_name} to your parent portal.`);
+      Alert.alert('Child Linked', `Successfully connected ${res.child.full_name} to your parent portal.`);
     } else {
       Alert.alert('Not Found', res.error || 'Could not verify student code. Please check with the tuition teacher.');
     }
@@ -188,7 +190,7 @@ export default function PinterestParentScreen() {
     <ScreenWrapper
       headerProps={{
         title: 'Parent Portal',
-        instituteName: currentInstitute?.name || 'Bloom Science Academy',
+        instituteName: currentInstitute?.name || 'Academy Hub',
         profileInitials: 'RS',
         onNotificationPress: openNotificationDrawer,
         onProfilePress: () => {
@@ -196,7 +198,7 @@ export default function PinterestParentScreen() {
             'Rajesh Sharma',
             `Primary Guardian • Enrolled: ${selectedChild?.full_name || 'Amelia Sharma'}\nPhone: +91 98230 44551`,
             [
-              { text: 'Sign Out 🚪', style: 'destructive', onPress: handleLogout },
+              { text: 'Sign Out', style: 'destructive', onPress: handleLogout },
               { text: 'Close', style: 'cancel' },
             ]
           );
@@ -518,7 +520,7 @@ export default function PinterestParentScreen() {
             <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
               <View className="flex-row items-center gap-3.5">
                 <View className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
-                  <Text className="text-3xl">🏡</Text>
+                  <Home size={28} color="#2563EB" />
                 </View>
                 <View className="flex-1 min-w-0">
                   <Text className="text-lg font-black text-slate-900">Sunita Sharma</Text>
@@ -572,6 +574,9 @@ export default function PinterestParentScreen() {
                   />
                 </View>
               </View>
+
+              {/* App Language Switcher */}
+              <LanguageSwitcher className="mt-3 mb-1" />
 
               {/* Sign Out Button */}
               <TouchableOpacity

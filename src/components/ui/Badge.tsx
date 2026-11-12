@@ -118,6 +118,8 @@ export const Badge: React.FC<BadgeProps> = ({
 
   return (
     <View
+      accessibilityRole="text"
+      accessibilityLabel={label}
       className={`flex-row items-center self-start ${currentSize.container} ${currentVariant.container} ${className}`}
     >
       {showDot && currentVariant.dotColor && (

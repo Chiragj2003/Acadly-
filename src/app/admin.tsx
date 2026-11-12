@@ -36,15 +36,19 @@ import {
   ChevronRight,
   ShieldCheck,
   Share2,
+  Building,
 } from 'lucide-react-native';
 import { useAuth } from '@/context/AuthContext';
 import { useFeeNotification } from '@/context/FeeNotificationContext';
-import { useAcademic } from '@/context/AcademicContext';
+import { useUI } from '@/context/UIContext';
+import { useJoinRequests } from '@/hooks/queries/useAdmissionQueries';
+import { useStudentsRoster } from '@/hooks/queries/useStudentQueries';
 import {
   ScreenWrapper,
   MetricCard,
   Badge,
   BottomTabBar,
+  LanguageSwitcher,
   type TabItem,
 } from '@/components/ui';
 import {
@@ -55,14 +59,16 @@ import {
   FeeReceiptModal,
   NotificationDrawer,
   RazorpayCheckoutModal,
-} from '@/components/finance';
+} from '@/features/fees';
 import { FEATURE_FEES } from '@/config/features';
 
 export default function PinterestAdminScreen() {
   const { isAuthorized, isLoading } = useRoleGuard(["admin"]);
   const router = useRouter();
   const { activeInstitute, batches, createBatch, signOut } = useAuth();
-  const { joinRequests, coachingProfile, studentsRoster } = useAcademic();
+  const { coachingProfile } = useUI();
+  const { data: joinRequests = [] } = useJoinRequests(activeInstitute?.id);
+  const { data: studentsRoster = [] } = useStudentsRoster(activeInstitute?.id);
   const {
     analytics,
     openNotificationDrawer,
@@ -191,15 +197,15 @@ export default function PinterestAdminScreen() {
     <ScreenWrapper
       headerProps={{
         title: 'Admin Command Desk',
-        instituteName: activeInstitute?.name || 'Bloom Science Academy',
+        instituteName: activeInstitute?.name || 'Academy Hub',
         profileInitials: 'AD',
         onNotificationPress: openNotificationDrawer,
         onProfilePress: () => {
           Alert.alert(
             coachingProfile.directorName || 'Director Sharma',
-            `${activeInstitute?.name || 'Bloom Science Academy'}\nInvite Code: ${coachingProfile.inviteCode}\nCity: ${coachingProfile.city}`,
+            `${activeInstitute?.name || 'Academy Hub'}\nInvite Code: ${coachingProfile.inviteCode}\nCity: ${coachingProfile.city}`,
             [
-              { text: 'Sign Out 🚪', style: 'destructive', onPress: handleLogout },
+              { text: 'Sign Out', style: 'destructive', onPress: handleLogout },
               { text: 'Close', style: 'cancel' },
             ]
           );
@@ -235,11 +241,11 @@ export default function PinterestAdminScreen() {
 
               <View className="flex-row items-center gap-3.5 mb-3.5">
                 <View className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
-                  <Text className="text-2xl">🏫</Text>
+                  <Building size={24} color="#2563EB" />
                 </View>
                 <View className="flex-1 min-w-0">
                   <Text className="text-base font-extrabold text-slate-900" numberOfLines={1}>
-                    {activeInstitute?.name || 'Bloom Academy'}
+                    {activeInstitute?.name || 'Academy Center'}
                   </Text>
                   <Text className="text-xs text-slate-500 mt-0.5">
                     Director: {coachingProfile.directorName || 'Director Sharma'} • {batches.length} Batches
@@ -598,10 +604,10 @@ export default function PinterestAdminScreen() {
             <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
               <View className="flex-row items-center gap-3.5">
                 <View className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
-                  <Text className="text-3xl">🏫</Text>
+                  <Building size={30} color="#2563EB" />
                 </View>
                 <View className="flex-1 min-w-0">
-                  <Text className="text-lg font-black text-slate-900">{activeInstitute?.name || 'Bloom Academy'}</Text>
+                  <Text className="text-lg font-black text-slate-900">{activeInstitute?.name || 'Academy Center'}</Text>
                   <Text className="text-xs text-slate-500">{coachingProfile.city || 'Kota, Rajasthan'}</Text>
                   <Badge label="Institute Admin" variant="info" />
                 </View>
@@ -630,6 +636,9 @@ export default function PinterestAdminScreen() {
 
               {/* Analytics Summary */}
               <AdminAnalyticsView />
+
+              {/* Language Switcher */}
+              <LanguageSwitcher className="mt-3 mb-1" />
 
               {/* Sign Out Button */}
               <TouchableOpacity

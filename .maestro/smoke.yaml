@@ -1,0 +1,131 @@
+# Acadly End-to-End Production Smoke Test Suite (Maestro)
+# Flow:
+# 1. Login as Teacher
+# 2. Mark attendance & save to Supabase
+# 3. Publish Interactive DPP / Quiz
+# 4. Sign out
+# 5. Login as Student
+# 6. Verify Attendance & Complete Quiz
+
+appId: com.acadly.app
+---
+
+# ==============================================================================
+# PHASE 1: TEACHER WORKFLOW - LOGIN, ATTENDANCE & QUIZ PUBLISH
+# ==============================================================================
+- launchApp:
+    clearState: true
+
+- assertVisible: "Acadly"
+- assertVisible: "Sign In"
+
+# Select Teacher Role
+- tapOn:
+    text: "Teacher"
+
+# Input Credentials
+- tapOn:
+    id: "auth-email-input"
+- inputText: "teacher@acadly.com"
+
+- tapOn:
+    id: "auth-password-input"
+- inputText: "Password123!"
+
+- tapOn:
+    text: "Sign In as Teacher"
+
+# Verify Teacher Portal Loaded
+- assertVisible: "Teacher Portal"
+- assertVisible: "Today's Attendance"
+
+# Mark Attendance & Commit
+- tapOn:
+    text: "Roll Call"
+
+- tapOn:
+    id: "attendance-status-toggle-1"
+
+- tapOn:
+    text: "Save Attendance"
+
+- assertVisible: "Attendance Saved"
+
+# Publish Interactive Quiz
+- tapOn:
+    text: "Create Quiz"
+
+- tapOn:
+    id: "quiz-title-input"
+- inputText: "Kinematics Interactive DPP #01"
+
+- tapOn:
+    id: "quiz-question-prompt-input"
+- inputText: "A car accelerates uniformly from rest. What is the velocity-time curve?"
+
+- tapOn:
+    text: "Publish Quiz"
+
+- assertVisible: "Quiz Published Successfully"
+
+# Sign Out
+- tapOn:
+    id: "header-profile-menu"
+- tapOn:
+    text: "Sign Out"
+
+- assertVisible: "Sign In"
+
+
+# ==============================================================================
+# PHASE 2: STUDENT WORKFLOW - ATTENDANCE VERIFICATION & QUIZ COMPLETION
+# ==============================================================================
+# Select Student Role
+- tapOn:
+    text: "Student"
+
+# Input Student Credentials
+- tapOn:
+    id: "auth-email-input"
+- inputText: "student@acadly.com"
+
+- tapOn:
+    id: "auth-password-input"
+- inputText: "Password123!"
+
+- tapOn:
+    text: "Sign In as Student"
+
+# Verify Student Portal Loaded
+- assertVisible: "Student Portal"
+- assertVisible: "Attendance"
+
+# Launch & Complete Interactive Quiz
+- tapOn:
+    text: "Assignments"
+
+- tapOn:
+    text: "Kinematics Interactive DPP #01"
+
+- assertVisible: "Question 1 of"
+
+# Select Answer
+- tapOn:
+    text: "Straight line with positive slope"
+
+- tapOn:
+    text: "Next"
+
+# Select Answer Question 2
+- tapOn:
+    text: "True"
+
+- tapOn:
+    text: "Submit Quiz"
+
+- tapOn:
+    text: "Submit Now"
+
+# Verify Auto-Graded Result Screen
+- assertVisible: "QUIZ COMPLETED"
+- assertVisible: "Question Breakdown & Explanations"

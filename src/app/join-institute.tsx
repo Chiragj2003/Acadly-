@@ -18,7 +18,9 @@ import {
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { ScreenWrapper, Mascot } from '@/components/ui';
-import { useAcademic, StudentExtraDetails } from '@/context/AcademicContext';
+import { useUI } from '@/context/UIContext';
+import { useSubmitJoinRequest } from '@/hooks/queries/useAdmissionQueries';
+import { type StudentExtraDetails } from '@/services/admissionService';
 import { useAuth } from '@/context/AuthContext';
 import { useRoleGuard } from '@/hooks/useRoleGuard';
 
@@ -45,19 +47,18 @@ const BOARD_OPTIONS = ['CBSE', 'ICSE', 'State Board', 'IB / Cambridge'];
 export default function JoinInstituteScreen() {
   const router = useRouter();
   const { isAuthorized, isLoading } = useRoleGuard(['student']);
-  const { user } = useAuth();
-  const {
-    submitJoinRequest,
-    studentJoinStatus,
-    activeJoinRequest,
-    teacherProfile,
-    coachingProfile,
-  } = useAcademic();
+  const { user, activeInstitute } = useAuth();
+  const { teacherProfile, coachingProfile } = useUI();
+  const submitJoinRequestMutation = useSubmitJoinRequest();
+
+  const [activeJoinRequest, setActiveJoinRequest] = useState<{
+    matchedTargetName?: string;
+    codeUsed?: string;
+    studentDetails: StudentExtraDetails;
+  } | null>(null);
 
   // Steps: 'form' | 'waiting'
-  const [step, setStep] = useState<'form' | 'waiting'>(
-    studentJoinStatus === 'pending' ? 'waiting' : 'form'
-  );
+  const [step, setStep] = useState<'form' | 'waiting'>('form');
 
   // Form State
   const [fullName, setFullName] = useState(user?.full_name || 'Amelia Sharma');
@@ -94,7 +95,7 @@ export default function JoinInstituteScreen() {
     };
   } else if (cleanCode === (coachingProfile?.inviteCode || '').toUpperCase()) {
     matchedTarget = {
-      name: coachingProfile?.name || 'Bloom Science Academy',
+      name: coachingProfile?.name || 'Academy Hub',
       type: 'Coaching Center',
       detail: `${coachingProfile?.city} Campus • ${coachingProfile?.subjectsOffered.join(', ')}`,
       rate: 'Comprehensive Tier Plan',
@@ -143,12 +144,27 @@ export default function JoinInstituteScreen() {
       bloodGroup,
     };
 
-    const res = await submitJoinRequest(details, teacherCode.trim().toUpperCase());
-    if (res.success) {
-      setStep('waiting');
-      Alert.alert('Request Submitted', `Sent to ${res.targetName} for verification.`);
-    } else {
-      Alert.alert('Error', res.error || 'Could not submit join request.');
+    try {
+      const res = await submitJoinRequestMutation.mutateAsync({
+        instituteId: activeInstitute?.id || 'a0000000-0000-0000-0000-000000000001',
+        userId: user?.id || 'u0000000-0000-0000-0000-000000000001',
+        teacherCode: teacherCode.trim().toUpperCase(),
+        targetType: matchedTarget?.type,
+        studentDetails: details,
+      });
+      if (res.success) {
+        setActiveJoinRequest({
+          matchedTargetName: matchedTarget?.name || 'Faculty Mentor',
+          codeUsed: teacherCode.trim().toUpperCase(),
+          studentDetails: details,
+        });
+        setStep('waiting');
+        Alert.alert('Request Submitted', `Sent to ${matchedTarget?.name || 'Faculty Mentor'} for verification.`);
+      } else {
+        Alert.alert('Error', res.error || 'Could not submit join request.');
+      }
+    } catch (err: any) {
+      Alert.alert('Submission Failed', err?.message || 'Could not send request.');
     }
   };
 

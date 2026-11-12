@@ -25,13 +25,13 @@ import { ScreenWrapper } from '@/components/ui';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useChat, ChatMessage } from '@/context/ChatContext';
 import { useAuth } from '@/context/AuthContext';
-import { useAcademic } from '@/context/AcademicContext';
+import { useStudentsRoster } from '@/hooks/queries/useStudentQueries';
 
 export default function PinterestChatScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { userRole } = useAuth();
-  const { teacherProfile, studentsRoster } = useAcademic();
+  const { userRole, activeInstitute } = useAuth();
+  const { data: studentsRoster = [] } = useStudentsRoster(activeInstitute?.id);
   const {
     rooms,
     activeRoomId,

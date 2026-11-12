@@ -107,7 +107,7 @@ export const FeeReceiptModal: React.FC = () => {
         </head>
         <body>
           <div class="header">
-            <h1 class="inst-name">${activeInstitute?.name || 'Apex Institute'}</h1>
+            <h1 class="inst-name">${activeInstitute?.name || 'Academy Center'}</h1>
             <div class="inst-sub">Central Campus • Center Code: ${activeInstitute?.center_code || 'APX-9021'}</div>
             <div class="inst-sub">GSTIN: 08AAACA9921K1ZO • Official Tax Invoice</div>
             <div class="badge">PAID & VERIFIED</div>
@@ -211,7 +211,7 @@ export const FeeReceiptModal: React.FC = () => {
             <View className="p-5 rounded-2xl border border-slate-200 bg-slate-50 gap-3">
               <View className="items-center text-center gap-0.5 pb-3 border-b border-slate-200">
                 <Text className="text-base font-extrabold text-slate-900 text-center">
-                  {activeInstitute?.name || 'Apex Institute'}
+                  {activeInstitute?.name || 'Academy Center'}
                 </Text>
                 <Text className="text-xs text-slate-500 text-center">
                   Central Campus • Center Code: {activeInstitute?.center_code || 'APX-9021'}

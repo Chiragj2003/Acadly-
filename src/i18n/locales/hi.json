@@ -8,17 +8,21 @@
     "loading": "लोड हो रहा है...",
     "signOut": "साइन आउट",
     "search": "खोजें",
-    "comingSoon": "जल्द आ रहा है"
+    "comingSoon": "जल्द आ रहा है",
+    "back": "पीछे",
+    "next": "अगला",
+    "previous": "पिछला",
+    "submit": "जमा करें"
   },
   "roles": {
-    "student": "छात्र",
-    "teacher": "शिक्षक / फैकल्टी",
-    "parent": "अभिभावक",
-    "admin": "प्रबंधक / एडमिन"
+    "student": "विद्यार्थी",
+    "teacher": "शिक्षक / संकाय",
+    "parent": "अभिभावक / माता-पिता",
+    "admin": "निदेशक / व्यवस्थापक"
   },
   "auth": {
     "welcome": "Acadly में आपका स्वागत है",
-    "subtitle": "संस्थानों और शिक्षार्थियों के लिए एकीकृत शिक्षा प्रबंधन",
+    "subtitle": "संस्थानों और विद्यार्थियों के लिए एकीकृत शिक्षा प्रबंधन",
     "signIn": "साइन इन करें",
     "signUp": "खाता बनाएं",
     "emailOrPhone": "ईमेल या मोबाइल नंबर",
@@ -27,7 +31,7 @@
     "googleSignIn": "गूगल के साथ जारी रखें"
   },
   "attendance": {
-    "title": "उपस्थिति एवं रोल कॉल",
+    "title": "उपस्थिति एवं हाजिरी",
     "present": "उपस्थित",
     "absent": "अनुपस्थित",
     "late": "देर से",
@@ -35,12 +39,31 @@
     "markAllPresent": "सभी को उपस्थित चिह्नित करें",
     "recordSuccess": "उपस्थिति सफलतापूर्वक दर्ज की गई"
   },
+  "academic": {
+    "quiz": "इंटरएक्टिव क्विज",
+    "startQuiz": "क्विज शुरू करें",
+    "submitQuiz": "क्विज सबमिट करें",
+    "quizCompleted": "क्विज पूर्ण हुआ",
+    "totalMarks": "कुल अंक",
+    "question": "प्रश्न",
+    "score": "प्राप्तांक",
+    "accuracy": "सटीकता",
+    "assignments": "असाइनमेंट",
+    "submissions": "सबमिशन"
+  },
   "navigation": {
     "home": "होम",
-    "study": "अध्ययन सामग्री",
+    "study": "स्टडी वॉल्ट",
     "analytics": "प्रदर्शन",
-    "roster": "छात्र सूची",
+    "roster": "कक्षा सूची",
     "chat": "संदेश",
     "profile": "प्रोफ़ाइल"
+  },
+  "settings": {
+    "language": "ऐप की भाषा",
+    "english": "English",
+    "hindi": "हिन्दी (Hindi)",
+    "darkMode": "डार्क मोड",
+    "notifications": "पुश सूचनाएं"
   }
 }

@@ -37,7 +37,7 @@ export const AttendanceRingAndTrendChart: React.FC<AttendanceRingAndTrendChartPr
         </View>
         <View className="bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
           <Text className="text-[10px] font-bold text-emerald-700">
-            {effectiveRate >= 90 ? 'Target 90%+ Met 🎯' : `${effectiveRate}% Current`}
+            {effectiveRate >= 90 ? 'Target 90%+ Met' : `${effectiveRate}% Current`}
           </Text>
         </View>
       </View>
