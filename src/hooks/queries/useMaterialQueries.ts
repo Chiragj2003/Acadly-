@@ -6,7 +6,6 @@ import {
   getSignedMaterialUrl,
   PDFMaterialItem,
 } from '@/services/materialService';
-import { INITIAL_PDF_MATERIALS } from '@/data/dummyAcademicData';
 import { type StudyMaterial } from '@/types/database';
 
 export const MATERIALS_QUERY_KEY = 'study_materials';
@@ -36,12 +35,9 @@ export function useStudyMaterials(
           storagePath: r.file_url,
         }));
       }
-      if (__DEV__) {
-        return INITIAL_PDF_MATERIALS;
-      }
       return [];
     },
-    enabled: Boolean(instituteId || __DEV__),
+    enabled: Boolean(instituteId),
   });
 }
 

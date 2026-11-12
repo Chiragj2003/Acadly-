@@ -51,3 +51,7 @@ example
 coverage/
 /ios
 /android
+
+# Supabase local state
+supabase/.temp/
+supabase/.branches/

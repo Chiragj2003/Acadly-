@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 console.log('====================================================');
-console.log('🚀 RUNNING ACADLY FULL DEEP DIVE AUDIT & TEST SUITE');
+console.log('🚀 ACADLY STATIC ARCHITECTURE CHECK (STATIC AUDIT - NOT BEHAVIORAL PROOF)');
 console.log('====================================================\n');
 
 let passCount = 0;
@@ -93,23 +93,14 @@ allSrcFiles.forEach(file => {
 });
 console.log(`Audited ${checkedNavCount} dynamic router navigation calls.`);
 
-// 2. Audit Dummy Accounts & Credentials
-console.log('\n--- 2. DUMMY ACCOUNTS & AUTHENTICATION AUDIT ---');
+// 2. Audit Authentication Integrity & Zero Hardcoded Passwords
+console.log('\n--- 2. AUTHENTICATION & SECURITY AUDIT ---');
 const authContextPath = path.join(srcDir, 'context', 'AuthContext.tsx');
 const authContextContent = fs.readFileSync(authContextPath, 'utf8');
 
-assert(authContextContent.includes('export const DUMMY_ACCOUNTS'), 'DUMMY_ACCOUNTS is exported from AuthContext');
-const accountEmails = [
-  'student@acadly.com',
-  'kabir@acadly.com',
-  'teacher@acadly.com',
-  'parent@acadly.com',
-  'admin@acadly.com',
-];
-
-accountEmails.forEach(email => {
-  assert(authContextContent.includes(email), `Test Account "${email}" is registered in AuthContext`);
-});
+assert(!authContextContent.includes('Password123'), 'AuthContext contains zero hardcoded passwords');
+assert(!authContextContent.includes('DUMMY_ACCOUNTS'), 'AuthContext does not import or export runtime DUMMY_ACCOUNTS');
+assert(authContextContent.includes('AuthProvider') && authContextContent.includes('useAuth'), 'AuthProvider and useAuth are exported from AuthContext');
 
 // 3. Audit Academic Data Depth
 console.log('\n--- 3. ACADEMIC DATA INTEGRITY AUDIT ---');
@@ -146,10 +137,9 @@ console.log('\n--- 5. PARENT MULTI-CHILD AUDIT ---');
 const childContextPath = path.join(srcDir, 'context', 'ChildContext.tsx');
 const childContextContent = fs.readFileSync(childContextPath, 'utf8');
 
-assert(childContextContent.includes('stud-amelia-01'), 'Child Amelia is present in default children list');
-assert(childContextContent.includes('stud-aarav-02'), 'Child Aarav is present in default children list');
-assert(childContextContent.includes('stud-rohan-03'), 'Child Rohan is present in default children list');
-assert(childContextContent.includes('DEFAULT_CHILDREN') && childContextContent.includes('setChildrenList(DEFAULT_CHILDREN)'), 'Fallback to DEFAULT_CHILDREN guarantees parent test data');
+assert(!childContextContent.includes('DEFAULT_CHILDREN'), 'ChildContext does not contain runtime DEFAULT_CHILDREN mocks');
+assert(childContextContent.includes('ChildProvider') && childContextContent.includes('useChild'), 'ChildProvider and useChild are exported');
+assert(childContextContent.includes('addChildByCodeOrPhone'), 'Parent student code linking function is exported');
 
 // 6. Audit Critical Syntax & JSX Safety
 console.log('\n--- 6. JSX SYNTAX & SAFETY AUDIT ---');

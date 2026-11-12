@@ -304,7 +304,7 @@ export default function PinterestTeacherScreen() {
 
   const handleOpenCorrection = useCallback((record: AttendanceRecord) => {
     setSelectedRecordForCorrection(record);
-  }, []);
+  }, [setSelectedRecordForCorrection]);
 
   const updateStudentFeeStatus = (studentId: string, status: string) => {
     setLocalFeeOverrides((prev) => ({ ...prev, [studentId]: status }));

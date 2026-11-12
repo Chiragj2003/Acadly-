@@ -8,7 +8,6 @@ import {
   CreatePostInput,
   CommunityPost,
 } from '@/services/communityService';
-import { INITIAL_COMMUNITY_POSTS } from '@/data/dummyAcademicData';
 import { type UserRole } from '@/types/database';
 
 export const COMMUNITY_QUERY_KEY = 'community';
@@ -44,12 +43,9 @@ export function useCommunityPosts(instituteId?: string, cursorCreatedAt?: string
           })),
         }));
       }
-      if (__DEV__) {
-        return INITIAL_COMMUNITY_POSTS;
-      }
       return [];
     },
-    enabled: Boolean(instituteId || __DEV__),
+    enabled: Boolean(instituteId),
   });
 }
 

@@ -4,6 +4,7 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { useAuth } from './AuthContext';
 import { useUI } from './UIContext';
 import { sendChatMessage, togglePinMessage } from '@/services/chatService';
+import { generateUUID } from '@/lib/uuid';
 
 export interface ChatMessage {
   id: string;
@@ -57,163 +58,8 @@ export interface ChatContextType {
 const STORAGE_KEY_ROOMS = '@acadly_chat_rooms_v1';
 const STORAGE_KEY_MESSAGES = '@acadly_chat_messages_v1';
 
-const INITIAL_ROOMS: ChatRoom[] = [
-  {
-    id: 'room-batch-sakura',
-    title: 'Class 12 • JEE Advanced (Morning)',
-    subtitle: 'Physics & Mechanics • 28 Enrolled Students',
-    type: 'batch_group',
-    batchId: 'batch-01',
-    participantIds: ['prof-vikram', 'stud-amelia', 'stud-kabir', 'stud-rohan'],
-    avatarEmoji: '📚',
-    unreadCount: 1,
-    lastMessage: {
-      text: 'Remember to solve DPP #14 before 08:00 PM today!',
-      senderName: 'Prof. Vikram Joshi',
-      timeFormatted: '04:15 PM',
-    },
-    pinnedMessage: {
-      id: 'pin-01',
-      roomId: 'room-batch-sakura',
-      senderId: 'prof-vikram',
-      senderName: 'Prof. Vikram Joshi',
-      senderRole: 'teacher',
-      senderAvatarEmoji: '👨‍🏫',
-      text: 'Announcement: Physics Masterclass on Rotational Dynamics is live at 04:30 PM. Keep your formula cheat-sheets ready.',
-      createdAt: new Date().toISOString(),
-      timeFormatted: '02:00 PM',
-      isPinned: true,
-    },
-  },
-  {
-    id: 'direct-vikram-amelia',
-    title: 'Prof. Vikram Joshi',
-    subtitle: 'Faculty 1-on-1 • Physics & Math Mentor',
-    type: 'direct',
-    participantIds: ['prof-vikram', 'stud-amelia'],
-    avatarEmoji: '👨‍🏫',
-    unreadCount: 0,
-    lastMessage: {
-      text: 'Great work on the previous mock test! Let me know if you need help with the calculus proof.',
-      senderName: 'Prof. Vikram Joshi',
-      timeFormatted: 'Yesterday',
-    },
-  },
-  {
-    id: 'direct-teacher-kabir',
-    title: 'Kabir Singhania (Student)',
-    subtitle: 'Class 11 Science • Roll #08',
-    type: 'direct',
-    participantIds: ['prof-vikram', 'stud-kabir'],
-    avatarEmoji: '🌱',
-    unreadCount: 1,
-    lastMessage: {
-      text: 'Sir, which reference book should I solve for Rotational Mechanics?',
-      senderName: 'Kabir Singhania',
-      timeFormatted: '11:20 AM',
-    },
-  },
-];
-
-const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
-  'room-batch-sakura': [
-    {
-      id: 'msg-s1',
-      roomId: 'room-batch-sakura',
-      senderId: 'prof-vikram',
-      senderName: 'Prof. Vikram Joshi',
-      senderRole: 'teacher',
-      senderAvatarEmoji: '👨‍🏫',
-      text: 'Good afternoon everyone! Today we will cover Rotational Kinematics and moment of inertia for composite geometries.',
-      createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-      timeFormatted: '01:30 PM',
-    },
-    {
-      id: 'msg-s2',
-      roomId: 'room-batch-sakura',
-      senderId: 'stud-amelia',
-      senderName: 'Amelia Sharma',
-      senderRole: 'student',
-      senderAvatarEmoji: '🎓',
-      text: 'Sir, I had a doubt regarding perpendicular axis theorem for 3D cylinders. Can it only be applied to planar laminas?',
-      createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-      timeFormatted: '02:15 PM',
-    },
-    {
-      id: 'msg-s3',
-      roomId: 'room-batch-sakura',
-      senderId: 'prof-vikram',
-      senderName: 'Prof. Vikram Joshi ⚡',
-      senderRole: 'teacher',
-      senderAvatarEmoji: '👨‍🏫',
-      text: 'Exactly right, Amelia! The perpendicular axis theorem Iz = Ix + Iy is strictly valid for 2D flat bodies (laminas in the x-y plane). For 3D cylinders, you must use volume integration or parallel axis theorem.',
-      createdAt: new Date(Date.now() - 3600000 * 1.5).toISOString(),
-      timeFormatted: '02:45 PM',
-    },
-    {
-      id: 'msg-s4',
-      roomId: 'room-batch-sakura',
-      senderId: 'stud-rohan',
-      senderName: 'Rohan Mehra',
-      senderRole: 'student',
-      senderAvatarEmoji: '🚀',
-      text: 'Got it! Solved Question 4 with this trick and got option B.',
-      createdAt: new Date(Date.now() - 3600000 * 1).toISOString(),
-      timeFormatted: '03:10 PM',
-    },
-    {
-      id: 'msg-s5',
-      roomId: 'room-batch-sakura',
-      senderId: 'prof-vikram',
-      senderName: 'Prof. Vikram Joshi ⚡',
-      senderRole: 'teacher',
-      senderAvatarEmoji: '👨‍🏫',
-      text: 'Remember to solve DPP #14 before 08:00 PM today!',
-      createdAt: new Date(Date.now() - 900000).toISOString(),
-      timeFormatted: '04:15 PM',
-    },
-  ],
-  'direct-vikram-amelia': [
-    {
-      id: 'msg-d1',
-      roomId: 'direct-vikram-amelia',
-      senderId: 'stud-amelia',
-      senderName: 'Amelia Sharma',
-      senderRole: 'student',
-      senderAvatarEmoji: '🌸',
-      text: 'Sir, I have submitted my assignment for Definite Integrals. Could you check my step in question 2?',
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-      timeFormatted: 'Yesterday',
-      attachmentName: 'Calculus_Solution_Page2.pdf',
-      attachmentType: 'pdf',
-      attachmentSize: '1.4 MB',
-    },
-    {
-      id: 'msg-d2',
-      roomId: 'direct-vikram-amelia',
-      senderId: 'prof-vikram',
-      senderName: 'Prof. Vikram Joshi ⚡',
-      senderRole: 'teacher',
-      senderAvatarEmoji: '👨‍🏫',
-      text: 'Great work on the previous mock test! Let me know if you need help with the calculus proof.',
-      createdAt: new Date(Date.now() - 80000000).toISOString(),
-      timeFormatted: 'Yesterday',
-    },
-  ],
-  'direct-teacher-kabir': [
-    {
-      id: 'msg-k1',
-      roomId: 'direct-teacher-kabir',
-      senderId: 'stud-kabir',
-      senderName: 'Kabir Singhania',
-      senderRole: 'student',
-      senderAvatarEmoji: '🌱',
-      text: 'Sir, which reference book should I solve for Rotational Mechanics?',
-      createdAt: new Date(Date.now() - 1800000).toISOString(),
-      timeFormatted: '11:20 AM',
-    },
-  ],
-};
+const INITIAL_ROOMS: ChatRoom[] = [];
+const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {};
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
@@ -222,7 +68,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { teacherProfile } = useUI();
 
   const [rooms, setRooms] = useState<ChatRoom[]>(INITIAL_ROOMS);
-  const [activeRoomId, setActiveRoomId] = useState<string>('room-batch-sakura');
+  const [activeRoomId, setActiveRoomId] = useState<string>('');
   const [messagesMap, setMessagesMap] = useState<Record<string, ChatMessage[]>>(INITIAL_MESSAGES);
 
   // Single persistent active Realtime channel reference per room
@@ -377,8 +223,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const newMsg: ChatMessage = {
       id: `msg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       roomId: activeRoomId,
-      senderId: isTeacher ? 'prof-vikram' : (user?.id || 'stud-amelia'),
-      senderName: isTeacher ? teacherProfile.fullName : (user?.full_name || 'Amelia Sharma'),
+      senderId: user?.id || '',
+      senderName: isTeacher ? (teacherProfile?.fullName || user?.full_name || 'Faculty Mentor') : (user?.full_name || 'Student'),
       senderRole: isTeacher ? 'teacher' : 'student',
       senderAvatarEmoji: isTeacher ? '👨‍🏫' : '🌸',
       text: text.trim(),
@@ -537,13 +383,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return existing.id;
     }
 
-    const newId = `direct-${Date.now()}`;
+    const newId = generateUUID();
     const newRoom: ChatRoom = {
       id: newId,
       title: targetName,
       subtitle: `${targetRole === 'teacher' ? 'Faculty Mentor' : 'Student'} • Direct 1-on-1`,
       type: 'direct',
-      participantIds: ['prof-vikram', targetId],
+      participantIds: [user?.id || '', targetId],
       avatarEmoji: targetRole === 'teacher' ? '👨‍🏫' : '🌱',
       unreadCount: 0,
     };

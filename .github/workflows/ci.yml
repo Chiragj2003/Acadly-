@@ -30,8 +30,11 @@ jobs:
       - name: TypeScript Static Typecheck
         run: npx tsc --noEmit
 
-      - name: Architecture & Data Integrity Lint
-        run: npm run lint:architecture
+      - name: ESLint
+        run: npm run lint
+
+      - name: Architecture & Data Integrity Static Check
+        run: npm run lint:architecture:static
 
   test:
     name: Jest Unit & Integration Tests

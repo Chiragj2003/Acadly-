@@ -1,43 +1,25 @@
 -- ==============================================================================
--- ACADLY RLS AUTOMATED VERIFICATION SUITE
+-- ACADLY RLS & MULTI-TENANT VERIFICATION SUITE (pgTAP)
 -- File: supabase/tests/rls.sql
 -- Proves:
---   1. Zero tables with RLS enabled have 0 policies.
---   2. Student A cannot read Student B's attendance or exam results.
---   3. Parent can see only linked child records.
---   4. Teacher can see and mark only their assigned batches.
+--   1. Every RLS-enabled table has at least one policy
+--   2. Student A cannot read Student B attendance, results, or submissions
+--   3. Parent sees only linked children
+--   4. Teacher sees only their own batches
+--   5. A user in Institute X cannot read Institute Y rows
 -- ==============================================================================
 
 BEGIN;
+CREATE EXTENSION IF NOT EXISTS pgtap;
 
-DO $$
-DECLARE
-    v_unprotected_count INTEGER := 0;
-    v_unprotected_tables TEXT := '';
-    v_rows_found INTEGER := 0;
-    
-    -- Seed account UUIDs
-    v_inst_id UUID := '11111111-1111-1111-1111-111111111111';
-    v_teacher_1_uid UUID := '00000000-0000-0000-0000-000000000002'; -- Prof. Joshi
-    v_teacher_2_uid UUID := '00000000-0000-0000-0000-000000000003'; -- Dr. Sen
-    v_student_1_uid UUID := '00000000-0000-0000-0000-000000000004'; -- Amelia
-    v_student_2_uid UUID := '00000000-0000-0000-0000-000000000005'; -- Kabir
-    v_parent_1_uid  UUID := '00000000-0000-0000-0000-000000000010'; -- Rajesh (Parent of Amelia, NOT Kabir)
+SELECT plan(12);
 
-    v_student_1_id UUID;
-    v_student_2_id UUID;
-    v_batch_1_id UUID := '55555555-5555-5555-5555-555555555501';
-    v_batch_2_id UUID := '55555555-5555-5555-5555-555555555502';
-BEGIN
-    RAISE NOTICE '==================================================';
-    RAISE NOTICE '  RUNNING ACADLY RLS & TENANT INTEGRITY AUDIT     ';
-    RAISE NOTICE '==================================================';
-
-    -- --------------------------------------------------------------------------
-    -- TEST 1: ZERO TABLES LEFT WITH RLS ENABLED AND ZERO POLICIES
-    -- --------------------------------------------------------------------------
-    SELECT COUNT(*), string_agg(c.relname, ', ')
-    INTO v_unprotected_count, v_unprotected_tables
+-- --------------------------------------------------------------------------
+-- 1. EVERY RLS-ENABLED TABLE HAS AT LEAST ONE POLICY
+-- --------------------------------------------------------------------------
+SELECT is_empty(
+    $$
+    SELECT c.relname
     FROM pg_class c
     JOIN pg_namespace n ON n.oid = c.relnamespace
     LEFT JOIN pg_policy p ON p.polrelid = c.oid
@@ -46,139 +28,147 @@ BEGIN
       AND c.relrowsecurity = true
     GROUP BY c.relname
     HAVING COUNT(p.polname) = 0;
+    $$,
+    'All RLS-enabled tables have at least one explicit policy'
+);
 
-    IF v_unprotected_count > 0 THEN
-        RAISE EXCEPTION 'RLS AUDIT FAILED: Tables with RLS enabled but 0 policies found: %', v_unprotected_tables;
-    ELSE
-        RAISE NOTICE '✓ TEST 1 PASSED: All tables with RLS have at least 1 explicit policy.';
-    END IF;
+-- Setup isolated Institute Y and Batch for cross-tenant testing
+INSERT INTO public.institutes (id, name, code, center_code, invite_code, city, email)
+VALUES ('22222222-2222-2222-2222-222222222222', 'Institute Y (Rival Academy)', 'INST-Y', 'CC-RIVAL-01', 'INV-RIVAL-01', 'Mumbai', 'rival@example.com')
+ON CONFLICT (id) DO NOTHING;
 
-    -- Fetch actual student table primary key IDs
-    SELECT id INTO v_student_1_id FROM public.students WHERE user_id = v_student_1_uid;
-    SELECT id INTO v_student_2_id FROM public.students WHERE user_id = v_student_2_uid;
+INSERT INTO public.batches (id, institute_id, name, subject, academic_year, start_date)
+VALUES ('55555555-5555-5555-5555-555555555599', '22222222-2222-2222-2222-222222222222', 'Institute Y Batch Alpha', 'Physics', '2026-2027', CURRENT_DATE)
+ON CONFLICT (id) DO NOTHING;
 
-    -- --------------------------------------------------------------------------
-    -- TEST 2: STUDENT A CANNOT READ STUDENT B'S ATTENDANCE
-    -- --------------------------------------------------------------------------
-    -- Simulate authenticated session for Student 1 (Amelia)
-    PERFORM set_config(
-        'request.jwt.claims',
-        json_build_object(
-            'sub', v_student_1_uid::text,
-            'role', 'authenticated',
-            'app_metadata', json_build_object('role', 'student', 'institute_id', v_inst_id::text)
-        )::text,
-        true
-    );
+-- --------------------------------------------------------------------------
+-- 2. STUDENT A CANNOT READ STUDENT B ATTENDANCE, RESULTS, OR SUBMISSIONS
+-- --------------------------------------------------------------------------
+SET LOCAL ROLE authenticated;
+SELECT set_config(
+    'request.jwt.claims',
+    json_build_object(
+        'sub', '00000000-0000-0000-0000-000000000004',
+        'role', 'authenticated',
+        'app_metadata', json_build_object('role', 'student', 'institute_id', '11111111-1111-1111-1111-111111111111')
+    )::text,
+    true
+);
 
-    -- Student 1 querying Student 2's attendance (must return 0 rows)
-    SELECT COUNT(*) INTO v_rows_found
-    FROM public.attendance
-    WHERE student_id = v_student_2_id;
+-- Student A reading Student B attendance (must be empty)
+SELECT is_empty(
+    $$ SELECT * FROM public.attendance WHERE student_id = '33333333-3333-3333-3333-333333333302' $$,
+    'Student A cannot read Student B attendance'
+);
 
-    IF v_rows_found > 0 THEN
-        RAISE EXCEPTION 'RLS BREACH: Student 1 (Amelia) read % attendance rows of Student 2 (Kabir)!', v_rows_found;
-    ELSE
-        RAISE NOTICE '✓ TEST 2.1 PASSED: Student A cannot read Student B attendance (0 records leaked).';
-    END IF;
+-- Student A reading Student B exam results (must be empty)
+SELECT is_empty(
+    $$ SELECT * FROM public.results WHERE student_id = '33333333-3333-3333-3333-333333333302' $$,
+    'Student A cannot read Student B exam results'
+);
 
-    -- Student 1 querying Student 2's exam results (must return 0 rows)
-    SELECT COUNT(*) INTO v_rows_found
-    FROM public.results
-    WHERE student_id = v_student_2_id;
+-- Student A reading Student B assignment submissions (must be empty)
+SELECT is_empty(
+    $$ SELECT * FROM public.submissions WHERE student_id = '33333333-3333-3333-3333-333333333302' $$,
+    'Student A cannot read Student B assignment submissions'
+);
 
-    IF v_rows_found > 0 THEN
-        RAISE EXCEPTION 'RLS BREACH: Student 1 (Amelia) read % result rows of Student 2 (Kabir)!', v_rows_found;
-    ELSE
-        RAISE NOTICE '✓ TEST 2.2 PASSED: Student A cannot read Student B exam results (0 records leaked).';
-    END IF;
+-- Student A reading own attendance (must succeed)
+SELECT isnt_empty(
+    $$ SELECT * FROM public.attendance WHERE student_id = '33333333-3333-3333-3333-333333333301' $$,
+    'Student A can read own attendance'
+);
 
-    -- Student 1 querying own attendance (must return records)
-    SELECT COUNT(*) INTO v_rows_found
-    FROM public.attendance
-    WHERE student_id = v_student_1_id;
+-- --------------------------------------------------------------------------
+-- 3. PARENT SEES ONLY LINKED CHILDREN
+-- --------------------------------------------------------------------------
+SELECT set_config(
+    'request.jwt.claims',
+    json_build_object(
+        'sub', '00000000-0000-0000-0000-000000000010',
+        'role', 'authenticated',
+        'app_metadata', json_build_object('role', 'parent', 'institute_id', '11111111-1111-1111-1111-111111111111')
+    )::text,
+    true
+);
 
-    IF v_rows_found = 0 THEN
-        RAISE EXCEPTION 'RLS FAILURE: Student 1 (Amelia) cannot view their own attendance!';
-    ELSE
-        RAISE NOTICE '✓ TEST 2.3 PASSED: Student 1 successfully views own attendance (% records).', v_rows_found;
-    END IF;
+-- Parent reads linked child (Amelia) attendance
+SELECT isnt_empty(
+    $$ SELECT * FROM public.attendance WHERE student_id = '33333333-3333-3333-3333-333333333301' $$,
+    'Parent sees linked child (Amelia) attendance'
+);
 
-    -- --------------------------------------------------------------------------
-    -- TEST 3: PARENT SEES ONLY LINKED CHILDREN
-    -- --------------------------------------------------------------------------
-    -- Simulate authenticated session for Parent 1 (Rajesh Sharma)
-    PERFORM set_config(
-        'request.jwt.claims',
-        json_build_object(
-            'sub', v_parent_1_uid::text,
-            'role', 'authenticated',
-            'app_metadata', json_build_object('role', 'parent', 'institute_id', v_inst_id::text)
-        )::text,
-        true
-    );
+-- Parent reads unlinked child (Kabir) attendance (must be empty)
+SELECT is_empty(
+    $$ SELECT * FROM public.attendance WHERE student_id = '33333333-3333-3333-3333-333333333302' $$,
+    'Parent cannot read unlinked child (Kabir) attendance'
+);
 
-    -- Parent 1 querying linked child (Amelia) attendance
-    SELECT COUNT(*) INTO v_rows_found
-    FROM public.attendance
-    WHERE student_id = v_student_1_id;
+-- Parent reads students table for unlinked child (must be empty)
+SELECT is_empty(
+    $$ SELECT * FROM public.students WHERE id = '33333333-3333-3333-3333-333333333302' $$,
+    'Parent cannot view unlinked child student profile'
+);
 
-    IF v_rows_found = 0 THEN
-        RAISE EXCEPTION 'RLS FAILURE: Parent 1 cannot view linked child (Amelia) attendance!';
-    ELSE
-        RAISE NOTICE '✓ TEST 3.1 PASSED: Parent 1 views linked child attendance (% records).', v_rows_found;
-    END IF;
+-- --------------------------------------------------------------------------
+-- 4. TEACHER SEES ONLY THEIR OWN BATCHES
+-- --------------------------------------------------------------------------
+SELECT set_config(
+    'request.jwt.claims',
+    json_build_object(
+        'sub', '00000000-0000-0000-0000-000000000002',
+        'role', 'authenticated',
+        'app_metadata', json_build_object('role', 'teacher', 'institute_id', '11111111-1111-1111-1111-111111111111')
+    )::text,
+    true
+);
 
-    -- Parent 1 querying unlinked child (Kabir) attendance (must return 0 rows)
-    SELECT COUNT(*) INTO v_rows_found
-    FROM public.attendance
-    WHERE student_id = v_student_2_id;
+-- Teacher sees assigned Batch 1
+SELECT isnt_empty(
+    $$ SELECT * FROM public.batches WHERE id = '55555555-5555-5555-5555-555555555501' $$,
+    'Teacher 1 can see assigned Batch 1'
+);
 
-    IF v_rows_found > 0 THEN
-        RAISE EXCEPTION 'RLS BREACH: Parent 1 read % attendance rows of unlinked child (Kabir)!', v_rows_found;
-    ELSE
-        RAISE NOTICE '✓ TEST 3.2 PASSED: Parent 1 cannot view unlinked child attendance (0 records leaked).';
-    END IF;
+-- Teacher cannot see unassigned Batch 2
+SELECT is_empty(
+    $$ SELECT * FROM public.batches WHERE id = '55555555-5555-5555-5555-555555555502' $$,
+    'Teacher 1 cannot see unassigned Batch 2'
+);
 
-    -- --------------------------------------------------------------------------
-    -- TEST 4: TEACHER SEES ONLY OWN ASSIGNED BATCHES
-    -- --------------------------------------------------------------------------
-    -- Simulate authenticated session for Teacher 1 (Prof. Vikram Joshi -> assigned to Batch 1)
-    PERFORM set_config(
-        'request.jwt.claims',
-        json_build_object(
-            'sub', v_teacher_1_uid::text,
-            'role', 'authenticated',
-            'app_metadata', json_build_object('role', 'teacher', 'institute_id', v_inst_id::text)
-        )::text,
-        true
-    );
+-- --------------------------------------------------------------------------
+-- 5. USER IN INSTITUTE X CANNOT READ INSTITUTE Y ROWS
+-- --------------------------------------------------------------------------
+-- Student in Institute X querying Institute Y batch (must be empty)
+SELECT set_config(
+    'request.jwt.claims',
+    json_build_object(
+        'sub', '00000000-0000-0000-0000-000000000004',
+        'role', 'authenticated',
+        'app_metadata', json_build_object('role', 'student', 'institute_id', '11111111-1111-1111-1111-111111111111')
+    )::text,
+    true
+);
 
-    -- Teacher 1 querying attendance for assigned Batch 1
-    SELECT COUNT(*) INTO v_rows_found
-    FROM public.attendance
-    WHERE batch_id = v_batch_1_id;
+SELECT is_empty(
+    $$ SELECT * FROM public.batches WHERE institute_id = '22222222-2222-2222-2222-222222222222' $$,
+    'Student in Institute X cannot read Institute Y batches'
+);
 
-    IF v_rows_found = 0 THEN
-        RAISE EXCEPTION 'RLS FAILURE: Teacher 1 cannot view assigned Batch 1 attendance!';
-    ELSE
-        RAISE NOTICE '✓ TEST 4.1 PASSED: Teacher 1 views assigned Batch 1 attendance (% records).', v_rows_found;
-    END IF;
+-- Teacher in Institute X querying Institute Y batch (must be empty)
+SELECT set_config(
+    'request.jwt.claims',
+    json_build_object(
+        'sub', '00000000-0000-0000-0000-000000000002',
+        'role', 'authenticated',
+        'app_metadata', json_build_object('role', 'teacher', 'institute_id', '11111111-1111-1111-1111-111111111111')
+    )::text,
+    true
+);
 
-    -- Teacher 1 querying attendance for unassigned Batch 2 (must return 0 rows)
-    SELECT COUNT(*) INTO v_rows_found
-    FROM public.attendance
-    WHERE batch_id = v_batch_2_id;
+SELECT is_empty(
+    $$ SELECT * FROM public.batches WHERE institute_id = '22222222-2222-2222-2222-222222222222' $$,
+    'Teacher in Institute X cannot read Institute Y batches'
+);
 
-    IF v_rows_found > 0 THEN
-        RAISE EXCEPTION 'RLS BREACH: Teacher 1 read % attendance rows of unassigned Batch 2!', v_rows_found;
-    ELSE
-        RAISE NOTICE '✓ TEST 4.2 PASSED: Teacher 1 cannot view unassigned Batch 2 attendance (0 records leaked).';
-    END IF;
-
-    RAISE NOTICE '==================================================';
-    RAISE NOTICE '  ALL RLS & SECURITY ASSERTION TESTS PASSED!      ';
-    RAISE NOTICE '==================================================';
-END $$;
-
+SELECT * FROM finish();
 ROLLBACK;

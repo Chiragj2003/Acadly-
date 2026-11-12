@@ -75,7 +75,12 @@ import {
   RazorpayCheckoutModal,
 } from '@/features/fees';
 import { generateAndSharePDF, DUMMY_PDF_CATALOG, type PDFDocumentContent } from '@/services/dummyPdfService';
-import { DAILY_AFFIRMATIONS } from '@/data/dummyAcademicData';
+const DAILY_AFFIRMATIONS = [
+  "You are learning, growing, and doing wonderfully today! 🌸",
+  "One step, one equation, one paragraph at a time. Keep going! ☕",
+  "Curiosity is your superpower. Ask every question! 🌟",
+  "Proud of you for showing up today. Let's make it count! 🍀",
+];
 import { FEATURE_FEES } from '@/config/features';
 
 const WEEK_DAYS = [

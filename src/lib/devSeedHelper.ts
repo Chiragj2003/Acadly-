@@ -119,44 +119,6 @@ export const DEV_INITIAL_BATCHES: Batch[] = [
 ];
 
 // ------------------------------------------------------------------------------
-// Seed Role Profiles
-// ------------------------------------------------------------------------------
-export const DEV_ROLE_PROFILES: Record<UserRole, Profile> = {
-  admin: {
-    id: DEV_ADMIN_USER_ID,
-    email: 'admin@acadly.com',
-    phone: '+91 98290 41208',
-    full_name: 'Director Rajesh Gupta',
-    default_role: 'admin',
-    created_at: '2025-01-01T00:00:00.000Z',
-  },
-  teacher: {
-    id: DEV_TEACHER_USER_ID,
-    email: 'teacher@acadly.com',
-    phone: '+91 98290 41209',
-    full_name: 'Prof. Vikram Joshi',
-    default_role: 'teacher',
-    created_at: '2025-01-05T00:00:00.000Z',
-  },
-  student: {
-    id: DEV_STUDENT_USER_ID,
-    email: 'student@acadly.com',
-    phone: '+91 98290 41210',
-    full_name: 'Amelia Sharma',
-    default_role: 'student',
-    created_at: '2025-01-15T00:00:00.000Z',
-  },
-  parent: {
-    id: DEV_PARENT_USER_ID,
-    email: 'parent@acadly.com',
-    phone: '+91 98290 41211',
-    full_name: 'Rajesh Sharma',
-    default_role: 'parent',
-    created_at: '2025-01-15T00:00:00.000Z',
-  },
-};
-
-// ------------------------------------------------------------------------------
 // Dev Dummy Accounts (Available only in __DEV__)
 // ------------------------------------------------------------------------------
 export interface DummyAccount {
@@ -172,6 +134,3 @@ export interface DummyAccount {
   description: string;
 }
 
-export const DEV_DUMMY_ACCOUNTS: DummyAccount[] = isDevEnvironment()
-  ? (require('@/dev/demoAccounts').DUMMY_ACCOUNTS as DummyAccount[])
-  : [];

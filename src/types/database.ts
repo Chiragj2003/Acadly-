@@ -1,3 +1,1373 @@
+
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+
+export type Database = {
+  
+  "graphql_public": {
+          Tables: {
+            [_ in never]: never
+          }
+          Views: {
+            [_ in never]: never
+          }
+          Functions: {
+            "graphql":
+{ Args: { "extensions"?: Json,"operationName"?: string,"query"?: string,"variables"?: Json }; Returns: Json
+                           }
+          }
+          Enums: {
+            [_ in never]: never
+          }
+          CompositeTypes: {
+            [_ in never]: never
+          }
+        },"public": {
+          Tables: {
+            "assignments": {
+                  Row: {
+                    "attachment_url": string | null,"batch_id": string,"created_at": string | null,"created_by": string | null,"description": string | null,"due_date": string,"id": string,"institute_id": string,"instructions": string | null,"max_marks": number | null,"question_count": number | null,"questions": Json | null,"subject": string | null,"subject_id": string | null,"teacher_id": string | null,"title": string,"total_marks": number | null,"type": Database["public"]['Enums']["assignment_type_enum"]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attachment_url"?: string | null,"batch_id": string,"created_at"?: string | null,"created_by"?: string | null,"description"?: string | null,"due_date": string,"id"?: string,"institute_id": string,"instructions"?: string | null,"max_marks"?: number | null,"question_count"?: number | null,"questions"?: Json | null,"subject"?: string | null,"subject_id"?: string | null,"teacher_id"?: string | null,"title": string,"total_marks"?: number | null,"type"?: Database["public"]['Enums']["assignment_type_enum"]
+                  }
+                  Update: {
+                    "attachment_url"?: string | null,"batch_id"?: string,"created_at"?: string | null,"created_by"?: string | null,"description"?: string | null,"due_date"?: string,"id"?: string,"institute_id"?: string,"instructions"?: string | null,"max_marks"?: number | null,"question_count"?: number | null,"questions"?: Json | null,"subject"?: string | null,"subject_id"?: string | null,"teacher_id"?: string | null,"title"?: string,"total_marks"?: number | null,"type"?: Database["public"]['Enums']["assignment_type_enum"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "assignments_batch_id_fkey"
+      columns: ["batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "assignments_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "assignments_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "assignments_subject_id_fkey"
+      columns: ["subject_id"]
+isOneToOne: false
+      referencedRelation: "subjects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "assignments_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "teachers"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"attendance": {
+                  Row: {
+                    "batch_id": string,"created_at": string | null,"date": string,"id": string,"institute_id": string,"marked_by": string | null,"remarks": string | null,"status": string,"student_id": string,"updated_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "batch_id": string,"created_at"?: string | null,"date"?: string,"id"?: string,"institute_id": string,"marked_by"?: string | null,"remarks"?: string | null,"status": string,"student_id": string,"updated_at"?: string | null
+                  }
+                  Update: {
+                    "batch_id"?: string,"created_at"?: string | null,"date"?: string,"id"?: string,"institute_id"?: string,"marked_by"?: string | null,"remarks"?: string | null,"status"?: string,"student_id"?: string,"updated_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "attendance_batch_id_fkey"
+      columns: ["batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "attendance_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "attendance_marked_by_fkey"
+      columns: ["marked_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "attendance_student_id_fkey"
+      columns: ["student_id"]
+isOneToOne: false
+      referencedRelation: "students"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"attendance_audit_log": {
+                  Row: {
+                    "attendance_id": string | null,"batch_id": string,"changed_at": string | null,"changed_by": string,"id": string,"new_status": string,"previous_status": string,"reason": string,"student_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attendance_id"?: string | null,"batch_id": string,"changed_at"?: string | null,"changed_by": string,"id"?: string,"new_status": string,"previous_status": string,"reason": string,"student_id": string
+                  }
+                  Update: {
+                    "attendance_id"?: string | null,"batch_id"?: string,"changed_at"?: string | null,"changed_by"?: string,"id"?: string,"new_status"?: string,"previous_status"?: string,"reason"?: string,"student_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "attendance_audit_log_attendance_id_fkey"
+      columns: ["attendance_id"]
+isOneToOne: false
+      referencedRelation: "attendance"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "attendance_audit_log_batch_id_fkey"
+      columns: ["batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "attendance_audit_log_changed_by_fkey"
+      columns: ["changed_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "attendance_audit_log_student_id_fkey"
+      columns: ["student_id"]
+isOneToOne: false
+      referencedRelation: "students"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"batch_students": {
+                  Row: {
+                    "batch_id": string,"enrolled_at": string | null,"id": string,"institute_id": string,"status": string | null,"student_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "batch_id": string,"enrolled_at"?: string | null,"id"?: string,"institute_id": string,"status"?: string | null,"student_id": string
+                  }
+                  Update: {
+                    "batch_id"?: string,"enrolled_at"?: string | null,"id"?: string,"institute_id"?: string,"status"?: string | null,"student_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "batch_students_batch_id_fkey"
+      columns: ["batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "batch_students_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "batch_students_student_id_fkey"
+      columns: ["student_id"]
+isOneToOne: false
+      referencedRelation: "students"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"batch_teachers": {
+                  Row: {
+                    "batch_id": string,"created_at": string | null,"id": string,"institute_id": string,"subject_id": string | null,"teacher_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "batch_id": string,"created_at"?: string | null,"id"?: string,"institute_id": string,"subject_id"?: string | null,"teacher_id": string
+                  }
+                  Update: {
+                    "batch_id"?: string,"created_at"?: string | null,"id"?: string,"institute_id"?: string,"subject_id"?: string | null,"teacher_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "batch_teachers_batch_id_fkey"
+      columns: ["batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "batch_teachers_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "batch_teachers_subject_id_fkey"
+      columns: ["subject_id"]
+isOneToOne: false
+      referencedRelation: "subjects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "batch_teachers_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "teachers"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"batches": {
+                  Row: {
+                    "academic_year": string | null,"created_at": string | null,"end_date": string | null,"end_time": string | null,"id": string,"institute_id": string,"is_archived": boolean | null,"name": string,"room_number": string | null,"start_date": string | null,"start_time": string | null,"status": string | null,"subject": string | null,"subject_id": string | null,"target_exam": string | null,"teacher_id": string | null,"updated_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "academic_year"?: string | null,"created_at"?: string | null,"end_date"?: string | null,"end_time"?: string | null,"id"?: string,"institute_id": string,"is_archived"?: boolean | null,"name": string,"room_number"?: string | null,"start_date"?: string | null,"start_time"?: string | null,"status"?: string | null,"subject"?: string | null,"subject_id"?: string | null,"target_exam"?: string | null,"teacher_id"?: string | null,"updated_at"?: string | null
+                  }
+                  Update: {
+                    "academic_year"?: string | null,"created_at"?: string | null,"end_date"?: string | null,"end_time"?: string | null,"id"?: string,"institute_id"?: string,"is_archived"?: boolean | null,"name"?: string,"room_number"?: string | null,"start_date"?: string | null,"start_time"?: string | null,"status"?: string | null,"subject"?: string | null,"subject_id"?: string | null,"target_exam"?: string | null,"teacher_id"?: string | null,"updated_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "batches_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "batches_subject_id_fkey"
+      columns: ["subject_id"]
+isOneToOne: false
+      referencedRelation: "subjects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "batches_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "teachers"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"chat_messages": {
+                  Row: {
+                    "attachment_name": string | null,"attachment_type": string | null,"attachment_url": string | null,"created_at": string,"id": string,"is_pinned": boolean,"is_read": boolean,"message_text": string | null,"room_id": string,"sender_id": string,"sender_role": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attachment_name"?: string | null,"attachment_type"?: string | null,"attachment_url"?: string | null,"created_at"?: string,"id"?: string,"is_pinned"?: boolean,"is_read"?: boolean,"message_text"?: string | null,"room_id": string,"sender_id": string,"sender_role": string
+                  }
+                  Update: {
+                    "attachment_name"?: string | null,"attachment_type"?: string | null,"attachment_url"?: string | null,"created_at"?: string,"id"?: string,"is_pinned"?: boolean,"is_read"?: boolean,"message_text"?: string | null,"room_id"?: string,"sender_id"?: string,"sender_role"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "chat_messages_room_id_fkey"
+      columns: ["room_id"]
+isOneToOne: false
+      referencedRelation: "chat_rooms"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "chat_messages_sender_id_fkey"
+      columns: ["sender_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"chat_rooms": {
+                  Row: {
+                    "batch_id": string | null,"created_at": string | null,"id": string,"institute_id": string,"last_message_at": string | null,"last_message_text": string | null,"name": string,"student_id": string | null,"teacher_id": string,"type": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "batch_id"?: string | null,"created_at"?: string | null,"id"?: string,"institute_id": string,"last_message_at"?: string | null,"last_message_text"?: string | null,"name": string,"student_id"?: string | null,"teacher_id": string,"type": string
+                  }
+                  Update: {
+                    "batch_id"?: string | null,"created_at"?: string | null,"id"?: string,"institute_id"?: string,"last_message_at"?: string | null,"last_message_text"?: string | null,"name"?: string,"student_id"?: string | null,"teacher_id"?: string,"type"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "chat_rooms_batch_id_fkey"
+      columns: ["batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "chat_rooms_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "chat_rooms_student_id_fkey"
+      columns: ["student_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "chat_rooms_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"community_comments": {
+                  Row: {
+                    "attachment_url": string | null,"author_id": string,"comment_text": string,"created_at": string | null,"id": string,"institute_id": string,"is_teacher_verified_answer": boolean | null,"post_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attachment_url"?: string | null,"author_id": string,"comment_text": string,"created_at"?: string | null,"id"?: string,"institute_id": string,"is_teacher_verified_answer"?: boolean | null,"post_id": string
+                  }
+                  Update: {
+                    "attachment_url"?: string | null,"author_id"?: string,"comment_text"?: string,"created_at"?: string | null,"id"?: string,"institute_id"?: string,"is_teacher_verified_answer"?: boolean | null,"post_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "community_comments_author_id_fkey"
+      columns: ["author_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "community_comments_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "community_comments_post_id_fkey"
+      columns: ["post_id"]
+isOneToOne: false
+      referencedRelation: "community_posts"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"community_posts": {
+                  Row: {
+                    "author_id": string,"batch_id": string | null,"content": string,"created_at": string | null,"id": string,"image_url": string | null,"institute_id": string,"is_pinned": boolean | null,"is_resolved": boolean | null,"pdf_or_file_url": string | null,"subject_id": string | null,"title": string,"upvotes_count": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "author_id": string,"batch_id"?: string | null,"content": string,"created_at"?: string | null,"id"?: string,"image_url"?: string | null,"institute_id": string,"is_pinned"?: boolean | null,"is_resolved"?: boolean | null,"pdf_or_file_url"?: string | null,"subject_id"?: string | null,"title": string,"upvotes_count"?: number | null
+                  }
+                  Update: {
+                    "author_id"?: string,"batch_id"?: string | null,"content"?: string,"created_at"?: string | null,"id"?: string,"image_url"?: string | null,"institute_id"?: string,"is_pinned"?: boolean | null,"is_resolved"?: boolean | null,"pdf_or_file_url"?: string | null,"subject_id"?: string | null,"title"?: string,"upvotes_count"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "community_posts_author_id_fkey"
+      columns: ["author_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "community_posts_batch_id_fkey"
+      columns: ["batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "community_posts_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "community_posts_subject_id_fkey"
+      columns: ["subject_id"]
+isOneToOne: false
+      referencedRelation: "subjects"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"community_upvotes": {
+                  Row: {
+                    "created_at": string | null,"id": string,"post_id": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string | null,"id"?: string,"post_id": string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string | null,"id"?: string,"post_id"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "community_upvotes_post_id_fkey"
+      columns: ["post_id"]
+isOneToOne: false
+      referencedRelation: "community_posts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "community_upvotes_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"examinations": {
+                  Row: {
+                    "batch_average_marks": number | null,"batch_highest_marks": number | null,"batch_id": string,"created_at": string | null,"exam_date": string,"id": string,"institute_id": string,"is_published": boolean | null,"max_marks": number,"passing_marks": number,"subject_id": string | null,"syllabus": string | null,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "batch_average_marks"?: number | null,"batch_highest_marks"?: number | null,"batch_id": string,"created_at"?: string | null,"exam_date": string,"id"?: string,"institute_id": string,"is_published"?: boolean | null,"max_marks"?: number,"passing_marks"?: number,"subject_id"?: string | null,"syllabus"?: string | null,"title": string
+                  }
+                  Update: {
+                    "batch_average_marks"?: number | null,"batch_highest_marks"?: number | null,"batch_id"?: string,"created_at"?: string | null,"exam_date"?: string,"id"?: string,"institute_id"?: string,"is_published"?: boolean | null,"max_marks"?: number,"passing_marks"?: number,"subject_id"?: string | null,"syllabus"?: string | null,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "examinations_batch_id_fkey"
+      columns: ["batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "examinations_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "examinations_subject_id_fkey"
+      columns: ["subject_id"]
+isOneToOne: false
+      referencedRelation: "subjects"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"fee_plans": {
+                  Row: {
+                    "amount": number,"batch_id": string | null,"created_at": string | null,"description": string | null,"frequency": string | null,"id": string,"institute_id": string,"name": string,"total_amount": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount": number,"batch_id"?: string | null,"created_at"?: string | null,"description"?: string | null,"frequency"?: string | null,"id"?: string,"institute_id": string,"name": string,"total_amount"?: number | null
+                  }
+                  Update: {
+                    "amount"?: number,"batch_id"?: string | null,"created_at"?: string | null,"description"?: string | null,"frequency"?: string | null,"id"?: string,"institute_id"?: string,"name"?: string,"total_amount"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "fee_plans_batch_id_fkey"
+      columns: ["batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "fee_plans_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"institute_members": {
+                  Row: {
+                    "created_at": string | null,"id": string,"institute_id": string,"joined_at": string | null,"role": Database["public"]['Enums']["app_role_enum"],"status": Database["public"]['Enums']["member_status_enum"],"user_id": string,"verification_status": Database["public"]['Enums']["verification_status_enum"],"verified_at": string | null,"verified_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string | null,"id"?: string,"institute_id": string,"joined_at"?: string | null,"role"?: Database["public"]['Enums']["app_role_enum"],"status"?: Database["public"]['Enums']["member_status_enum"],"user_id": string,"verification_status"?: Database["public"]['Enums']["verification_status_enum"],"verified_at"?: string | null,"verified_by"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string | null,"id"?: string,"institute_id"?: string,"joined_at"?: string | null,"role"?: Database["public"]['Enums']["app_role_enum"],"status"?: Database["public"]['Enums']["member_status_enum"],"user_id"?: string,"verification_status"?: Database["public"]['Enums']["verification_status_enum"],"verified_at"?: string | null,"verified_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "institute_members_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "institute_members_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "institute_members_verified_by_fkey"
+      columns: ["verified_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"institutes": {
+                  Row: {
+                    "account_type": Database["public"]['Enums']["account_type_enum"],"address": string | null,"banner_url": string | null,"campus_name": string | null,"center_code": string,"city": string,"code": string | null,"created_at": string | null,"email": string | null,"id": string,"invite_code": string,"is_active": boolean | null,"logo_url": string | null,"name": string,"owner_id": string | null,"phone": string | null,"state": string | null,"updated_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "account_type"?: Database["public"]['Enums']["account_type_enum"],"address"?: string | null,"banner_url"?: string | null,"campus_name"?: string | null,"center_code": string,"city": string,"code"?: string | null,"created_at"?: string | null,"email"?: string | null,"id"?: string,"invite_code": string,"is_active"?: boolean | null,"logo_url"?: string | null,"name": string,"owner_id"?: string | null,"phone"?: string | null,"state"?: string | null,"updated_at"?: string | null
+                  }
+                  Update: {
+                    "account_type"?: Database["public"]['Enums']["account_type_enum"],"address"?: string | null,"banner_url"?: string | null,"campus_name"?: string | null,"center_code"?: string,"city"?: string,"code"?: string | null,"created_at"?: string | null,"email"?: string | null,"id"?: string,"invite_code"?: string,"is_active"?: boolean | null,"logo_url"?: string | null,"name"?: string,"owner_id"?: string | null,"phone"?: string | null,"state"?: string | null,"updated_at"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"join_requests": {
+                  Row: {
+                    "code_used": string,"created_at": string | null,"id": string,"institute_id": string,"requested_role": Database["public"]['Enums']["app_role_enum"],"reviewed_at": string | null,"reviewed_by": string | null,"status": Database["public"]['Enums']["verification_status_enum"],"student_extra_details_json": Json | null,"teacher_id": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "code_used": string,"created_at"?: string | null,"id"?: string,"institute_id": string,"requested_role"?: Database["public"]['Enums']["app_role_enum"],"reviewed_at"?: string | null,"reviewed_by"?: string | null,"status"?: Database["public"]['Enums']["verification_status_enum"],"student_extra_details_json"?: Json | null,"teacher_id"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "code_used"?: string,"created_at"?: string | null,"id"?: string,"institute_id"?: string,"requested_role"?: Database["public"]['Enums']["app_role_enum"],"reviewed_at"?: string | null,"reviewed_by"?: string | null,"status"?: Database["public"]['Enums']["verification_status_enum"],"student_extra_details_json"?: Json | null,"teacher_id"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "join_requests_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "join_requests_reviewed_by_fkey"
+      columns: ["reviewed_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "join_requests_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "teachers"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "join_requests_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"lectures": {
+                  Row: {
+                    "batch_id": string,"created_at": string | null,"description": string | null,"duration_minutes": number | null,"duration_seconds": number | null,"faculty_name": string | null,"id": string,"institute_id": string,"is_live": boolean | null,"is_published": boolean | null,"provider": Database["public"]['Enums']["video_provider_enum"],"subject": string | null,"subject_id": string | null,"thumbnail_url": string | null,"title": string,"uploaded_by": string | null,"video_id_or_url": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "batch_id": string,"created_at"?: string | null,"description"?: string | null,"duration_minutes"?: number | null,"duration_seconds"?: number | null,"faculty_name"?: string | null,"id"?: string,"institute_id": string,"is_live"?: boolean | null,"is_published"?: boolean | null,"provider"?: Database["public"]['Enums']["video_provider_enum"],"subject"?: string | null,"subject_id"?: string | null,"thumbnail_url"?: string | null,"title": string,"uploaded_by"?: string | null,"video_id_or_url": string
+                  }
+                  Update: {
+                    "batch_id"?: string,"created_at"?: string | null,"description"?: string | null,"duration_minutes"?: number | null,"duration_seconds"?: number | null,"faculty_name"?: string | null,"id"?: string,"institute_id"?: string,"is_live"?: boolean | null,"is_published"?: boolean | null,"provider"?: Database["public"]['Enums']["video_provider_enum"],"subject"?: string | null,"subject_id"?: string | null,"thumbnail_url"?: string | null,"title"?: string,"uploaded_by"?: string | null,"video_id_or_url"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "lectures_batch_id_fkey"
+      columns: ["batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "lectures_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "lectures_subject_id_fkey"
+      columns: ["subject_id"]
+isOneToOne: false
+      referencedRelation: "subjects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "lectures_uploaded_by_fkey"
+      columns: ["uploaded_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"notifications": {
+                  Row: {
+                    "body": string | null,"created_at": string | null,"data": Json | null,"deep_link_data": Json | null,"id": string,"institute_id": string,"is_read": boolean | null,"message": string | null,"recipient_id": string | null,"recipient_role": string | null,"title": string,"type": string | null,"user_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body"?: string | null,"created_at"?: string | null,"data"?: Json | null,"deep_link_data"?: Json | null,"id"?: string,"institute_id": string,"is_read"?: boolean | null,"message"?: string | null,"recipient_id"?: string | null,"recipient_role"?: string | null,"title": string,"type"?: string | null,"user_id"?: string | null
+                  }
+                  Update: {
+                    "body"?: string | null,"created_at"?: string | null,"data"?: Json | null,"deep_link_data"?: Json | null,"id"?: string,"institute_id"?: string,"is_read"?: boolean | null,"message"?: string | null,"recipient_id"?: string | null,"recipient_role"?: string | null,"title"?: string,"type"?: string | null,"user_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "notifications_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_recipient_id_fkey"
+      columns: ["recipient_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"parent_students": {
+                  Row: {
+                    "created_at": string | null,"id": string,"institute_id": string,"parent_id": string,"relationship": string | null,"student_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string | null,"id"?: string,"institute_id": string,"parent_id": string,"relationship"?: string | null,"student_id": string
+                  }
+                  Update: {
+                    "created_at"?: string | null,"id"?: string,"institute_id"?: string,"parent_id"?: string,"relationship"?: string | null,"student_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "parent_students_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "parent_students_parent_id_fkey"
+      columns: ["parent_id"]
+isOneToOne: false
+      referencedRelation: "parents"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "parent_students_student_id_fkey"
+      columns: ["student_id"]
+isOneToOne: false
+      referencedRelation: "students"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"parents": {
+                  Row: {
+                    "alternate_phone": string | null,"created_at": string | null,"id": string,"institute_id": string,"occupation": string | null,"phone": string | null,"relationship_type": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "alternate_phone"?: string | null,"created_at"?: string | null,"id"?: string,"institute_id": string,"occupation"?: string | null,"phone"?: string | null,"relationship_type"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "alternate_phone"?: string | null,"created_at"?: string | null,"id"?: string,"institute_id"?: string,"occupation"?: string | null,"phone"?: string | null,"relationship_type"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "parents_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "parents_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"payments": {
+                  Row: {
+                    "amount": number,"created_at": string | null,"gst_amount": number | null,"id": string,"institute_id": string,"notes": string | null,"paid_at": string | null,"payment_method": string | null,"payment_mode": string | null,"razorpay_order_id": string | null,"razorpay_payment_id": string | null,"razorpay_signature": string | null,"receipt_number": string,"recorded_by": string | null,"status": string | null,"student_fee_id": string,"student_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount": number,"created_at"?: string | null,"gst_amount"?: number | null,"id"?: string,"institute_id": string,"notes"?: string | null,"paid_at"?: string | null,"payment_method"?: string | null,"payment_mode"?: string | null,"razorpay_order_id"?: string | null,"razorpay_payment_id"?: string | null,"razorpay_signature"?: string | null,"receipt_number": string,"recorded_by"?: string | null,"status"?: string | null,"student_fee_id": string,"student_id": string
+                  }
+                  Update: {
+                    "amount"?: number,"created_at"?: string | null,"gst_amount"?: number | null,"id"?: string,"institute_id"?: string,"notes"?: string | null,"paid_at"?: string | null,"payment_method"?: string | null,"payment_mode"?: string | null,"razorpay_order_id"?: string | null,"razorpay_payment_id"?: string | null,"razorpay_signature"?: string | null,"receipt_number"?: string,"recorded_by"?: string | null,"status"?: string | null,"student_fee_id"?: string,"student_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "payments_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "payments_recorded_by_fkey"
+      columns: ["recorded_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "payments_student_fee_id_fkey"
+      columns: ["student_fee_id"]
+isOneToOne: false
+      referencedRelation: "student_fees"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "payments_student_id_fkey"
+      columns: ["student_id"]
+isOneToOne: false
+      referencedRelation: "students"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"profiles": {
+                  Row: {
+                    "avatar_url": string | null,"created_at": string | null,"default_role": Database["public"]['Enums']["app_role_enum"],"email": string,"expo_push_token": string | null,"full_name": string,"id": string,"is_deleted": boolean | null,"phone": string | null,"updated_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "avatar_url"?: string | null,"created_at"?: string | null,"default_role"?: Database["public"]['Enums']["app_role_enum"],"email": string,"expo_push_token"?: string | null,"full_name": string,"id": string,"is_deleted"?: boolean | null,"phone"?: string | null,"updated_at"?: string | null
+                  }
+                  Update: {
+                    "avatar_url"?: string | null,"created_at"?: string | null,"default_role"?: Database["public"]['Enums']["app_role_enum"],"email"?: string,"expo_push_token"?: string | null,"full_name"?: string,"id"?: string,"is_deleted"?: boolean | null,"phone"?: string | null,"updated_at"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"push_tokens": {
+                  Row: {
+                    "created_at": string | null,"id": string,"platform": string | null,"token": string,"updated_at": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string | null,"id"?: string,"platform"?: string | null,"token": string,"updated_at"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string | null,"id"?: string,"platform"?: string | null,"token"?: string,"updated_at"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "push_tokens_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"quiz_answer_keys": {
+                  Row: {
+                    "answer_keys": NonNullable<Json>,"assignment_id": string,"created_at": string | null,"institute_id": string,"updated_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "answer_keys"?: NonNullable<Json>,"assignment_id": string,"created_at"?: string | null,"institute_id": string,"updated_at"?: string | null
+                  }
+                  Update: {
+                    "answer_keys"?: NonNullable<Json>,"assignment_id"?: string,"created_at"?: string | null,"institute_id"?: string,"updated_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "quiz_answer_keys_assignment_id_fkey"
+      columns: ["assignment_id"]
+isOneToOne: true
+      referencedRelation: "assignments"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "quiz_answer_keys_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"receipts": {
+                  Row: {
+                    "generated_at": string,"gst_amount": number,"gst_rate": number,"id": string,"institute_id": string,"payment_id": string,"receipt_number": string,"signed_hash": string | null,"student_id": string,"taxable_amount": number,"total_amount": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "generated_at"?: string,"gst_amount"?: number,"gst_rate"?: number,"id"?: string,"institute_id": string,"payment_id": string,"receipt_number": string,"signed_hash"?: string | null,"student_id": string,"taxable_amount": number,"total_amount": number
+                  }
+                  Update: {
+                    "generated_at"?: string,"gst_amount"?: number,"gst_rate"?: number,"id"?: string,"institute_id"?: string,"payment_id"?: string,"receipt_number"?: string,"signed_hash"?: string | null,"student_id"?: string,"taxable_amount"?: number,"total_amount"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "receipts_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "receipts_payment_id_fkey"
+      columns: ["payment_id"]
+isOneToOne: true
+      referencedRelation: "payments"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "receipts_student_id_fkey"
+      columns: ["student_id"]
+isOneToOne: false
+      referencedRelation: "students"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"results": {
+                  Row: {
+                    "batch_rank": number | null,"created_at": string | null,"examination_id": string,"grade": string | null,"id": string,"institute_id": string,"is_absent": boolean | null,"marks_obtained": number,"percentage": number,"recorded_by": string | null,"remarks": string | null,"student_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "batch_rank"?: number | null,"created_at"?: string | null,"examination_id": string,"grade"?: string | null,"id"?: string,"institute_id": string,"is_absent"?: boolean | null,"marks_obtained"?: number,"percentage"?: number,"recorded_by"?: string | null,"remarks"?: string | null,"student_id": string
+                  }
+                  Update: {
+                    "batch_rank"?: number | null,"created_at"?: string | null,"examination_id"?: string,"grade"?: string | null,"id"?: string,"institute_id"?: string,"is_absent"?: boolean | null,"marks_obtained"?: number,"percentage"?: number,"recorded_by"?: string | null,"remarks"?: string | null,"student_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "results_examination_id_fkey"
+      columns: ["examination_id"]
+isOneToOne: false
+      referencedRelation: "examinations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "results_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "results_recorded_by_fkey"
+      columns: ["recorded_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "results_student_id_fkey"
+      columns: ["student_id"]
+isOneToOne: false
+      referencedRelation: "students"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"student_fees": {
+                  Row: {
+                    "created_at": string | null,"discount_amount": number | null,"due_date": string,"fee_plan_id": string | null,"id": string,"institute_id": string,"net_payable": number | null,"paid_amount": number,"pending_amount": number,"status": string,"student_id": string,"title": string,"total_amount": number,"updated_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string | null,"discount_amount"?: number | null,"due_date": string,"fee_plan_id"?: string | null,"id"?: string,"institute_id": string,"net_payable"?: number | null,"paid_amount"?: number,"pending_amount": number,"status"?: string,"student_id": string,"title": string,"total_amount": number,"updated_at"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string | null,"discount_amount"?: number | null,"due_date"?: string,"fee_plan_id"?: string | null,"id"?: string,"institute_id"?: string,"net_payable"?: number | null,"paid_amount"?: number,"pending_amount"?: number,"status"?: string,"student_id"?: string,"title"?: string,"total_amount"?: number,"updated_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "student_fees_fee_plan_id_fkey"
+      columns: ["fee_plan_id"]
+isOneToOne: false
+      referencedRelation: "fee_plans"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "student_fees_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "student_fees_student_id_fkey"
+      columns: ["student_id"]
+isOneToOne: false
+      referencedRelation: "students"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"students": {
+                  Row: {
+                    "address": string | null,"admission_date": string | null,"admission_number": string | null,"blood_group": string | null,"board": string | null,"class_grade": string,"created_at": string | null,"dob": string | null,"emergency_contact_name": string | null,"emergency_contact_phone": string | null,"grade": string | null,"guardian_name": string | null,"guardian_phone": string | null,"id": string,"institute_id": string,"is_archived": boolean | null,"medium": string | null,"parent_link_code": string,"previous_percentage": string | null,"roll_number": string,"school_name": string | null,"school_or_college": string | null,"target_exam": string | null,"user_id": string,"weak_subjects": (string)[] | null,"weak_topics": (string)[] | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "address"?: string | null,"admission_date"?: string | null,"admission_number"?: string | null,"blood_group"?: string | null,"board"?: string | null,"class_grade": string,"created_at"?: string | null,"dob"?: string | null,"emergency_contact_name"?: string | null,"emergency_contact_phone"?: string | null,"grade"?: string | null,"guardian_name"?: string | null,"guardian_phone"?: string | null,"id"?: string,"institute_id": string,"is_archived"?: boolean | null,"medium"?: string | null,"parent_link_code": string,"previous_percentage"?: string | null,"roll_number": string,"school_name"?: string | null,"school_or_college"?: string | null,"target_exam"?: string | null,"user_id": string,"weak_subjects"?: (string)[] | null,"weak_topics"?: (string)[] | null
+                  }
+                  Update: {
+                    "address"?: string | null,"admission_date"?: string | null,"admission_number"?: string | null,"blood_group"?: string | null,"board"?: string | null,"class_grade"?: string,"created_at"?: string | null,"dob"?: string | null,"emergency_contact_name"?: string | null,"emergency_contact_phone"?: string | null,"grade"?: string | null,"guardian_name"?: string | null,"guardian_phone"?: string | null,"id"?: string,"institute_id"?: string,"is_archived"?: boolean | null,"medium"?: string | null,"parent_link_code"?: string,"previous_percentage"?: string | null,"roll_number"?: string,"school_name"?: string | null,"school_or_college"?: string | null,"target_exam"?: string | null,"user_id"?: string,"weak_subjects"?: (string)[] | null,"weak_topics"?: (string)[] | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "students_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "students_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"study_materials": {
+                  Row: {
+                    "batch_id": string | null,"category": string | null,"created_at": string | null,"description": string | null,"download_count": number | null,"file_size": string | null,"file_size_bytes": number | null,"file_type": string | null,"file_url": string,"id": string,"institute_id": string,"subject": string | null,"subject_id": string | null,"title": string,"uploaded_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "batch_id"?: string | null,"category"?: string | null,"created_at"?: string | null,"description"?: string | null,"download_count"?: number | null,"file_size"?: string | null,"file_size_bytes"?: number | null,"file_type"?: string | null,"file_url": string,"id"?: string,"institute_id": string,"subject"?: string | null,"subject_id"?: string | null,"title": string,"uploaded_by"?: string | null
+                  }
+                  Update: {
+                    "batch_id"?: string | null,"category"?: string | null,"created_at"?: string | null,"description"?: string | null,"download_count"?: number | null,"file_size"?: string | null,"file_size_bytes"?: number | null,"file_type"?: string | null,"file_url"?: string,"id"?: string,"institute_id"?: string,"subject"?: string | null,"subject_id"?: string | null,"title"?: string,"uploaded_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "study_materials_batch_id_fkey"
+      columns: ["batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "study_materials_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "study_materials_subject_id_fkey"
+      columns: ["subject_id"]
+isOneToOne: false
+      referencedRelation: "subjects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "study_materials_uploaded_by_fkey"
+      columns: ["uploaded_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"subjects": {
+                  Row: {
+                    "code": string,"color_hex": string | null,"created_at": string | null,"description": string | null,"id": string,"institute_id": string,"name": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "code": string,"color_hex"?: string | null,"created_at"?: string | null,"description"?: string | null,"id"?: string,"institute_id": string,"name": string
+                  }
+                  Update: {
+                    "code"?: string,"color_hex"?: string | null,"created_at"?: string | null,"description"?: string | null,"id"?: string,"institute_id"?: string,"name"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "subjects_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"submissions": {
+                  Row: {
+                    "answers": Json | null,"assignment_id": string,"feedback": string | null,"file_url": string | null,"graded_at": string | null,"graded_by": string | null,"id": string,"institute_id": string,"marks_obtained": number | null,"score": number | null,"status": string | null,"student_id": string,"submission_text": string | null,"submitted_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "answers"?: Json | null,"assignment_id": string,"feedback"?: string | null,"file_url"?: string | null,"graded_at"?: string | null,"graded_by"?: string | null,"id"?: string,"institute_id": string,"marks_obtained"?: number | null,"score"?: number | null,"status"?: string | null,"student_id": string,"submission_text"?: string | null,"submitted_at"?: string | null
+                  }
+                  Update: {
+                    "answers"?: Json | null,"assignment_id"?: string,"feedback"?: string | null,"file_url"?: string | null,"graded_at"?: string | null,"graded_by"?: string | null,"id"?: string,"institute_id"?: string,"marks_obtained"?: number | null,"score"?: number | null,"status"?: string | null,"student_id"?: string,"submission_text"?: string | null,"submitted_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "submissions_assignment_id_fkey"
+      columns: ["assignment_id"]
+isOneToOne: false
+      referencedRelation: "assignments"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "submissions_graded_by_fkey"
+      columns: ["graded_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "submissions_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "submissions_student_id_fkey"
+      columns: ["student_id"]
+isOneToOne: false
+      referencedRelation: "students"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"teachers": {
+                  Row: {
+                    "achievements": string | null,"bio": string | null,"created_at": string | null,"demo_video_url": string | null,"experience_years": number | null,"id": string,"institute_id": string,"joining_date": string | null,"mode": string | null,"monthly_fee_rate": number | null,"qualification": string | null,"specialization": string | null,"specialization_subjects": (string)[] | null,"teacher_code": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "achievements"?: string | null,"bio"?: string | null,"created_at"?: string | null,"demo_video_url"?: string | null,"experience_years"?: number | null,"id"?: string,"institute_id": string,"joining_date"?: string | null,"mode"?: string | null,"monthly_fee_rate"?: number | null,"qualification"?: string | null,"specialization"?: string | null,"specialization_subjects"?: (string)[] | null,"teacher_code": string,"user_id": string
+                  }
+                  Update: {
+                    "achievements"?: string | null,"bio"?: string | null,"created_at"?: string | null,"demo_video_url"?: string | null,"experience_years"?: number | null,"id"?: string,"institute_id"?: string,"joining_date"?: string | null,"mode"?: string | null,"monthly_fee_rate"?: number | null,"qualification"?: string | null,"specialization"?: string | null,"specialization_subjects"?: (string)[] | null,"teacher_code"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "teachers_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "teachers_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                }
+          }
+          Views: {
+            "pg_all_foreign_keys": {
+                  Row: {
+                    "fk_columns": (unknown)[] | null,"fk_constraint_name": unknown,"fk_schema_name": unknown,"fk_table_name": unknown,"fk_table_oid": unknown,"is_deferrable": boolean | null,"is_deferred": boolean | null,"match_type": string | null,"on_delete": string | null,"on_update": string | null,"pk_columns": (unknown)[] | null,"pk_constraint_name": unknown,"pk_index_name": unknown,"pk_schema_name": unknown,"pk_table_name": unknown,"pk_table_oid": unknown
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    
+                  ]
+                },"tap_funky": {
+                  Row: {
+                    "args": string | null,"is_definer": boolean | null,"is_strict": boolean | null,"is_visible": boolean | null,"kind": unknown,"langoid": unknown,"name": unknown,"oid": unknown,"owner": unknown,"returns": string | null,"returns_set": boolean | null,"schema": unknown,"volatility": string | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    
+                  ]
+                }
+          }
+          Functions: {
+            "_cleanup":
+{ Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"_contract_on":
+{ Args: { "": string }; Returns: unknown
+                           },
+"_currtest":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
+"_db_privs":
+{ Args: Record<PropertyKey, never>; Returns: (unknown)[]
+                           },
+"_extensions":
+{ Args: Record<PropertyKey, never>; Returns: unknown[]
+                           },
+"_get":
+{ Args: { "": string }; Returns: number
+                           },
+"_get_latest":
+{ Args: { "": string }; Returns: (number)[]
+                           },
+"_get_note":
+{ Args: { "": string }; Returns: string
+                           },
+"_is_verbose":
+{ Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"_prokind":
+{ Args: { "p_oid": unknown }; Returns: unknown
+                           },
+"_query":
+{ Args: { "": string }; Returns: string
+                           },
+"_refine_vol":
+{ Args: { "": string }; Returns: string
+                           },
+"_retval":
+{ Args: { "": string }; Returns: string
+                           },
+"_table_privs":
+{ Args: Record<PropertyKey, never>; Returns: (unknown)[]
+                           },
+"_temptypes":
+{ Args: { "": string }; Returns: string
+                           },
+"_todo":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"auth_institute_id":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"auth_role":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"col_is_null":
+{ Args: { "column_name": unknown,"description"?: string,"schema_name": unknown,"table_name": unknown }; Returns: string
+                           } |
+{ Args: { "column_name": unknown,"description"?: string,"table_name": unknown }; Returns: string
+                           },
+"col_not_null":
+{ Args: { "column_name": unknown,"description"?: string,"schema_name": unknown,"table_name": unknown }; Returns: string
+                           } |
+{ Args: { "column_name": unknown,"description"?: string,"table_name": unknown }; Returns: string
+                           },
+"create_institute_and_admin":
+{ Args: { "p_center_code": string,"p_city": string,"p_name": string,"p_phone"?: string,"p_subjects"?: (string)[] }; Returns: Json
+                           },
+"current_student_id":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"current_teacher_id":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"diag":
+{ Args: { "msg": unknown }; Returns: { error: true } & "Could not choose the best candidate function between: public.diag(msg => text), public.diag(msg => anyelement). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+                           } |
+{ Args: { "msg": string }; Returns: { error: true } & "Could not choose the best candidate function between: public.diag(msg => text), public.diag(msg => anyelement). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+                           },
+"diag_test_name":
+{ Args: { "": string }; Returns: string
+                           },
+"do_tap":
+{ Args: Record<PropertyKey, never>; Returns: string[]
+                           } |
+{ Args: { "": string }; Returns: string[]
+                           },
+"fail":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           } |
+{ Args: { "": string }; Returns: string
+                           },
+"findfuncs":
+{ Args: { "": string }; Returns: (string)[]
+                           },
+"finish":
+{ Args: { "exception_on_failure"?: boolean }; Returns: string[]
+                           },
+"format_type_string":
+{ Args: { "": string }; Returns: string
+                           },
+"has_unique":
+{ Args: { "": string }; Returns: string
+                           },
+"in_todo":
+{ Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"is_empty":
+{ Args: { "": string }; Returns: string
+                           },
+"is_institute_admin":
+{ Args: { "target_inst_id": string }; Returns: boolean
+                           },
+"is_institute_member":
+{ Args: { "target_inst_id": string }; Returns: boolean
+                           },
+"is_parent_of":
+{ Args: { "target_student_id": string }; Returns: boolean
+                           },
+"is_student_in_batch":
+{ Args: { "target_batch_id": string }; Returns: boolean
+                           },
+"is_teacher_of_batch":
+{ Args: { "target_batch_id": string }; Returns: boolean
+                           },
+"is_teacher_of_student":
+{ Args: { "target_student_id": string }; Returns: boolean
+                           },
+"isnt_empty":
+{ Args: { "": string }; Returns: string
+                           },
+"join_institute_as_teacher":
+{ Args: { "p_bio"?: string,"p_code": string,"p_experience_years"?: number,"p_monthly_fee_rate"?: number,"p_qualification"?: string,"p_specialization"?: string,"p_specialization_subjects"?: (string)[] }; Returns: Json
+                           },
+"link_child_by_code":
+{ Args: { "p_relationship"?: string,"p_student_code": string }; Returns: Json
+                           },
+"lives_ok":
+{ Args: { "": string }; Returns: string
+                           },
+"no_plan":
+{ Args: Record<PropertyKey, never>; Returns: boolean[]
+                           },
+"num_failed":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
+"os_name":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"pass":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           } |
+{ Args: { "": string }; Returns: string
+                           },
+"pg_version":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"pg_version_num":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
+"pgtap_version":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
+"runtests":
+{ Args: Record<PropertyKey, never>; Returns: string[]
+                           } |
+{ Args: { "": string }; Returns: string[]
+                           },
+"skip":
+{ Args: { "": string }; Returns: string
+                           } |
+{ Args: { "how_many": number,"why": string }; Returns: string
+                           },
+"submit_and_grade_quiz":
+{ Args: { "p_answers": Json,"p_assignment_id": string,"p_student_id": string }; Returns: Json
+                           },
+"throws_ok":
+{ Args: { "": string }; Returns: string
+                           },
+"todo":
+{ Args: { "how_many": number }; Returns: boolean[]
+                           } |
+{ Args: { "how_many": number,"why": string }; Returns: boolean[]
+                           } |
+{ Args: { "why": string }; Returns: boolean[]
+                           } |
+{ Args: { "how_many": number,"why": string }; Returns: boolean[]
+                           },
+"todo_end":
+{ Args: Record<PropertyKey, never>; Returns: boolean[]
+                           },
+"todo_start":
+{ Args: Record<PropertyKey, never>; Returns: boolean[]
+                           } |
+{ Args: { "": string }; Returns: boolean[]
+                           }
+          }
+          Enums: {
+            "account_type_enum": "coaching_center"|"individual_teacher","app_role_enum": "admin"|"teacher"|"student"|"parent","assignment_type_enum": "file"|"quiz","member_status_enum": "active"|"suspended"|"pending","verification_status_enum": "pending"|"verified"|"rejected","video_provider_enum": "youtube"|"bunny"|"direct"
+          }
+          CompositeTypes: {
+            "_time_trial_type": {
+                        "a_time": number | null
+                      }
+          }
+        }
+}
+
+type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : never
+
+export const Constants = {
+  "graphql_public": {
+          Enums: {
+            
+          }
+        },"public": {
+          Enums: {
+            "account_type_enum": ["coaching_center", "individual_teacher"],"app_role_enum": ["admin", "teacher", "student", "parent"],"assignment_type_enum": ["file", "quiz"],"member_status_enum": ["active", "suspended", "pending"],"verification_status_enum": ["pending", "verified", "rejected"],"video_provider_enum": ["youtube", "bunny", "direct"]
+          }
+        }
+} as const
 // ==============================================================================
 // ACADLY - COMPLETE DATABASE TYPE DEFINITIONS
 // Canonical typing aligned with 0001_core -> 0006_storage migration schema.

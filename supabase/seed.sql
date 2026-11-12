@@ -96,20 +96,20 @@ BEGIN
         (v_parent_2_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'parent.singhania@acadly.com', v_password_hash, NOW(), json_build_object('provider','email','providers',json_build_array('email'),'role','parent','institute_id',v_inst_id), '{"full_name":"Sanjay Singhania","role":"parent"}', NOW(), NOW())
     ON CONFLICT (id) DO UPDATE SET encrypted_password = EXCLUDED.encrypted_password;
 
-    INSERT INTO auth.identities (id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
+    INSERT INTO auth.identities (id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at)
     VALUES
-        (v_admin_id, v_admin_id, json_build_object('sub', v_admin_id, 'email', 'admin.dev@acadly.com'), 'email', NOW(), NOW(), NOW()),
-        (v_teach_1_id, v_teach_1_id, json_build_object('sub', v_teach_1_id, 'email', 'teacher.joshi@acadly.com'), 'email', NOW(), NOW(), NOW()),
-        (v_teach_2_id, v_teach_2_id, json_build_object('sub', v_teach_2_id, 'email', 'teacher.sen@acadly.com'), 'email', NOW(), NOW(), NOW()),
-        (v_stud_1_id, v_stud_1_id, json_build_object('sub', v_stud_1_id, 'email', 'student.amelia@acadly.com'), 'email', NOW(), NOW(), NOW()),
-        (v_stud_2_id, v_stud_2_id, json_build_object('sub', v_stud_2_id, 'email', 'student.kabir@acadly.com'), 'email', NOW(), NOW(), NOW()),
-        (v_stud_3_id, v_stud_3_id, json_build_object('sub', v_stud_3_id, 'email', 'student.zoya@acadly.com'), 'email', NOW(), NOW(), NOW()),
-        (v_stud_4_id, v_stud_4_id, json_build_object('sub', v_stud_4_id, 'email', 'student.rohan@acadly.com'), 'email', NOW(), NOW(), NOW()),
-        (v_stud_5_id, v_stud_5_id, json_build_object('sub', v_stud_5_id, 'email', 'student.aarav@acadly.com'), 'email', NOW(), NOW(), NOW()),
-        (v_stud_6_id, v_stud_6_id, json_build_object('sub', v_stud_6_id, 'email', 'student.ananya@acadly.com'), 'email', NOW(), NOW(), NOW()),
-        (v_parent_1_id, v_parent_1_id, json_build_object('sub', v_parent_1_id, 'email', 'parent.sharma@acadly.com'), 'email', NOW(), NOW(), NOW()),
-        (v_parent_2_id, v_parent_2_id, json_build_object('sub', v_parent_2_id, 'email', 'parent.singhania@acadly.com'), 'email', NOW(), NOW(), NOW())
-    ON CONFLICT (provider, identity_id) DO NOTHING;
+        (v_admin_id, v_admin_id, json_build_object('sub', v_admin_id, 'email', 'admin.dev@acadly.com'), 'email', v_admin_id::text, NOW(), NOW(), NOW()),
+        (v_teach_1_id, v_teach_1_id, json_build_object('sub', v_teach_1_id, 'email', 'teacher.joshi@acadly.com'), 'email', v_teach_1_id::text, NOW(), NOW(), NOW()),
+        (v_teach_2_id, v_teach_2_id, json_build_object('sub', v_teach_2_id, 'email', 'teacher.sen@acadly.com'), 'email', v_teach_2_id::text, NOW(), NOW(), NOW()),
+        (v_stud_1_id, v_stud_1_id, json_build_object('sub', v_stud_1_id, 'email', 'student.amelia@acadly.com'), 'email', v_stud_1_id::text, NOW(), NOW(), NOW()),
+        (v_stud_2_id, v_stud_2_id, json_build_object('sub', v_stud_2_id, 'email', 'student.kabir@acadly.com'), 'email', v_stud_2_id::text, NOW(), NOW(), NOW()),
+        (v_stud_3_id, v_stud_3_id, json_build_object('sub', v_stud_3_id, 'email', 'student.zoya@acadly.com'), 'email', v_stud_3_id::text, NOW(), NOW(), NOW()),
+        (v_stud_4_id, v_stud_4_id, json_build_object('sub', v_stud_4_id, 'email', 'student.rohan@acadly.com'), 'email', v_stud_4_id::text, NOW(), NOW(), NOW()),
+        (v_stud_5_id, v_stud_5_id, json_build_object('sub', v_stud_5_id, 'email', 'student.aarav@acadly.com'), 'email', v_stud_5_id::text, NOW(), NOW(), NOW()),
+        (v_stud_6_id, v_stud_6_id, json_build_object('sub', v_stud_6_id, 'email', 'student.ananya@acadly.com'), 'email', v_stud_6_id::text, NOW(), NOW(), NOW()),
+        (v_parent_1_id, v_parent_1_id, json_build_object('sub', v_parent_1_id, 'email', 'parent.sharma@acadly.com'), 'email', v_parent_1_id::text, NOW(), NOW(), NOW()),
+        (v_parent_2_id, v_parent_2_id, json_build_object('sub', v_parent_2_id, 'email', 'parent.singhania@acadly.com'), 'email', v_parent_2_id::text, NOW(), NOW(), NOW())
+    ON CONFLICT (provider, provider_id) DO NOTHING;
 
     -- --------------------------------------------------------------------------
     -- 3. Profiles

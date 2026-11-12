@@ -12,7 +12,6 @@ import {
   isDevEnvironment,
   DEV_DEFAULT_INSTITUTES,
   DEV_INITIAL_BATCHES,
-  DEV_ROLE_PROFILES,
   type DummyAccount,
 } from '@/lib/devSeedHelper';
 import { registerForPushNotifications } from '@/services/notificationService';
@@ -41,15 +40,6 @@ export interface AuthContextType {
   createBatch: (batchData: Omit<Batch, 'id' | 'institute_id' | 'created_at' | 'student_count'>) => Promise<{ success: boolean; batch?: Batch }>;
   archiveBatch: (batchId: string) => void;
 }
-
-/**
- * Dev-mode test dummy accounts (guaranteed RFC 4122 UUIDs).
- * Strictly gated behind __DEV__; never bundled into production code paths.
- * Supported test accounts: 'student@acadly.com', 'kabir@acadly.com', 'teacher@acadly.com', 'parent@acadly.com', 'admin@acadly.com'
- */
-export const DUMMY_ACCOUNTS: DummyAccount[] = __DEV__
-  ? (require('@/dev/demoAccounts').DUMMY_ACCOUNTS as DummyAccount[])
-  : [];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -121,18 +111,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error || !session?.user) {
-        // In dev environment, check if dev session was set
-        if (isDevEnvironment()) {
-          const devRole = await AsyncStorage.getItem('@acadly_role');
-          const isAuth = await AsyncStorage.getItem('@acadly_authenticated');
-          if (isAuth === 'true' && devRole && ['admin', 'teacher', 'student', 'parent'].includes(devRole)) {
-            const role = devRole as UserRole;
-            setUserRole(role);
-            setUser(DEV_ROLE_PROFILES[role] || null);
-            setLoading(false);
-            return;
-          }
-        }
         setUser(null);
         setLoading(false);
         return;
@@ -220,7 +198,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     setUserRole(role);
-    setUser((prev) => (prev ? { ...prev, default_role: role } : DEV_ROLE_PROFILES[role] || null));
+    setUser((prev) => (prev ? { ...prev, default_role: role } : null));
     await AsyncStorage.setItem('@acadly_role', role);
     await AsyncStorage.setItem('@acadly_authenticated', 'true');
   };
@@ -246,29 +224,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (!cleanEmail) {
         return { success: false, error: 'Please enter your registered email address.' };
-      }
-
-      // 1. Dev-mode 1-tap quick demo accounts check (Strictly gated behind __DEV__)
-      if (isDevEnvironment() && enteredPass) {
-        const matchedDummy = DUMMY_ACCOUNTS.find(
-          (acc) => acc.email.toLowerCase() === cleanEmail || acc.id === cleanEmail
-        );
-
-        if (matchedDummy && matchedDummy.password === enteredPass) {
-          const profile: Profile = {
-            id: matchedDummy.id,
-            email: matchedDummy.email,
-            phone: '+91 98290 41208',
-            full_name: matchedDummy.name,
-            default_role: matchedDummy.role,
-            created_at: '2025-01-01T00:00:00.000Z',
-          };
-          setUser(profile);
-          setUserRole(matchedDummy.role);
-          await AsyncStorage.setItem('@acadly_role', matchedDummy.role);
-          await AsyncStorage.setItem('@acadly_authenticated', 'true');
-          return { success: true, role: matchedDummy.role };
-        }
       }
 
       // Password requirement

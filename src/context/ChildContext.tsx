@@ -15,42 +15,6 @@ export interface ChildStudent {
   emoji?: string;
 }
 
-const DEFAULT_CHILDREN: ChildStudent[] = [
-  {
-    id: 'stud-amelia-01',
-    admission_number: 'ADM-2026-088',
-    user_id: '00000000-0000-0000-0000-000000000004',
-    full_name: 'Amelia Sharma',
-    avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
-    batch_name: 'Class 12 • JEE Advanced (Morning)',
-    grade: 'Class 11 Science',
-    parent_code: 'STU-AMELIA-902',
-    emoji: '🎓',
-  },
-  {
-    id: 'stud-aarav-02',
-    admission_number: 'ADM-2026-104',
-    user_id: '00000000-0000-0000-0000-000000000008',
-    full_name: 'Aarav Sharma',
-    avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200',
-    batch_name: 'Class 11 • Physics & Calculus Mastery',
-    grade: 'Class 12 Advanced',
-    parent_code: 'STU-AARAV-104',
-    emoji: '📐',
-  },
-  {
-    id: 'stud-rohan-03',
-    admission_number: 'ADM-2026-306',
-    user_id: '00000000-0000-0000-0000-000000000007',
-    full_name: 'Rohan Sharma',
-    avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
-    batch_name: 'Class 11 Foundation Batch',
-    grade: 'Class 11 Science',
-    parent_code: 'STU-ROHAN-306',
-    emoji: '⚡',
-  },
-];
-
 interface ChildContextType {
   selectedChild: ChildStudent | null;
   childrenList: ChildStudent[];
@@ -81,13 +45,8 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
 
     if (!currentInstitute) {
-      if (isDevEnvironment() && user.id.startsWith('00000000-')) {
-        setChildrenList(DEFAULT_CHILDREN);
-        setSelectedChild(DEFAULT_CHILDREN[0]);
-      } else {
-        setChildrenList([]);
-        setSelectedChild(null);
-      }
+      setChildrenList([]);
+      setSelectedChild(null);
       setIsLoading(false);
       setError(null);
       return;
@@ -115,15 +74,9 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ]);
 
       if (parentError || !parentRecord) {
-        if (isDevEnvironment() && user.id.startsWith('00000000-')) {
-          setChildrenList(DEFAULT_CHILDREN);
-          setSelectedChild(DEFAULT_CHILDREN[0]);
-        } else {
-          // FAIL CLOSED: Do not silently fake children records
-          if (parentError) setError(parentError.message);
-          setChildrenList([]);
-          setSelectedChild(null);
-        }
+        if (parentError) setError(parentError.message);
+        setChildrenList([]);
+        setSelectedChild(null);
         return;
       }
 
@@ -155,14 +108,9 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ]);
 
       if (mapError || !mappings || mappings.length === 0) {
-        if (isDevEnvironment() && user.id.startsWith('00000000-')) {
-          setChildrenList(DEFAULT_CHILDREN);
-          setSelectedChild(DEFAULT_CHILDREN[0]);
-        } else {
-          if (mapError) setError(mapError.message);
-          setChildrenList([]);
-          setSelectedChild(null);
-        }
+        if (mapError) setError(mapError.message);
+        setChildrenList([]);
+        setSelectedChild(null);
         return;
       }
 
@@ -190,14 +138,9 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error fetching children';
       console.warn('[ChildContext] Exception:', msg);
-      if (isDevEnvironment() && user?.id?.startsWith('00000000-')) {
-        setChildrenList(DEFAULT_CHILDREN);
-        setSelectedChild(DEFAULT_CHILDREN[0]);
-      } else {
-        setError(msg);
-        setChildrenList([]);
-        setSelectedChild(null);
-      }
+      setError(msg);
+      setChildrenList([]);
+      setSelectedChild(null);
     } finally {
       setIsLoading(false);
     }
@@ -220,32 +163,6 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const clean = codeOrPhone.trim().toUpperCase();
     if (!clean) {
       return { success: false, error: 'Please enter a Student Parent Link Code or Phone Number' };
-    }
-
-    // 1. Dev-mode lookup for local demo testing
-    if (isDevEnvironment()) {
-      const knownChildren: Record<string, ChildStudent> = {
-        'STU-AMELIA-902': DEFAULT_CHILDREN[0],
-        'STU-AARAV-104': DEFAULT_CHILDREN[1],
-        'STU-ROHAN-305': DEFAULT_CHILDREN[2],
-        'STU-ROHAN-306': DEFAULT_CHILDREN[2],
-      };
-
-      let matched = knownChildren[clean];
-      if (!matched && (clean.includes('98290') || clean.length >= 10)) {
-        matched = knownChildren['STU-AMELIA-902'];
-      }
-
-      if (matched) {
-        setChildrenList((prev) => {
-          if (prev.some((c) => c.id === matched.id || c.parent_code === matched.parent_code)) {
-            return prev;
-          }
-          return [...prev, matched];
-        });
-        setSelectedChild(matched);
-        return { success: true, child: matched };
-      }
     }
 
     if (!user) {

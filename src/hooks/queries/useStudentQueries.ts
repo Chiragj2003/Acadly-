@@ -4,7 +4,6 @@ import {
   getStudent360Profile,
 } from '@/services/studentService';
 import { Student360Profile } from '@/types/database';
-import { INITIAL_STUDENTS_ROSTER } from '@/data/dummyAcademicData';
 
 export const STUDENTS_QUERY_KEY = 'students';
 
@@ -41,12 +40,9 @@ export function useStudentsRoster(
           teacherRemarks: ['Active student in regular batch.'],
         }));
       }
-      if (__DEV__) {
-        return INITIAL_STUDENTS_ROSTER;
-      }
       return [];
     },
-    enabled: Boolean(instituteId || __DEV__),
+    enabled: Boolean(instituteId),
   });
 }
 
@@ -79,9 +75,6 @@ export function useStudentProfile(studentId?: string) {
           percentile: s.percentile || 95.0,
           teacherRemarks: ['Active student in regular batch.'],
         };
-      }
-      if (__DEV__) {
-        return INITIAL_STUDENTS_ROSTER.find((st) => st.id === studentId) || INITIAL_STUDENTS_ROSTER[0];
       }
       return null;
     },
