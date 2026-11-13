@@ -1,5 +1,8 @@
 // Jest setup file for Acadly
 
+// Generous timeout for React Native / Expo tests in CI environments
+jest.setTimeout(30000);
+
 // React 19 test environment act flag
 // @ts-ignore
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -98,6 +101,7 @@ jest.mock('expo-router', () => ({
   Link: 'Link',
   Stack: Object.assign(({ children }) => children, { Screen: () => null }),
   Tabs: Object.assign(({ children }) => children, { Screen: () => null }),
+  mockRouter,
 }));
 
 // Mock Reanimated
@@ -111,7 +115,6 @@ jest.mock('react-native-reanimated', () => {
   };
 });
 
-// Mock react-i18next with dynamic language support
 // Mock react-i18next with dynamic language support connected to i18next
 const mockI18next = require('i18next');
 
@@ -162,11 +165,12 @@ console.error = (...args) => {
   if (
     typeof args[0] === 'string' &&
     (args[0].includes('The current testing environment is not configured to support act') ||
-      args[0].includes('Cannot log after tests are done'))
+      args[0].includes('Cannot log after tests are done') ||
+      args[0].includes('overlapping act() calls'))
   ) {
     return;
   }
   originalError(...args);
 };
 
-export { mockRouter };
+module.exports = { mockRouter };

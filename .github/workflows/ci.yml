@@ -55,6 +55,7 @@ jobs:
       - name: Run Jest Test Suite
         run: npm test
         env:
+          CI: 'true'
           EXPO_PUBLIC_SUPABASE_URL: https://mock-ci-project.supabase.co
           EXPO_PUBLIC_SUPABASE_ANON_KEY: mock-ci-anon-key-for-test-suite
 
@@ -71,11 +72,10 @@ jobs:
           version: latest
 
       - name: Start Local Supabase
-        run: supabase start
+        run: supabase start -x studio,inbucket,imgproxy,edge-runtime,logflare,vector
 
       - name: Reset Database and Apply Canonical Migrations
         run: supabase db reset
 
       - name: Execute RLS & Multi-Tenant Audit Suite
-        run: |
-          docker exec -i $(docker ps -q -f name=supabase_db) psql -U postgres -d postgres -f supabase/tests/rls.sql
+        run: supabase test db

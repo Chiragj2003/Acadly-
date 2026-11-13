@@ -78,7 +78,7 @@
     "lint": "expo lint",
     "lint:architecture": "node scripts/lint-architecture-static.js",
     "lint:architecture:static": "node scripts/lint-architecture-static.js",
-    "test": "jest --forceExit",
+    "test": "jest --forceExit --ci --maxWorkers=2",
     "prepare": "husky"
   },
   "private": true

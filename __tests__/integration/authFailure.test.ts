@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { mockRouter } from '../../jest.setup';
+import { useRouter } from 'expo-router';
 
 jest.mock('@/lib/supabase', () => ({
   supabase: {
@@ -15,6 +15,8 @@ jest.mock('@/lib/supabase', () => ({
 }));
 
 describe('Auth Failure Integration', () => {
+  const router = useRouter();
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -37,8 +39,8 @@ describe('Auth Failure Integration', () => {
     expect(result.data.session).toBeNull();
 
     // Assert that router.replace / router.push was NOT called
-    expect(mockRouter.replace).not.toHaveBeenCalled();
-    expect(mockRouter.push).not.toHaveBeenCalled();
+    expect(router.replace).not.toHaveBeenCalled();
+    expect(router.push).not.toHaveBeenCalled();
   });
 
   it('fails closed on unverified email', async () => {
@@ -53,6 +55,6 @@ describe('Auth Failure Integration', () => {
     });
 
     expect(result.error?.message).toBe('Email not confirmed');
-    expect(mockRouter.replace).not.toHaveBeenCalled();
+    expect(router.replace).not.toHaveBeenCalled();
   });
 });

@@ -14,9 +14,13 @@ describe('Local Supabase DB-Backed Integration Tests', () => {
 
   beforeAll(async () => {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1000);
       const pingRes = await fetch(`${SUPABASE_LOCAL_URL}/rest/v1/`, {
         headers: { apikey: SUPABASE_ANON_KEY },
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
       if (pingRes.status === 200 || pingRes.status === 404) {
         isLocalRunning = true;
         adminClient = createClient(SUPABASE_LOCAL_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -25,7 +29,7 @@ describe('Local Supabase DB-Backed Integration Tests', () => {
     } catch {
       isLocalRunning = false;
     }
-  });
+  }, 2500);
 
   it('1. commit_attendance RPC enforces atomic insert/update in one transaction', async () => {
     if (!isLocalRunning) {
