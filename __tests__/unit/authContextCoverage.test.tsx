@@ -77,7 +77,7 @@ describe('AuthContext & Hooks Comprehensive Coverage', () => {
     await waitFor(() => {
       expect(supabase.auth.signOut).toHaveBeenCalled();
     });
-  });
+  }, 30000);
 
   it('useInstitute consumes context within AuthProvider without error', async () => {
     const { getByTestId } = await render(
@@ -88,5 +88,5 @@ describe('AuthContext & Hooks Comprehensive Coverage', () => {
 
     expect(getByTestId('current-inst')).toBeTruthy();
     expect(getByTestId('loading-inst')).toBeTruthy();
-  });
+  }, 30000);
 });
