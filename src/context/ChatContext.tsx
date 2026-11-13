@@ -121,33 +121,25 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     activeSubscriptionRoomIdRef.current = activeRoomId;
-    const channel = supabase.channel(`chat_${activeRoomId}`, {
-      config: { broadcast: { self: false } },
-    });
-    channelRef.current = channel;
-
-    channel
-      .on('broadcast', { event: 'new_message' }, (payload) => {
-        const incomingMsg: ChatMessage = payload.payload;
-        if (incomingMsg && incomingMsg.roomId === activeRoomId) {
-          setMessagesMap((prev) => {
-            const list = prev[activeRoomId] || [];
-            if (list.some((m) => m.id === incomingMsg.id)) return prev;
-            return { ...prev, [activeRoomId]: [...list, incomingMsg] };
-          });
-        }
-      })
+    // Subscribe to postgres_changes filtered by active room_id (RLS enforced on server)
+    const channel = supabase
+      .channel(`room_${activeRoomId}`)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'chat_messages' },
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `room_id=eq.${activeRoomId}`,
+        },
         (payload: any) => {
           const row = payload.new;
-          if (row && (row.room_id === activeRoomId || row.roomId === activeRoomId)) {
+          if (row && row.id) {
             const incomingMsg: ChatMessage = {
               id: row.id,
-              roomId: row.room_id || row.roomId,
-              senderId: row.sender_id || row.senderId,
-              senderName: row.sender_name || (row.sender_role === 'teacher' ? 'Prof. Vikram Joshi ⚡' : 'Student'),
+              roomId: row.room_id || activeRoomId,
+              senderId: row.sender_id || '',
+              senderName: row.sender_name || (row.sender_role === 'teacher' ? 'Faculty Mentor' : 'Student'),
               senderRole: row.sender_role || 'student',
               senderAvatarEmoji: row.sender_role === 'teacher' ? '👨‍🏫' : '🌸',
               text: row.text || row.message_text || '',
@@ -156,33 +148,71 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 hour: '2-digit',
                 minute: '2-digit',
               }),
-              attachmentName: row.attachment_name || (row.attachment_url ? 'Attachment.pdf' : undefined),
+              attachmentName: row.attachment_name,
               attachmentType: row.attachment_type,
               isPinned: row.is_pinned || false,
             };
             setMessagesMap((prev) => {
               const list = prev[activeRoomId] || [];
+              // De-duplicate by message id
               if (list.some((m) => m.id === incomingMsg.id)) return prev;
               return { ...prev, [activeRoomId]: [...list, incomingMsg] };
             });
           }
         }
       )
-      .on('broadcast', { event: 'pin_message' }, (payload) => {
-        const { messageId, roomId } = payload.payload;
-        if (roomId === activeRoomId) {
-          setRooms((prev) =>
-            prev.map((r) => {
-              if (r.id === roomId) {
-                const targetMsg = (messagesMap[roomId] || []).find((m) => m.id === messageId);
-                return { ...r, pinnedMessage: targetMsg };
-              }
-              return r;
-            })
-          );
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `room_id=eq.${activeRoomId}`,
+        },
+        (payload: any) => {
+          const row = payload.new;
+          if (row && row.id) {
+            setMessagesMap((prev) => {
+              const list = prev[activeRoomId] || [];
+              return {
+                ...prev,
+                [activeRoomId]: list.map((m) =>
+                  m.id === row.id ? { ...m, isPinned: row.is_pinned || false } : m
+                ),
+              };
+            });
+            if (row.is_pinned) {
+              setRooms((prev) =>
+                prev.map((r) =>
+                  r.id === activeRoomId
+                    ? {
+                        ...r,
+                        pinnedMessage: {
+                          id: row.id,
+                          roomId: row.room_id,
+                          senderId: row.sender_id,
+                          senderName: row.sender_name,
+                          senderRole: row.sender_role,
+                          senderAvatarEmoji: row.sender_role === 'teacher' ? '👨‍🏫' : '🌸',
+                          text: row.text || row.message_text || '',
+                          createdAt: row.created_at,
+                          timeFormatted: new Date(row.created_at).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          }),
+                          isPinned: true,
+                        },
+                      }
+                    : r
+                )
+              );
+            }
+          }
         }
-      })
+      )
       .subscribe();
+
+    channelRef.current = channel;
 
     return () => {
       if (channelRef.current) {
@@ -220,8 +250,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const now = new Date();
     const timeFormatted = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+    const msgId = generateUUID();
     const newMsg: ChatMessage = {
-      id: `msg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      id: msgId,
       roomId: activeRoomId,
       senderId: user?.id || '',
       senderName: isTeacher ? (teacherProfile?.fullName || user?.full_name || 'Faculty Mentor') : (user?.full_name || 'Student'),
@@ -236,7 +267,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       attachmentSize: attachment?.size,
     };
 
-    // Update local state optimistically
+    // Update local state optimistically (with de-duplicating ID)
     const currentList = messagesMap[activeRoomId] || [];
     const updatedMessages = {
       ...messagesMap,
@@ -261,26 +292,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRooms(updatedRooms);
     await persistState(updatedRooms, updatedMessages);
 
-    // Broadcast via existing active room channel without creating new channels
+    // Persist to Postgres via chat_messages table (RLS automatically restricts and emits to authorized subscribers)
     try {
-      if (channelRef.current) {
-        const payload = {
-          type: 'broadcast' as const,
-          event: 'new_message',
-          payload: newMsg,
-        };
-        if (typeof (channelRef.current as any).httpSend === 'function') {
-          await (channelRef.current as any).httpSend(payload);
-        } else {
-          await channelRef.current.send(payload);
-        }
-      }
-
-      // If Supabase is active and activeRoomId is UUID, persist to Postgres
       if (isSupabaseConfigured && activeRoomId.includes('-') && activeRoomId.length === 36) {
         await sendChatMessage({
           roomId: activeRoomId,
-          senderId: user?.id || 'u0000000-0000-0000-0000-000000000001',
+          senderId: user?.id || '',
           senderName: newMsg.senderName,
           senderRole: isTeacher ? 'teacher' : 'student',
           text: newMsg.text,
@@ -289,7 +306,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
       }
     } catch (err) {
-      console.warn('Realtime broadcast note (using local state fallback):', err);
+      console.warn('Realtime message persist warning (using local state):', err);
       // Mark failed for retry
       setMessagesMap((prev) => {
         const list = prev[activeRoomId] || [];
@@ -319,55 +336,37 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRooms(updatedRooms);
     await persistState(updatedRooms, messagesMap);
 
-    // Broadcast pin via existing active channel
+    // Persist pin to Postgres
     try {
-      if (channelRef.current) {
-        const payload = {
-          type: 'broadcast' as const,
-          event: 'pin_message',
-          payload: { messageId, roomId: activeRoomId },
-        };
-        if (typeof (channelRef.current as any).httpSend === 'function') {
-          await (channelRef.current as any).httpSend(payload);
-        } else {
-          await channelRef.current.send(payload);
-        }
-      }
-
-      if (isSupabaseConfigured && messageId.includes('-') && messageId.length === 36) {
-        await togglePinMessage(messageId, true, user?.id || 'u0000000-0000-0000-0000-000000000001');
+      if (isSupabaseConfigured && messageId.includes('-') && messageId.length === 36 && user?.id) {
+        await togglePinMessage(messageId, true, user.id);
       }
     } catch (err) {
-      console.warn('Realtime pin note:', err);
+      console.warn('Could not persist message pin:', err);
     }
   };
 
-  // Unpin Message
+  // Unpin Message (Teacher only action)
   const unpinMessage = async (roomId: string) => {
+    const currentPinned = rooms.find((r) => r.id === roomId)?.pinnedMessage;
+
     const updatedRooms = rooms.map((r) => {
       if (r.id === roomId) {
         return { ...r, pinnedMessage: undefined };
       }
       return r;
     });
+
     setRooms(updatedRooms);
     await persistState(updatedRooms, messagesMap);
 
+    // Persist unpin to Postgres
     try {
-      if (channelRef.current) {
-        const payload = {
-          type: 'broadcast' as const,
-          event: 'unpin_message',
-          payload: { roomId },
-        };
-        if (typeof (channelRef.current as any).httpSend === 'function') {
-          await (channelRef.current as any).httpSend(payload);
-        } else {
-          await channelRef.current.send(payload);
-        }
+      if (isSupabaseConfigured && currentPinned?.id && user?.id) {
+        await togglePinMessage(currentPinned.id, false, user.id);
       }
     } catch (err) {
-      console.warn('Realtime unpin note:', err);
+      console.warn('Could not persist unpin message:', err);
     }
   };
 

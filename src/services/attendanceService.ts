@@ -87,9 +87,11 @@ export const commitBatchAttendance = async (
   }
 
   try {
-    const { error } = await supabase
-      .from('attendance')
-      .upsert(rows, { onConflict: 'student_id,batch_id,date' });
+    const { data: rpcData, error } = await supabase.rpc('commit_attendance', {
+      p_batch_id: batchId,
+      p_date: date,
+      p_rows: records,
+    });
 
     if (error) {
       // If network failure, queue offline
@@ -112,7 +114,13 @@ export const commitBatchAttendance = async (
     // Try flushing any previously queued offline attendance
     flushAttendanceQueue().catch(() => {});
 
-    return { success: true, count: rows.length };
+    return {
+      success: true,
+      count:
+        rpcData && typeof rpcData === 'object' && 'count' in rpcData
+          ? Number((rpcData as { count: number }).count)
+          : records.length,
+    };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : '';
     if (msg.includes('network') || msg.includes('fetch') || msg.includes('Failed to fetch')) {
@@ -132,90 +140,93 @@ export const commitBatchAttendance = async (
 };
 
 /**
- * Correct an attendance entry, write to attendance_audit_log,
- * and dispatch push notification to parent via edge function.
+ * Correct an attendance entry atomically in ONE transaction via correct_attendance RPC.
+ * - Updates attendance row
+ * - Writes to attendance_audit_log
+ * - Dispatches notification in public.notifications
  */
 export const correctAttendanceEntry = async (
   input: AttendanceAuditCorrectionInput
 ): Promise<{ success: boolean }> => {
-  const {
-    attendanceId,
-    oldStatus,
-    newStatus,
-    reason,
-    correctedBy,
-    studentId,
-    studentName,
-  } = input;
+  const { attendanceId, newStatus, reason } = input;
 
   if (!isSupabaseConfigured) {
     return { success: true };
   }
 
-  // 1. Update attendance status
-  const { error: updateError } = await supabase
-    .from('attendance')
-    .update({
-      status: newStatus,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', attendanceId);
-
-  if (updateError) {
-    throw new Error(`Failed to update attendance status: ${updateError.message}`);
-  }
-
-  // 2. Insert into attendance_audit_log
-  const { error: auditError } = await supabase.from('attendance_audit_log').insert({
-    attendance_id: attendanceId,
-    old_status: oldStatus,
-    new_status: newStatus,
-    reason: reason.trim(),
-    corrected_by: correctedBy,
-    corrected_at: new Date().toISOString(),
+  const { error } = await supabase.rpc('correct_attendance', {
+    p_attendance_id: attendanceId,
+    p_new_status: newStatus,
+    p_reason: reason.trim(),
   });
 
-  if (auditError) {
-    console.warn('[AttendanceAudit] Failed to log audit record:', auditError.message);
-  }
-
-  // 3. Dispatch notification to parent via edge function or notifications table
-  if (studentId) {
-    try {
-      // Find parent of student
-      const { data: parentLink } = await supabase
-        .from('parent_students')
-        .select('parent:parents(user_id)')
-        .eq('student_id', studentId)
-        .maybeSingle();
-
-      const parentUserId = (parentLink as any)?.parent?.user_id;
-
-      if (parentUserId) {
-        // Insert in-app notification
-        await supabase.from('notifications').insert({
-          user_id: parentUserId,
-          title: 'Attendance Corrected',
-          body: `Attendance for ${studentName || 'your child'} was corrected from ${oldStatus} to ${newStatus}. Reason: ${reason}`,
-          data: { student_id: studentId, attendance_id: attendanceId, reason },
-        });
-
-        // Trigger edge function for push notification
-        supabase.functions
-          .invoke('send-push-notifications', {
-            body: {
-              userIds: [parentUserId],
-              title: 'Attendance Updated',
-              body: `Attendance for ${studentName || 'your child'} updated to ${newStatus}. Reason: ${reason}`,
-              data: { studentId, attendanceId },
-            },
-          })
-          .catch(() => {});
-      }
-    } catch (e) {
-      console.warn('[AttendanceNotification] Failed to notify parent:', e);
-    }
+  if (error) {
+    throw new Error(`Failed to correct attendance: ${error.message}`);
   }
 
   return { success: true };
+};
+
+/**
+ * Batch dispatch notifications to parents of absent students for a given batch & date.
+ * Sends one batched push payload rather than individual pushes per student.
+ */
+export const batchNotifyAbsentParents = async (
+  batchId: string,
+  date: string,
+  instituteId: string
+): Promise<{ success: boolean; notifiedCount: number }> => {
+  if (!isSupabaseConfigured || !batchId || !date) {
+    return { success: true, notifiedCount: 0 };
+  }
+
+  // 1. Fetch absent records for this batch and date
+  const { data: absentRecords, error: attError } = await supabase
+    .from('attendance')
+    .select('student_id')
+    .eq('batch_id', batchId)
+    .eq('date', date)
+    .eq('status', 'A');
+
+  if (attError || !absentRecords || absentRecords.length === 0) {
+    return { success: true, notifiedCount: 0 };
+  }
+
+  const absentStudentIds = absentRecords.map((r) => r.student_id);
+
+  // 2. Fetch parent user IDs mapped to these students
+  const { data: parentMappings } = await supabase
+    .from('parent_students')
+    .select('parent:parents(user_id)')
+    .in('student_id', absentStudentIds);
+
+  const parentUserIds = Array.from(
+    new Set(
+      (parentMappings || [])
+        .map((pm: any) => pm.parent?.user_id)
+        .filter(Boolean)
+    )
+  );
+
+  if (parentUserIds.length === 0) {
+    return { success: true, notifiedCount: 0 };
+  }
+
+  // 3. Batch invoke send-push-notifications edge function
+  try {
+    await supabase.functions.invoke('send-push-notifications', {
+      body: {
+        instituteId,
+        userIds: parentUserIds,
+        title: 'Attendance Alert: Absent',
+        body: `Your ward was marked absent today (${date}). Please review attendance in your parent portal.`,
+        type: 'attendance_alert',
+        data: { batchId, date, status: 'A' },
+      },
+    });
+  } catch (err) {
+    console.warn('Batched parent push notification dispatch note:', err);
+  }
+
+  return { success: true, notifiedCount: parentUserIds.length };
 };

@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
-import { UserRole } from '@/types/database';
+import { type Profile, type UserRole } from '@/types/database';
 
 type AllowedRolesInput = UserRole | readonly UserRole[] | UserRole[];
 
@@ -10,11 +10,11 @@ type AllowedRolesInput = UserRole | readonly UserRole[] | UserRole[];
  * Determines if user is authorized and what redirect route (if any) should be taken.
  */
 export function evaluateRoleAccess(
-  user: any,
+  user: Profile | null,
   userRole: UserRole | null | undefined,
   loading: boolean,
   allowedRoles: AllowedRolesInput
-): { isAuthorized: boolean; redirectRoute: string | null } {
+): { isAuthorized: boolean; redirectRoute: Href | null } {
   if (loading) {
     return { isAuthorized: false, redirectRoute: null };
   }
@@ -57,15 +57,15 @@ export function useRoleGuard(allowedRoles: AllowedRolesInput) {
   const { user, userRole, loading } = useAuth();
 
   // Stabilize allowedRoles input across renders even if inline arrays are passed
-  const rolesKey = Array.isArray(allowedRoles) ? allowedRoles.join(',') : allowedRoles;
+  const rolesKey = Array.isArray(allowedRoles) ? allowedRoles.join(',') : String(allowedRoles);
   const rolesList: readonly UserRole[] = useMemo(() => {
-    return Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles as UserRole];
+    return rolesKey ? (rolesKey.split(',') as UserRole[]) : [];
   }, [rolesKey]);
 
   useEffect(() => {
     const { redirectRoute } = evaluateRoleAccess(user, userRole, loading, rolesList);
     if (redirectRoute) {
-      router.replace(redirectRoute as any);
+      router.replace(redirectRoute);
     }
   }, [user, userRole, loading, rolesKey, rolesList, router]);
 
@@ -74,7 +74,8 @@ export function useRoleGuard(allowedRoles: AllowedRolesInput) {
   return {
     isAuthorized,
     isLoading: loading,
-    userRole,
+    loading,
     user,
+    userRole,
   };
 }

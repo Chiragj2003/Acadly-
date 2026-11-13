@@ -42,21 +42,29 @@ export const registerForPushNotifications = async (
 
     if (!token) return null;
 
-    // 1. Upsert into push_tokens table
+    // 1. Register push token via atomic SECURITY DEFINER RPC
     try {
-      await supabase
-        .from('push_tokens')
-        .upsert(
-          {
-            user_id: userId,
-            token,
-            platform: Platform.OS,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'token' }
-        );
-    } catch (err: unknown) {
-      console.warn('Could not upsert push token:', err);
+      await supabase.rpc('register_push_token', {
+        p_token: token,
+        p_platform: Platform.OS,
+      });
+    } catch {
+      // Fallback to table upsert if RPC unavailable
+      try {
+        await supabase
+          .from('push_tokens')
+          .upsert(
+            {
+              user_id: userId,
+              token,
+              platform: Platform.OS,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'token' }
+          );
+      } catch {
+        // Ignore fallback failure
+      }
     }
 
     // 2. Also keep on profiles table for convenience

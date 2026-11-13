@@ -15,6 +15,11 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
+// Mock NetInfo
+jest.mock('@react-native-community/netinfo', () =>
+  require('@react-native-community/netinfo/jest/netinfo-mock.js')
+);
+
 // Mock React Native Modal
 jest.mock('react-native/Libraries/Modal/Modal', () => {
   const React = require('react');
@@ -106,15 +111,24 @@ jest.mock('react-native-reanimated', () => {
   };
 });
 
-// Mock react-i18next
+// Mock react-i18next with dynamic language support
+// Mock react-i18next with dynamic language support connected to i18next
+const mockI18next = require('i18next');
+
 jest.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key) => key,
-    i18n: {
-      changeLanguage: jest.fn(() => Promise.resolve()),
-      language: 'en',
-    },
-  }),
+  useTranslation: () => {
+    const instance = mockI18next.default || mockI18next;
+    return {
+      t: (key, fallback) => {
+        if (instance && typeof instance.t === 'function') {
+          const res = instance.t(key);
+          if (res && res !== key) return res;
+        }
+        return typeof fallback === 'string' ? fallback : key;
+      },
+      i18n: instance,
+    };
+  },
   initReactI18next: {
     type: '3rdParty',
     init: jest.fn(),

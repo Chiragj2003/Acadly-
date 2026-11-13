@@ -400,4 +400,37 @@ BEGIN
         (v_inst_id, v_parent_1_id, v_parent_1_id, 'parent', 'Attendance Check-in', 'Amelia Sharma checked in for Class 12 JEE Advanced at 07:28 AM.', 'Amelia Sharma checked in for Class 12 JEE Advanced at 07:28 AM.', 'attendance'),
         (v_inst_id, v_parent_1_id, v_parent_1_id, 'parent', 'Fee Receipt Generated', 'Official GST invoice APX-REC-2026-9021 available for download.', 'Official GST invoice APX-REC-2026-9021 available for download.', 'fee');
 
+    -- --------------------------------------------------------------------------
+    -- 14. Batch Schedule
+    -- --------------------------------------------------------------------------
+    INSERT INTO public.batch_schedule (
+        id, institute_id, batch_id, weekday, start_time, end_time, subject_id, subject_name, teacher_id, teacher_name, room, tag, is_live
+    ) VALUES
+        ('77777777-7777-7777-7777-777777777701', v_inst_id, v_batch_1_id, 'Mon', '16:30', '18:00', v_subject_1_id, 'Physics', v_teacher_rec_1, 'Prof. Vikram Joshi', 'Lecture Hall A', 'Live Stream', true),
+        ('77777777-7777-7777-7777-777777777702', v_inst_id, v_batch_1_id, 'Tue', '10:30', '12:00', v_subject_1_id, 'Physics Lab', v_teacher_rec_1, 'Prof. Vikram Joshi', 'B2, Room 158', 'Lab Session', false),
+        ('77777777-7777-7777-7777-777777777703', v_inst_id, v_batch_1_id, 'Wed', '16:30', '18:00', v_subject_2_id, 'Mathematics', v_teacher_rec_1, 'Dr. Ramanujan', 'Room 204', 'Live Stream', true),
+        ('77777777-7777-7777-7777-777777777704', v_inst_id, v_batch_1_id, 'Thu', '11:00', '12:30', v_subject_1_id, 'Chemistry', v_teacher_rec_1, 'Dr. Sen', 'Chem Lab 1', 'Classroom', false),
+        ('77777777-7777-7777-7777-777777777705', v_inst_id, v_batch_1_id, 'Fri', '16:30', '18:00', v_subject_1_id, 'Physics', v_teacher_rec_1, 'Prof. Vikram Joshi', 'Main Auditorium', 'Live Stream', true),
+        ('77777777-7777-7777-7777-777777777706', v_inst_id, v_batch_1_id, 'Sat', '09:00', '12:00', v_subject_2_id, 'All Subjects Test', v_teacher_rec_1, 'Exam Controller', 'Examination Centre', 'Proctored Test', false),
+        ('77777777-7777-7777-7777-777777777707', v_inst_id, v_batch_1_id, 'Sun', '11:00', '13:00', v_subject_1_id, 'Mentorship', v_teacher_rec_1, 'Senior Faculty Panel', 'Seminar Room 3', 'Doubt Clinic', false)
+    ON CONFLICT (id) DO NOTHING;
+
+    -- --------------------------------------------------------------------------
+    -- 15. Examinations & Results
+    -- --------------------------------------------------------------------------
+    INSERT INTO public.examinations (
+        id, institute_id, batch_id, subject_id, title, exam_date, max_marks, passing_marks, batch_average_marks, batch_highest_marks, syllabus, is_published
+    ) VALUES
+        ('88888888-8888-8888-8888-888888888801', v_inst_id, v_batch_1_id, v_subject_1_id, 'Term 1 Physics & Calculus Comprehensive', CURRENT_DATE - INTERVAL '5 days', 100.00, 40.00, 78.50, 96.00, 'Newtonian Mechanics, Thermodynamics, Integration', true),
+        ('88888888-8888-8888-8888-888888888802', v_inst_id, v_batch_1_id, v_subject_1_id, 'Rotational Mechanics Unit Test', CURRENT_DATE - INTERVAL '14 days', 50.00, 20.00, 41.20, 48.00, 'Moment of Inertia, Angular Momentum', true)
+    ON CONFLICT (id) DO NOTHING;
+
+    INSERT INTO public.results (
+        id, institute_id, examination_id, student_id, marks_obtained, percentage, batch_rank, grade, is_absent, remarks, recorded_by
+    ) VALUES
+        ('99999999-9999-9999-9999-888888888801', v_inst_id, '88888888-8888-8888-8888-888888888801', v_student_rec_1, 92.50, 92.50, 1, 'A+', false, 'Outstanding conceptual clarity in rotational dynamics.', v_teach_1_id),
+        ('99999999-9999-9999-9999-888888888802', v_inst_id, '88888888-8888-8888-8888-888888888801', v_student_rec_2, 74.00, 74.00, 3, 'B+', false, 'Good effort, revise calculus integration techniques.', v_teach_1_id),
+        ('99999999-9999-9999-9999-888888888803', v_inst_id, '88888888-8888-8888-8888-888888888802', v_student_rec_1, 46.00, 92.00, 1, 'A+', false, 'Excellent angular momentum problem-solving.', v_teach_1_id)
+    ON CONFLICT (id) DO NOTHING;
+
 END $$;

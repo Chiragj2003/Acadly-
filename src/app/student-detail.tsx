@@ -6,77 +6,28 @@ import {
   ScrollView,
   Alert,
   Linking,
-  TextInput,
   ActivityIndicator,
 } from 'react-native';
-import {
-  Phone,
-  Mail,
-  Calendar,
-  Trophy,
-  BookOpen,
-  CheckCircle2,
-  AlertTriangle,
-  ArrowLeft,
-  GraduationCap,
-  Sparkles,
-  MapPin,
-  Clock,
-  MessageSquare,
-  DollarSign,
-  Plus,
-  Send,
-} from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useRoleGuard } from '@/hooks/useRoleGuard';
-import { ScreenWrapper, Badge } from '@/components/ui';
-import {
-  PerformanceComparisonChart,
-  SubjectRadarOrBarChart,
-  AttendanceRingAndTrendChart,
-} from '@/components/charts';
+import { ScreenWrapper } from '@/components/ui';
+import { ListLoadingSkeleton, ListEmptyState } from '@/components/ui';
+import { PerformanceComparisonChart, SubjectRadarOrBarChart } from '@/components/charts';
 import { useUI } from '@/context/UIContext';
 import { useStudentProfile } from '@/hooks/queries/useStudentQueries';
+import { StudentDetailHeader } from '@/components/screens/student-detail/StudentDetailHeader';
+import { StudentBioTab } from '@/components/screens/student-detail/StudentBioTab';
+import { StudentAttendanceTab } from '@/components/screens/student-detail/StudentAttendanceTab';
 
 export default function StudentDetailScreen() {
-  const { isAuthorized, isLoading } = useRoleGuard(["teacher","admin","parent"]);
+  const { isAuthorized, isLoading: isGuardLoading } = useRoleGuard(['teacher', 'admin', 'parent']);
   const router = useRouter();
   const params = useLocalSearchParams<{ studentId?: string }>();
   const { comparisonChartData } = useUI();
-  const { data: studentProfile, isLoading: isStudentLoading } = useStudentProfile(params.studentId || 'stud-amelia');
-  const [localRemarks, setLocalRemarks] = useState<string[]>([]);
-  const [localFeeStatus, setLocalFeeStatus] = useState<string>('');
-
+  const { data: student, isLoading: isStudentLoading, error } = useStudentProfile(params.studentId);
   const [activeTab, setActiveTab] = useState<'analytics' | 'attendance' | 'bio'>('analytics');
-  const [newRemarkText, setNewRemarkText] = useState('');
 
-  const student = studentProfile || {
-    id: params.studentId || 'stud-amelia',
-    name: 'Amelia Sharma',
-    rollNumber: '#01',
-    grade: 'Class 12 Science',
-    board: 'CBSE',
-    school: 'Delhi Public School (R.K. Puram)',
-    targetExam: 'IIT-JEE 2026',
-    batchName: 'Class 12 • JEE Advanced (Morning)',
-    parentLinkCode: 'STU-AMELIA-902',
-    guardianName: 'Rajesh Sharma (Father)',
-    guardianPhone: '+91 98230 44551',
-    address: 'Flat 402, Lotus Towers, Pune, Maharashtra',
-    bloodGroup: 'B+',
-    previousPercentage: '96.2% in Class 10',
-    weakSubjects: ['Rotational Mechanics', 'Ionic Equilibrium'],
-    overallAttendance: 96.4,
-    feeStatus: 'Paid Full (₹45,000)',
-    rank: 1,
-    percentile: 98.8,
-    teacherRemarks: ['Exceptionally strong in calculus.', 'Active class contributor & doubt helper.'],
-  };
-
-  const remarks = localRemarks.length > 0 ? localRemarks : student.teacherRemarks;
-  const currentFeeStatus = localFeeStatus || student.feeStatus;
-
-  if (isLoading || !isAuthorized) {
+  if (isGuardLoading || !isAuthorized) {
     return (
       <ScreenWrapper headerProps={{ title: 'Student Profile', onBackPress: () => router.back() }}>
         <View className="flex-1 items-center justify-center p-8">
@@ -87,24 +38,37 @@ export default function StudentDetailScreen() {
     );
   }
 
-  if (!student) {
+  if (isStudentLoading) {
     return (
       <ScreenWrapper headerProps={{ title: 'Student Profile', onBackPress: () => router.back() }}>
-        <View className="items-center justify-center p-8">
-          <Text className="text-sm font-bold text-slate-700">Student record not found.</Text>
-        </View>
+        <ListLoadingSkeleton count={3} />
       </ScreenWrapper>
     );
   }
 
-  // Handle calling guardian
+  if (!student || error) {
+    return (
+      <ScreenWrapper headerProps={{ title: 'Student Profile', onBackPress: () => router.back() }}>
+        <ListEmptyState
+          title="Student Record Not Found"
+          message="No active student profile matches the provided identifier."
+          actionLabel="Go Back"
+          onAction={() => router.back()}
+        />
+      </ScreenWrapper>
+    );
+  }
+
   const handleCallGuardian = () => {
+    if (!student.guardianPhone) {
+      Alert.alert('No Phone', 'No guardian phone registered for this student.');
+      return;
+    }
     Linking.openURL(`tel:${student.guardianPhone}`).catch(() => {
       Alert.alert('Calling Guardian', `Dialing ${student.guardianPhone}`);
     });
   };
 
-  // Handle direct in-app message/notice to guardian
   const handleMessageGuardianInApp = () => {
     Alert.alert(
       'In-App Parent Notice',
@@ -124,26 +88,6 @@ export default function StudentDetailScreen() {
     );
   };
 
-  // Add teacher remark
-  const handleAddRemark = () => {
-    if (!newRemarkText.trim()) return;
-    setLocalRemarks((prev) => [...(prev.length ? prev : student.teacherRemarks), newRemarkText.trim()]);
-    setNewRemarkText('');
-    Alert.alert('Observation Saved 📝', 'Teacher remark recorded in student 360 diagnostic profile.');
-  };
-
-  // Cycle fee status
-  const handleCycleFeeStatus = () => {
-    const statuses = [
-      'Paid in Full (₹42,000)',
-      'Partially Paid (₹15,000 remaining)',
-      'Pending Installment (Due in 5 days)',
-    ];
-    const currentIndex = statuses.indexOf(currentFeeStatus);
-    const nextIndex = (currentIndex + 1) % statuses.length;
-    setLocalFeeStatus(statuses[nextIndex]);
-  };
-
   return (
     <ScreenWrapper
       scrollable={false}
@@ -153,64 +97,19 @@ export default function StudentDetailScreen() {
         onBackPress: () => router.back(),
       }}
     >
-      <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 140 }} contentContainerClassName="gap-3.5">
-        {/* 1. 360 Profile Diagnostic Header Card */}
-        <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs">
-          <View className="flex-row items-center justify-between mb-3">
-            <View className="flex-row items-center gap-3">
-              <View className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
-                <GraduationCap size={24} color="#2563EB" />
-              </View>
-              <View>
-                <Text className="text-base font-extrabold text-slate-900">{student.name}</Text>
-                <Text className="text-xs text-slate-500">
-                  {student.rollNumber} • {student.grade}
-                </Text>
-              </View>
-            </View>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: 140 }}
+        contentContainerClassName="gap-3.5"
+      >
+        <StudentDetailHeader
+          student={student}
+          onCallGuardian={handleCallGuardian}
+          onMessageGuardian={handleMessageGuardianInApp}
+        />
 
-            <View className="bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
-              <Text className="text-[11px] font-bold text-amber-800">
-                Rank #{student.rank} ({student.percentile}%ile)
-              </Text>
-            </View>
-          </View>
-
-          {/* Parent Link Code Strip */}
-          <View className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 mb-3 flex-row items-center justify-between">
-            <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Parent Link Code:
-            </Text>
-            <Text className="text-xs font-mono font-bold text-blue-600">
-              {student.parentLinkCode || 'STU-AMELIA-902'}
-            </Text>
-          </View>
-
-          {/* Quick Guardian Action Buttons */}
-          <View className="flex-row gap-2 pt-2 border-t border-slate-100">
-            <TouchableOpacity
-              activeOpacity={0.88}
-              onPress={handleCallGuardian}
-              className="flex-1 py-2.5 rounded-xl bg-blue-600 flex-row items-center justify-center gap-1.5 shadow-xs active:scale-98"
-            >
-              <Phone size={13} color="#ffffff" />
-              <Text className="text-xs font-bold text-white">
-                Call Guardian ({student.guardianName.split(' ')[0]})
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.88}
-              onPress={handleMessageGuardianInApp}
-              className="px-4 py-2.5 rounded-xl bg-blue-50 border border-blue-200 flex-row items-center justify-center gap-1.5 active:scale-98"
-            >
-              <MessageSquare size={13} color="#2563EB" />
-              <Text className="text-xs font-bold text-blue-700">In-App Notice</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* 2. Sub-Tabs Selector */}
+        {/* Sub-Tabs Selector */}
         <View className="flex-row bg-white p-1 rounded-2xl border border-slate-200/90 shadow-xs">
           <TouchableOpacity
             onPress={() => setActiveTab('analytics')}
@@ -258,7 +157,6 @@ export default function StudentDetailScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* ================= TAB 1: ANALYTICS ================= */}
         {activeTab === 'analytics' && (
           <View className="gap-3.5">
             <PerformanceComparisonChart data={comparisonChartData} />
@@ -266,173 +164,9 @@ export default function StudentDetailScreen() {
           </View>
         )}
 
-        {/* ================= TAB 2: ATTENDANCE ================= */}
-        {activeTab === 'attendance' && (
-          <View className="gap-3.5">
-            <AttendanceRingAndTrendChart percentage={student.overallAttendance} />
+        {activeTab === 'attendance' && <StudentAttendanceTab student={student} />}
 
-            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs">
-              <Text className="text-sm font-bold text-slate-900 mb-3">
-                Recent Roll Call History
-              </Text>
-              <View className="gap-2">
-                {[
-                  { date: 'Today, 09:30 AM', subject: 'Physics (Mechanics)', status: 'P' },
-                  { date: 'Yesterday, 10:00 AM', subject: 'Mathematics (Calculus)', status: 'P' },
-                  { date: '30 Oct, 09:30 AM', subject: 'Chemistry (Organic)', status: 'P' },
-                  { date: '29 Oct, 11:30 AM', subject: 'Weekly Mock Test', status: 'L' },
-                  { date: '28 Oct, 09:30 AM', subject: 'Physics (Optics)', status: 'P' },
-                ].map((item, idx) => (
-                  <View
-                    key={idx}
-                    className="flex-row items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/80"
-                  >
-                    <View>
-                      <Text className="text-xs font-bold text-slate-800">{item.subject}</Text>
-                      <Text className="text-[10px] text-slate-500">{item.date}</Text>
-                    </View>
-                    <View
-                      className={`px-2 py-0.5 rounded-full ${
-                        item.status === 'P'
-                          ? 'bg-emerald-100 border border-emerald-300'
-                          : 'bg-amber-100 border border-amber-300'
-                      }`}
-                    >
-                      <Text
-                        className={`text-[10px] font-bold ${
-                          item.status === 'P' ? 'text-emerald-800' : 'text-amber-800'
-                        }`}
-                      >
-                        {item.status === 'P' ? 'PRESENT' : 'LATE'}
-                      </Text>
-                    </View>
-                  </View>
-                ))}
-              </View>
-            </View>
-          </View>
-        )}
-
-        {/* ================= TAB 3: BIO, REMARKS & FEES ================= */}
-        {activeTab === 'bio' && (
-          <View className="gap-3.5">
-            {/* Student Background Details */}
-            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
-              <Text className="text-sm font-bold text-slate-900">
-                Student Profile & Identity
-              </Text>
-
-              <View className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 gap-2">
-                <View className="flex-row justify-between">
-                  <Text className="text-xs text-slate-500">Board & School:</Text>
-                  <Text className="text-xs font-bold text-slate-800">
-                    {student.board} • {student.school}
-                  </Text>
-                </View>
-                <View className="flex-row justify-between">
-                  <Text className="text-xs text-slate-500">Target Exam:</Text>
-                  <Text className="text-xs font-bold text-slate-800">{student.targetExam}</Text>
-                </View>
-                <View className="flex-row justify-between">
-                  <Text className="text-xs text-slate-500">Previous Exam Score:</Text>
-                  <Text className="text-xs font-bold text-blue-600">
-                    {student.previousPercentage}
-                  </Text>
-                </View>
-                <View className="flex-row justify-between">
-                  <Text className="text-xs text-slate-500">Blood Group:</Text>
-                  <Text className="text-xs font-bold text-slate-800">{student.bloodGroup}</Text>
-                </View>
-                <View className="flex-row justify-between">
-                  <Text className="text-xs text-slate-500">Residential Address:</Text>
-                  <Text className="text-xs font-bold text-slate-800 max-w-[200px] text-right">
-                    {student.address}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Weak Subjects Tags */}
-              <View>
-                <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                  Focus / Revision Priority:
-                </Text>
-                <View className="flex-row flex-wrap gap-1.5">
-                  {student.weakSubjects.map((sub, i) => (
-                    <View
-                      key={i}
-                      className="bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-xl"
-                    >
-                      <Text className="text-xs font-bold text-rose-700">{sub}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            </View>
-
-            {/* Fee Collection Status Card */}
-            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs">
-              <View className="flex-row items-center justify-between mb-2">
-                <View className="flex-row items-center gap-1.5">
-                  <DollarSign size={16} color="#2563EB" />
-                  <Text className="text-sm font-bold text-slate-900">Tuition Fee Status</Text>
-                </View>
-                <TouchableOpacity
-                  onPress={handleCycleFeeStatus}
-                  className="bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200 active:scale-98"
-                >
-                  <Text className="text-[10px] font-bold text-blue-700">Update Status ↺</Text>
-                </TouchableOpacity>
-              </View>
-              <View className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
-                <Text className="text-xs font-bold text-slate-800">{currentFeeStatus}</Text>
-                <Text className="text-[10px] text-slate-500 mt-0.5">
-                  UPI payments automatically reconcile via parent notifications.
-                </Text>
-              </View>
-            </View>
-
-            {/* Teacher Remarks & Observations */}
-            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
-              <View className="flex-row items-center gap-1.5">
-                <MessageSquare size={16} color="#2563EB" />
-                <Text className="text-sm font-bold text-slate-900">
-                  Teacher Observations & Remarks
-                </Text>
-              </View>
-
-              <View className="gap-2">
-                {remarks.map((remark, idx) => (
-                  <View
-                    key={idx}
-                    className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex-row items-start gap-2"
-                  >
-                    <Text className="text-xs">📌</Text>
-                    <Text className="text-xs text-slate-700 flex-1 leading-relaxed">
-                      {remark}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-
-              {/* Add New Remark Input */}
-              <View className="flex-row gap-2 mt-1">
-                <TextInput
-                  placeholder="Record mentor note..."
-                  placeholderTextColor="#94a3b8"
-                  value={newRemarkText}
-                  onChangeText={setNewRemarkText}
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
-                />
-                <TouchableOpacity
-                  onPress={handleAddRemark}
-                  className="bg-blue-600 px-3.5 py-2 rounded-2xl items-center justify-center active:scale-98 shadow-xs"
-                >
-                  <Plus size={16} color="#ffffff" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        )}
+        {activeTab === 'bio' && <StudentBioTab student={student} />}
       </ScrollView>
     </ScreenWrapper>
   );

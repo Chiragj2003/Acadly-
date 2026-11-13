@@ -26,6 +26,8 @@ import {
   Sparkles,
   BarChart3,
   TrendingUp,
+  Bot,
+  ShieldCheck,
 } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { useAuth } from '@/context/AuthContext';
@@ -37,6 +39,7 @@ import {
   useSubmitHomework,
   useGradeSubmission,
 } from '@/hooks/queries/useAssignmentQueries';
+import { useGradeSubmissionWithAI, useTeacherAiQuota } from '@/hooks/queries/useAiQueries';
 import { useBatches } from '@/hooks/queries/useBatchQueries';
 import { Card, Button, Input, Badge } from '@/components/ui';
 import { QuizRunner } from './QuizRunner';
@@ -95,6 +98,28 @@ export const AssignmentsModule: React.FC = () => {
   const createAssignmentMutation = useCreateAssignment();
   const submitHomeworkMutation = useSubmitHomework();
   const gradeSubmissionMutation = useGradeSubmission();
+  const gradeWithAiMutation = useGradeSubmissionWithAI();
+  const { data: aiQuota } = useTeacherAiQuota(user?.id);
+
+  const handleRequestAiGrading = async (subId: string) => {
+    try {
+      const res = await gradeWithAiMutation.mutateAsync({
+        submissionId: subId,
+      });
+
+      setGradingSubId(subId);
+      setGradeMarks(String(res.aiScore));
+      setGradeFeedback(res.aiFeedback);
+
+      Alert.alert(
+        'AI Evaluation Received 🤖',
+        `Gemini suggested ${res.aiScore}/${res.maxScore} marks.\n\nYou can review, adjust the score/feedback, and approve to publish the final grade.`
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'AI grading failed';
+      Alert.alert('AI Grading Error', msg);
+    }
+  };
 
   const handleOpenAnalytics = async (asgId: string) => {
     setIsAnalyticsLoading(true);
@@ -399,34 +424,92 @@ export const AssignmentsModule: React.FC = () => {
                     <Text className="text-sm font-extrabold text-slate-900">{sub.student_name}</Text>
                   </View>
 
-                  {sub.score !== undefined && sub.score !== null ? (
+                  {sub.status === 'graded' && sub.score !== undefined && sub.score !== null ? (
                     <View className="items-end">
                       <Text className="text-base font-black text-blue-600">{sub.score} Marks</Text>
                       <Text className="text-[10px] text-emerald-600 font-bold">Evaluated</Text>
                     </View>
-                  ) : null}
+                  ) : sub.ai_status === 'pending_review' ? (
+                    <View className="items-end">
+                      <View className="bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md flex-row items-center gap-1">
+                        <Bot size={11} color="#D97706" />
+                        <Text className="text-[10px] font-bold text-amber-800">
+                          AI-checked, awaiting teacher review
+                        </Text>
+                      </View>
+                    </View>
+                  ) : (
+                    <View className="items-end">
+                      <Text className="text-[10px] text-slate-500 font-semibold">Under Evaluation</Text>
+                    </View>
+                  )}
                 </View>
 
-                {sub.feedback ? (
+                {sub.status === 'graded' && sub.feedback ? (
                   <View className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
                     <Text className="text-[11px] text-slate-600 italic">"{sub.feedback}"</Text>
                   </View>
                 ) : null}
 
                 {(userRole === 'teacher' || userRole === 'admin') && (
-                  <View className="flex-row items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                    <TouchableOpacity
-                      onPress={() => {
-                        setGradingSubId(sub.id);
-                        if (sub.score) setGradeMarks(String(sub.score));
-                        if (sub.feedback) setGradeFeedback(sub.feedback);
-                      }}
-                      className="px-3 py-1.5 rounded-xl bg-blue-600 active:scale-95"
-                    >
-                      <Text className="text-xs font-bold text-white">
-                        {sub.status === 'graded' ? 'Edit Marks' : 'Grade Submission'}
-                      </Text>
-                    </TouchableOpacity>
+                  <View className="gap-2 pt-2 border-t border-slate-100">
+                    {sub.ai_status === 'pending_review' && sub.ai_score !== undefined && sub.ai_score !== null && (
+                      <View className="bg-indigo-50 border border-indigo-200 p-2.5 rounded-xl flex-row items-center justify-between">
+                        <View className="flex-1 mr-2">
+                          <View className="flex-row items-center gap-1">
+                            <Sparkles size={11} color="#4F46E5" />
+                            <Text className="text-[10px] font-bold text-indigo-950">
+                              Gemini Suggestion: {sub.ai_score} Marks
+                            </Text>
+                          </View>
+                          {sub.ai_feedback ? (
+                            <Text className="text-[10px] text-indigo-700 italic mt-0.5" numberOfLines={1}>
+                              "{sub.ai_feedback}"
+                            </Text>
+                          ) : null}
+                        </View>
+                        <Text className="text-[9px] font-bold text-indigo-600 bg-white px-2 py-0.5 rounded-full border border-indigo-100">
+                          Pending Approval
+                        </Text>
+                      </View>
+                    )}
+
+                    <View className="flex-row items-center justify-end gap-2">
+                      {sub.ai_status !== 'pending_review' && sub.status !== 'graded' && (
+                        <TouchableOpacity
+                          disabled={gradeWithAiMutation.isPending}
+                          onPress={() => handleRequestAiGrading(sub.id)}
+                          className={`px-2.5 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 flex-row items-center gap-1 active:scale-95 ${
+                            gradeWithAiMutation.isPending ? 'opacity-50' : ''
+                          }`}
+                        >
+                          <Sparkles size={12} color="#4F46E5" />
+                          <Text className="text-xs font-bold text-indigo-700">AI Suggest</Text>
+                        </TouchableOpacity>
+                      )}
+
+                      <TouchableOpacity
+                        onPress={() => {
+                          setGradingSubId(sub.id);
+                          if (sub.ai_status === 'pending_review' && sub.ai_score !== null && sub.ai_score !== undefined) {
+                            setGradeMarks(String(sub.ai_score));
+                            if (sub.ai_feedback) setGradeFeedback(sub.ai_feedback);
+                          } else {
+                            if (sub.score) setGradeMarks(String(sub.score));
+                            if (sub.feedback) setGradeFeedback(sub.feedback);
+                          }
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-blue-600 active:scale-95"
+                      >
+                        <Text className="text-xs font-bold text-white">
+                          {sub.status === 'graded'
+                            ? 'Edit Marks'
+                            : sub.ai_status === 'pending_review'
+                            ? 'Review & Approve'
+                            : 'Grade Submission'}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 )}
               </Card>
@@ -572,6 +655,42 @@ export const AssignmentsModule: React.FC = () => {
               <TouchableOpacity onPress={() => setGradingSubId(null)}>
                 <X size={20} color="#64748B" />
               </TouchableOpacity>
+            </View>
+
+            {/* Privacy & Quota Helper Banner */}
+            <View className="bg-indigo-50 border border-indigo-200 p-2.5 rounded-xl gap-1">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-1.5">
+                  <ShieldCheck size={13} color="#4338CA" />
+                  <Text className="text-[10px] font-bold text-indigo-900">
+                    AI Assistance (Optional)
+                  </Text>
+                </View>
+                <Text className="text-[9px] font-semibold text-indigo-700">
+                  Quota: {aiQuota?.remaining ?? 25}/25 left
+                </Text>
+              </View>
+              <Text className="text-[10px] text-indigo-700">
+                Acadly uses Gemini to suggest scores from rubrics. No student PII is shared. The final grade is always yours.
+              </Text>
+              {gradingSubId && (
+                <TouchableOpacity
+                  disabled={gradeWithAiMutation.isPending}
+                  onPress={() => handleRequestAiGrading(gradingSubId)}
+                  className="mt-1 bg-indigo-600 py-1.5 rounded-lg items-center flex-row justify-center gap-1"
+                >
+                  {gradeWithAiMutation.isPending ? (
+                    <ActivityIndicator color="#FFFFFF" size="small" />
+                  ) : (
+                    <>
+                      <Sparkles size={11} color="#FFFFFF" />
+                      <Text className="text-[10px] font-bold text-white">
+                        Fetch Gemini Evaluation Suggestion
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              )}
             </View>
 
             <View className="gap-1">

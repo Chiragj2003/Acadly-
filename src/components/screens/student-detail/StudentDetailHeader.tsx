@@ -1,0 +1,73 @@
+import React from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { GraduationCap, Phone, MessageSquare } from 'lucide-react-native';
+import { Student360Profile } from '@/types/database';
+
+interface StudentDetailHeaderProps {
+  student: Student360Profile;
+  onCallGuardian: () => void;
+  onMessageGuardian: () => void;
+}
+
+export const StudentDetailHeader: React.FC<StudentDetailHeaderProps> = ({
+  student,
+  onCallGuardian,
+  onMessageGuardian,
+}) => {
+  return (
+    <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs">
+      <View className="flex-row items-center justify-between mb-3">
+        <View className="flex-row items-center gap-3">
+          <View className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
+            <GraduationCap size={24} color="#2563EB" />
+          </View>
+          <View>
+            <Text className="text-base font-extrabold text-slate-900">{student.name}</Text>
+            <Text className="text-xs text-slate-500">
+              {student.rollNumber} • {student.grade}
+            </Text>
+          </View>
+        </View>
+
+        <View className="bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+          <Text className="text-[11px] font-bold text-amber-800">
+            Rank #{student.rank} ({student.percentile}%ile)
+          </Text>
+        </View>
+      </View>
+
+      {/* Parent Link Code Strip */}
+      <View className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 mb-3 flex-row items-center justify-between">
+        <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+          Parent Link Code:
+        </Text>
+        <Text className="text-xs font-mono font-bold text-blue-600">
+          {student.parentLinkCode || 'UNLINKED'}
+        </Text>
+      </View>
+
+      {/* Quick Guardian Action Buttons */}
+      <View className="flex-row gap-2 pt-2 border-t border-slate-100">
+        <TouchableOpacity
+          activeOpacity={0.88}
+          onPress={onCallGuardian}
+          className="flex-1 py-2.5 rounded-xl bg-blue-600 flex-row items-center justify-center gap-1.5 shadow-xs active:scale-98"
+        >
+          <Phone size={13} color="#ffffff" />
+          <Text className="text-xs font-bold text-white">
+            Call Guardian ({student.guardianName.split(' ')[0]})
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.88}
+          onPress={onMessageGuardian}
+          className="px-4 py-2.5 rounded-xl bg-blue-50 border border-blue-200 flex-row items-center justify-center gap-1.5 active:scale-98"
+        >
+          <MessageSquare size={13} color="#2563EB" />
+          <Text className="text-xs font-bold text-blue-700">In-App Notice</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};

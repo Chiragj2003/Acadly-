@@ -12,7 +12,13 @@
     "back": "पीछे",
     "next": "अगला",
     "previous": "पिछला",
-    "submit": "जमा करें"
+    "submit": "जमा करें",
+    "retry": "पुनः प्रयास करें",
+    "viewAll": "सभी देखें",
+    "close": "बंद करें",
+    "edit": "संपादित करें",
+    "details": "विवरण",
+    "status": "स्थिति"
   },
   "roles": {
     "student": "विद्यार्थी",
@@ -28,7 +34,35 @@
     "emailOrPhone": "ईमेल या मोबाइल नंबर",
     "password": "पासवर्ड",
     "selectRole": "अपनी प्राथमिक भूमिका चुनें",
-    "googleSignIn": "गूगल के साथ जारी रखें"
+    "googleSignIn": "गूगल के साथ जारी रखें",
+    "createTuition": "मेरा ट्यूशन बनाएं",
+    "joinWithCode": "कोड या इनवाइट लिंक से जुड़ें",
+    "forgotPassword": "पासवर्ड भूल गए?",
+    "haveAccount": "पहले से खाता है? साइन इन करें",
+    "needAccount": "खाता नहीं है? साइन अप करें",
+    "fullName": "पूरा नाम",
+    "emailAddress": "ईमेल पता",
+    "signInAs": "{{role}} के रूप में साइन इन करें",
+    "completeRegistration": "{{role}} पंजीकरण पूरा करें"
+  },
+  "teacher": {
+    "activeBatches": "सक्रिय बैच",
+    "commitRollCall": "हाजिरी दर्ज करें",
+    "batchFocus": "बैच और समय-सारणी",
+    "soloDesk": "निजी ट्यूटर डेस्क",
+    "facultyDesk": "संकाय कमांड डेस्क",
+    "savingToDatabase": "डेटाबेस में सहेजा जा रहा है...",
+    "commitAndDispatch": "हाजिरी सहेजें और प्रसारित करें",
+    "signOutPrompt": "क्या आप वाकई शिक्षक डेस्क से साइन आउट करना चाहते हैं?"
+  },
+  "student": {
+    "verifyingEnrollment": "विद्यार्थी नामांकन का सत्यापन हो रहा है...",
+    "signOutPrompt": "क्या आप वाकई विद्यार्थी पोर्टल से लॉग आउट करना चाहते हैं?",
+    "home": "होम",
+    "schedule": "समय-सारणी",
+    "dpps": "डीपीपी",
+    "mastery": "दक्षता",
+    "profile": "प्रोफ़ाइल"
   },
   "attendance": {
     "title": "उपस्थिति एवं हाजिरी",
@@ -37,7 +71,11 @@
     "late": "देर से",
     "rate": "उपस्थिति दर",
     "markAllPresent": "सभी को उपस्थित चिह्नित करें",
-    "recordSuccess": "उपस्थिति सफलतापूर्वक दर्ज की गई"
+    "commit": "उपस्थिति सहेजें",
+    "recordSuccess": "उपस्थिति सफलतापूर्वक दर्ज की गई",
+    "correctEntry": "प्रविष्टि सुधारें",
+    "correctionReason": "सुधार का कारण (आवश्यक)",
+    "auditLog": "उपस्थिति ऑडिट लॉग"
   },
   "academic": {
     "quiz": "इंटरएक्टिव क्विज",
@@ -49,21 +87,49 @@
     "score": "प्राप्तांक",
     "accuracy": "सटीकता",
     "assignments": "असाइनमेंट",
-    "submissions": "सबमिशन"
+    "submissions": "सबमिशन",
+    "reportCard": "सत्र प्रगति रिपोर्ट कार्ड (PDF) डाउनलोड करें",
+    "exportData": "शैक्षणिक रिकॉर्ड (JSON) निर्यात करें",
+    "deleteAccount": "खाता एवं डेटा हटाएं",
+    "homework": "दैनिक गृहकार्य",
+    "evaluating": "मूल्यांकन जारी है"
+  },
+  "ai": {
+    "generatorTitle": "Gemini AI से क्विज ड्राफ्ट तैयार करें",
+    "generatorSubtitle": "ड्राफ्ट बहुविकल्पीय प्रश्न बनाने के लिए नोट्स अपलोड या पेस्ट करें",
+    "quotaRemaining": "दैनिक AI कोटा",
+    "privacyBanner": "गोपनीयता सुरक्षित: AI सेवाओं को कोई व्यक्तिगत डेटा नहीं भेजा जाता।",
+    "aiCheckedAwaiting": "AI-जांच पूर्ण, शिक्षक समीक्षा की प्रतीक्षा",
+    "aiSuggestion": "Gemini मूल्यांकन सुझाव",
+    "approveGrade": "अंक स्वीकृत करें और प्रकाशित करें",
+    "fetchSuggestion": "AI सुझाव प्राप्त करें"
   },
   "navigation": {
     "home": "होम",
-    "study": "स्टडी वॉल्ट",
-    "analytics": "प्रदर्शन",
+    "schedule": "समय-सारणी",
+    "academics": "डीपीपी",
+    "performance": "दक्षता",
+    "profile": "प्रोफ़ाइल",
     "roster": "कक्षा सूची",
+    "exams": "परीक्षा व चैट",
+    "settings": "सेटिंग्स",
     "chat": "संदेश",
-    "profile": "प्रोफ़ाइल"
+    "community": "समुदाय"
   },
   "settings": {
     "language": "ऐप की भाषा",
     "english": "English",
     "hindi": "हिन्दी (Hindi)",
     "darkMode": "डार्क मोड",
-    "notifications": "पुश सूचनाएं"
+    "notifications": "पुश सूचनाएं",
+    "walkthrough": "प्रथम बार गाइड टूर",
+    "walkthroughDesc": "अपनी भूमिका के लिए मुख्य सुविधाएं और नेविगेशन देखें"
+  },
+  "parent": {
+    "linkChild": "विद्यार्थी कोड से बच्चे को जोड़ें",
+    "childSwitcher": "चयनित बच्चा",
+    "noChildLinked": "अभी तक कोई बच्चा नहीं जुड़ा। जोड़ने के लिए कोड दर्ज करें।",
+    "absentNotice": "अनुपस्थिति सूचना प्राप्त",
+    "messageTeacher": "बैच शिक्षक को संदेश भेजें"
   }
 }

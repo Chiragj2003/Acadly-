@@ -1,7 +1,7 @@
-import * as FileSystem from 'expo-file-system';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { base64ToArrayBuffer } from '@/lib/binaryUtils';
+import { prepareMemorySafeUpload } from '@/lib/fileUploadHelper';
 import { type StudyMaterial } from '@/types/database';
+export { base64ToArrayBuffer } from '@/lib/binaryUtils';
 
 export interface PDFMaterialItem {
   id: string;
@@ -33,38 +33,21 @@ export const uploadStudyMaterialFile = async (
     return { storagePath: `study-materials/${fileName}`, fileSizeBytes: 1024 * 1024 };
   }
 
-  // 1. Validation: File extension
-  if (!fileName.toLowerCase().endsWith('.pdf')) {
-    throw new Error('Only PDF documents are accepted for study materials.');
-  }
+  // Memory-safe pre-flight and blob preparation
+  const { blob, contentType, sizeBytes } = await prepareMemorySafeUpload(
+    fileUri,
+    fileName,
+    'application/pdf'
+  );
 
-  // 2. Validation: File size
-  const info = await FileSystem.getInfoAsync(fileUri);
-  if (!info.exists) {
-    throw new Error('Selected file could not be found on device storage.');
-  }
-
-  const fileSizeBytes = info.size ?? 0;
-  if (fileSizeBytes > MAX_FILE_SIZE_BYTES) {
-    throw new Error(`File size (${(fileSizeBytes / (1024 * 1024)).toFixed(1)} MB) exceeds the maximum allowed 20 MB limit.`);
-  }
-
-  // 3. Read file as Base64 via expo-file-system
-  const base64Data = await FileSystem.readAsStringAsync(fileUri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
-
-  const arrayBuffer = base64ToArrayBuffer(base64Data);
-
-  // 4. Generate clean storage path
   const sanitizedName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
   const storagePath = `${Date.now()}_${sanitizedName}`;
 
-  // 5. Upload to Supabase Storage bucket 'study-materials'
+  // Upload to Supabase Storage bucket 'study-materials'
   const { error } = await supabase.storage
     .from('study-materials')
-    .upload(storagePath, arrayBuffer, {
-      contentType: 'application/pdf',
+    .upload(storagePath, blob, {
+      contentType,
       upsert: true,
     });
 
@@ -72,7 +55,7 @@ export const uploadStudyMaterialFile = async (
     throw new Error(`Storage upload failed: ${error.message}`);
   }
 
-  return { storagePath, fileSizeBytes };
+  return { storagePath, fileSizeBytes: sizeBytes };
 };
 
 /**

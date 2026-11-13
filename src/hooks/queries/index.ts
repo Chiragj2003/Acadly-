@@ -6,3 +6,6 @@ export * from './useAssignmentQueries';
 export * from './useChatQueries';
 export * from './useCommunityQueries';
 export * from './useStudentQueries';
+export * from './useScheduleQueries';
+export * from './useAnalyticsQueries';
+export * from './useAiQueries';

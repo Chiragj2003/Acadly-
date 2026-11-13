@@ -16,8 +16,14 @@ import { ChildProvider } from '@/context/ChildContext';
 import { UIProvider } from '@/context/UIContext';
 import { FeeNotificationProvider } from '@/context/FeeNotificationContext';
 import { ChatProvider } from '@/context/ChatContext';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { initSentry } from '@/lib/sentry';
+import { useThemeStore } from '@/stores/themeStore';
+
+// Initialize Sentry crash reporting (free tier)
+initSentry();
+useThemeStore.getState().initializeTheme().catch(() => {});
 
 // Disable strict mode warning for third-party libraries accessing .value during render
 try {
@@ -46,7 +52,7 @@ export default function RootLayout() {
         const parsed = Linking.parse(url);
 
         // 1. Google OAuth / Magic Link Code Exchange
-        if (url.includes('auth/callback') || parsed.queryParams?.code) {
+        if (url.includes('auth/callback')) {
           const code = parsed.queryParams?.code;
           if (typeof code === 'string' && isSupabaseConfigured) {
             const { error } = await supabase.auth.exchangeCodeForSession(code);
@@ -56,7 +62,22 @@ export default function RootLayout() {
           }
         }
 
-        // 2. Password Reset Deep Link
+        // 2. Invite Deep Link (e.g. acadly://invite/INV-1234 or ?inviteCode=INV-1234)
+        if (url.includes('invite')) {
+          let inviteCode = (parsed.queryParams?.inviteCode || parsed.queryParams?.code) as string | undefined;
+          if (!inviteCode && parsed.path) {
+            const segments = parsed.path.split('/');
+            const inviteIdx = segments.indexOf('invite');
+            if (inviteIdx !== -1 && segments[inviteIdx + 1]) {
+              inviteCode = segments[inviteIdx + 1];
+            }
+          }
+          if (inviteCode) {
+            router.push({ pathname: '/join-institute', params: { code: inviteCode } });
+          }
+        }
+
+        // 3. Password Reset Deep Link
         if (url.includes('reset-password') || parsed.path === 'reset-password') {
           router.push('/reset-password');
         }
@@ -78,7 +99,7 @@ export default function RootLayout() {
   // Background / Network Reconnection Offline Attendance Queue Auto-Flush (BUG-017)
   useEffect(() => {
     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
-      if (state.isConnected && isSupabaseConfigured) {
+      if (state.isConnected) {
         flushAttendanceQueue().catch((err) => {
           console.warn('[OfflineQueue] NetInfo reconnect flush error:', err);
         });

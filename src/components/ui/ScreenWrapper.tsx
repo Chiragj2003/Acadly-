@@ -11,6 +11,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderBar, type HeaderBarProps } from './HeaderBar';
+import { useAppTheme } from '@/hooks/useAppTheme';
 
 export interface ScreenWrapperProps {
   children: React.ReactNode;
@@ -39,12 +40,14 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
   withBottomInset = true,
   statusBarStyle = 'dark',
 }) => {
+  const { isDark, colors } = useAppTheme();
   const insets = useSafeAreaInsets();
   // When footer is present, it handles its own bottom padding and safe area.
   const applyBottomInset = !footer && withBottomInset;
 
   // Header background continuity for status bar area on modern iOS devices
-  const headerBgColor = '#FFFFFF';
+  const headerBgColor = colors.surface;
+  const activeStatusBarStyle = statusBarStyle || (isDark ? 'light' : 'dark');
 
   const bodyContent = scrollable ? (
     <ScrollView
@@ -74,15 +77,19 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
 
   return (
     <View
-      className={`flex-1 bg-surface ${className}`}
+      className={`flex-1 ${className}`}
       style={{
+        backgroundColor: colors.backgroundSecondary,
         paddingBottom: applyBottomInset ? insets.bottom : 0,
         alignItems: 'center',
       }}
     >
-      <StatusBar style={statusBarStyle} />
+      <StatusBar style={activeStatusBarStyle} />
 
-      <View className="flex-1 w-full max-w-2xl bg-surface">
+      <View
+        className="flex-1 w-full max-w-2xl"
+        style={{ backgroundColor: colors.backgroundSecondary }}
+      >
         {/* Top Safe Area & Header Zone */}
         {headerProps ? (
           <View style={{ paddingTop: insets.top, backgroundColor: headerBgColor }}>

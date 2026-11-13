@@ -71,17 +71,17 @@ const variantStyles: Record<ButtonVariant, { container: string; text: string; sp
 
 const sizeStyles: Record<ButtonSize, { container: string; text: string; iconGap: string }> = {
   sm: {
-    container: 'px-3 py-1.5 rounded-lg',
+    container: 'px-3 py-2 min-h-[44px] min-w-[44px] rounded-lg',
     text: 'text-xs',
     iconGap: 'gap-1',
   },
   md: {
-    container: 'px-4 py-2.5 rounded-lg',
+    container: 'px-4 py-2.5 min-h-[44px] min-w-[44px] rounded-xl',
     text: 'text-sm',
     iconGap: 'gap-2',
   },
   lg: {
-    container: 'px-5 py-3.5 rounded-xl',
+    container: 'px-5 py-3.5 min-h-[48px] min-w-[48px] rounded-2xl',
     text: 'text-base',
     iconGap: 'gap-2.5',
   },

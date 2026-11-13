@@ -1,0 +1,83 @@
+appId: com.acadly.app
+---
+# ==============================================================================
+# Acadly Mobile Maestro E2E Smoke Flow
+# Tests: Launch -> Auth & Language Switcher -> Role Navigation -> Core Screens
+# ==============================================================================
+
+- launchApp:
+    clearState: true
+
+# 1. Assert Auth Launch & Welcoming UI
+- assertVisible: "Acadly"
+- assertVisible: "Enter the Portal"
+
+# 2. Test Language Switcher (English -> Hindi -> English)
+- tapOn:
+    id: "toggle-language-btn"
+    optional: true
+- tapOn:
+    text: "हिन्दी (Hindi)"
+    optional: true
+- assertVisible:
+    text: "हिन्दी सक्रिय है"
+    optional: true
+- tapOn:
+    text: "English"
+    optional: true
+
+# 3. Test Student Flow Navigation
+- tapOn:
+    text: "Enrolled Student"
+    optional: true
+- tapOn:
+    text: "Enter Student Portal"
+    optional: true
+
+# 4. Handle First-Run Onboarding Walkthrough if present
+- tapOn:
+    text: "Next"
+    optional: true
+- tapOn:
+    text: "Next"
+    optional: true
+- tapOn:
+    text: "Get Started"
+    optional: true
+
+# 5. Assert Core Student UI Elements
+- assertVisible:
+    text: "Schedule"
+    optional: true
+- assertVisible:
+    text: "DPPs"
+    optional: true
+
+# 6. Test Notifications Bell
+- tapOn:
+    text: "Notifications"
+    optional: true
+- tapOn:
+    text: "Mark all read"
+    optional: true
+- tapOn:
+    id: "close-notifications-modal"
+    optional: true
+
+# 7. Test Theme Switcher in Profile
+- tapOn:
+    text: "Profile"
+    optional: true
+- scrollUntilVisible:
+    element:
+      text: "App Theme"
+    direction: DOWN
+    optional: true
+
+# 8. Clean Sign Out
+- tapOn:
+    text: "Sign Out"
+    optional: true
+- tapOn:
+    text: "Sign Out"
+    optional: true

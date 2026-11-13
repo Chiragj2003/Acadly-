@@ -1,22 +1,22 @@
 import { commitBatchAttendance } from '@/services/attendanceService';
 import { supabase } from '@/lib/supabase';
+import { enqueueAttendanceBatch } from '@/lib/offlineQueue';
 
-const mockUpsert = jest.fn();
+const mockRpc = jest.fn();
+
 jest.mock('@/lib/supabase', () => ({
   supabase: {
-    from: jest.fn(() => ({
-      upsert: mockUpsert,
-    })),
+    rpc: (...args: unknown[]) => mockRpc(...args),
   },
   isSupabaseConfigured: true,
 }));
 
 jest.mock('@/lib/offlineQueue', () => ({
-  enqueueAttendanceBatch: jest.fn(),
+  enqueueAttendanceBatch: jest.fn(async () => {}),
   flushAttendanceQueue: jest.fn(async () => {}),
 }));
 
-describe('Attendance Commit Integration', () => {
+describe('Attendance Commit Integration (Atomic RPC)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -25,8 +25,11 @@ describe('Attendance Commit Integration', () => {
   const validInstId = 'e3b0c442-98fc-1c14-9afb-4c7fa4390001';
   const dateStr = '2026-11-12';
 
-  it('calls upsert exactly once with the batch rows on conflict (student_id,batch_id,date)', async () => {
-    mockUpsert.mockResolvedValueOnce({ data: null, error: null });
+  it('calls atomic commit_attendance RPC with batch, date, and rows in ONE transaction', async () => {
+    mockRpc.mockResolvedValueOnce({
+      data: { success: true, count: 3 },
+      error: null,
+    });
 
     const records = [
       { studentId: 'student-uuid-01', status: 'P' as const, remarks: 'On time' },
@@ -44,28 +47,17 @@ describe('Attendance Commit Integration', () => {
     expect(res.success).toBe(true);
     expect(res.count).toBe(3);
 
-    // Verify supabase.from('attendance') was queried
-    expect(supabase.from).toHaveBeenCalledWith('attendance');
-
-    // Verify upsert called once
-    expect(mockUpsert).toHaveBeenCalledTimes(1);
-
-    // Verify row structure and onConflict constraint
-    const [rows, options] = mockUpsert.mock.calls[0];
-    expect(rows).toHaveLength(3);
-    expect(rows[0]).toMatchObject({
-      institute_id: validInstId,
-      batch_id: validBatchId,
-      student_id: 'student-uuid-01',
-      date: dateStr,
-      status: 'P',
-      remarks: 'On time',
+    // Verify atomic RPC was called once with proper payload
+    expect(mockRpc).toHaveBeenCalledTimes(1);
+    expect(mockRpc).toHaveBeenCalledWith('commit_attendance', {
+      p_batch_id: validBatchId,
+      p_date: dateStr,
+      p_rows: records,
     });
-    expect(options).toEqual({ onConflict: 'student_id,batch_id,date' });
   });
 
   it('handles offline queue when network error occurs', async () => {
-    mockUpsert.mockResolvedValueOnce({
+    mockRpc.mockResolvedValueOnce({
       data: null,
       error: { message: 'Failed to fetch (network error)' },
     });
@@ -81,5 +73,6 @@ describe('Attendance Commit Integration', () => {
 
     expect(res.success).toBe(true);
     expect(res.queuedOffline).toBe(true);
+    expect(enqueueAttendanceBatch).toHaveBeenCalledTimes(1);
   });
 });

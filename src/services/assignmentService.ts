@@ -1,6 +1,5 @@
-import * as FileSystem from 'expo-file-system';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { base64ToArrayBuffer } from '@/lib/binaryUtils';
+import { prepareMemorySafeUpload } from '@/lib/fileUploadHelper';
 import { type Assignment } from '@/types/database';
 
 /**
@@ -111,19 +110,19 @@ export const uploadAssignmentAttachment = async (
     return { storagePath: `assignments/${fileName}` };
   }
 
-  const base64Data = await FileSystem.readAsStringAsync(fileUri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
-
-  const bytes = base64ToArrayBuffer(base64Data);
+  const { blob, contentType } = await prepareMemorySafeUpload(
+    fileUri,
+    fileName,
+    'application/pdf'
+  );
 
   const sanitized = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
   const storagePath = `assignments/${Date.now()}_${sanitized}`;
 
   const { error } = await supabase.storage
     .from('study-materials')
-    .upload(storagePath, bytes.buffer, {
-      contentType: 'application/pdf',
+    .upload(storagePath, blob, {
+      contentType,
       upsert: true,
     });
 

@@ -23,10 +23,12 @@ export interface JoinRequestRow {
   teacher_code?: string;
   target_type: string;
   student_details: StudentExtraDetails;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'waitlisted';
   assigned_batch_id?: string;
   assigned_fee_plan?: string;
   rejection_reason?: string;
+  waitlist_reason?: string;
+  reapplied_at?: string;
   applied_at: string;
   created_at: string;
   user?: {
@@ -54,7 +56,18 @@ export interface ApproveJoinRequestInput {
 export interface RejectJoinRequestInput {
   requestId: string;
   reason: string;
-  reviewerId: string;
+  reviewerId?: string;
+}
+
+export interface WaitlistJoinRequestInput {
+  requestId: string;
+  reason: string;
+  reviewerId?: string;
+}
+
+export interface ReapplyJoinRequestInput {
+  requestId: string;
+  studentDetails: StudentExtraDetails;
 }
 
 /**
@@ -67,7 +80,21 @@ export const submitJoinRequest = async (
     return { success: true, requestId: generateUUID() };
   }
 
-  const { instituteId, userId, teacherCode, targetType = 'coaching_center', studentDetails } = input;
+  let { instituteId, userId, teacherCode, targetType = 'coaching_center', studentDetails } = input;
+
+  // If instituteId is missing or placeholder, resolve dynamically via RPC
+  if (!instituteId || instituteId.startsWith('a0000000') || !instituteId.includes('-')) {
+    try {
+      const { data: instData } = await supabase.rpc('lookup_institute_by_code', {
+        p_code: teacherCode.trim().toUpperCase(),
+      });
+      if (instData && typeof instData === 'object' && 'id' in (instData as any)) {
+        instituteId = (instData as any).id;
+      }
+    } catch {
+      // Fall through to standard submission
+    }
+  }
 
   const { data, error } = await supabase
     .from('join_requests')
@@ -115,180 +142,129 @@ export const getPendingJoinRequests = async (
 };
 
 /**
- * Approve a join request:
- * - Creates/updates the student record in public.students
- * - Enrolls student in public.batch_students with batchId (UUID)
- * - Sets status = 'approved' on join_requests
- * - Sends approval notification to student
+ * Approve a join request atomically in ONE transaction via SECURITY DEFINER RPC.
+ * - Verifies caller permission
+ * - Creates/updates student record in public.students
+ * - Enrolls student in public.batch_students
+ * - Updates institute membership
+ * - Updates join_requests to 'approved'
+ * - Dispatches notification in public.notifications
  */
 export const approveJoinRequest = async (
   input: ApproveJoinRequestInput
 ): Promise<{ success: boolean }> => {
-  const { requestId, batchId, feePlan, reviewerId } = input;
+  const { requestId, batchId } = input;
 
   if (!isSupabaseConfigured) {
     return { success: true };
   }
 
-  // 1. Fetch the request details
-  const { data: request, error: reqError } = await supabase
-    .from('join_requests')
-    .select('*')
-    .eq('id', requestId)
-    .single();
-
-  if (reqError || !request) {
-    throw new Error(`Join request not found: ${reqError?.message}`);
-  }
-
-  const details = (request.student_details || {}) as StudentExtraDetails;
-  const targetUserId = request.user_id;
-  const instituteId = request.institute_id;
-
-  // 2. Upsert student record
-  const rollNumber = `#${Math.floor(100 + Math.random() * 900)}`;
-  const parentLinkCode = `STU-${(details.fullName || 'STU').substring(0, 4).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
-
-  const { data: studentRecord, error: stuError } = await supabase
-    .from('students')
-    .upsert(
-      {
-        institute_id: instituteId,
-        user_id: targetUserId,
-        roll_number: rollNumber,
-        admission_number: rollNumber,
-        parent_link_code: parentLinkCode,
-        class_grade: details.grade || 'Class 12',
-        grade: details.grade || 'Class 12',
-        board: details.board || 'CBSE',
-        target_exam: details.targetExam || 'Competitive Exam',
-        school_or_college: details.school || 'School',
-        school_name: details.school || 'School',
-        guardian_name: details.guardianName || 'Guardian',
-        guardian_phone: details.guardianPhone || '',
-        blood_group: details.bloodGroup || 'O+',
-        previous_percentage: details.previousPercentage || '',
-        weak_subjects: details.weakSubjects || [],
-      },
-      { onConflict: 'institute_id,user_id' }
-    )
-    .select('id')
-    .single();
-
-  if (stuError || !studentRecord) {
-    throw new Error(`Failed to create student record: ${stuError?.message}`);
-  }
-
-  const studentId = studentRecord.id;
-
-  // 3. Insert enrollment in batch_students (UUID batchId)
-  const { error: batchError } = await supabase.from('batch_students').upsert(
-    {
-      batch_id: batchId,
-      student_id: studentId,
-      status: 'active',
-    },
-    { onConflict: 'batch_id,student_id' }
-  );
-
-  if (batchError) {
-    throw new Error(`Failed to assign student to batch: ${batchError.message}`);
-  }
-
-  // 4. Update join_requests record
-  const { error: updateError } = await supabase
-    .from('join_requests')
-    .update({
-      status: 'approved',
-      assigned_batch_id: batchId,
-      assigned_fee_plan: feePlan || 'Standard',
-      student_id: studentId,
-      reviewed_by: reviewerId,
-      reviewed_at: new Date().toISOString(),
-    })
-    .eq('id', requestId);
-
-  if (updateError) {
-    throw new Error(`Failed to update join request status: ${updateError.message}`);
-  }
-
-  // 5. Notify the student
-  await supabase.from('notifications').insert({
-    user_id: targetUserId,
-    title: 'Admission Approved!',
-    body: 'Your enrollment request has been approved. You can now access your classroom batch, DPPs, and lectures.',
-    data: { batch_id: batchId, student_id: studentId },
+  const { data, error } = await supabase.rpc('approve_join_request', {
+    p_request_id: requestId,
+    p_batch_id: batchId,
   });
 
-  supabase.functions
-    .invoke('send-push-notifications', {
-      body: {
-        instituteId,
-        userIds: [targetUserId],
-        title: 'Admission Approved!',
-        body: 'Your enrollment request has been approved. You can now access your classroom batch, DPPs, and lectures.',
-        type: 'admission_decision',
-        data: { batch_id: batchId, student_id: studentId, status: 'approved' },
-      },
-    })
-    .catch(() => null);
+  if (error) {
+    throw new Error(`Failed to approve join request: ${error.message}`);
+  }
 
   return { success: true };
 };
 
 /**
- * Reject a join request with a documented reason.
+ * Reject a join request with a documented reason via atomic SECURITY DEFINER RPC.
  */
 export const rejectJoinRequest = async (
   input: RejectJoinRequestInput
-): Promise<{ success: boolean }> => {
-  const { requestId, reason, reviewerId } = input;
+): Promise<{ success: boolean; status?: string; reason?: string }> => {
+  const { requestId, reason } = input;
 
   if (!isSupabaseConfigured) {
-    return { success: true };
+    return { success: true, status: 'rejected', reason };
   }
 
-  const { data: request } = await supabase
-    .from('join_requests')
-    .select('user_id')
-    .eq('id', requestId)
-    .single();
-
-  const { error } = await supabase
-    .from('join_requests')
-    .update({
-      status: 'rejected',
-      rejection_reason: reason.trim(),
-      reviewed_by: reviewerId,
-      reviewed_at: new Date().toISOString(),
-    })
-    .eq('id', requestId);
+  const { data, error } = await supabase.rpc('reject_join_request', {
+    p_request_id: requestId,
+    p_reason: reason.trim(),
+  });
 
   if (error) {
     throw new Error(`Failed to reject join request: ${error.message}`);
   }
 
-  if (request?.user_id) {
-    await supabase.from('notifications').insert({
-      user_id: request.user_id,
-      title: 'Admission Application Update',
-      body: `Your request could not be approved at this time. Reason: ${reason}`,
-      data: { request_id: requestId, reason },
-    });
+  return { success: true, ...(data as Record<string, unknown>) };
+};
 
-    supabase.functions
-      .invoke('send-push-notifications', {
-        body: {
-          instituteId: 'a0000000-0000-0000-0000-000000000001',
-          userIds: [request.user_id],
-          title: 'Admission Application Update',
-          body: `Your request could not be approved at this time. Reason: ${reason}`,
-          type: 'admission_decision',
-          data: { request_id: requestId, reason, status: 'rejected' },
-        },
-      })
-      .catch(() => null);
+/**
+ * Waitlist a join request with a documented reason via atomic SECURITY DEFINER RPC.
+ */
+export const waitlistJoinRequest = async (
+  input: WaitlistJoinRequestInput
+): Promise<{ success: boolean; status?: string; reason?: string }> => {
+  const { requestId, reason } = input;
+
+  if (!isSupabaseConfigured) {
+    return { success: true, status: 'waitlisted', reason };
   }
 
-  return { success: true };
+  const { data, error } = await supabase.rpc('waitlist_join_request', {
+    p_request_id: requestId,
+    p_reason: reason.trim(),
+  });
+
+  if (error) {
+    throw new Error(`Failed to waitlist join request: ${error.message}`);
+  }
+
+  return { success: true, ...(data as Record<string, unknown>) };
+};
+
+/**
+ * Student edits details and resubmits their application via atomic SECURITY DEFINER RPC.
+ */
+export const reapplyJoinRequest = async (
+  input: ReapplyJoinRequestInput
+): Promise<{ success: boolean; status?: string }> => {
+  const { requestId, studentDetails } = input;
+
+  if (!isSupabaseConfigured) {
+    return { success: true, status: 'pending' };
+  }
+
+  const { data, error } = await supabase.rpc('reapply_join_request', {
+    p_request_id: requestId,
+    p_updated_details: studentDetails as unknown as Record<string, unknown>,
+  });
+
+  if (error) {
+    throw new Error(`Failed to reapply join request: ${error.message}`);
+  }
+
+  return { success: true, ...(data as Record<string, unknown>) };
+};
+
+/**
+ * Fetch the latest join request for a specific user to display admission state.
+ */
+export const getUserLatestJoinRequest = async (
+  userId: string
+): Promise<JoinRequestRow | null> => {
+  if (!isSupabaseConfigured || !userId) return null;
+
+  const { data, error } = await supabase
+    .from('join_requests')
+    .select(`
+      *,
+      user:profiles!join_requests_user_id_fkey(full_name, email, avatar_url)
+    `)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch user join request: ${error.message}`);
+  }
+
+  return data as JoinRequestRow | null;
 };

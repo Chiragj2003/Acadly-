@@ -29,10 +29,20 @@ serve(async (req) => {
       });
     }
 
-    const supabaseAdmin = createClient(
+    // 1. Authenticate caller using user token
+    const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } }
     );
+
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized: Invalid or expired session" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const payload: PushNotificationPayload = await req.json();
     const { instituteId, userIds, title, body, type = "general", data = {} } = payload;
@@ -43,6 +53,27 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // 2. Authorize caller: Verify caller is an active teacher or admin of this institute
+    const { data: membership, error: memError } = await supabaseClient
+      .from("institute_members")
+      .select("role, status")
+      .eq("institute_id", instituteId)
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (memError || !membership || !["admin", "teacher"].includes(membership.role)) {
+      return new Response(JSON.stringify({ error: "Forbidden: Only staff can dispatch notifications" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
 
     // Fetch Expo Push tokens from both push_tokens table and profiles
     const { data: pushTokenRows } = await supabaseAdmin
@@ -125,6 +156,18 @@ serve(async (req) => {
 
         if (expoResponse.ok) {
           sentCount += chunk.length;
+          const expoResult = await expoResponse.json().catch(() => null);
+          if (expoResult?.data && Array.isArray(expoResult.data)) {
+            for (let idx = 0; idx < expoResult.data.length; idx++) {
+              const ticket = expoResult.data[idx];
+              if (ticket.status === "error" && ticket.details?.error === "DeviceNotRegistered") {
+                const deadToken = chunk[idx]?.token;
+                if (deadToken) {
+                  await supabaseAdmin.rpc("deactivate_push_token", { p_token: deadToken });
+                }
+              }
+            }
+          }
         }
       }
     }

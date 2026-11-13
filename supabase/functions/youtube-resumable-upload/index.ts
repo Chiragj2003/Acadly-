@@ -53,14 +53,14 @@ serve(async (req) => {
       });
     }
 
-    // Verify user is teacher or admin in this institute
+    // Verify user is active teacher or admin in this institute
     const { data: membership, error: memError } = await supabaseClient
       .from("institute_members")
-      .select("role")
+      .select("role, status")
       .eq("institute_id", instituteId)
       .eq("user_id", user.id)
-      .eq("is_active", true)
-      .single();
+      .eq("status", "active")
+      .maybeSingle();
 
     if (memError || !membership || !["admin", "teacher", "super_admin"].includes(membership.role)) {
       return new Response(JSON.stringify({ error: "Forbidden: Only staff can initiate video uploads" }), {

@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
-import { hmac } from "https://deno.land/x/hmac@v2.0.1/mod.ts";
 
 serve(async (req) => {
   if (req.method !== "POST") {
@@ -17,10 +16,29 @@ serve(async (req) => {
 
     const rawBody = await req.text();
 
-    // Verify HMAC-SHA256 signature
-    const expectedSignature = hmac("sha256", webhookSecret, rawBody, "utf8", "hex");
+    // Verify HMAC-SHA256 signature via Web Crypto API with constant-time comparison
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(webhookSecret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+    const signatureBytes = await crypto.subtle.sign("HMAC", key, encoder.encode(rawBody));
+    const expectedHex = Array.from(new Uint8Array(signatureBytes))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
 
-    if (signature !== expectedSignature) {
+    // Constant-time comparison
+    if (signature.length !== expectedHex.length) {
+      return new Response("Invalid signature", { status: 400 });
+    }
+    let mismatch = 0;
+    for (let i = 0; i < signature.length; i++) {
+      mismatch |= signature.charCodeAt(i) ^ expectedHex.charCodeAt(i);
+    }
+    if (mismatch !== 0) {
       console.error("Invalid Razorpay webhook signature");
       return new Response("Invalid signature", { status: 400 });
     }

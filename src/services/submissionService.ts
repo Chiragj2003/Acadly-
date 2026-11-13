@@ -1,6 +1,6 @@
-import * as FileSystem from 'expo-file-system';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { base64ToArrayBuffer } from '@/lib/binaryUtils';
+import { prepareMemorySafeUpload } from '@/lib/fileUploadHelper';
+import { base64ToArrayBuffer } from '@/services/materialService';
 import { type Submission } from '@/types/database';
 
 export interface SubmitHomeworkInput {
@@ -9,7 +9,7 @@ export interface SubmitHomeworkInput {
   notes?: string;
   fileUri?: string;
   fileName?: string;
-  answers?: Record<string, any>;
+  answers?: Record<string, unknown>;
 }
 
 export interface GradeSubmissionInput {
@@ -93,19 +93,32 @@ export const submitHomework = async (
 
   if (fileUri && fileName) {
     cleanFileName = fileName;
-    const base64Data = await FileSystem.readAsStringAsync(fileUri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
 
-    const bytes = base64ToArrayBuffer(base64Data);
+    // Polyfill Bare atob (BUG-016): convert base64 safely via base64ToArrayBuffer if data-URI is provided
+    let uploadBlob: Blob;
+    let uploadContentType = 'application/pdf';
+
+    if (fileUri.startsWith('data:')) {
+      const arrayBuffer = base64ToArrayBuffer(fileUri);
+      uploadContentType = fileUri.split(';')[0].replace('data:', '') || 'application/pdf';
+      uploadBlob = new Blob([arrayBuffer.buffer as ArrayBuffer], { type: uploadContentType });
+    } else {
+      const prepared = await prepareMemorySafeUpload(
+        fileUri,
+        fileName,
+        'application/pdf'
+      );
+      uploadBlob = prepared.blob;
+      uploadContentType = prepared.contentType;
+    }
 
     const sanitized = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
     storagePath = `${assignmentId}/${studentId}_${Date.now()}_${sanitized}`;
 
     const { error: uploadError } = await supabase.storage
       .from('student-submissions')
-      .upload(storagePath, bytes.buffer, {
-        contentType: 'application/pdf',
+      .upload(storagePath, uploadBlob, {
+        contentType: uploadContentType,
         upsert: true,
       });
 
@@ -185,6 +198,7 @@ export const gradeSubmission = async (
       score: clampedScore,
       feedback: feedback.trim(),
       status: 'graded',
+      ai_status: 'approved',
       graded_at: new Date().toISOString(),
       graded_by: graderId,
     })
@@ -267,40 +281,50 @@ export interface QuizAnalyticsSummary {
 
 /**
  * Fetch assignment for taking a quiz.
- * Strips correctOptionIndex and expectedAnswerText so answers are never sent to student client.
+ * Calls SECURITY DEFINER RPC get_quiz_for_student which strips correct answers and explanations on the server.
  */
 export const getAssignmentForTaking = async (assignmentId: string): Promise<any | null> => {
   if (!isSupabaseConfigured || !assignmentId) return null;
 
-  const { data, error } = await supabase
-    .from('assignments')
-    .select('*')
-    .eq('id', assignmentId)
-    .single();
+  const { data, error } = await supabase.rpc('get_quiz_for_student', {
+    p_assignment_id: assignmentId,
+  });
 
   if (error || !data) {
-    throw new Error(`Failed to load quiz: ${error?.message || 'Not found'}`);
+    // Fallback query if RPC unavailable
+    const { data: rawAsg, error: rawErr } = await supabase
+      .from('assignments')
+      .select('id, institute_id, batch_id, title, description, subject, type, total_marks, due_date, questions')
+      .eq('id', assignmentId)
+      .single();
+
+    if (rawErr || !rawAsg) {
+      throw new Error(`Failed to load quiz: ${error?.message || rawErr?.message || 'Not found'}`);
+    }
+
+    const rawQuestions = Array.isArray(rawAsg.questions) ? rawAsg.questions : [];
+    const sanitized = rawQuestions.map((q: any) => ({
+      id: q.id,
+      type: q.type,
+      questionText: q.questionText,
+      options: q.options || [],
+      marks: q.marks || 1,
+    }));
+
+    return {
+      ...rawAsg,
+      questions: sanitized,
+    };
   }
 
-  const rawQuestions = Array.isArray(data.questions) ? data.questions : [];
-  const sanitizedQuestions = rawQuestions.map((q: any) => ({
-    id: q.id,
-    type: q.type,
-    questionText: q.questionText,
-    options: q.options || [],
-    marks: q.marks || 1,
-    // Do NOT include correctOptionIndex or expectedAnswerText here
-  }));
-
-  return {
-    ...data,
-    questions: sanitizedQuestions,
-  };
+  return data;
 };
 
 /**
  * Submit and auto-grade interactive DPP / quiz.
- * Compares student answers against assignment's secret answer key from the database.
+ * Evaluated strictly server-side via SECURITY DEFINER RPC submit_and_grade_quiz (SEC-008).
+ * Compares student answers against master questions, calculates total score, and persists grade.
+ * Students cannot directly set or modify score, graded_at, or feedback.
  */
 export const submitQuiz = async (input: {
   assignmentId: string;
@@ -308,7 +332,7 @@ export const submitQuiz = async (input: {
   instituteId?: string;
   answers: Record<string, any>;
 }): Promise<QuizSubmissionResult> => {
-  const { assignmentId, studentId, instituteId, answers } = input;
+  const { assignmentId, studentId, answers } = input;
 
   if (!isSupabaseConfigured) {
     return {
@@ -322,115 +346,64 @@ export const submitQuiz = async (input: {
     };
   }
 
-  // 1. Attempt secure PostgreSQL RPC auto-grading first (SEC-008)
-  try {
-    const { data: rpcData, error: rpcError } = await supabase.rpc('submit_and_grade_quiz', {
-      p_assignment_id: assignmentId,
-      p_student_id: studentId,
-      p_answers: answers,
-    });
+  // 1. Primary: Server-side secure evaluation via submit_and_grade_quiz RPC (SEC-008)
+  let rpcData: any = null;
+  let rpcError: any = null;
 
-    if (!rpcError && rpcData && typeof rpcData === 'object' && 'submissionId' in rpcData) {
-      return rpcData as QuizSubmissionResult;
-    }
-  } catch (rpcErr) {
-    console.warn('[SubmissionService] Note: RPC submit_and_grade_quiz fallback:', rpcErr);
-  }
-
-  // 2. Fetch assignment with question keys fallback
-  const { data: assignment, error: asgError } = await supabase
-    .from('assignments')
-    .select('*')
-    .eq('id', assignmentId)
-    .single();
-
-  if (asgError || !assignment) {
-    throw new Error(`Quiz assignment not found: ${asgError?.message}`);
-  }
-
-  const questions: any[] = Array.isArray(assignment.questions) ? assignment.questions : [];
-  let totalScore = 0;
-  let totalMarks = 0;
-  let hasSubjective = false;
-
-  const detailedQuestions: QuizResultQuestion[] = questions.map((q: any) => {
-    const qMarks = Number(q.marks) || 1;
-    totalMarks += qMarks;
-    const studentAns = answers[q.id];
-
-    if (q.type === 'mcq' || q.type === 'true_false') {
-      const isCorrect =
-        studentAns !== undefined &&
-        Number(studentAns) === Number(q.correctOptionIndex);
-
-      const marksObtained = isCorrect ? qMarks : 0;
-      totalScore += marksObtained;
-
-      return {
-        id: q.id,
-        type: q.type,
-        questionText: q.questionText,
-        options: q.options || [],
-        studentAnswer: studentAns,
-        correctOptionIndex: q.correctOptionIndex,
-        isCorrect,
-        marksObtained,
-        maxMarks: qMarks,
-        explanation: q.explanation || `Correct option is ${q.options?.[q.correctOptionIndex] || 'Option ' + (q.correctOptionIndex + 1)}`,
-      };
-    } else {
-      // Short answer / subjective question
-      hasSubjective = true;
-      return {
-        id: q.id,
-        type: q.type,
-        questionText: q.questionText,
-        studentAnswer: studentAns || '',
-        expectedAnswerText: q.expectedAnswerText || '',
-        isCorrect: null,
-        marksObtained: 0,
-        maxMarks: qMarks,
-        explanation: 'Pending faculty grading.',
-      };
-    }
+  const res = await supabase.rpc('submit_and_grade_quiz', {
+    p_assignment_id: assignmentId,
+    p_student_id: studentId,
+    p_student_answers: answers,
   });
 
-  const finalStatus: 'graded' | 'submitted' = hasSubjective ? 'submitted' : 'graded';
-  const percentage = totalMarks > 0 ? Math.round((totalScore / totalMarks) * 100) : 0;
+  rpcData = res.data;
+  rpcError = res.error;
 
-  // 2. Persist submission
-  const { data: submissionData, error: subError } = await supabase
-    .from('submissions')
-    .upsert(
-      {
-        institute_id: instituteId || assignment.institute_id,
-        assignment_id: assignmentId,
-        student_id: studentId,
-        answers,
-        score: totalScore,
-        marks_obtained: totalScore,
-        status: finalStatus,
-        submitted_at: new Date().toISOString(),
-        graded_at: hasSubjective ? null : new Date().toISOString(),
-      },
-      { onConflict: 'assignment_id,student_id' }
-    )
-    .select('id')
-    .single();
-
-  if (subError) {
-    throw new Error(`Failed to save quiz submission: ${subError.message}`);
+  // Fallback to submit_quiz RPC if submit_and_grade_quiz is not found
+  if (rpcError && rpcError.message && (rpcError.message.includes('not found') || rpcError.code === '42883')) {
+    const fallbackRes = await supabase.rpc('submit_quiz', {
+      p_assignment_id: assignmentId,
+      p_answers: answers,
+    });
+    rpcData = fallbackRes.data;
+    rpcError = fallbackRes.error;
   }
 
-  return {
-    submissionId: submissionData?.id || 'sub-saved',
-    totalScore,
-    totalMarks,
-    percentage,
-    isPassed: percentage >= 40,
-    status: finalStatus,
-    questions: detailedQuestions,
-  };
+  if (rpcError) {
+    throw new Error(`Failed to submit quiz: ${rpcError.message}`);
+  }
+
+  if (rpcData && typeof rpcData === 'object') {
+    const raw = rpcData as any;
+    const questionsArray = Array.isArray(raw.questions)
+      ? raw.questions
+      : Array.isArray(raw.details)
+      ? raw.details
+      : [];
+
+    return {
+      submissionId: raw.submissionId || raw.submission_id || 'sub-graded',
+      totalScore: Number(raw.totalScore ?? raw.score) || 0,
+      totalMarks: Number(raw.totalMarks ?? raw.total_marks) || 0,
+      percentage: Number(raw.percentage) || 0,
+      isPassed: Boolean(raw.isPassed ?? raw.is_passed),
+      status: 'graded',
+      questions: questionsArray.map((d: any) => ({
+        id: d.id,
+        type: d.type || 'mcq',
+        questionText: d.questionText || '',
+        studentAnswer: d.studentAnswer,
+        correctOptionIndex: d.correctOptionIndex,
+        expectedAnswerText: d.expectedAnswerText,
+        isCorrect: d.isCorrect,
+        marksObtained: Number(d.marksObtained) || 0,
+        maxMarks: Number(d.maxMarks) || 1,
+        explanation: d.explanation,
+      })),
+    };
+  }
+
+  throw new Error('Unexpected empty response from quiz grading RPC');
 };
 
 /**
@@ -454,16 +427,27 @@ export const getQuizAnalytics = async (
     .select('id, student_id, score, answers, status')
     .eq('assignment_id', assignmentId);
 
-  const subList = submissions || [];
+  const subList = (submissions || []) as {
+    id: string;
+    student_id: string;
+    score: number | null;
+    answers: Record<string, unknown> | null;
+    status: string;
+  }[];
   const submittedCount = subList.length;
-  const questions: any[] = Array.isArray(assignment.questions) ? assignment.questions : [];
+  const questions = (Array.isArray(assignment.questions) ? assignment.questions : []) as {
+    id: string;
+    questionText?: string;
+    correctOptionIndex?: number;
+    [key: string]: unknown;
+  }[];
 
   let totalScoreSum = 0;
   let highest = 0;
   let lowest = Number(assignment.total_marks) || 100;
   let passCount = 0;
 
-  subList.forEach((s: any) => {
+  subList.forEach((s) => {
     const sc = Number(s.score) || 0;
     totalScoreSum += sc;
     if (sc > highest) highest = sc;
@@ -475,12 +459,12 @@ export const getQuizAnalytics = async (
   const averageScore = submittedCount > 0 ? Math.round((totalScoreSum / submittedCount) * 10) / 10 : 0;
   const passRate = submittedCount > 0 ? Math.round((passCount / submittedCount) * 100) : 0;
 
-  const questionAnalytics: QuestionAnalyticsItem[] = questions.map((q: any) => {
+  const questionAnalytics: QuestionAnalyticsItem[] = questions.map((q) => {
     let correct = 0;
     let incorrect = 0;
 
-    subList.forEach((s: any) => {
-      const studentAns = s.answers?.[q.id];
+    subList.forEach((s) => {
+      const studentAns = (s.answers as Record<string, unknown> | null)?.[q.id];
       if (studentAns !== undefined) {
         if (Number(studentAns) === Number(q.correctOptionIndex)) {
           correct++;
@@ -495,7 +479,7 @@ export const getQuizAnalytics = async (
 
     return {
       questionId: q.id,
-      questionText: q.questionText,
+      questionText: String(q.questionText || ''),
       totalAttempts,
       correctCount: correct,
       incorrectCount: incorrect,
@@ -513,6 +497,102 @@ export const getQuizAnalytics = async (
     lowestScore: submittedCount > 0 ? lowest : 0,
     passRate,
     questions: questionAnalytics,
+  };
+};
+
+/**
+ * Submit written homework (PDF documents or photos) via atomic SECURITY DEFINER RPC submit_written_homework.
+ * Enforces deadlines, maximum attempts, and sets is_late flag.
+ */
+export const submitWrittenHomework = async (input: {
+  assignmentId: string;
+  fileUrls: string[];
+  submissionText?: string;
+}): Promise<{
+  success: boolean;
+  submissionId: string;
+  status: string;
+  isLate: boolean;
+  attemptNumber: number;
+}> => {
+  const { assignmentId, fileUrls, submissionText = '' } = input;
+
+  if (!isSupabaseConfigured) {
+    return {
+      success: true,
+      submissionId: 'mock-written-sub',
+      status: 'submitted',
+      isLate: false,
+      attemptNumber: 1,
+    };
+  }
+
+  const { data, error } = await supabase.rpc('submit_written_homework', {
+    p_assignment_id: assignmentId,
+    p_file_urls: fileUrls as unknown as Record<string, unknown>,
+    p_submission_text: submissionText,
+  });
+
+  if (error) {
+    throw new Error(`Failed to submit written homework: ${error.message}`);
+  }
+
+  const res = data as any;
+  return {
+    success: true,
+    submissionId: res.submission_id,
+    status: res.status || 'submitted',
+    isLate: Boolean(res.is_late),
+    attemptNumber: Number(res.attempt_number) || 1,
+  };
+};
+
+/**
+ * Grade or Return a written homework submission via atomic SECURITY DEFINER RPC grade_written_submission.
+ * Faculty can post score and feedback, or return to student for rework.
+ */
+export const gradeWrittenSubmission = async (input: {
+  submissionId: string;
+  score: number;
+  feedback: string;
+  returnForRework?: boolean;
+}): Promise<{
+  success: boolean;
+  submissionId: string;
+  status: string;
+  score: number;
+  feedback: string;
+}> => {
+  const { submissionId, score, feedback, returnForRework = false } = input;
+
+  if (!isSupabaseConfigured) {
+    return {
+      success: true,
+      submissionId,
+      status: returnForRework ? 'returned' : 'graded',
+      score,
+      feedback,
+    };
+  }
+
+  const { data, error } = await supabase.rpc('grade_written_submission', {
+    p_submission_id: submissionId,
+    p_score: score,
+    p_feedback: feedback.trim(),
+    p_return_for_rework: returnForRework,
+  });
+
+  if (error) {
+    throw new Error(`Failed to grade submission: ${error.message}`);
+  }
+
+  const res = data as any;
+  return {
+    success: true,
+    submissionId: res.submission_id,
+    status: res.status,
+    score: Number(res.score),
+    feedback: res.feedback,
   };
 };
 

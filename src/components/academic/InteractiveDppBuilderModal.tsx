@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {
   X,
@@ -21,8 +22,12 @@ import {
   Sparkles,
   FileQuestion,
   ChevronDown,
+  ShieldCheck,
+  Bot,
 } from 'lucide-react-native';
 import { Badge } from '@/components/ui';
+import { useAuth } from '@/context/AuthContext';
+import { useGenerateQuizDraft, useTeacherAiQuota } from '@/hooks/queries/useAiQueries';
 
 export type QuestionType = 'mcq' | 'true_false' | 'short_answer';
 
@@ -34,6 +39,7 @@ export interface InteractiveQuestion {
   correctOptionIndex: number;
   expectedAnswerText?: string;
   marks: number;
+  [key: string]: unknown;
 }
 
 interface InteractiveDppBuilderModalProps {
@@ -63,6 +69,15 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
   const [subject, setSubject] = useState(defaultSubject);
   const [dueDays, setDueDays] = useState('2');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Gemini AI Draft Generator State
+  const { user } = useAuth();
+  const { data: aiQuota } = useTeacherAiQuota(user?.id);
+  const generateQuizMutation = useGenerateQuizDraft();
+  const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
+  const [aiNotes, setAiNotes] = useState('');
+  const [aiTopic, setAiTopic] = useState('');
+  const [aiCount, setAiCount] = useState('5');
 
   // Questions array
   const [questions, setQuestions] = useState<InteractiveQuestion[]>([
@@ -156,6 +171,38 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
   };
 
   const totalCalculatedMarks = questions.reduce((sum, q) => sum + (Number(q.marks) || 0), 0);
+
+  const handleGenerateAiQuiz = async () => {
+    if (!aiNotes.trim() && !aiTopic.trim()) {
+      Alert.alert('Missing Input', 'Please paste lecture notes or enter a topic for Gemini.');
+      return;
+    }
+
+    try {
+      const parsedCount = Math.min(Math.max(1, parseInt(aiCount, 10) || 5), 15);
+      const res = await generateQuizMutation.mutateAsync({
+        notesText: aiNotes.trim() || `Core principles and numericals of ${aiTopic}`,
+        topic: aiTopic.trim() || subject,
+        count: parsedCount,
+        batchId,
+      });
+
+      if (res.questions && res.questions.length > 0) {
+        setQuestions(res.questions);
+        if (!title.trim() && aiTopic.trim()) {
+          setTitle(`${aiTopic} - Conceptual Practice DPP`);
+        }
+        setIsAiPanelOpen(false);
+        Alert.alert(
+          'Draft Questions Generated! 🤖',
+          `Gemini generated ${res.questions.length} draft MCQs. You can now review, tweak the options/correct keys, and add or delete questions before publishing.`
+        );
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to generate quiz draft';
+      Alert.alert('AI Quiz Generation Error', msg);
+    }
+  };
 
   const handleConfirmPublish = async () => {
     if (!title.trim()) {
@@ -314,6 +361,126 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
                 Target Batch: <Text className="font-bold">{defaultBatchName}</Text>
               </Text>
             </View>
+          </View>
+
+          {/* AI Quiz Draft Generator Card */}
+          <View className="bg-indigo-50/80 border border-indigo-200 rounded-2xl p-4 gap-3 shadow-xs mb-4">
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => setIsAiPanelOpen(!isAiPanelOpen)}
+              className="flex-row items-center justify-between"
+            >
+              <View className="flex-row items-center gap-2">
+                <View className="w-7 h-7 rounded-lg bg-indigo-600 items-center justify-center">
+                  <Bot size={15} color="#FFFFFF" />
+                </View>
+                <View>
+                  <Text className="text-xs font-black text-indigo-950">
+                    Generate Quiz Draft with Gemini AI
+                  </Text>
+                  <Text className="text-[10px] text-indigo-700 font-medium">
+                    Upload or paste lecture notes to auto-generate draft MCQs
+                  </Text>
+                </View>
+              </View>
+              <ChevronDown
+                size={16}
+                color="#4338CA"
+                style={{ transform: [{ rotate: isAiPanelOpen ? '180deg' : '0deg' }] }}
+              />
+            </TouchableOpacity>
+
+            {isAiPanelOpen && (
+              <View className="gap-2.5 pt-2 border-t border-indigo-200/70">
+                <View>
+                  <Text className="text-[11px] font-bold text-indigo-900 mb-1">
+                    Topic / Concept Focus
+                  </Text>
+                  <TextInput
+                    placeholder="e.g. Gauss's Law, Electric Dipoles & Flux"
+                    placeholderTextColor="#818CF8"
+                    value={aiTopic}
+                    onChangeText={setAiTopic}
+                    className="bg-white border border-indigo-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-medium"
+                  />
+                </View>
+
+                <View>
+                  <Text className="text-[11px] font-bold text-indigo-900 mb-1">
+                    Lecture Notes / Syllabus Excerpt
+                  </Text>
+                  <TextInput
+                    placeholder="Paste notes, textbook definitions, formula rules, or key concepts here..."
+                    placeholderTextColor="#818CF8"
+                    value={aiNotes}
+                    onChangeText={setAiNotes}
+                    multiline
+                    numberOfLines={4}
+                    className="bg-white border border-indigo-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-medium"
+                  />
+                </View>
+
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center gap-1.5">
+                    <Text className="text-[11px] font-bold text-indigo-900">Questions:</Text>
+                    {['3', '5', '8', '10'].map((cnt) => (
+                      <TouchableOpacity
+                        key={cnt}
+                        onPress={() => setAiCount(cnt)}
+                        className={`px-2.5 py-1 rounded-lg border ${
+                          aiCount === cnt
+                            ? 'bg-indigo-600 border-indigo-600'
+                            : 'bg-white border-indigo-200'
+                        }`}
+                      >
+                        <Text
+                          className={`text-[10px] font-bold ${
+                            aiCount === cnt ? 'text-white' : 'text-indigo-800'
+                          }`}
+                        >
+                          {cnt}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  <View className="flex-row items-center gap-1">
+                    <Sparkles size={11} color="#6366F1" />
+                    <Text className="text-[10px] text-indigo-800 font-semibold">
+                      Quota: {aiQuota?.remaining ?? 25}/25 left
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Privacy Disclosure Banner */}
+                <View className="bg-indigo-100/60 p-2 rounded-xl flex-row items-center gap-1.5">
+                  <ShieldCheck size={13} color="#4338CA" />
+                  <Text className="text-[10px] text-indigo-900 font-medium flex-1">
+                    Privacy Guaranteed: Gemini processes only academic notes. Zero student PII is transmitted.
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  disabled={generateQuizMutation.isPending}
+                  onPress={handleGenerateAiQuiz}
+                  className={`py-2.5 rounded-xl bg-indigo-600 flex-row items-center justify-center gap-1.5 active:scale-98 ${
+                    generateQuizMutation.isPending ? 'opacity-60' : ''
+                  }`}
+                >
+                  {generateQuizMutation.isPending ? (
+                    <ActivityIndicator color="#FFFFFF" size="small" />
+                  ) : (
+                    <>
+                      <Sparkles size={13} color="#FFFFFF" />
+                      <Text className="text-xs font-bold text-white">
+                        Generate Draft Questions ({aiCount} MCQs)
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
 
           {/* Questions Section */}

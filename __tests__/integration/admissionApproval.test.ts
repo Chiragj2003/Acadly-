@@ -1,57 +1,17 @@
 import { approveJoinRequest } from '@/services/admissionService';
 import { supabase } from '@/lib/supabase';
 
-// Mock Supabase chained queries
-const mockSelectSingle = jest.fn();
-const mockUpsertStudent = jest.fn();
-const mockUpsertBatchStudent = jest.fn();
-const mockUpdateJoinRequest = jest.fn();
+const mockRpc = jest.fn();
 
 jest.mock('@/lib/supabase', () => ({
   supabase: {
-    functions: {
-      invoke: jest.fn().mockResolvedValue({ data: null, error: null }),
-    },
-    from: jest.fn((table: string) => {
-      if (table === 'join_requests') {
-        return {
-          select: jest.fn(() => ({
-            eq: jest.fn(() => ({
-              single: mockSelectSingle,
-            })),
-          })),
-          update: jest.fn(() => ({
-            eq: mockUpdateJoinRequest,
-          })),
-        };
-      }
-      if (table === 'students') {
-        return {
-          upsert: jest.fn(() => ({
-            select: jest.fn(() => ({
-              single: mockUpsertStudent,
-            })),
-          })),
-        };
-      }
-      if (table === 'batch_students') {
-        return {
-          upsert: mockUpsertBatchStudent,
-        };
-      }
-      return {
-        insert: jest.fn().mockResolvedValue({ error: null }),
-      };
-    }),
+    rpc: (...args: unknown[]) => mockRpc(...args),
+    from: jest.fn(),
   },
   isSupabaseConfigured: true,
 }));
 
-jest.mock('@/services/notificationService', () => ({
-  sendPushNotification: jest.fn(async () => ({ success: true })),
-}));
-
-describe('Admission Approval Integration', () => {
+describe('Admission Approval Integration (Atomic RPC)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -60,36 +20,13 @@ describe('Admission Approval Integration', () => {
   const targetBatchId = 'batch-uuid-physics-12';
   const reviewerId = 'teacher-uuid-vikram';
 
-  it('enrolls student in batch_students with target batchId and approves request', async () => {
-    // 1. Mock existing request
-    mockSelectSingle.mockResolvedValueOnce({
+  it('calls atomic approve_join_request RPC with requestId and target batchId in ONE transaction', async () => {
+    mockRpc.mockResolvedValueOnce({
       data: {
-        id: sampleRequestId,
-        institute_id: 'inst-uuid-001',
-        user_id: 'user-uuid-student-42',
-        student_details: {
-          fullName: 'Aarav Patel',
-          grade: '12th',
-        },
+        success: true,
+        request_id: sampleRequestId,
+        batch_id: targetBatchId,
       },
-      error: null,
-    });
-
-    // 2. Mock student upsert
-    mockUpsertStudent.mockResolvedValueOnce({
-      data: { id: 'student-profile-uuid-99' },
-      error: null,
-    });
-
-    // 3. Mock batch_students upsert
-    mockUpsertBatchStudent.mockResolvedValueOnce({
-      data: null,
-      error: null,
-    });
-
-    // 4. Mock join_requests status update
-    mockUpdateJoinRequest.mockResolvedValueOnce({
-      data: null,
       error: null,
     });
 
@@ -100,19 +37,25 @@ describe('Admission Approval Integration', () => {
     });
 
     expect(result.success).toBe(true);
+    expect(mockRpc).toHaveBeenCalledTimes(1);
+    expect(mockRpc).toHaveBeenCalledWith('approve_join_request', {
+      p_request_id: sampleRequestId,
+      p_batch_id: targetBatchId,
+    });
+  });
 
-    // Verify batch_students was called with target batch ID
-    expect(supabase.from).toHaveBeenCalledWith('batch_students');
-    expect(mockUpsertBatchStudent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        batch_id: targetBatchId,
-        student_id: 'student-profile-uuid-99',
-        status: 'active',
-      }),
-      expect.any(Object)
-    );
+  it('fails closed and throws error when atomic RPC returns an error', async () => {
+    mockRpc.mockResolvedValueOnce({
+      data: null,
+      error: { message: 'Unauthorized or target batch not found' },
+    });
 
-    // Verify join_requests was marked approved
-    expect(supabase.from).toHaveBeenCalledWith('join_requests');
+    await expect(
+      approveJoinRequest({
+        requestId: sampleRequestId,
+        batchId: targetBatchId,
+        reviewerId,
+      })
+    ).rejects.toThrow('Failed to approve join request: Unauthorized or target batch not found');
   });
 });

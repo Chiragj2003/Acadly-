@@ -23,16 +23,100 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "assignments": {
+            "announcement_reads": {
                   Row: {
-                    "attachment_url": string | null,"batch_id": string,"created_at": string | null,"created_by": string | null,"description": string | null,"due_date": string,"id": string,"institute_id": string,"instructions": string | null,"max_marks": number | null,"question_count": number | null,"questions": Json | null,"subject": string | null,"subject_id": string | null,"teacher_id": string | null,"title": string,"total_marks": number | null,"type": Database["public"]['Enums']["assignment_type_enum"]
+                    "announcement_id": string,"read_at": string | null,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "attachment_url"?: string | null,"batch_id": string,"created_at"?: string | null,"created_by"?: string | null,"description"?: string | null,"due_date": string,"id"?: string,"institute_id": string,"instructions"?: string | null,"max_marks"?: number | null,"question_count"?: number | null,"questions"?: Json | null,"subject"?: string | null,"subject_id"?: string | null,"teacher_id"?: string | null,"title": string,"total_marks"?: number | null,"type"?: Database["public"]['Enums']["assignment_type_enum"]
+                    "announcement_id": string,"read_at"?: string | null,"user_id": string
                   }
                   Update: {
-                    "attachment_url"?: string | null,"batch_id"?: string,"created_at"?: string | null,"created_by"?: string | null,"description"?: string | null,"due_date"?: string,"id"?: string,"institute_id"?: string,"instructions"?: string | null,"max_marks"?: number | null,"question_count"?: number | null,"questions"?: Json | null,"subject"?: string | null,"subject_id"?: string | null,"teacher_id"?: string | null,"title"?: string,"total_marks"?: number | null,"type"?: Database["public"]['Enums']["assignment_type_enum"]
+                    "announcement_id"?: string,"read_at"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "announcement_reads_announcement_id_fkey"
+      columns: ["announcement_id"]
+isOneToOne: false
+      referencedRelation: "announcements"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "announcement_reads_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"announcements": {
+                  Row: {
+                    "author_id": string,"batch_id": string | null,"content": string,"created_at": string | null,"id": string,"institute_id": string,"priority": string | null,"title": string,"updated_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "author_id": string,"batch_id"?: string | null,"content": string,"created_at"?: string | null,"id"?: string,"institute_id": string,"priority"?: string | null,"title": string,"updated_at"?: string | null
+                  }
+                  Update: {
+                    "author_id"?: string,"batch_id"?: string | null,"content"?: string,"created_at"?: string | null,"id"?: string,"institute_id"?: string,"priority"?: string | null,"title"?: string,"updated_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "announcements_author_id_fkey"
+      columns: ["author_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "announcements_batch_id_fkey"
+      columns: ["batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "announcements_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"assignment_answer_keys": {
+                  Row: {
+                    "answer_keys": NonNullable<Json>,"assignment_id": string,"created_at": string | null,"institute_id": string,"updated_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "answer_keys"?: NonNullable<Json>,"assignment_id": string,"created_at"?: string | null,"institute_id": string,"updated_at"?: string | null
+                  }
+                  Update: {
+                    "answer_keys"?: NonNullable<Json>,"assignment_id"?: string,"created_at"?: string | null,"institute_id"?: string,"updated_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "assignment_answer_keys_assignment_id_fkey"
+      columns: ["assignment_id"]
+isOneToOne: true
+      referencedRelation: "assignments"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "assignment_answer_keys_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"assignments": {
+                  Row: {
+                    "allow_resubmission": boolean | null,"attachment_url": string | null,"batch_id": string,"close_at": string | null,"created_at": string | null,"created_by": string | null,"description": string | null,"due_date": string,"duration_minutes": number | null,"file_url": string | null,"homework_type": string | null,"id": string,"institute_id": string,"instructions": string | null,"max_attempts": number | null,"max_marks": number | null,"open_at": string | null,"question_count": number | null,"questions": Json | null,"subject": string | null,"subject_id": string | null,"teacher_id": string | null,"title": string,"total_marks": number | null,"type": Database["public"]['Enums']["assignment_type_enum"]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "allow_resubmission"?: boolean | null,"attachment_url"?: string | null,"batch_id": string,"close_at"?: string | null,"created_at"?: string | null,"created_by"?: string | null,"description"?: string | null,"due_date": string,"duration_minutes"?: number | null,"file_url"?: string | null,"homework_type"?: string | null,"id"?: string,"institute_id": string,"instructions"?: string | null,"max_attempts"?: number | null,"max_marks"?: number | null,"open_at"?: string | null,"question_count"?: number | null,"questions"?: Json | null,"subject"?: string | null,"subject_id"?: string | null,"teacher_id"?: string | null,"title": string,"total_marks"?: number | null,"type"?: Database["public"]['Enums']["assignment_type_enum"]
+                  }
+                  Update: {
+                    "allow_resubmission"?: boolean | null,"attachment_url"?: string | null,"batch_id"?: string,"close_at"?: string | null,"created_at"?: string | null,"created_by"?: string | null,"description"?: string | null,"due_date"?: string,"duration_minutes"?: number | null,"file_url"?: string | null,"homework_type"?: string | null,"id"?: string,"institute_id"?: string,"instructions"?: string | null,"max_attempts"?: number | null,"max_marks"?: number | null,"open_at"?: string | null,"question_count"?: number | null,"questions"?: Json | null,"subject"?: string | null,"subject_id"?: string | null,"teacher_id"?: string | null,"title"?: string,"total_marks"?: number | null,"type"?: Database["public"]['Enums']["assignment_type_enum"]
                   }
                   Relationships: [
                     {
@@ -140,6 +224,44 @@ isOneToOne: false
       columns: ["student_id"]
 isOneToOne: false
       referencedRelation: "students"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"batch_schedule": {
+                  Row: {
+                    "batch_id": string,"created_at": string | null,"end_time": string,"id": string,"institute_id": string,"is_live": boolean | null,"room": string | null,"start_time": string,"subject_id": string | null,"subject_name": string,"tag": string | null,"teacher_id": string | null,"teacher_name": string | null,"updated_at": string | null,"weekday": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "batch_id": string,"created_at"?: string | null,"end_time": string,"id"?: string,"institute_id": string,"is_live"?: boolean | null,"room"?: string | null,"start_time": string,"subject_id"?: string | null,"subject_name": string,"tag"?: string | null,"teacher_id"?: string | null,"teacher_name"?: string | null,"updated_at"?: string | null,"weekday": string
+                  }
+                  Update: {
+                    "batch_id"?: string,"created_at"?: string | null,"end_time"?: string,"id"?: string,"institute_id"?: string,"is_live"?: boolean | null,"room"?: string | null,"start_time"?: string,"subject_id"?: string | null,"subject_name"?: string,"tag"?: string | null,"teacher_id"?: string | null,"teacher_name"?: string | null,"updated_at"?: string | null,"weekday"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "batch_schedule_batch_id_fkey"
+      columns: ["batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "batch_schedule_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "batch_schedule_subject_id_fkey"
+      columns: ["subject_id"]
+isOneToOne: false
+      referencedRelation: "subjects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "batch_schedule_teacher_id_fkey"
+      columns: ["teacher_id"]
+isOneToOne: false
+      referencedRelation: "teachers"
       referencedColumns: ["id"]
     }
                   ]
@@ -463,6 +585,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"institute_code_lookup_attempts": {
+                  Row: {
+                    "attempted_at": string | null,"code_attempted": string,"id": string,"user_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attempted_at"?: string | null,"code_attempted": string,"id"?: string,"user_id"?: string | null
+                  }
+                  Update: {
+                    "attempted_at"?: string | null,"code_attempted"?: string,"id"?: string,"user_id"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"institute_members": {
                   Row: {
                     "created_at": string | null,"id": string,"institute_id": string,"joined_at": string | null,"role": Database["public"]['Enums']["app_role_enum"],"status": Database["public"]['Enums']["member_status_enum"],"user_id": string,"verification_status": Database["public"]['Enums']["verification_status_enum"],"verified_at": string | null,"verified_by": string | null
@@ -509,19 +645,57 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
-                },"join_requests": {
+                },"invites": {
                   Row: {
-                    "code_used": string,"created_at": string | null,"id": string,"institute_id": string,"requested_role": Database["public"]['Enums']["app_role_enum"],"reviewed_at": string | null,"reviewed_by": string | null,"status": Database["public"]['Enums']["verification_status_enum"],"student_extra_details_json": Json | null,"teacher_id": string | null,"user_id": string
+                    "batch_id": string | null,"code": string,"created_at": string | null,"created_by": string | null,"expires_at": string | null,"id": string,"institute_id": string,"max_uses": number,"role": Database["public"]['Enums']["app_role_enum"],"updated_at": string | null,"used_count": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "code_used": string,"created_at"?: string | null,"id"?: string,"institute_id": string,"requested_role"?: Database["public"]['Enums']["app_role_enum"],"reviewed_at"?: string | null,"reviewed_by"?: string | null,"status"?: Database["public"]['Enums']["verification_status_enum"],"student_extra_details_json"?: Json | null,"teacher_id"?: string | null,"user_id": string
+                    "batch_id"?: string | null,"code": string,"created_at"?: string | null,"created_by"?: string | null,"expires_at"?: string | null,"id"?: string,"institute_id": string,"max_uses"?: number,"role"?: Database["public"]['Enums']["app_role_enum"],"updated_at"?: string | null,"used_count"?: number
                   }
                   Update: {
-                    "code_used"?: string,"created_at"?: string | null,"id"?: string,"institute_id"?: string,"requested_role"?: Database["public"]['Enums']["app_role_enum"],"reviewed_at"?: string | null,"reviewed_by"?: string | null,"status"?: Database["public"]['Enums']["verification_status_enum"],"student_extra_details_json"?: Json | null,"teacher_id"?: string | null,"user_id"?: string
+                    "batch_id"?: string | null,"code"?: string,"created_at"?: string | null,"created_by"?: string | null,"expires_at"?: string | null,"id"?: string,"institute_id"?: string,"max_uses"?: number,"role"?: Database["public"]['Enums']["app_role_enum"],"updated_at"?: string | null,"used_count"?: number
                   }
                   Relationships: [
                     {
+      foreignKeyName: "invites_batch_id_fkey"
+      columns: ["batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "invites_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "invites_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"join_requests": {
+                  Row: {
+                    "assigned_batch_id": string | null,"code_used": string,"created_at": string | null,"id": string,"institute_id": string,"reapplied_at": string | null,"rejection_reason": string | null,"requested_role": Database["public"]['Enums']["app_role_enum"],"reviewed_at": string | null,"reviewed_by": string | null,"status": string,"student_extra_details_json": Json | null,"teacher_id": string | null,"user_id": string,"waitlist_reason": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "assigned_batch_id"?: string | null,"code_used": string,"created_at"?: string | null,"id"?: string,"institute_id": string,"reapplied_at"?: string | null,"rejection_reason"?: string | null,"requested_role"?: Database["public"]['Enums']["app_role_enum"],"reviewed_at"?: string | null,"reviewed_by"?: string | null,"status"?: string,"student_extra_details_json"?: Json | null,"teacher_id"?: string | null,"user_id": string,"waitlist_reason"?: string | null
+                  }
+                  Update: {
+                    "assigned_batch_id"?: string | null,"code_used"?: string,"created_at"?: string | null,"id"?: string,"institute_id"?: string,"reapplied_at"?: string | null,"rejection_reason"?: string | null,"requested_role"?: Database["public"]['Enums']["app_role_enum"],"reviewed_at"?: string | null,"reviewed_by"?: string | null,"status"?: string,"student_extra_details_json"?: Json | null,"teacher_id"?: string | null,"user_id"?: string,"waitlist_reason"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "join_requests_assigned_batch_id_fkey"
+      columns: ["assigned_batch_id"]
+isOneToOne: false
+      referencedRelation: "batches"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "join_requests_institute_id_fkey"
       columns: ["institute_id"]
 isOneToOne: false
@@ -614,6 +788,38 @@ isOneToOne: false
       columns: ["user_id"]
 isOneToOne: false
       referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"parent_student_links": {
+                  Row: {
+                    "created_at": string | null,"id": string,"institute_id": string,"parent_id": string,"relationship": string | null,"status": string,"student_code_entered": string | null,"student_id": string,"updated_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string | null,"id"?: string,"institute_id": string,"parent_id": string,"relationship"?: string | null,"status"?: string,"student_code_entered"?: string | null,"student_id": string,"updated_at"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string | null,"id"?: string,"institute_id"?: string,"parent_id"?: string,"relationship"?: string | null,"status"?: string,"student_code_entered"?: string | null,"student_id"?: string,"updated_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "parent_student_links_institute_id_fkey"
+      columns: ["institute_id"]
+isOneToOne: false
+      referencedRelation: "institutes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "parent_student_links_parent_id_fkey"
+      columns: ["parent_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "parent_student_links_student_id_fkey"
+      columns: ["student_id"]
+isOneToOne: false
+      referencedRelation: "students"
       referencedColumns: ["id"]
     }
                   ]
@@ -729,14 +935,14 @@ isOneToOne: false
                   ]
                 },"push_tokens": {
                   Row: {
-                    "created_at": string | null,"id": string,"platform": string | null,"token": string,"updated_at": string | null,"user_id": string
+                    "created_at": string | null,"device_id": string | null,"id": string,"is_active": boolean | null,"platform": string | null,"token": string,"updated_at": string | null,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string | null,"id"?: string,"platform"?: string | null,"token": string,"updated_at"?: string | null,"user_id": string
+                    "created_at"?: string | null,"device_id"?: string | null,"id"?: string,"is_active"?: boolean | null,"platform"?: string | null,"token": string,"updated_at"?: string | null,"user_id": string
                   }
                   Update: {
-                    "created_at"?: string | null,"id"?: string,"platform"?: string | null,"token"?: string,"updated_at"?: string | null,"user_id"?: string
+                    "created_at"?: string | null,"device_id"?: string | null,"id"?: string,"is_active"?: boolean | null,"platform"?: string | null,"token"?: string,"updated_at"?: string | null,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -961,14 +1167,14 @@ isOneToOne: false
                   ]
                 },"submissions": {
                   Row: {
-                    "answers": Json | null,"assignment_id": string,"feedback": string | null,"file_url": string | null,"graded_at": string | null,"graded_by": string | null,"id": string,"institute_id": string,"marks_obtained": number | null,"score": number | null,"status": string | null,"student_id": string,"submission_text": string | null,"submitted_at": string | null
+                    "answers": Json | null,"assignment_id": string,"attempt_number": number | null,"feedback": string | null,"file_url": string | null,"file_urls": Json | null,"graded_at": string | null,"graded_by": string | null,"id": string,"institute_id": string,"is_late": boolean | null,"marks_obtained": number | null,"resubmission_count": number | null,"returned_at": string | null,"score": number | null,"status": string | null,"student_id": string,"submission_text": string | null,"submitted_at": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "answers"?: Json | null,"assignment_id": string,"feedback"?: string | null,"file_url"?: string | null,"graded_at"?: string | null,"graded_by"?: string | null,"id"?: string,"institute_id": string,"marks_obtained"?: number | null,"score"?: number | null,"status"?: string | null,"student_id": string,"submission_text"?: string | null,"submitted_at"?: string | null
+                    "answers"?: Json | null,"assignment_id": string,"attempt_number"?: number | null,"feedback"?: string | null,"file_url"?: string | null,"file_urls"?: Json | null,"graded_at"?: string | null,"graded_by"?: string | null,"id"?: string,"institute_id": string,"is_late"?: boolean | null,"marks_obtained"?: number | null,"resubmission_count"?: number | null,"returned_at"?: string | null,"score"?: number | null,"status"?: string | null,"student_id": string,"submission_text"?: string | null,"submitted_at"?: string | null
                   }
                   Update: {
-                    "answers"?: Json | null,"assignment_id"?: string,"feedback"?: string | null,"file_url"?: string | null,"graded_at"?: string | null,"graded_by"?: string | null,"id"?: string,"institute_id"?: string,"marks_obtained"?: number | null,"score"?: number | null,"status"?: string | null,"student_id"?: string,"submission_text"?: string | null,"submitted_at"?: string | null
+                    "answers"?: Json | null,"assignment_id"?: string,"attempt_number"?: number | null,"feedback"?: string | null,"file_url"?: string | null,"file_urls"?: Json | null,"graded_at"?: string | null,"graded_by"?: string | null,"id"?: string,"institute_id"?: string,"is_late"?: boolean | null,"marks_obtained"?: number | null,"resubmission_count"?: number | null,"returned_at"?: string | null,"score"?: number | null,"status"?: string | null,"student_id"?: string,"submission_text"?: string | null,"submitted_at"?: string | null
                   }
                   Relationships: [
                     {
@@ -1026,72 +1232,14 @@ isOneToOne: false
                 }
           }
           Views: {
-            "pg_all_foreign_keys": {
-                  Row: {
-                    "fk_columns": (unknown)[] | null,"fk_constraint_name": unknown,"fk_schema_name": unknown,"fk_table_name": unknown,"fk_table_oid": unknown,"is_deferrable": boolean | null,"is_deferred": boolean | null,"match_type": string | null,"on_delete": string | null,"on_update": string | null,"pk_columns": (unknown)[] | null,"pk_constraint_name": unknown,"pk_index_name": unknown,"pk_schema_name": unknown,"pk_table_name": unknown,"pk_table_oid": unknown
-                  }
-                  ComputedFields: never
-                  Relationships: [
-                    
-                  ]
-                },"tap_funky": {
-                  Row: {
-                    "args": string | null,"is_definer": boolean | null,"is_strict": boolean | null,"is_visible": boolean | null,"kind": unknown,"langoid": unknown,"name": unknown,"oid": unknown,"owner": unknown,"returns": string | null,"returns_set": boolean | null,"schema": unknown,"volatility": string | null
-                  }
-                  ComputedFields: never
-                  Relationships: [
-                    
-                  ]
-                }
+            [_ in never]: never
           }
           Functions: {
-            "_cleanup":
-{ Args: Record<PropertyKey, never>; Returns: boolean
+            "accept_invite_code":
+{ Args: { "p_code": string }; Returns: Json
                            },
-"_contract_on":
-{ Args: { "": string }; Returns: unknown
-                           },
-"_currtest":
-{ Args: Record<PropertyKey, never>; Returns: number
-                           },
-"_db_privs":
-{ Args: Record<PropertyKey, never>; Returns: (unknown)[]
-                           },
-"_extensions":
-{ Args: Record<PropertyKey, never>; Returns: unknown[]
-                           },
-"_get":
-{ Args: { "": string }; Returns: number
-                           },
-"_get_latest":
-{ Args: { "": string }; Returns: (number)[]
-                           },
-"_get_note":
-{ Args: { "": string }; Returns: string
-                           },
-"_is_verbose":
-{ Args: Record<PropertyKey, never>; Returns: boolean
-                           },
-"_prokind":
-{ Args: { "p_oid": unknown }; Returns: unknown
-                           },
-"_query":
-{ Args: { "": string }; Returns: string
-                           },
-"_refine_vol":
-{ Args: { "": string }; Returns: string
-                           },
-"_retval":
-{ Args: { "": string }; Returns: string
-                           },
-"_table_privs":
-{ Args: Record<PropertyKey, never>; Returns: (unknown)[]
-                           },
-"_temptypes":
-{ Args: { "": string }; Returns: string
-                           },
-"_todo":
-{ Args: Record<PropertyKey, never>; Returns: string
+"approve_join_request":
+{ Args: { "p_batch_id": string,"p_request_id": string }; Returns: Json
                            },
 "auth_institute_id":
 { Args: Record<PropertyKey, never>; Returns: string
@@ -1099,15 +1247,11 @@ isOneToOne: false
 "auth_role":
 { Args: Record<PropertyKey, never>; Returns: string
                            },
-"col_is_null":
-{ Args: { "column_name": unknown,"description"?: string,"schema_name": unknown,"table_name": unknown }; Returns: string
-                           } |
-{ Args: { "column_name": unknown,"description"?: string,"table_name": unknown }; Returns: string
+"commit_attendance":
+{ Args: { "p_batch_id": string,"p_date": string,"p_rows": Json }; Returns: Json
                            },
-"col_not_null":
-{ Args: { "column_name": unknown,"description"?: string,"schema_name": unknown,"table_name": unknown }; Returns: string
-                           } |
-{ Args: { "column_name": unknown,"description"?: string,"table_name": unknown }; Returns: string
+"correct_attendance":
+{ Args: { "p_attendance_id": string,"p_new_status": string,"p_reason": string }; Returns: Json
                            },
 "create_institute_and_admin":
 { Args: { "p_center_code": string,"p_city": string,"p_name": string,"p_phone"?: string,"p_subjects"?: (string)[] }; Returns: Json
@@ -1118,41 +1262,17 @@ isOneToOne: false
 "current_teacher_id":
 { Args: Record<PropertyKey, never>; Returns: string
                            },
-"diag":
-{ Args: { "msg": unknown }; Returns: { error: true } & "Could not choose the best candidate function between: public.diag(msg => text), public.diag(msg => anyelement). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
-                           } |
-{ Args: { "msg": string }; Returns: { error: true } & "Could not choose the best candidate function between: public.diag(msg => text), public.diag(msg => anyelement). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+"deactivate_push_token":
+{ Args: { "p_token": string }; Returns: Json
                            },
-"diag_test_name":
-{ Args: { "": string }; Returns: string
+"export_user_data":
+{ Args: Record<PropertyKey, never>; Returns: Json
                            },
-"do_tap":
-{ Args: Record<PropertyKey, never>; Returns: string[]
-                           } |
-{ Args: { "": string }; Returns: string[]
+"get_quiz_for_student":
+{ Args: { "p_assignment_id": string }; Returns: Json
                            },
-"fail":
-{ Args: Record<PropertyKey, never>; Returns: string
-                           } |
-{ Args: { "": string }; Returns: string
-                           },
-"findfuncs":
-{ Args: { "": string }; Returns: (string)[]
-                           },
-"finish":
-{ Args: { "exception_on_failure"?: boolean }; Returns: string[]
-                           },
-"format_type_string":
-{ Args: { "": string }; Returns: string
-                           },
-"has_unique":
-{ Args: { "": string }; Returns: string
-                           },
-"in_todo":
-{ Args: Record<PropertyKey, never>; Returns: boolean
-                           },
-"is_empty":
-{ Args: { "": string }; Returns: string
+"grade_written_submission":
+{ Args: { "p_feedback": string,"p_return_for_rework"?: boolean,"p_score": number,"p_submission_id": string }; Returns: Json
                            },
 "is_institute_admin":
 { Args: { "target_inst_id": string }; Returns: boolean
@@ -1166,14 +1286,14 @@ isOneToOne: false
 "is_student_in_batch":
 { Args: { "target_batch_id": string }; Returns: boolean
                            },
+"is_student_of_batch":
+{ Args: { "target_batch_id": string }; Returns: boolean
+                           },
 "is_teacher_of_batch":
 { Args: { "target_batch_id": string }; Returns: boolean
                            },
 "is_teacher_of_student":
 { Args: { "target_student_id": string }; Returns: boolean
-                           },
-"isnt_empty":
-{ Args: { "": string }; Returns: string
                            },
 "join_institute_as_teacher":
 { Args: { "p_bio"?: string,"p_code": string,"p_experience_years"?: number,"p_monthly_fee_rate"?: number,"p_qualification"?: string,"p_specialization"?: string,"p_specialization_subjects"?: (string)[] }; Returns: Json
@@ -1181,73 +1301,45 @@ isOneToOne: false
 "link_child_by_code":
 { Args: { "p_relationship"?: string,"p_student_code": string }; Returns: Json
                            },
-"lives_ok":
-{ Args: { "": string }; Returns: string
+"lookup_institute_by_code":
+{ Args: { "p_code": string }; Returns: Json
                            },
-"no_plan":
-{ Args: Record<PropertyKey, never>; Returns: boolean[]
+"post_announcement":
+{ Args: { "p_batch_id": string,"p_content": string,"p_institute_id": string,"p_priority"?: string,"p_title": string }; Returns: Json
                            },
-"num_failed":
-{ Args: Record<PropertyKey, never>; Returns: number
+"reapply_join_request":
+{ Args: { "p_request_id": string,"p_updated_details": Json }; Returns: Json
                            },
-"os_name":
-{ Args: Record<PropertyKey, never>; Returns: string
+"register_push_token":
+{ Args: { "p_device_id"?: string,"p_platform": string,"p_token": string }; Returns: Json
                            },
-"pass":
-{ Args: Record<PropertyKey, never>; Returns: string
-                           } |
-{ Args: { "": string }; Returns: string
+"reject_join_request":
+{ Args: { "p_reason": string,"p_request_id": string }; Returns: Json
                            },
-"pg_version":
-{ Args: Record<PropertyKey, never>; Returns: string
+"request_account_deletion":
+{ Args: Record<PropertyKey, never>; Returns: Json
                            },
-"pg_version_num":
-{ Args: Record<PropertyKey, never>; Returns: number
-                           },
-"pgtap_version":
-{ Args: Record<PropertyKey, never>; Returns: number
-                           },
-"runtests":
-{ Args: Record<PropertyKey, never>; Returns: string[]
-                           } |
-{ Args: { "": string }; Returns: string[]
-                           },
-"skip":
-{ Args: { "": string }; Returns: string
-                           } |
-{ Args: { "how_many": number,"why": string }; Returns: string
+"request_parent_child_link":
+{ Args: { "p_relationship"?: string,"p_student_code": string }; Returns: Json
                            },
 "submit_and_grade_quiz":
 { Args: { "p_answers": Json,"p_assignment_id": string,"p_student_id": string }; Returns: Json
                            },
-"throws_ok":
-{ Args: { "": string }; Returns: string
+"submit_quiz":
+{ Args: { "p_answers": Json,"p_assignment_id": string }; Returns: Json
                            },
-"todo":
-{ Args: { "how_many": number }; Returns: boolean[]
-                           } |
-{ Args: { "how_many": number,"why": string }; Returns: boolean[]
-                           } |
-{ Args: { "why": string }; Returns: boolean[]
-                           } |
-{ Args: { "how_many": number,"why": string }; Returns: boolean[]
+"submit_written_homework":
+{ Args: { "p_assignment_id": string,"p_file_urls": Json,"p_submission_text": string }; Returns: Json
                            },
-"todo_end":
-{ Args: Record<PropertyKey, never>; Returns: boolean[]
-                           },
-"todo_start":
-{ Args: Record<PropertyKey, never>; Returns: boolean[]
-                           } |
-{ Args: { "": string }; Returns: boolean[]
+"waitlist_join_request":
+{ Args: { "p_reason": string,"p_request_id": string }; Returns: Json
                            }
           }
           Enums: {
             "account_type_enum": "coaching_center"|"individual_teacher","app_role_enum": "admin"|"teacher"|"student"|"parent","assignment_type_enum": "file"|"quiz","member_status_enum": "active"|"suspended"|"pending","verification_status_enum": "pending"|"verified"|"rejected","video_provider_enum": "youtube"|"bunny"|"direct"
           }
           CompositeTypes: {
-            "_time_trial_type": {
-                        "a_time": number | null
-                      }
+            [_ in never]: never
           }
         }
 }
@@ -1368,20 +1460,37 @@ export const Constants = {
           }
         }
 } as const
+
 // ==============================================================================
-// ACADLY - COMPLETE DATABASE TYPE DEFINITIONS
-// Canonical typing aligned with 0001_core -> 0006_storage migration schema.
+// APPLICATION LEVEL HELPER TYPES & EXTENDED MODELS
 // ==============================================================================
 
 export type UserRole = 'admin' | 'teacher' | 'student' | 'parent';
-export type VerificationStatus = 'pending' | 'verified' | 'rejected';
+export type VerificationStatus = 'pending' | 'verified' | 'rejected' | 'waitlisted' | 'approved';
 export type MemberStatus = 'active' | 'suspended' | 'pending';
-export type AssignmentType = 'file' | 'quiz';
+export type AssignmentType = 'file' | 'quiz' | 'written' | 'mcq';
 export type FeeStatus = 'paid' | 'partial' | 'pending' | 'overdue';
 export type PaymentMode = 'razorpay' | 'upi' | 'cash' | 'bank_transfer' | 'cheque' | 'bank';
 export type PaymentStatus = 'paid' | 'success' | 'pending' | 'failed' | 'refunded';
 
-// ------------------------------------------------------------------------------
+export interface BatchSchedule {
+  id: string;
+  institute_id: string;
+  batch_id: string;
+  subject_id?: string;
+  teacher_id?: string;
+  subject_name?: string;
+  teacher_name?: string;
+  weekday: string;
+  start_time: string;
+  end_time: string;
+  room?: string;
+  tag?: string;
+  is_live?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 // Core Entities (0001_core.sql)
 // ------------------------------------------------------------------------------
 
@@ -1571,7 +1680,7 @@ export interface JoinRequest {
   user_id: string;
   requested_role: UserRole;
   code_used: string;
-  student_extra_details_json?: Record<string, any>;
+  student_extra_details_json?: Record<string, unknown>;
   status: VerificationStatus;
   reviewed_by?: string;
   reviewed_at?: string;
@@ -1599,7 +1708,7 @@ export interface AttendanceRecord {
 
 export interface AttendanceAuditLog {
   id: string;
-  attendance_id?: string;
+  attendance_id: string;
   batch_id: string;
   student_id: string;
   previous_status: string;
@@ -1653,10 +1762,17 @@ export interface StudyMaterial {
 
 export interface AssignmentQuestion {
   id: string;
-  prompt: string;
+  prompt?: string;
+  question?: string;
+  questionText?: string;
+  title?: string;
   options?: string[];
   correct_answer?: string;
-  marks: number;
+  correct_option_index?: number;
+  explanation?: string;
+  marks?: number;
+  points?: number;
+  [key: string]: unknown;
 }
 
 export interface Assignment {
@@ -1671,7 +1787,7 @@ export interface Assignment {
   instructions: string;
   description?: string;
   type?: AssignmentType;
-  questions?: AssignmentQuestion[] | Record<string, any>;
+  questions?: AssignmentQuestion[] | Record<string, unknown>;
   question_paper_url?: string;
   due_date: string;
   due_label: string;
@@ -1696,7 +1812,7 @@ export interface Submission {
   student_name: string;
   roll_number: string;
   submission_text?: string;
-  answers?: Record<string, any>;
+  answers?: Record<string, unknown>;
   score?: number;
   file_url?: string;
   file_name?: string;
@@ -1707,6 +1823,10 @@ export interface Submission {
   submitted_at: string;
   submitted_at_formatted?: string;
   graded_at?: string;
+  ai_score?: number | null;
+  ai_feedback?: string | null;
+  ai_status?: 'none' | 'pending_review' | 'suggested' | 'approved' | 'rejected';
+  ai_graded_at?: string | null;
 }
 
 export interface Examination {
@@ -1886,8 +2006,8 @@ export interface InAppNotification {
   message: string;
   body?: string;
   type: 'attendance' | 'fee' | 'lecture' | 'assignment' | 'broadcast' | 'fee_reminder' | 'general' | string;
-  data?: Record<string, any>;
-  deep_link_data?: Record<string, any>;
+  data?: Record<string, unknown>;
+  deep_link_data?: Record<string, unknown>;
   is_read: boolean;
   created_at: string;
 }
@@ -1935,3 +2055,38 @@ export interface Student360Profile {
   percentile: number;
   teacherRemarks: string[];
 }
+
+
+export interface Announcement {
+  id: string;
+  institute_id: string;
+  batch_id?: string | null;
+  author_id: string;
+  title: string;
+  content: string;
+  priority?: 'normal' | 'urgent' | 'high';
+  created_at: string;
+  updated_at?: string;
+  author_name?: string;
+  read_count?: number;
+  is_read?: boolean;
+}
+
+export interface AnnouncementRead {
+  announcement_id: string;
+  user_id: string;
+  read_at: string;
+}
+
+export interface ParentStudentLink {
+  id: string;
+  institute_id: string;
+  parent_id: string;
+  student_id: string;
+  relationship: string;
+  student_code_entered?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  updated_at?: string;
+}
+

@@ -33,6 +33,17 @@ import {
 } from '@/services/submissionService';
 import { type Assignment } from '@/types/database';
 
+interface QuizQuestion {
+  id: string;
+  question?: string;
+  questionText?: string;
+  title?: string;
+  type?: 'mcq' | 'text' | 'boolean' | 'true_false' | string;
+  options?: string[];
+  points?: number;
+  marks?: number;
+}
+
 interface QuizRunnerProps {
   assignment: Assignment | null;
   visible: boolean;
@@ -49,9 +60,9 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
   const { user, activeInstitute } = useAuth();
 
   const [loading, setLoading] = useState(true);
-  const [sanitizedAssignment, setSanitizedAssignment] = useState<any | null>(null);
+  const [sanitizedAssignment, setSanitizedAssignment] = useState<Assignment | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [answers, setAnswers] = useState<Record<string, string | number | boolean>>({});
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<QuizSubmissionResult | null>(null);
@@ -61,7 +72,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
   useEffect(() => {
     if (!visible || !assignment || !user) return;
 
-    let timer: any = null;
+    let timer: ReturnType<typeof setInterval> | null = null;
     let isMounted = true;
 
     const init = async () => {
@@ -96,7 +107,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
         // Fetch sanitized questions
         const secureAsg = await getAssignmentForTaking(assignment.id);
         if (isMounted) {
-          setSanitizedAssignment(secureAsg || assignment);
+          setSanitizedAssignment((secureAsg as unknown as Assignment) || assignment);
         }
       } catch (err) {
         console.warn('Could not load secure quiz:', err);
@@ -119,14 +130,14 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
       isMounted = false;
       if (timer) clearInterval(timer);
     };
-  }, [visible, assignment?.id, user?.id]);
+  }, [visible, assignment, user]);
 
   if (!visible || !assignment) return null;
 
-  const rawQuestions: any[] = Array.isArray(sanitizedAssignment?.questions)
-    ? sanitizedAssignment.questions
+  const rawQuestions: QuizQuestion[] = Array.isArray(sanitizedAssignment?.questions)
+    ? (sanitizedAssignment.questions as unknown as QuizQuestion[])
     : Array.isArray(assignment?.questions)
-    ? (assignment.questions as any[])
+    ? (assignment.questions as unknown as QuizQuestion[])
     : [];
 
   const currentQ = rawQuestions[currentIndex];
@@ -408,25 +419,26 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                       variant="pro"
                     />
                     <Text className="text-xs font-extrabold text-slate-400">
-                      {currentQ.marks || 1} Marks
+                      {String(currentQ.marks || 1)} Marks
                     </Text>
                   </View>
 
                   {/* Question Prompt */}
                   <Text className="text-base font-extrabold text-white leading-relaxed">
-                    {currentQ.questionText || currentQ.question}
+                    {String(currentQ.questionText || currentQ.question || '')}
                   </Text>
 
                   {/* Options List */}
                   {currentQ.type === 'mcq' || currentQ.type === 'true_false' ? (
                     <View className="gap-2.5 mt-2">
                       {currentQ.options?.map((optionText: string, optIndex: number) => {
-                        const isSelected = answers[currentQ.id] === optIndex;
+                        const questionId = currentQ.id || `q-${currentIndex}`;
+                        const isSelected = answers[questionId] === optIndex;
                         return (
                           <TouchableOpacity
                             key={optIndex}
                             activeOpacity={0.8}
-                            onPress={() => handleSelectOption(currentQ.id, optIndex)}
+                            onPress={() => handleSelectOption(questionId, optIndex)}
                             accessibilityRole="radio"
                             accessibilityState={{ selected: isSelected }}
                             className={`p-3.5 rounded-2xl border flex-row items-center justify-between ${

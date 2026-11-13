@@ -12,7 +12,13 @@
     "back": "Back",
     "next": "Next",
     "previous": "Previous",
-    "submit": "Submit"
+    "submit": "Submit",
+    "retry": "Retry",
+    "viewAll": "View All",
+    "close": "Close",
+    "edit": "Edit",
+    "details": "Details",
+    "status": "Status"
   },
   "roles": {
     "student": "Student",
@@ -28,7 +34,35 @@
     "emailOrPhone": "Email or Mobile Number",
     "password": "Password",
     "selectRole": "Choose your primary role",
-    "googleSignIn": "Continue with Google"
+    "googleSignIn": "Continue with Google",
+    "createTuition": "Create my tuition",
+    "joinWithCode": "Join with code or invite link",
+    "forgotPassword": "Forgot Password?",
+    "haveAccount": "Already have an account? Sign in",
+    "needAccount": "Need an account? Sign up",
+    "fullName": "Full Name",
+    "emailAddress": "Email Address",
+    "signInAs": "Sign In as {{role}}",
+    "completeRegistration": "Complete {{role}} Registration"
+  },
+  "teacher": {
+    "activeBatches": "Active Batches",
+    "commitRollCall": "Commit Roll Call",
+    "batchFocus": "Batch & Schedule Focus",
+    "soloDesk": "Solo Tutor Desk",
+    "facultyDesk": "Faculty Command Desk",
+    "savingToDatabase": "Saving to Database...",
+    "commitAndDispatch": "Commit & Dispatch Roll Call",
+    "signOutPrompt": "Are you sure you want to sign out from the Teacher Desk?"
+  },
+  "student": {
+    "verifyingEnrollment": "Verifying student enrollment...",
+    "signOutPrompt": "Are you sure you want to log out of the Student Portal?",
+    "home": "Home",
+    "schedule": "Schedule",
+    "dpps": "DPPs",
+    "mastery": "Mastery",
+    "profile": "Profile"
   },
   "attendance": {
     "title": "Roll Call & Attendance",
@@ -37,7 +71,11 @@
     "late": "Late",
     "rate": "Attendance Rate",
     "markAllPresent": "Mark All Present",
-    "recordSuccess": "Attendance recorded successfully"
+    "commit": "Commit Attendance",
+    "recordSuccess": "Attendance recorded successfully",
+    "correctEntry": "Correct Entry",
+    "correctionReason": "Reason for correction (required)",
+    "auditLog": "Attendance Audit Log"
   },
   "academic": {
     "quiz": "Interactive Quiz",
@@ -49,21 +87,49 @@
     "score": "Score",
     "accuracy": "Accuracy",
     "assignments": "Assignments",
-    "submissions": "Submissions"
+    "submissions": "Submissions",
+    "reportCard": "Download Term Report Card (PDF)",
+    "exportData": "Export Academic Records (JSON)",
+    "deleteAccount": "Delete Account & Data",
+    "homework": "Daily Homework",
+    "evaluating": "Under Evaluation"
+  },
+  "ai": {
+    "generatorTitle": "Generate Quiz Draft with Gemini AI",
+    "generatorSubtitle": "Upload or paste lecture notes to auto-generate draft MCQs",
+    "quotaRemaining": "Daily AI Quota",
+    "privacyBanner": "Privacy Guaranteed: Zero student PII is transmitted to AI services.",
+    "aiCheckedAwaiting": "AI-checked, awaiting teacher review",
+    "aiSuggestion": "Gemini Evaluation Suggestion",
+    "approveGrade": "Approve Grade & Publish",
+    "fetchSuggestion": "Fetch AI Suggestion"
   },
   "navigation": {
     "home": "Home",
-    "study": "Study Vault",
-    "analytics": "Performance",
-    "roster": "Class Roster",
+    "schedule": "Schedule",
+    "academics": "DPPs",
+    "performance": "Mastery",
+    "profile": "Profile",
+    "roster": "Roster",
+    "exams": "Exams & Chat",
+    "settings": "Settings",
     "chat": "Messages",
-    "profile": "Profile"
+    "community": "Community"
   },
   "settings": {
     "language": "App Language",
     "english": "English",
     "hindi": "हिन्दी (Hindi)",
     "darkMode": "Dark Mode",
-    "notifications": "Push Notifications"
+    "notifications": "Push Notifications",
+    "walkthrough": "First-Run Tour",
+    "walkthroughDesc": "Review feature highlights and navigation guides for your role"
+  },
+  "parent": {
+    "linkChild": "Link Child with Student Code",
+    "childSwitcher": "Selected Ward",
+    "noChildLinked": "No children linked yet. Enter a student code to connect.",
+    "absentNotice": "Absent Notification Received",
+    "messageTeacher": "Message Batch Teacher"
   }
 }

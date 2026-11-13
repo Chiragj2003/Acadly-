@@ -2,9 +2,9 @@ name: Acadly Continuous Integration
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, round-1]
   pull_request:
-    branches: [main, master]
+    branches: [main, master, round-1]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

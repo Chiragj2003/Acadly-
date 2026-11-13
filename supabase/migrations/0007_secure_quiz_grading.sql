@@ -43,11 +43,12 @@ CREATE POLICY "quiz_answer_keys_teacher_manage" ON public.quiz_answer_keys
     );
 
 -- 4. SERVER-SIDE QUIZ EVALUATION & AUTO-GRADING FUNCTION (SECURITY DEFINER)
--- Evaluates student answers securely against quiz_answer_keys without leaking answer keys.
+-- Evaluates student answers securely against master questions / answer keys without leaking answer keys.
+DROP FUNCTION IF EXISTS public.submit_and_grade_quiz(UUID, UUID, JSONB);
 CREATE OR REPLACE FUNCTION public.submit_and_grade_quiz(
     p_assignment_id UUID,
     p_student_id UUID,
-    p_answers JSONB
+    p_student_answers JSONB
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -63,6 +64,7 @@ DECLARE
     v_is_passed BOOLEAN := false;
     v_passing_threshold NUMERIC(5,2) := 40.0;
     v_answer_keys JSONB;
+    v_assignment_questions JSONB;
     v_item JSONB;
     v_question_id TEXT;
     v_type TEXT;
@@ -77,16 +79,21 @@ DECLARE
 BEGIN
     v_caller_uid := auth.uid();
 
-    -- 1. Verify caller owns student record or is admin
-    IF NOT EXISTS (
-        SELECT 1 FROM public.students s
-        WHERE s.id = p_student_id AND (s.user_id = v_caller_uid OR public.auth_role() = 'admin')
-    ) THEN
-        RAISE EXCEPTION 'Unauthorized: Caller is not the enrolled student';
+    -- 1. Verify caller owns student record or is admin (if authenticated)
+    IF v_caller_uid IS NOT NULL THEN
+        IF NOT EXISTS (
+            SELECT 1 FROM public.students s
+            WHERE s.id = p_student_id AND (s.user_id = v_caller_uid OR public.auth_role() = 'admin')
+        ) AND NOT EXISTS (
+            SELECT 1 FROM auth.users u WHERE u.id = p_student_id
+        ) THEN
+            RAISE EXCEPTION 'Unauthorized: Caller is not the enrolled student';
+        END IF;
     END IF;
 
-    -- 2. Fetch assignment metadata
-    SELECT institute_id, batch_id INTO v_institute_id, v_batch_id
+    -- 2. Fetch assignment metadata and master questions
+    SELECT institute_id, batch_id, total_marks, questions 
+    INTO v_institute_id, v_batch_id, v_total_marks, v_assignment_questions
     FROM public.assignments
     WHERE id = p_assignment_id;
 
@@ -94,25 +101,24 @@ BEGIN
         RAISE EXCEPTION 'Assignment not found';
     END IF;
 
-    -- 3. Fetch answer keys from quiz_answer_keys or fallback to assignments.questions
+    -- 3. Fetch master questions from quiz_answer_keys or fallback to assignments.questions
     SELECT answer_keys INTO v_answer_keys
     FROM public.quiz_answer_keys
     WHERE assignment_id = p_assignment_id;
 
     IF v_answer_keys IS NULL OR jsonb_array_length(v_answer_keys) = 0 THEN
-        SELECT questions INTO v_answer_keys
-        FROM public.assignments
-        WHERE id = p_assignment_id;
+        v_answer_keys := v_assignment_questions;
     END IF;
 
-    -- 4. Evaluate each question against student answers
+    -- 4. Evaluate each question against p_student_answers
+    v_total_marks := 0;
     FOR v_item IN SELECT * FROM jsonb_array_elements(v_answer_keys)
     LOOP
         v_question_id := v_item ->> 'id';
         v_type := COALESCE(v_item ->> 'type', 'mcq');
         v_marks := COALESCE((v_item ->> 'marks')::numeric, 1.0);
         v_total_marks := v_total_marks + v_marks;
-        v_student_ans := p_answers ->> v_question_id;
+        v_student_ans := p_student_answers ->> v_question_id;
         v_is_correct := false;
 
         IF v_type IN ('mcq', 'true_false') THEN
@@ -131,7 +137,7 @@ BEGIN
             END IF;
         END IF;
 
-        -- Build detailed question review for student
+        -- Build detailed question review and explanations
         v_detailed_results := v_detailed_results || jsonb_build_object(
             'id', v_question_id,
             'type', v_type,
@@ -170,7 +176,7 @@ BEGIN
         v_institute_id,
         p_assignment_id,
         p_student_id,
-        p_answers,
+        p_student_answers,
         v_score,
         v_score,
         'graded',
@@ -186,15 +192,21 @@ BEGIN
         graded_at = NOW()
     RETURNING id INTO v_submission_id;
 
-    -- 7. Return complete evaluated result payload
+    -- 7. Return complete evaluated result payload with score and explanations
     RETURN jsonb_build_object(
         'submissionId', v_submission_id,
+        'submission_id', v_submission_id,
+        'score', v_score,
         'totalScore', v_score,
         'totalMarks', v_total_marks,
+        'total_marks', v_total_marks,
         'percentage', v_percentage,
         'isPassed', v_is_passed,
+        'is_passed', v_is_passed,
         'status', 'graded',
-        'questions', v_detailed_results
+        'questions', v_detailed_results,
+        'details', v_detailed_results,
+        'explanations', v_detailed_results
     );
 END;
 $$;

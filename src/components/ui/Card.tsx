@@ -11,10 +11,10 @@ export interface CardProps extends ViewProps {
 }
 
 const elevationClasses: Record<CardElevation, string> = {
-  lowest: 'bg-white rounded-2xl p-4 shadow-xs border border-slate-200/90',
-  low: 'bg-white rounded-2xl p-4 shadow-xs border border-slate-200',
-  container: 'bg-slate-50 rounded-2xl p-4 border border-slate-200/80',
-  high: 'bg-white rounded-2xl p-4 shadow-sm border border-slate-200',
+  lowest: 'bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-xs border border-slate-200/90 dark:border-slate-800',
+  low: 'bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-xs border border-slate-200 dark:border-slate-800',
+  container: 'bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-700',
+  high: 'bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-800',
   hero: 'bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-5 shadow-sm',
 };
 
