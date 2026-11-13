@@ -53,11 +53,20 @@ jobs:
         run: npm ci
 
       - name: Run Jest Test Suite
-        run: npm test
+        run: |
+          npm test 2>&1 | tee test-output.log
         env:
           CI: 'true'
           EXPO_PUBLIC_SUPABASE_URL: https://mock-ci-project.supabase.co
           EXPO_PUBLIC_SUPABASE_ANON_KEY: mock-ci-anon-key-for-test-suite
+
+      - name: Publish Test Summary
+        if: always()
+        run: |
+          echo "## Jest Test Log" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -n 80 test-output.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
   supabase-rls-audit:
     name: Supabase Migration & RLS Security Audit
