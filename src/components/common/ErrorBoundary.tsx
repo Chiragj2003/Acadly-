@@ -45,7 +45,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </View>
 
             <View className="items-center gap-1">
-              <Text className="text-base font-black text-slate-900 dark:text-slate-100 text-center">
+              <Text className="text-base font-display text-slate-900 dark:text-slate-100 text-center">
                 Something unexpected occurred
               </Text>
               <Text className="text-xs text-slate-600 dark:text-slate-400 text-center leading-relaxed">
@@ -61,7 +61,7 @@ export class ErrorBoundary extends Component<Props, State> {
               className="bg-blue-600 w-full py-3.5 rounded-xl flex-row items-center justify-center gap-2 active:scale-98 min-h-[44px]"
             >
               <RotateCcw size={16} color="#FFFFFF" />
-              <Text className="text-xs font-bold text-white">Retry & Refresh</Text>
+              <Text className="text-xs font-sans-bold text-white">Retry & Refresh</Text>
             </TouchableOpacity>
           </View>
         </View>

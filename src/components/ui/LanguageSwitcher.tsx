@@ -19,10 +19,10 @@ export const LanguageSwitcher: React.FC<{ className?: string }> = ({ className =
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
           <View className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200 items-center justify-center">
-            <Languages size={16} color="#2563EB" />
+            <Languages size={16} color="#1C1C1E" />
           </View>
           <View>
-            <Text className="text-xs font-black text-slate-900 uppercase tracking-wider">
+            <Text className="text-xs font-display text-slate-900 uppercase tracking-wider">
               {t('settings.language', 'App Language')}
             </Text>
             <Text className="text-[11px] text-slate-500">
@@ -46,13 +46,13 @@ export const LanguageSwitcher: React.FC<{ className?: string }> = ({ className =
           }`}
         >
           <Text
-            className={`text-xs font-bold ${
+            className={`text-xs font-sans-bold ${
               selected === 'en' ? 'text-blue-900' : 'text-slate-700'
             }`}
           >
             English
           </Text>
-          {selected === 'en' && <Check size={14} color="#2563EB" />}
+          {selected === 'en' && <Check size={14} color="#1C1C1E" />}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -68,13 +68,13 @@ export const LanguageSwitcher: React.FC<{ className?: string }> = ({ className =
           }`}
         >
           <Text
-            className={`text-xs font-bold ${
+            className={`text-xs font-sans-bold ${
               selected === 'hi' ? 'text-blue-900' : 'text-slate-700'
             }`}
           >
             हिन्दी (Hindi)
           </Text>
-          {selected === 'hi' && <Check size={14} color="#2563EB" />}
+          {selected === 'hi' && <Check size={14} color="#1C1C1E" />}
         </TouchableOpacity>
       </View>
     </View>

@@ -78,7 +78,8 @@ export const createBatch = async (
     .from('batches')
     .insert({
       ...batchData,
-      status: batchData.status || 'active',
+      // batches.status CHECK allows in_progress | upcoming | completed | archived.
+      status: batchData.status || 'in_progress',
     })
     .select('*')
     .single();
@@ -88,6 +89,35 @@ export const createBatch = async (
   }
 
   return { ...data, student_count: 0 } as Batch;
+};
+
+export interface StudentEnrollment {
+  batch_id: string;
+  batch_name: string;
+}
+
+/**
+ * Fetch the batches a student (students.id) is currently enrolled in.
+ */
+export const getStudentEnrollments = async (studentId: string): Promise<StudentEnrollment[]> => {
+  if (!isSupabaseConfigured || !studentId) return [];
+
+  const { data, error } = await supabase
+    .from('batch_students')
+    .select('batch_id, batch:batches(name)')
+    .eq('student_id', studentId)
+    .eq('status', 'enrolled')
+    .order('enrolled_at', { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to load enrolments: ${error.message}`);
+  }
+
+  type Row = { batch_id: string; batch: { name: string } | { name: string }[] | null };
+  return ((data || []) as unknown as Row[]).map((row) => {
+    const batch = Array.isArray(row.batch) ? row.batch[0] : row.batch;
+    return { batch_id: row.batch_id, batch_name: batch?.name ?? '' };
+  });
 };
 
 /**
@@ -117,7 +147,9 @@ export const getBatchStudents = async (batchId: string): Promise<BatchStudentRow
       )
     `)
     .eq('batch_id', batchId)
-    .eq('status', 'active');
+    // Enrolment RPCs (0009_security_hardening_round1.sql) write status = 'enrolled';
+    // filtering on 'active' always returned an empty list.
+    .eq('status', 'enrolled');
 
   if (error) {
     throw new Error(`Failed to load batch students: ${error.message}`);

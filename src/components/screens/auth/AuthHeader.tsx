@@ -8,14 +8,16 @@ interface AuthHeaderProps {
 }
 
 export const AuthHeader: React.FC<AuthHeaderProps> = ({
-  title = 'Welcome to Acadly',
-  subtitle = 'Tuition & Coaching Management Platform',
+  title = 'Good to see you.',
+  subtitle = 'Class, practice and progress, in one calm place.',
 }) => {
   return (
-    <View className="items-center py-4">
+    <View className="items-center pt-2 pb-4 gap-2">
       <Mascot size="lg" mood="happy" />
-      <Text className="text-2xl font-black text-slate-900 mt-2">{title}</Text>
-      <Text className="text-xs text-slate-500 font-medium text-center max-w-[260px] mt-0.5">
+      <Text accessibilityRole="header" className="text-[30px] leading-[34px] font-display text-ink text-center mt-3">
+        {title}
+      </Text>
+      <Text className="text-[15px] text-slate-600 font-sans text-center max-w-[290px]">
         {subtitle}
       </Text>
     </View>

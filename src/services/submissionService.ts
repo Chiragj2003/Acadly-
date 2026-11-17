@@ -52,6 +52,38 @@ export const getSubmissionsForAssignment = async (
 };
 
 /**
+ * Fetch all submissions for every assignment in a batch (teacher grading inbox).
+ */
+export const getSubmissionsForBatch = async (batchId: string): Promise<Submission[]> => {
+  if (!isSupabaseConfigured || !batchId) return [];
+
+  const { data, error } = await supabase
+    .from('submissions')
+    .select(`
+      *,
+      assignment:assignments!inner(id, batch_id, title),
+      student:students(
+        id,
+        roll_number,
+        user:profiles(full_name, email, avatar_url)
+      )
+    `)
+    .eq('assignment.batch_id', batchId)
+    .order('submitted_at', { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to load batch submissions: ${error.message}`);
+  }
+
+  type Row = Submission & { student?: { roll_number?: string; user?: { full_name?: string } } };
+  return ((data || []) as unknown as Row[]).map((s) => ({
+    ...s,
+    student_name: s.student?.user?.full_name || 'Student',
+    roll_number: s.student?.roll_number || '',
+  })) as Submission[];
+};
+
+/**
  * Fetch a specific student's submission for an assignment.
  */
 export const getStudentSubmission = async (

@@ -33,18 +33,18 @@ function buildReportCardHTML(data: ProgressSummaryData): string {
         .map(
           (r) => `
         <tr>
-          <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #1e293b;">${r.examTitle}</td>
-          <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; text-align: center; color: #475569;">${r.marksObtained} / ${r.maxMarks}</td>
-          <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: ${r.percentage >= 75 ? '#16a34a' : r.percentage >= 40 ? '#d97706' : '#dc2626'};">${r.percentage}%</td>
-          <td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; text-align: center; color: #2563eb; font-weight: 700;">${r.grade || 'A'}</td>
+          <td style="padding: 10px 14px; border-bottom: 1px solid #E6E2DA; font-weight: 600; color: #2A2724;">${r.examTitle}</td>
+          <td style="padding: 10px 14px; border-bottom: 1px solid #E6E2DA; text-align: center; color: #4A463F;">${r.marksObtained} / ${r.maxMarks}</td>
+          <td style="padding: 10px 14px; border-bottom: 1px solid #E6E2DA; text-align: center; font-weight: 700; color: ${r.percentage >= 75 ? '#16a34a' : r.percentage >= 40 ? '#d97706' : '#dc2626'};">${r.percentage}%</td>
+          <td style="padding: 10px 14px; border-bottom: 1px solid #E6E2DA; text-align: center; color: #1C1C1E; font-weight: 700;">${r.grade || 'A'}</td>
         </tr>
       `
         )
         .join('')
-    : `<tr><td colspan="4" style="padding: 14px; text-align: center; color: #94a3b8;">No examination records logged yet.</td></tr>`;
+    : `<tr><td colspan="4" style="padding: 14px; text-align: center; color: #8C877E;">No examination records logged yet.</td></tr>`;
 
   const remarksList = (data.teacherRemarks || [])
-    .map((rm) => `<li style="margin-bottom: 6px; color: #334155;">${rm}</li>`)
+    .map((rm) => `<li style="margin-bottom: 6px; color: #3B372F;">${rm}</li>`)
     .join('');
 
   return `
@@ -57,13 +57,13 @@ function buildReportCardHTML(data: ProgressSummaryData): string {
         <style>
           body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            color: #0f172a;
+            color: #1C1C1E;
             padding: 36px 32px;
             background-color: #ffffff;
             margin: 0;
           }
           .header {
-            border-bottom: 2px solid #2563eb;
+            border-bottom: 2px solid #1C1C1E;
             padding-bottom: 20px;
             margin-bottom: 24px;
             display: flex;
@@ -77,8 +77,8 @@ function buildReportCardHTML(data: ProgressSummaryData): string {
             letter-spacing: -0.5px;
           }
           .badge {
-            background-color: #eff6ff;
-            color: #1d4ed8;
+            background-color: #EEF4FC;
+            color: #121212;
             font-size: 11px;
             font-weight: 700;
             padding: 4px 10px;
@@ -88,8 +88,8 @@ function buildReportCardHTML(data: ProgressSummaryData): string {
             margin-top: 4px;
           }
           .student-card {
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background-color: #F3F1EC;
+            border: 1px solid #E6E2DA;
             border-radius: 12px;
             padding: 16px 20px;
             margin-bottom: 24px;
@@ -101,23 +101,23 @@ function buildReportCardHTML(data: ProgressSummaryData): string {
             font-size: 10px;
             font-weight: 700;
             text-transform: uppercase;
-            color: #64748b;
+            color: #6E6A63;
             display: block;
             margin-bottom: 2px;
           }
           .student-field span {
             font-size: 13px;
             font-weight: 700;
-            color: #0f172a;
+            color: #1C1C1E;
           }
           .section-title {
             font-size: 14px;
             font-weight: 800;
-            color: #1e293b;
+            color: #2A2724;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 12px;
-            border-left: 3px solid #2563eb;
+            border-left: 3px solid #1C1C1E;
             padding-left: 8px;
           }
           table {
@@ -127,12 +127,12 @@ function buildReportCardHTML(data: ProgressSummaryData): string {
             font-size: 12px;
           }
           th {
-            background-color: #f1f5f9;
+            background-color: #EDE9E1;
             padding: 10px 14px;
             text-align: left;
             font-weight: 700;
-            color: #475569;
-            border-bottom: 1px solid #cbd5e1;
+            color: #4A463F;
+            border-bottom: 1px solid #D8D3CA;
           }
           .remarks-box {
             background-color: #f0fdf4;
@@ -142,10 +142,10 @@ function buildReportCardHTML(data: ProgressSummaryData): string {
             margin-bottom: 28px;
           }
           .footer {
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid #E6E2DA;
             padding-top: 16px;
             font-size: 10px;
-            color: #94a3b8;
+            color: #8C877E;
             display: flex;
             justify-content: space-between;
           }
@@ -157,7 +157,7 @@ function buildReportCardHTML(data: ProgressSummaryData): string {
             <div class="inst-name">${data.instituteName}</div>
             <div class="badge">Official Term Progress Summary</div>
           </div>
-          <div style="text-align: right; font-size: 11px; color: #64748b;">
+          <div style="text-align: right; font-size: 11px; color: #6E6A63;">
             <div>Generated: ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
             <div>Acadly Verified Record</div>
           </div>

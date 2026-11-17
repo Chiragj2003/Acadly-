@@ -59,7 +59,7 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
         <View className="flex-row items-center justify-between mb-3">
           <View className="flex-row items-center gap-2">
             <View className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-            <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <Text className="text-xs font-sans-bold text-slate-500 uppercase tracking-wider">
               {teacherMode === 'solo' ? 'Solo Tutor Workspace' : 'Institute Faculty Mode'}
             </Text>
           </View>
@@ -68,8 +68,8 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
             onPress={onOpenDualMode}
             className="bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 flex-row items-center gap-1 active:scale-95"
           >
-            <Layers size={12} color="#2563EB" />
-            <Text className="text-[11px] font-bold text-blue-600">
+            <Layers size={12} color="#1C1C1E" />
+            <Text className="text-[11px] font-sans-bold text-blue-600">
               {teacherMode === 'solo' ? 'Solo' : 'Coaching'} • Switch
             </Text>
           </TouchableOpacity>
@@ -77,7 +77,7 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
 
         <View className="flex-row items-center gap-3.5 mb-4">
           <View className="w-14 h-14 rounded-2xl bg-blue-600 items-center justify-center shadow-xs">
-            <Text className="text-lg font-black text-white">
+            <Text className="text-lg font-display text-white">
               {teacherProfile.fullName
                 .split(' ')
                 .map((n) => n[0])
@@ -86,13 +86,13 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
             </Text>
           </View>
           <View className="flex-1 min-w-0">
-            <Text className="text-base font-extrabold text-slate-900" numberOfLines={1}>
+            <Text className="text-base font-display text-slate-900" numberOfLines={1}>
               {teacherProfile.fullName}
             </Text>
             <Text className="text-xs text-slate-500 mt-0.5" numberOfLines={1}>
               {teacherProfile.qualification} • {teacherProfile.experienceYears} Years Exp
             </Text>
-            <Text className="text-[11px] font-semibold text-blue-600 mt-0.5">
+            <Text className="text-[11px] font-sans-semibold text-blue-600 mt-0.5">
               {teacherProfile.specializationSubjects.join(' • ')}
             </Text>
           </View>
@@ -101,10 +101,10 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
         {/* Shareable Teacher Code Strip */}
         <View className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200 flex-row items-center justify-between">
           <View>
-            <Text className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+            <Text className="text-[10px] font-sans-bold text-slate-600 uppercase tracking-wider">
               Shareable Teacher Code
             </Text>
-            <Text className="text-base font-black text-blue-600 tracking-wider">
+            <Text className="text-base font-display text-blue-600 tracking-wider">
               {teacherProfile.teacherCode}
             </Text>
           </View>
@@ -114,7 +114,7 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
               onPress={onCopyTeacherCode}
               className="p-2 bg-white rounded-xl border border-slate-200 active:scale-95"
             >
-              <Copy size={14} color="#475569" />
+              <Copy size={14} color="#4A463F" />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -122,7 +122,7 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
               className="bg-blue-600 px-3.5 py-2 rounded-xl flex-row items-center gap-1.5 active:scale-95 shadow-xs"
             >
               <Share2 size={13} color="#ffffff" />
-              <Text className="text-xs font-bold text-white">Share Code</Text>
+              <Text className="text-xs font-sans-bold text-white">Share Code</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -135,12 +135,12 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
           >
             <View className="flex-row items-center gap-2 flex-1 pr-2">
               <View className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-              <Text className="text-xs font-bold text-amber-900">
+              <Text className="text-xs font-sans-bold text-amber-900">
                 {pendingJoinCount} student{pendingJoinCount > 1 ? 's' : ''} waiting for batch admission
               </Text>
             </View>
             <View className="flex-row items-center gap-1 bg-amber-200/60 px-2 py-0.5 rounded-lg">
-              <Text className="text-[10px] font-bold text-amber-900">Review</Text>
+              <Text className="text-[10px] font-sans-bold text-amber-900">Review</Text>
               <ChevronRight size={12} color="#78350f" />
             </View>
           </TouchableOpacity>
@@ -151,8 +151,8 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
       <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
-            <Calendar size={16} color="#2563EB" />
-            <Text className="text-sm font-bold text-slate-900">Today's Class Schedule</Text>
+            <Calendar size={16} color="#1C1C1E" />
+            <Text className="text-sm font-sans-bold text-slate-900">Today's Class Schedule</Text>
           </View>
           <Badge label="3 Sessions" variant="info" />
         </View>
@@ -171,21 +171,21 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
             >
               <View className="flex-1 pr-2">
                 <View className="flex-row items-center gap-2 mb-0.5">
-                  <Text className="text-xs font-bold text-slate-900">{item.batch}</Text>
+                  <Text className="text-xs font-sans-bold text-slate-900">{item.batch}</Text>
                   {item.active && (
                     <View className="bg-emerald-100 px-1.5 py-0.2 rounded border border-emerald-200">
-                      <Text className="text-[9px] font-bold text-emerald-800">Next Up</Text>
+                      <Text className="text-[9px] font-sans-bold text-emerald-800">Next Up</Text>
                     </View>
                   )}
                 </View>
                 <Text className="text-[11px] text-slate-500">{item.subject}</Text>
                 <View className="flex-row items-center gap-2 mt-1">
                   <View className="flex-row items-center gap-1">
-                    <Clock size={11} color="#64748B" />
-                    <Text className="text-[10px] font-medium text-slate-500">{item.time}</Text>
+                    <Clock size={11} color="#6E6A63" />
+                    <Text className="text-[10px] font-sans text-slate-500">{item.time}</Text>
                   </View>
                   <Text className="text-[10px] text-slate-500">•</Text>
-                  <Text className="text-[10px] font-medium text-slate-500">{item.count}</Text>
+                  <Text className="text-[10px] font-sans text-slate-500">{item.count}</Text>
                 </View>
               </View>
 
@@ -193,7 +193,7 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
                 onPress={() => onNavigateTab('roster')}
                 className="bg-white px-3 py-1.5 rounded-xl border border-slate-200 active:scale-95"
               >
-                <Text className="text-xs font-bold text-blue-600">Roll Call →</Text>
+                <Text className="text-xs font-sans-bold text-blue-600">Roll Call →</Text>
               </TouchableOpacity>
             </View>
           ))}
@@ -203,7 +203,7 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
       {/* 3. Quick Action Navigation Cards */}
       <View className="gap-2">
         <View className="flex-row items-center justify-between px-1">
-          <Text className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+          <Text className="text-xs font-sans-bold text-slate-600 uppercase tracking-wider">
             Quick Shortcuts
           </Text>
           {onOpenAnnouncement && (
@@ -211,8 +211,8 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
               onPress={onOpenAnnouncement}
               className="flex-row items-center gap-1 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-lg active:scale-95"
             >
-              <Megaphone size={11} color="#2563EB" />
-              <Text className="text-[10px] font-bold text-blue-700">Broadcast Notice</Text>
+              <Megaphone size={11} color="#1C1C1E" />
+              <Text className="text-[10px] font-sans-bold text-blue-700">Broadcast Notice</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -222,9 +222,9 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
             className="flex-1 bg-white border border-slate-200/90 p-3.5 rounded-2xl items-center gap-2 active:scale-98 shadow-xs"
           >
             <View className="w-10 h-10 rounded-xl bg-blue-50 items-center justify-center">
-              <ClipboardCheck size={18} color="#2563EB" />
+              <ClipboardCheck size={18} color="#1C1C1E" />
             </View>
-            <Text className="text-xs font-bold text-slate-800 text-center">Daily Roll Call</Text>
+            <Text className="text-xs font-sans-bold text-slate-800 text-center">Daily Roll Call</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -234,7 +234,7 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
             <View className="w-10 h-10 rounded-xl bg-emerald-50 items-center justify-center">
               <Plus size={18} color="#059669" />
             </View>
-            <Text className="text-xs font-bold text-slate-800 text-center">New DPP</Text>
+            <Text className="text-xs font-sans-bold text-slate-800 text-center">New DPP</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -244,7 +244,7 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
             <View className="w-10 h-10 rounded-xl bg-amber-50 items-center justify-center">
               <Award size={18} color="#d97706" />
             </View>
-            <Text className="text-xs font-bold text-slate-800 text-center">Test Marks</Text>
+            <Text className="text-xs font-sans-bold text-slate-800 text-center">Test Marks</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -254,7 +254,7 @@ export const TeacherHomeTab: React.FC<TeacherHomeTabProps> = ({
             <View className="w-10 h-10 rounded-xl bg-purple-50 items-center justify-center">
               <MessageSquare size={18} color="#7c3aed" />
             </View>
-            <Text className="text-xs font-bold text-slate-800 text-center">Doubt Chat</Text>
+            <Text className="text-xs font-sans-bold text-slate-800 text-center">Doubt Chat</Text>
           </TouchableOpacity>
         </View>
       </View>

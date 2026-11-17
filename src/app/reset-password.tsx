@@ -90,14 +90,14 @@ export default function ResetPasswordScreen() {
           className="w-10 h-10 rounded-full bg-slate-100 items-center justify-center mb-6"
           activeOpacity={0.7}
         >
-          <ArrowLeft size={20} color="#334155" />
+          <ArrowLeft size={20} color="#3B372F" />
         </TouchableOpacity>
 
         <View className="items-center mb-8">
           <View className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center mb-4">
-            <KeyRound size={32} color="#2563EB" />
+            <KeyRound size={32} color="#1C1C1E" />
           </View>
-          <Text className="text-2xl font-black text-slate-900 tracking-tight">
+          <Text className="text-2xl font-display text-slate-900 tracking-tight">
             Create New Password
           </Text>
           <Text className="text-sm text-slate-500 mt-2 text-center max-w-xs">
@@ -107,14 +107,14 @@ export default function ResetPasswordScreen() {
 
         {errorMsg && (
           <View className="p-3.5 rounded-xl bg-red-50 border border-red-200 mb-5">
-            <Text className="text-xs font-bold text-red-700">{errorMsg}</Text>
+            <Text className="text-xs font-sans-bold text-red-700">{errorMsg}</Text>
           </View>
         )}
 
         {isSuccess && (
           <View className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 mb-5 flex-row items-center gap-2">
             <CheckCircle2 size={16} color="#059669" />
-            <Text className="text-xs font-bold text-emerald-800">
+            <Text className="text-xs font-sans-bold text-emerald-800">
               Password successfully updated! Redirecting...
             </Text>
           </View>
@@ -122,11 +122,11 @@ export default function ResetPasswordScreen() {
 
         <View className="gap-4 mb-6">
           <View>
-            <Text className="text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+            <Text className="text-xs font-sans-bold text-slate-700 mb-1.5 uppercase tracking-wider">
               New Password
             </Text>
             <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3">
-              <Lock size={18} color="#64748B" />
+              <Lock size={18} color="#6E6A63" />
               <TextInput
                 value={password}
                 onChangeText={(t) => {
@@ -134,20 +134,20 @@ export default function ResetPasswordScreen() {
                   setErrorMsg(null);
                 }}
                 placeholder="At least 6 characters"
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor="#8C877E"
                 secureTextEntry
                 autoCapitalize="none"
-                className="flex-1 ml-2.5 text-sm font-semibold text-slate-900"
+                className="flex-1 ml-2.5 text-sm font-sans-semibold text-slate-900"
               />
             </View>
           </View>
 
           <View>
-            <Text className="text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+            <Text className="text-xs font-sans-bold text-slate-700 mb-1.5 uppercase tracking-wider">
               Confirm New Password
             </Text>
             <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3">
-              <ShieldCheck size={18} color="#64748B" />
+              <ShieldCheck size={18} color="#6E6A63" />
               <TextInput
                 value={confirmPassword}
                 onChangeText={(t) => {
@@ -155,10 +155,10 @@ export default function ResetPasswordScreen() {
                   setErrorMsg(null);
                 }}
                 placeholder="Re-enter your password"
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor="#8C877E"
                 secureTextEntry
                 autoCapitalize="none"
-                className="flex-1 ml-2.5 text-sm font-semibold text-slate-900"
+                className="flex-1 ml-2.5 text-sm font-sans-semibold text-slate-900"
               />
             </View>
           </View>
@@ -175,7 +175,7 @@ export default function ResetPasswordScreen() {
           {loading ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text className="text-base font-black text-white">Save New Password</Text>
+            <Text className="text-base font-display text-white">Save New Password</Text>
           )}
         </TouchableOpacity>
 
@@ -184,8 +184,8 @@ export default function ResetPasswordScreen() {
           activeOpacity={0.7}
           className="mt-6 items-center"
         >
-          <Text className="text-sm font-bold text-slate-600">
-            Cancel & Return to <Text className="text-blue-600 font-black">Sign In</Text>
+          <Text className="text-sm font-sans-bold text-slate-600">
+            Cancel & Return to <Text className="text-blue-600 font-display">Sign In</Text>
           </Text>
         </TouchableOpacity>
       </ScrollView>

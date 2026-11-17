@@ -16,19 +16,19 @@ export interface MetricCardProps {
 
 const trendStyles: Record<TrendDirection, { text: string; bg?: string }> = {
   positive: {
-    text: 'text-on-tertiary-container font-semibold',
+    text: 'text-on-tertiary-container font-sans-semibold',
     bg: 'bg-tertiary-fixed/30',
   },
   negative: {
-    text: 'text-error font-semibold',
+    text: 'text-error font-sans-semibold',
     bg: 'bg-error-container',
   },
   info: {
-    text: 'text-secondary font-semibold',
+    text: 'text-secondary font-sans-semibold',
     bg: 'bg-secondary-fixed/40',
   },
   neutral: {
-    text: 'text-on-surface-variant font-medium',
+    text: 'text-on-surface-variant font-sans',
     bg: 'bg-surface-container',
   },
 };
@@ -49,7 +49,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
     <View className="flex-col justify-between">
       <View className="flex-row items-start justify-between">
         <Text
-          className="text-xs text-on-surface-variant font-medium flex-1 mr-2"
+          className="text-xs text-on-surface-variant font-sans flex-1 mr-2"
           numberOfLines={1}
         >
           {title}
@@ -64,13 +64,13 @@ export const MetricCard: React.FC<MetricCardProps> = ({
       <View className="mt-2.5">
         <View className="flex-row items-baseline gap-1">
           <Text
-            className="text-2xl font-bold text-on-surface tracking-tight"
+            className="text-2xl font-sans-bold text-on-surface tracking-tight"
             numberOfLines={1}
           >
             {value}
           </Text>
           {subValue && (
-            <Text className="text-xs text-on-surface-variant font-medium">
+            <Text className="text-xs text-on-surface-variant font-sans">
               {subValue}
             </Text>
           )}

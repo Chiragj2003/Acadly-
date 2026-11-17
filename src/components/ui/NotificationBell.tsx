@@ -13,7 +13,7 @@ interface NotificationBellProps {
 
 export const NotificationBell: React.FC<NotificationBellProps> = ({
   className = '',
-  iconColor = '#475569',
+  iconColor = '#4A463F',
   size = 18,
 }) => {
   const { user } = useAuth();
@@ -52,7 +52,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
         <Bell size={size} color={iconColor} />
         {unreadCount > 0 && (
           <View className="absolute -top-1 -right-1 bg-rose-500 rounded-full min-w-[18px] h-[18px] px-1 items-center justify-center border-2 border-white dark:border-slate-900">
-            <Text className="text-[10px] font-black text-white">
+            <Text className="text-[10px] font-display text-white">
               {unreadCount > 99 ? '99+' : unreadCount}
             </Text>
           </View>

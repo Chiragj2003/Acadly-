@@ -126,24 +126,24 @@ export const TeacherMarksEntryModal: React.FC<TeacherMarksEntryModalProps> = ({
           {/* Header */}
           <View className="flex-row items-center justify-between pb-3 border-b border-slate-100">
             <View>
-              <Text className="text-base font-bold text-slate-900">Record Examination Marks</Text>
+              <Text className="text-base font-sans-bold text-slate-900">Record Examination Marks</Text>
               <Text className="text-xs text-slate-500">{batchName}</Text>
             </View>
             <TouchableOpacity
               onPress={onClose}
               className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center"
             >
-              <X size={18} color="#64748b" />
+              <X size={18} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
           <ScrollView className="py-3" keyboardShouldPersistTaps="handled">
             {/* Exam Metadata */}
             <View className="bg-slate-50 p-4 rounded-2xl border border-slate-200 gap-3 mb-4">
-              <Text className="text-xs font-bold text-slate-700 uppercase">Exam Details</Text>
+              <Text className="text-xs font-sans-bold text-slate-700 uppercase">Exam Details</Text>
 
               <View>
-                <Text className="text-[11px] font-semibold text-slate-600 mb-1">Title</Text>
+                <Text className="text-[11px] font-sans-semibold text-slate-600 mb-1">Title</Text>
                 <TextInput
                   value={examTitle}
                   onChangeText={setExamTitle}
@@ -154,7 +154,7 @@ export const TeacherMarksEntryModal: React.FC<TeacherMarksEntryModalProps> = ({
 
               <View className="flex-row gap-2">
                 <View className="flex-1">
-                  <Text className="text-[11px] font-semibold text-slate-600 mb-1">Max Marks</Text>
+                  <Text className="text-[11px] font-sans-semibold text-slate-600 mb-1">Max Marks</Text>
                   <TextInput
                     value={maxMarks}
                     onChangeText={setMaxMarks}
@@ -163,7 +163,7 @@ export const TeacherMarksEntryModal: React.FC<TeacherMarksEntryModalProps> = ({
                   />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-[11px] font-semibold text-slate-600 mb-1">Passing Marks</Text>
+                  <Text className="text-[11px] font-sans-semibold text-slate-600 mb-1">Passing Marks</Text>
                   <TextInput
                     value={passingMarks}
                     onChangeText={setPassingMarks}
@@ -172,7 +172,7 @@ export const TeacherMarksEntryModal: React.FC<TeacherMarksEntryModalProps> = ({
                   />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-[11px] font-semibold text-slate-600 mb-1">Exam Date</Text>
+                  <Text className="text-[11px] font-sans-semibold text-slate-600 mb-1">Exam Date</Text>
                   <TextInput
                     value={examDate}
                     onChangeText={setExamDate}
@@ -183,7 +183,7 @@ export const TeacherMarksEntryModal: React.FC<TeacherMarksEntryModalProps> = ({
             </View>
 
             {/* Students Marks Entry Table */}
-            <Text className="text-xs font-bold text-slate-700 mb-2">
+            <Text className="text-xs font-sans-bold text-slate-700 mb-2">
               Student Marks ({students.length} Enrolled)
             </Text>
 
@@ -203,7 +203,7 @@ export const TeacherMarksEntryModal: React.FC<TeacherMarksEntryModalProps> = ({
                   >
                     <View className="flex-1 mr-3">
                       <View className="flex-row items-center gap-1.5">
-                        <Text className="text-xs font-bold text-slate-800">{s.name}</Text>
+                        <Text className="text-xs font-sans-bold text-slate-800">{s.name}</Text>
                         <Text className="text-[10px] text-slate-400">Roll: {s.rollNumber}</Text>
                       </View>
                       <TextInput
@@ -224,7 +224,7 @@ export const TeacherMarksEntryModal: React.FC<TeacherMarksEntryModalProps> = ({
                         }`}
                       >
                         <Text
-                          className={`text-[10px] font-bold ${
+                          className={`text-[10px] font-sans-bold ${
                             isAbsent ? 'text-white' : 'text-slate-600'
                           }`}
                         >
@@ -239,14 +239,14 @@ export const TeacherMarksEntryModal: React.FC<TeacherMarksEntryModalProps> = ({
                           onChangeText={(val) => handleScoreChange(s.id, val)}
                           placeholder="0"
                           keyboardType="numeric"
-                          className={`text-center font-bold text-xs py-1.5 px-2 rounded-xl border ${
+                          className={`text-center font-sans-bold text-xs py-1.5 px-2 rounded-xl border ${
                             isAbsent
                               ? 'bg-slate-100 border-slate-200 text-slate-400'
                               : 'bg-white border-blue-300 text-blue-700'
                           }`}
                         />
                       </View>
-                      <Text className="text-[11px] font-bold text-slate-400">/{maxMarks}</Text>
+                      <Text className="text-[11px] font-sans-bold text-slate-400">/{maxMarks}</Text>
                     </View>
                   </View>
                 );
@@ -261,7 +261,7 @@ export const TeacherMarksEntryModal: React.FC<TeacherMarksEntryModalProps> = ({
                   students.length === 0 ? 'bg-slate-300' : 'bg-blue-600'
                 }`}
               >
-                <Text className="text-xs font-bold text-white">
+                <Text className="text-xs font-sans-bold text-white">
                   {recordMutation.isPending ? 'Publishing Marks...' : 'Publish & Persist Exam Results'}
                 </Text>
               </TouchableOpacity>

@@ -79,36 +79,36 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
       <View className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs">
         <View className="flex-row items-center gap-2.5 mb-2">
           <View className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
-            <QrCode size={18} color="#2563EB" />
+            <QrCode size={18} color="#1C1C1E" />
           </View>
           <View className="flex-1">
-            <Text className="text-sm font-black text-slate-800">Enter Teacher / Coaching Code</Text>
+            <Text className="text-sm font-display text-slate-800">Enter Teacher / Coaching Code</Text>
             <Text className="text-xs text-slate-500">Share code provided by your teacher</Text>
           </View>
         </View>
 
         <TextInput
           placeholder="e.g. MATH-89 or APEX2026"
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor="#8C877E"
           autoCapitalize="characters"
           value={teacherCode}
           onChangeText={setTeacherCode}
-          className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-sm font-black text-slate-800 tracking-wider mt-2 uppercase"
+          className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-sm font-display text-slate-800 tracking-wider mt-2 uppercase"
         />
 
         {matchedTarget && (
           <View className="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 mt-3">
             <View className="flex-row items-center justify-between mb-1">
               <View className="flex-row items-center gap-1.5">
-                <CheckCircle2 size={14} color="#2563EB" />
-                <Text className="text-xs font-black text-slate-800">{matchedTarget.name}</Text>
+                <CheckCircle2 size={14} color="#1C1C1E" />
+                <Text className="text-xs font-display text-slate-800">{matchedTarget.name}</Text>
               </View>
               <View className="bg-white/90 px-2 py-0.5 rounded-md border border-blue-200/30">
-                <Text className="text-[10px] font-bold text-blue-600">{matchedTarget.type}</Text>
+                <Text className="text-[10px] font-sans-bold text-blue-600">{matchedTarget.type}</Text>
               </View>
             </View>
             <Text className="text-[11px] text-slate-800/80 leading-snug">{matchedTarget.detail}</Text>
-            <Text className="text-[10px] font-bold text-blue-600 mt-1">Fee: {matchedTarget.rate}</Text>
+            <Text className="text-[10px] font-sans-bold text-blue-600 mt-1">Fee: {matchedTarget.rate}</Text>
           </View>
         )}
       </View>
@@ -116,15 +116,15 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
       {/* 2. Academic Profile */}
       <View className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs gap-3">
         <View className="flex-row items-center gap-2 mb-1">
-          <GraduationCap size={16} color="#2563EB" />
-          <Text className="text-sm font-black text-slate-800">Student Academic Profile</Text>
+          <GraduationCap size={16} color="#1C1C1E" />
+          <Text className="text-sm font-display text-slate-800">Student Academic Profile</Text>
         </View>
 
         <View>
-          <Text className="text-xs font-bold text-slate-800 mb-1">Student Full Name</Text>
+          <Text className="text-xs font-sans-bold text-slate-800 mb-1">Student Full Name</Text>
           <TextInput
             placeholder="e.g. Amelia Sharma"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor="#8C877E"
             value={fullName}
             onChangeText={setFullName}
             className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
@@ -132,7 +132,7 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
         </View>
 
         <View>
-          <Text className="text-xs font-bold text-slate-800 mb-1.5">Class / Grade</Text>
+          <Text className="text-xs font-sans-bold text-slate-800 mb-1.5">Class / Grade</Text>
           <View className="flex-row flex-wrap gap-1.5">
             {GRADE_OPTIONS.map((g) => (
               <TouchableOpacity
@@ -142,7 +142,7 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
                   grade === g ? 'bg-blue-600 border-blue-600' : 'bg-slate-50 border-slate-200'
                 }`}
               >
-                <Text className={`text-xs font-bold ${grade === g ? 'text-white' : 'text-slate-700'}`}>
+                <Text className={`text-xs font-sans-bold ${grade === g ? 'text-white' : 'text-slate-700'}`}>
                   {g}
                 </Text>
               </TouchableOpacity>
@@ -151,7 +151,7 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
         </View>
 
         <View>
-          <Text className="text-xs font-bold text-slate-800 mb-1.5">Affiliated Board</Text>
+          <Text className="text-xs font-sans-bold text-slate-800 mb-1.5">Affiliated Board</Text>
           <View className="flex-row flex-wrap gap-1.5">
             {BOARD_OPTIONS.map((b) => (
               <TouchableOpacity
@@ -161,7 +161,7 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
                   board === b ? 'bg-blue-600 border-blue-600' : 'bg-slate-50 border-slate-200'
                 }`}
               >
-                <Text className={`text-xs font-bold ${board === b ? 'text-white' : 'text-slate-700'}`}>
+                <Text className={`text-xs font-sans-bold ${board === b ? 'text-white' : 'text-slate-700'}`}>
                   {b}
                 </Text>
               </TouchableOpacity>
@@ -171,20 +171,20 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
 
         <View className="flex-row gap-2">
           <View className="flex-1">
-            <Text className="text-xs font-bold text-slate-800 mb-1">Target Exam</Text>
+            <Text className="text-xs font-sans-bold text-slate-800 mb-1">Target Exam</Text>
             <TextInput
               placeholder="e.g. IIT-JEE 2026"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor="#8C877E"
               value={targetExam}
               onChangeText={setTargetExam}
               className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
             />
           </View>
           <View className="w-28">
-            <Text className="text-xs font-bold text-slate-800 mb-1">Previous %</Text>
+            <Text className="text-xs font-sans-bold text-slate-800 mb-1">Previous %</Text>
             <TextInput
               placeholder="e.g. 96.2%"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor="#8C877E"
               value={previousScore}
               onChangeText={setPreviousScore}
               className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
@@ -193,10 +193,10 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
         </View>
 
         <View>
-          <Text className="text-xs font-bold text-slate-800 mb-1">School / College Name</Text>
+          <Text className="text-xs font-sans-bold text-slate-800 mb-1">School / College Name</Text>
           <TextInput
             placeholder="e.g. Delhi Public School"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor="#8C877E"
             value={school}
             onChangeText={setSchool}
             className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
@@ -205,7 +205,7 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
 
         {/* Weak Subject Checkboxes */}
         <View>
-          <Text className="text-xs font-bold text-slate-800 mb-1.5">Focus Subject Areas</Text>
+          <Text className="text-xs font-sans-bold text-slate-800 mb-1.5">Focus Subject Areas</Text>
           <View className="flex-row flex-wrap gap-1.5">
             {WEAK_SUBJECT_OPTIONS.map((sub) => {
               const isSel = selectedWeakSubjects.includes(sub);
@@ -217,7 +217,7 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
                     isSel ? 'bg-rose-50 border-rose-300' : 'bg-slate-50 border-slate-200'
                   }`}
                 >
-                  <Text className={`text-[11px] font-bold ${isSel ? 'text-rose-700' : 'text-slate-600'}`}>
+                  <Text className={`text-[11px] font-sans-bold ${isSel ? 'text-rose-700' : 'text-slate-600'}`}>
                     {isSel ? '✓ ' : '+ '}
                     {sub}
                   </Text>
@@ -231,15 +231,15 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
       {/* 3. Guardian & Emergency Contact */}
       <View className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs gap-3">
         <View className="flex-row items-center gap-2 mb-1">
-          <Phone size={16} color="#2563EB" />
-          <Text className="text-sm font-black text-slate-800">Guardian Contact & Bio</Text>
+          <Phone size={16} color="#1C1C1E" />
+          <Text className="text-sm font-display text-slate-800">Guardian Contact & Bio</Text>
         </View>
 
         <View>
-          <Text className="text-xs font-bold text-slate-800 mb-1">Guardian Full Name</Text>
+          <Text className="text-xs font-sans-bold text-slate-800 mb-1">Guardian Full Name</Text>
           <TextInput
             placeholder="e.g. Sunita Sharma"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor="#8C877E"
             value={guardianName}
             onChangeText={setGuardianName}
             className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"
@@ -248,10 +248,10 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
 
         <View className="flex-row gap-2">
           <View className="flex-1">
-            <Text className="text-xs font-bold text-slate-800 mb-1">Guardian Phone (SMS Alerts)</Text>
+            <Text className="text-xs font-sans-bold text-slate-800 mb-1">Guardian Phone (SMS Alerts)</Text>
             <TextInput
               placeholder="+91 98230 44551"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor="#8C877E"
               keyboardType="phone-pad"
               value={guardianPhone}
               onChangeText={setGuardianPhone}
@@ -259,10 +259,10 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
             />
           </View>
           <View className="w-24">
-            <Text className="text-xs font-bold text-slate-800 mb-1">Blood Grp</Text>
+            <Text className="text-xs font-sans-bold text-slate-800 mb-1">Blood Grp</Text>
             <TextInput
               placeholder="e.g. B+"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor="#8C877E"
               value={bloodGroup}
               onChangeText={setBloodGroup}
               className="bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"

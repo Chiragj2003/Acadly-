@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Share, Alert, ActivityIndicator } from 'react-native';
 import { GraduationCap, Share2, LogOut, FileDown, Download, Trash2 } from 'lucide-react-native';
 import { LanguageSwitcher } from '@/components/ui';
-import { exportStudentReportCardPDF } from '@/services/reportCardService';
 import { exportUserData, requestAccountDeletion } from '@/services/accountService';
 
 interface StudentProfileSectionProps {
@@ -11,6 +10,7 @@ interface StudentProfileSectionProps {
   rollNumber: string;
   parentLinkCode: string;
   batchName: string;
+  /** Reserved for the real report card; not shown until results are published. */
   overallAttendance?: number;
   onSignOut: () => void;
 }
@@ -21,7 +21,6 @@ export const StudentProfileSection: React.FC<StudentProfileSectionProps> = ({
   rollNumber,
   parentLinkCode,
   batchName,
-  overallAttendance = 92,
   onSignOut,
 }) => {
   const [isExportingPdf, setIsExportingPdf] = useState(false);
@@ -38,37 +37,17 @@ export const StudentProfileSection: React.FC<StudentProfileSectionProps> = ({
     }
   };
 
+  // The report card PDF used to be filled with invented marks and remarks.
+  // Until it is generated from published results, say so honestly.
   const handleDownloadReportCard = async () => {
     setIsExportingPdf(true);
     try {
-      await exportStudentReportCardPDF({
-        studentName: name,
-        rollNumber,
-        batchName,
-        instituteName: 'Acadly Academy Hub',
-        overallAttendanceRate: overallAttendance,
-        grade: 'Class 12',
-        board: 'CBSE',
-        results: [
-          {
-            examTitle: 'Term 1 Mid-Term Assessment',
-            subject: 'Physics & Maths',
-            marksObtained: 88,
-            maxMarks: 100,
-            percentage: 88,
-            grade: 'A',
-            remarks: 'Strong conceptual clarity in vectors & calculus.',
-          },
-        ],
-        teacherRemarks: [
-          'Demonstrates consistent engagement in live problem-solving sessions.',
-          'Daily homework submissions submitted on time with clear derivations.',
-        ],
-      });
+      Alert.alert('Coming soon', 'Your report card will be available here once your institute publishes term results.');
     } finally {
       setIsExportingPdf(false);
     }
   };
+
 
   const handleExportData = async () => {
     setIsExportingData(true);
@@ -118,29 +97,29 @@ export const StudentProfileSection: React.FC<StudentProfileSectionProps> = ({
     <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
       <View className="flex-row items-center gap-3">
         <View className="w-14 h-14 rounded-2xl bg-blue-100 border border-blue-200 items-center justify-center">
-          <GraduationCap size={28} color="#2563eb" />
+          <GraduationCap size={28} color="#1C1C1E" />
         </View>
         <View className="flex-1">
-          <Text className="text-base font-black text-slate-900">{name}</Text>
+          <Text className="text-base font-display text-slate-900">{name}</Text>
           <Text className="text-xs text-slate-500">{email}</Text>
-          <Text className="text-[11px] text-blue-600 font-bold mt-0.5">{batchName}</Text>
+          <Text className="text-[11px] text-blue-600 font-sans-bold mt-0.5">{batchName}</Text>
         </View>
       </View>
 
       {/* Parent Link Code Card */}
       <View className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 gap-2">
         <View className="flex-row items-center justify-between">
-          <Text className="text-xs font-bold text-slate-600 uppercase">Parent Link Code</Text>
+          <Text className="text-xs font-sans-bold text-slate-600 uppercase">Parent Link Code</Text>
           <TouchableOpacity
             onPress={handleShareCode}
             className="flex-row items-center gap-1 bg-white border border-slate-200 px-2 py-1 rounded-lg"
           >
-            <Share2 size={12} color="#2563eb" />
-            <Text className="text-[11px] font-bold text-blue-600">Share with Parent</Text>
+            <Share2 size={12} color="#1C1C1E" />
+            <Text className="text-[11px] font-sans-bold text-blue-600">Share with Parent</Text>
           </TouchableOpacity>
         </View>
-        <Text className="text-lg font-black text-slate-900 tracking-wider">
-          {parentLinkCode || 'STU-LINK-CODE'}
+        <Text className="text-lg font-display text-slate-900 tracking-wider">
+          {parentLinkCode || 'Not available yet'}
         </Text>
         <Text className="text-[11px] text-slate-500">
           Your parent or guardian enters this code in their Acadly Parent Portal to view your daily attendance and term report cards.
@@ -149,7 +128,7 @@ export const StudentProfileSection: React.FC<StudentProfileSectionProps> = ({
 
       {/* Data Export & Report Card Actions */}
       <View className="gap-2 pt-2 border-t border-slate-100">
-        <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+        <Text className="text-xs font-sans-bold text-slate-500 uppercase tracking-wider">
           Academic Documents & Data
         </Text>
 
@@ -159,10 +138,10 @@ export const StudentProfileSection: React.FC<StudentProfileSectionProps> = ({
           className="bg-blue-50 border border-blue-200 p-3 rounded-2xl flex-row items-center justify-between active:scale-98"
         >
           <View className="flex-row items-center gap-2">
-            <FileDown size={16} color="#2563EB" />
-            <Text className="text-xs font-bold text-blue-900">Download Term Report Card (PDF)</Text>
+            <FileDown size={16} color="#1C1C1E" />
+            <Text className="text-xs font-sans-bold text-blue-900">Download Term Report Card (PDF)</Text>
           </View>
-          {isExportingPdf ? <ActivityIndicator size="small" color="#2563EB" /> : null}
+          {isExportingPdf ? <ActivityIndicator size="small" color="#1C1C1E" /> : null}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -171,10 +150,10 @@ export const StudentProfileSection: React.FC<StudentProfileSectionProps> = ({
           className="bg-slate-50 border border-slate-200 p-3 rounded-2xl flex-row items-center justify-between active:scale-98"
         >
           <View className="flex-row items-center gap-2">
-            <Download size={16} color="#475569" />
-            <Text className="text-xs font-bold text-slate-700">Export My Academic Records (JSON)</Text>
+            <Download size={16} color="#4A463F" />
+            <Text className="text-xs font-sans-bold text-slate-700">Export My Academic Records (JSON)</Text>
           </View>
-          {isExportingData ? <ActivityIndicator size="small" color="#475569" /> : null}
+          {isExportingData ? <ActivityIndicator size="small" color="#4A463F" /> : null}
         </TouchableOpacity>
       </View>
 
@@ -188,7 +167,7 @@ export const StudentProfileSection: React.FC<StudentProfileSectionProps> = ({
           className="p-3 rounded-2xl flex-row items-center justify-center gap-2 active:scale-98"
         >
           <Trash2 size={14} color="#dc2626" />
-          <Text className="text-xs font-bold text-rose-600">Delete Account & Data</Text>
+          <Text className="text-xs font-sans-bold text-rose-600">Delete Account & Data</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -196,7 +175,7 @@ export const StudentProfileSection: React.FC<StudentProfileSectionProps> = ({
           className="bg-rose-50 border border-rose-200 py-3 rounded-2xl flex-row items-center justify-center gap-2 active:scale-98"
         >
           <LogOut size={16} color="#be123c" />
-          <Text className="text-xs font-bold text-rose-700">Sign Out of Student Portal</Text>
+          <Text className="text-xs font-sans-bold text-rose-700">Sign Out of Student Portal</Text>
         </TouchableOpacity>
       </View>
     </View>

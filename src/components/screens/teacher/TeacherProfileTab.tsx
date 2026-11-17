@@ -92,7 +92,7 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
       <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
         <View className="flex-row items-center gap-3.5">
           <View className="w-14 h-14 rounded-2xl bg-blue-600 items-center justify-center shadow-xs">
-            <Text className="text-xl font-black text-white">
+            <Text className="text-xl font-display text-white">
               {teacherProfile.fullName
                 .split(' ')
                 .map((n) => n[0])
@@ -101,18 +101,18 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
             </Text>
           </View>
           <View className="flex-1 min-w-0">
-            <Text className="text-base font-extrabold text-slate-900" numberOfLines={1}>
+            <Text className="text-base font-display text-slate-900" numberOfLines={1}>
               {teacherProfile.fullName}
             </Text>
-            <Text className="text-xs text-slate-500 font-medium">{teacherProfile.qualification}</Text>
+            <Text className="text-xs text-slate-500 font-sans">{teacherProfile.qualification}</Text>
             <View className="flex-row items-center gap-2 mt-1">
               <View className="bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
-                <Text className="text-[10px] font-bold text-blue-700">
+                <Text className="text-[10px] font-sans-bold text-blue-700">
                   {teacherMode === 'solo' ? 'Solo Tutor' : 'Institute Faculty'}
                 </Text>
               </View>
               <View className="bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
-                <Text className="text-[10px] font-bold text-emerald-700">
+                <Text className="text-[10px] font-sans-bold text-emerald-700">
                   ₹{teacherProfile.monthlyFeeRate.toLocaleString()}/mo per pupil
                 </Text>
               </View>
@@ -123,10 +123,10 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
         {/* Teacher Code Card */}
         <View className="bg-slate-50 border border-slate-200 rounded-2xl p-3 flex-row items-center justify-between">
           <View>
-            <Text className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+            <Text className="text-[10px] font-sans-bold text-slate-600 uppercase tracking-wider">
               Batch Enrollment Code
             </Text>
-            <Text className="text-sm font-extrabold text-blue-600 font-mono">
+            <Text className="text-sm font-display text-blue-600 font-mono">
               {teacherProfile.teacherCode}
             </Text>
           </View>
@@ -136,7 +136,7 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
               className="bg-blue-600 px-3 py-1.5 rounded-xl active:scale-95 flex-row items-center gap-1.5 shadow-xs"
             >
               <Share2 size={13} color="#ffffff" />
-              <Text className="text-xs font-bold text-white">Share Code</Text>
+              <Text className="text-xs font-sans-bold text-white">Share Code</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -146,8 +146,8 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
       <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
-            <Clock size={16} color="#2563EB" />
-            <Text className="text-sm font-bold text-slate-900">Active Batch & Schedule</Text>
+            <Clock size={16} color="#1C1C1E" />
+            <Text className="text-sm font-sans-bold text-slate-900">Active Batch & Schedule</Text>
           </View>
           <Badge label={`${batchesList.length} Batches`} variant="info" />
         </View>
@@ -160,10 +160,10 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
           className="bg-blue-50 border border-blue-200 p-3 rounded-2xl flex-row items-center justify-between active:scale-98"
         >
           <View className="flex-row items-center gap-2">
-            <Calendar size={15} color="#2563EB" />
-            <Text className="text-xs font-bold text-blue-900">Manage Batch Timetable / Schedule</Text>
+            <Calendar size={15} color="#1C1C1E" />
+            <Text className="text-xs font-sans-bold text-blue-900">Manage Batch Timetable / Schedule</Text>
           </View>
-          <ChevronRight size={15} color="#2563EB" />
+          <ChevronRight size={15} color="#1C1C1E" />
         </TouchableOpacity>
 
         <View className="gap-2 mt-1">
@@ -181,17 +181,17 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
               >
                 <View className="flex-1 pr-2">
                   <View className="flex-row items-center gap-2 mb-0.5">
-                    <Text className={`text-xs font-bold ${isSelected ? 'text-blue-950' : 'text-slate-900'}`}>
+                    <Text className={`text-xs font-sans-bold ${isSelected ? 'text-blue-950' : 'text-slate-900'}`}>
                       {batch.name}
                     </Text>
                     {isSelected && (
                       <View className="bg-blue-600 px-1.5 py-0.2 rounded">
-                        <Text className="text-[9px] font-bold text-white">Active Focus</Text>
+                        <Text className="text-[9px] font-sans-bold text-white">Active Focus</Text>
                       </View>
                     )}
                   </View>
                   <Text className="text-[11px] text-slate-500">{batch.subject} • {batch.room}</Text>
-                  <Text className="text-[10px] font-semibold text-slate-600 mt-1">
+                  <Text className="text-[10px] font-sans-semibold text-slate-600 mt-1">
                     🕒 {batch.time} • {batch.count} Pupils
                   </Text>
                 </View>
@@ -213,25 +213,25 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
       <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
-            <Users size={16} color="#2563EB" />
-            <Text className="text-sm font-bold text-slate-900">Student Directory & Fee Tracker</Text>
+            <Users size={16} color="#1C1C1E" />
+            <Text className="text-sm font-sans-bold text-slate-900">Student Directory & Fee Tracker</Text>
           </View>
-          <Text className="text-xs font-bold text-slate-500">{filteredStudents.length} Students</Text>
+          <Text className="text-xs font-sans-bold text-slate-500">{filteredStudents.length} Students</Text>
         </View>
 
         {/* Search Bar */}
         <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 gap-2">
-          <Search size={15} color="#94A3B8" />
+          <Search size={15} color="#8C877E" />
           <TextInput
             placeholder="Search pupil by name or roll number..."
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor="#8C877E"
             value={directorySearchQuery}
             onChangeText={setDirectorySearchQuery}
-            className="flex-1 text-xs text-slate-800 font-medium p-0"
+            className="flex-1 text-xs text-slate-800 font-sans p-0"
           />
           {directorySearchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setDirectorySearchQuery('')}>
-              <X size={14} color="#94A3B8" />
+              <X size={14} color="#8C877E" />
             </TouchableOpacity>
           )}
         </View>
@@ -254,7 +254,7 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
                     : 'bg-slate-50 border-slate-200'
                 } active:scale-95`}
               >
-                <Text className={`text-xs font-bold ${isActive ? 'text-white' : 'text-slate-600'}`}>
+                <Text className={`text-xs font-sans-bold ${isActive ? 'text-white' : 'text-slate-600'}`}>
                   {tab.label}
                 </Text>
               </TouchableOpacity>
@@ -265,7 +265,7 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
         {/* Student Cards List with FlashList */}
         {filteredStudents.length === 0 ? (
           <View className="py-8 items-center justify-center">
-            <Text className="text-xs text-slate-500 font-semibold">No students match your filter.</Text>
+            <Text className="text-xs text-slate-500 font-sans-semibold">No students match your filter.</Text>
           </View>
         ) : (
           <View style={{ minHeight: Math.min(filteredStudents.length * 110, 480) }}>
@@ -288,12 +288,12 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
                         className="flex-row items-center gap-2.5 flex-1 min-w-0"
                       >
                         <View className="min-w-[36px] h-8 px-1.5 rounded-xl bg-white border border-slate-200 items-center justify-center shrink-0">
-                          <Text className="text-[11px] font-bold text-blue-600 font-mono" numberOfLines={1}>
+                          <Text className="text-[11px] font-sans-bold text-blue-600 font-mono" numberOfLines={1}>
                             {roll}
                           </Text>
                         </View>
                         <View className="flex-1 min-w-0">
-                          <Text className="text-xs font-bold text-slate-900" numberOfLines={1}>
+                          <Text className="text-xs font-sans-bold text-slate-900" numberOfLines={1}>
                             {st.name}
                           </Text>
                           <Text className="text-[11px] text-slate-500" numberOfLines={1}>
@@ -320,7 +320,7 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
                           <AlertTriangle size={12} color="#d97706" />
                         )}
                         <Text
-                          className={`text-[10px] font-bold ${
+                          className={`text-[10px] font-sans-bold ${
                             isFeePaid ? 'text-emerald-700' : 'text-amber-700'
                           }`}
                         >
@@ -332,10 +332,10 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
                     {/* Chips: Attendance & Rank & Action */}
                     <View className="flex-row items-center justify-between pt-1 border-t border-slate-200/60">
                       <View className="flex-row items-center gap-2">
-                        <Text className="text-[10px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+                        <Text className="text-[10px] font-sans-bold text-slate-600 bg-white px-2 py-0.5 rounded-md border border-slate-200">
                           {st.overallAttendance}% Attendance
                         </Text>
-                        <Text className="text-[10px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+                        <Text className="text-[10px] font-sans-bold text-slate-600 bg-white px-2 py-0.5 rounded-md border border-slate-200">
                           Rank #{st.rank}
                         </Text>
                       </View>
@@ -346,15 +346,15 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
                             onPress={() => Linking.openURL(`tel:${st.guardianPhone}`)}
                             className="w-7 h-7 rounded-xl bg-white border border-slate-200 items-center justify-center active:scale-90"
                           >
-                            <Phone size={12} color="#2563EB" />
+                            <Phone size={12} color="#1C1C1E" />
                           </TouchableOpacity>
                         )}
                         <TouchableOpacity
                           onPress={() => onViewStudentDetail(st.id)}
                           className="bg-white border border-slate-200 px-2.5 py-1 rounded-xl flex-row items-center gap-1 active:scale-95"
                         >
-                          <Text className="text-[11px] font-bold text-slate-700">360° Profile</Text>
-                          <ChevronRight size={12} color="#64748B" />
+                          <Text className="text-[11px] font-sans-bold text-slate-700">360° Profile</Text>
+                          <ChevronRight size={12} color="#6E6A63" />
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -372,12 +372,12 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
         className="bg-blue-50/70 border border-blue-200 p-4 rounded-3xl flex-row items-center justify-between active:scale-98"
       >
         <View className="flex-1 pr-2">
-          <Text className="text-xs font-bold text-blue-900">Switch Account Mode</Text>
+          <Text className="text-xs font-sans-bold text-blue-900">Switch Account Mode</Text>
           <Text className="text-[11px] text-blue-700 mt-0.5">
             Currently: {teacherMode === 'solo' ? 'Independent Solo Tutor' : 'Connected to Coaching Center'}
           </Text>
         </View>
-        <ChevronRight size={16} color="#2563EB" />
+        <ChevronRight size={16} color="#1C1C1E" />
       </TouchableOpacity>
 
       {/* Language Selector */}
@@ -389,7 +389,7 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
         className="bg-rose-50 border border-rose-200 p-4 rounded-3xl flex-row items-center justify-center gap-2 active:scale-98 mb-6"
       >
         <LogOut size={16} color="#e11d48" />
-        <Text className="text-xs font-bold text-rose-700">Sign Out of Teacher Desk</Text>
+        <Text className="text-xs font-sans-bold text-rose-700">Sign Out of Teacher Desk</Text>
       </TouchableOpacity>
     </View>
   );

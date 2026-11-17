@@ -26,14 +26,14 @@ export const TeacherExamsChatTab: React.FC<TeacherExamsChatTabProps> = ({
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
             <Award size={18} color="#d97706" />
-            <Text className="text-sm font-bold text-slate-900">Exam Marks & Live Rankings</Text>
+            <Text className="text-sm font-sans-bold text-slate-900">Exam Marks & Live Rankings</Text>
           </View>
           <TouchableOpacity
             onPress={onOpenMarksModal}
             className="bg-amber-500 px-3 py-1.5 rounded-xl flex-row items-center gap-1.5 active:scale-95"
           >
             <Plus size={13} color="#ffffff" />
-            <Text className="text-xs font-bold text-white">Record Marks</Text>
+            <Text className="text-xs font-sans-bold text-white">Record Marks</Text>
           </TouchableOpacity>
         </View>
 
@@ -50,7 +50,7 @@ export const TeacherExamsChatTab: React.FC<TeacherExamsChatTabProps> = ({
               <Text className="text-lg">📚</Text>
             </View>
             <View>
-              <Text className="text-sm font-bold text-slate-900">{batchName} Chat</Text>
+              <Text className="text-sm font-sans-bold text-slate-900">{batchName} Chat</Text>
               <Text className="text-xs text-slate-500">Teacher + {students.length} Pupils</Text>
             </View>
           </View>
@@ -58,10 +58,10 @@ export const TeacherExamsChatTab: React.FC<TeacherExamsChatTabProps> = ({
         </View>
 
         <View className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
-          <Text className="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1">
+          <Text className="text-[10px] font-sans-bold text-slate-600 uppercase tracking-wider mb-1">
             Pinned Class Announcement
           </Text>
-          <Text className="text-xs text-slate-800 font-semibold">
+          <Text className="text-xs text-slate-800 font-sans-semibold">
             📌 Physics masterclass on Rotational Dynamics is live today at 04:30 PM. Keep your formula cheat-sheets ready!
           </Text>
         </View>
@@ -71,7 +71,7 @@ export const TeacherExamsChatTab: React.FC<TeacherExamsChatTabProps> = ({
           className="bg-blue-600 py-3 rounded-2xl items-center flex-row justify-center gap-2 shadow-xs active:scale-98"
         >
           <MessageSquare size={14} color="#ffffff" />
-          <Text className="text-xs font-bold text-white">Open Batch Chat Room →</Text>
+          <Text className="text-xs font-sans-bold text-white">Open Batch Chat Room →</Text>
         </TouchableOpacity>
       </View>
 
@@ -79,8 +79,8 @@ export const TeacherExamsChatTab: React.FC<TeacherExamsChatTabProps> = ({
       <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
-            <Users size={16} color="#2563EB" />
-            <Text className="text-sm font-bold text-slate-900">1-on-1 Student Doubt Rooms</Text>
+            <Users size={16} color="#1C1C1E" />
+            <Text className="text-sm font-sans-bold text-slate-900">1-on-1 Student Doubt Rooms</Text>
           </View>
           <Badge label="1 Doubt" variant="neutral" />
         </View>
@@ -94,11 +94,11 @@ export const TeacherExamsChatTab: React.FC<TeacherExamsChatTabProps> = ({
             >
               <View className="flex-1 pr-2">
                 <View className="flex-row items-center gap-2 mb-0.5">
-                  <Text className="text-xs font-bold text-slate-900">{st.name}</Text>
-                  <Text className="text-[10px] text-slate-500 font-semibold">{st.rollNumber}</Text>
+                  <Text className="text-xs font-sans-bold text-slate-900">{st.name}</Text>
+                  <Text className="text-[10px] text-slate-500 font-sans-semibold">{st.rollNumber}</Text>
                   {idx === 0 && (
                     <View className="bg-rose-100 px-1.5 py-0.2 rounded border border-rose-200">
-                      <Text className="text-[9px] font-bold text-rose-800">PDF Doubt</Text>
+                      <Text className="text-[9px] font-sans-bold text-rose-800">PDF Doubt</Text>
                     </View>
                   )}
                 </View>
@@ -108,7 +108,7 @@ export const TeacherExamsChatTab: React.FC<TeacherExamsChatTabProps> = ({
                     : 'Sir, which reference book for Rotational Mechanics?'}
                 </Text>
               </View>
-              <Text className="text-[10px] font-semibold text-blue-600">Open Chat</Text>
+              <Text className="text-[10px] font-sans-semibold text-blue-600">Open Chat</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -119,10 +119,10 @@ export const TeacherExamsChatTab: React.FC<TeacherExamsChatTabProps> = ({
           className="mt-1 bg-slate-100 p-3 rounded-2xl border border-slate-200 flex-row items-center justify-between active:scale-98"
         >
           <View className="flex-row items-center gap-2">
-            <Sparkles size={14} color="#2563EB" />
-            <Text className="text-xs font-bold text-slate-800">Community Doubts & Forum</Text>
+            <Sparkles size={14} color="#1C1C1E" />
+            <Text className="text-xs font-sans-bold text-slate-800">Community Doubts & Forum</Text>
           </View>
-          <ArrowRight size={14} color="#64748B" />
+          <ArrowRight size={14} color="#6E6A63" />
         </TouchableOpacity>
       </View>
     </View>

@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { GraduationCap, BookOpen, Users, Shield } from 'lucide-react-native';
+import { View, Text, Pressable } from 'react-native';
+import { GraduationCap, ClipboardCheck, Users, Building2 } from 'lucide-react-native';
 import { type UserRole } from '@/types/database';
 
 interface RoleSelectorProps {
@@ -8,70 +8,44 @@ interface RoleSelectorProps {
   onSelectRole: (role: UserRole) => void;
 }
 
-const ROLES: {
-  role: UserRole;
-  label: string;
-  sub: string;
-  icon: React.ReactNode;
-}[] = [
-  {
-    role: 'student',
-    label: 'Student',
-    sub: 'Classes & DPPs',
-    icon: <GraduationCap size={16} color="#2563eb" />,
-  },
-  {
-    role: 'teacher',
-    label: 'Teacher',
-    sub: 'Roll call & DPPs',
-    icon: <BookOpen size={16} color="#059669" />,
-  },
-  {
-    role: 'parent',
-    label: 'Parent',
-    sub: 'Track child fees',
-    icon: <Users size={16} color="#d97706" />,
-  },
-  {
-    role: 'admin',
-    label: 'Admin',
-    sub: 'Coaching center',
-    icon: <Shield size={16} color="#7c3aed" />,
-  },
+const INK = '#1C1C1E';
+
+// Each role keeps its Soft Desk pastel (pink / sky / peach / mint).
+const ROLES: { role: UserRole; label: string; sub: string; bg: string; Icon: typeof GraduationCap }[] = [
+  { role: 'student', label: 'Student', sub: 'Classes and practice', bg: 'bg-pastel-pink', Icon: GraduationCap },
+  { role: 'teacher', label: 'Teacher', sub: 'Faculty or tutor', bg: 'bg-pastel-sky', Icon: ClipboardCheck },
+  { role: 'parent', label: 'Parent', sub: 'Follow your child', bg: 'bg-pastel-peach', Icon: Users },
+  { role: 'admin', label: 'Institute', sub: 'Run a centre', bg: 'bg-pastel-mint', Icon: Building2 },
 ];
 
-export const RoleSelector: React.FC<RoleSelectorProps> = ({
-  selectedRole,
-  onSelectRole,
-}) => {
-  return (
-    <View className="flex-row gap-2">
-      {ROLES.map((r) => {
-        const isSelected = selectedRole === r.role;
-        return (
-          <TouchableOpacity
-            key={r.role}
-            onPress={() => onSelectRole(r.role)}
-            className={`flex-1 p-2.5 rounded-2xl items-center border-2 ${
-              isSelected
-                ? 'bg-blue-50/80 border-blue-600 shadow-xs'
-                : 'bg-white border-slate-200/80'
-            }`}
-          >
-            <View className="mb-1">{r.icon}</View>
-            <Text
-              className={`text-xs font-bold ${
-                isSelected ? 'text-blue-900' : 'text-slate-700'
-              }`}
-            >
-              {r.label}
+/** 2×2 pastel role tiles; the chosen tile lifts with an ink outline. */
+export const RoleSelector: React.FC<RoleSelectorProps> = ({ selectedRole, onSelectRole }) => (
+  <View accessibilityRole="radiogroup" className="flex-row flex-wrap gap-3">
+    {ROLES.map(({ role, label, sub, bg, Icon }) => {
+      const isSelected = selectedRole === role;
+      return (
+        <Pressable
+          key={role}
+          accessibilityRole="radio"
+          accessibilityState={{ checked: isSelected }}
+          accessibilityLabel={`${label}. ${sub}`}
+          onPress={() => onSelectRole(role)}
+          style={isSelected ? { shadowColor: INK, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 1, shadowRadius: 0, elevation: 4 } : undefined}
+          className={`basis-[47%] grow h-[120px] rounded-[26px] p-3.5 justify-between ${bg} ${
+            isSelected ? 'border-[1.5px] border-ink' : 'border-[1.5px] border-transparent'
+          }`}
+        >
+          <View className="w-10 h-10 rounded-full bg-white items-center justify-center">
+            <Icon size={20} color={INK} />
+          </View>
+          <View>
+            <Text className="font-display text-ink text-[17px]">{label}</Text>
+            <Text className="font-sans text-slate-700 text-xs" numberOfLines={1}>
+              {sub}
             </Text>
-            <Text className="text-[9px] text-slate-400 mt-0.5 text-center" numberOfLines={1}>
-              {r.sub}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
-  );
-};
+          </View>
+        </Pressable>
+      );
+    })}
+  </View>
+);

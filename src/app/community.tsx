@@ -75,10 +75,11 @@ export default function PinterestCommunityScreen() {
   }, [communityPosts, searchQuery]);
 
   const handleUpvote = async (postId: string) => {
+    if (!user?.id) return;
     try {
       await upvotePostMutation.mutateAsync({
         postId,
-        userId: user?.id || '00000000-0000-0000-0000-000000000001',
+        userId: user.id,
         instituteId: activeInstitute?.id,
       });
     } catch {
@@ -93,10 +94,14 @@ export default function PinterestCommunityScreen() {
     fileUri?: string;
     fileName?: string;
   }) => {
+    if (!activeInstitute?.id || !user?.id) {
+      Alert.alert('Not ready', 'Join an institute before posting.');
+      return;
+    }
     try {
       await createPostMutation.mutateAsync({
-        instituteId: activeInstitute?.id || '00000000-0000-0000-0000-000000000001',
-        authorId: user?.id || '00000000-0000-0000-0000-000000000004',
+        instituteId: activeInstitute.id,
+        authorId: user.id,
         authorName: user?.full_name || 'Community Member',
         authorRole: (userRole as 'student' | 'teacher') || 'student',
         title: data.title,
@@ -119,14 +124,18 @@ export default function PinterestCommunityScreen() {
     fileUri: string;
     fileName: string;
   }) => {
+    if (!activeInstitute?.id || !user?.id) {
+      Alert.alert('Not ready', 'Join an institute before uploading.');
+      return;
+    }
     try {
       await uploadMaterialMutation.mutateAsync({
         fileUri: data.fileUri,
         fileName: data.fileName,
         title: data.title,
-        instituteId: activeInstitute?.id || '00000000-0000-0000-0000-000000000001',
+        instituteId: activeInstitute.id,
         category: data.category,
-        uploadedBy: user?.id || '00000000-0000-0000-0000-000000000001',
+        uploadedBy: user.id,
       });
       Alert.alert('Success', 'Study material uploaded to library!');
     } catch (err: unknown) {
@@ -142,10 +151,10 @@ export default function PinterestCommunityScreen() {
         <View className="flex-row items-center justify-between mb-2.5">
           <View className="flex-row items-center gap-2">
             <TouchableOpacity onPress={() => router.back()} className="p-1">
-              <ArrowLeft size={18} color="#0f172a" />
+              <ArrowLeft size={18} color="#1C1C1E" />
             </TouchableOpacity>
             <View>
-              <Text className="text-base font-black text-slate-900">Academic Forum & Library</Text>
+              <Text className="text-base font-display text-slate-900">Academic Forum & Library</Text>
               <Text className="text-[10px] text-slate-500">Peer discussions & shared study files</Text>
             </View>
           </View>
@@ -157,7 +166,7 @@ export default function PinterestCommunityScreen() {
                 className="bg-blue-600 px-3 py-1.5 rounded-xl flex-row items-center gap-1 active:scale-95 shadow-xs"
               >
                 <Plus size={14} color="white" />
-                <Text className="text-xs font-bold text-white">Ask Doubt</Text>
+                <Text className="text-xs font-sans-bold text-white">Ask Doubt</Text>
               </TouchableOpacity>
             ) : (
               (userRole === 'teacher' || userRole === 'admin') && (
@@ -166,7 +175,7 @@ export default function PinterestCommunityScreen() {
                   className="bg-blue-600 px-3 py-1.5 rounded-xl flex-row items-center gap-1 active:scale-95 shadow-xs"
                 >
                   <Upload size={14} color="white" />
-                  <Text className="text-xs font-bold text-white">Upload PDF</Text>
+                  <Text className="text-xs font-sans-bold text-white">Upload PDF</Text>
                 </TouchableOpacity>
               )
             )}
@@ -182,7 +191,7 @@ export default function PinterestCommunityScreen() {
             }`}
           >
             <Text
-              className={`text-xs font-bold ${
+              className={`text-xs font-sans-bold ${
                 activeTab === 'doubts' ? 'text-blue-900' : 'text-slate-600'
               }`}
             >
@@ -196,7 +205,7 @@ export default function PinterestCommunityScreen() {
             }`}
           >
             <Text
-              className={`text-xs font-bold ${
+              className={`text-xs font-sans-bold ${
                 activeTab === 'library' ? 'text-blue-900' : 'text-slate-600'
               }`}
             >
@@ -207,7 +216,7 @@ export default function PinterestCommunityScreen() {
 
         {/* Search Bar */}
         <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2">
-          <Search size={14} color="#94a3b8" />
+          <Search size={14} color="#8C877E" />
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -269,13 +278,13 @@ export default function PinterestCommunityScreen() {
               renderItem={({ item }) => (
                 <View className="bg-white border border-slate-200 rounded-2xl p-3.5 mb-2.5 flex-row items-center justify-between shadow-xs">
                   <View className="flex-1 mr-2">
-                    <Text className="text-xs font-bold text-slate-900">{item.title}</Text>
+                    <Text className="text-xs font-sans-bold text-slate-900">{item.title}</Text>
                     <Text className="text-[11px] text-slate-500">
                       {item.subject} • {item.category || 'Notes'}
                     </Text>
                   </View>
                   <View className="bg-blue-50 px-2 py-1 rounded-lg border border-blue-200">
-                    <Text className="text-[10px] font-bold text-blue-700">PDF</Text>
+                    <Text className="text-[10px] font-sans-bold text-blue-700">PDF</Text>
                   </View>
                 </View>
               )}

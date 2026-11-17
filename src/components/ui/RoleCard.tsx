@@ -103,7 +103,7 @@ export const RoleCard: React.FC<RoleCardProps> = ({
 
       <View className="gap-0.5">
         <Text
-          className={`text-sm font-semibold ${
+          className={`text-sm font-sans-semibold ${
             isSelected ? 'text-on-surface' : 'text-on-surface-variant'
           }`}
           numberOfLines={1}

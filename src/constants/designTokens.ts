@@ -9,47 +9,48 @@
 export const DesignTokens = {
   colors: {
     light: {
+      // "Soft Desk": warm paper ground, white cards, ink text.
       backgroundPrimary: '#FFFFFF',
-      backgroundSecondary: '#F8FAFC',
-      backgroundTertiary: '#F1F5F9',
+      backgroundSecondary: '#F3F1EC',
+      backgroundTertiary: '#EDE9E1',
       surface: '#FFFFFF',
       surfaceRaised: '#FFFFFF',
-      surfaceBorder: '#E2E8F0',
-      surfaceBorderSubtle: '#F1F5F9',
+      surfaceBorder: '#E6E2DA',
+      surfaceBorderSubtle: '#EDE9E1',
 
-      // Text tokens with guaranteed contrast on white/F8FAFC
-      textPrimary: '#0F172A',      // 15.8:1 contrast (AAA)
-      textBody: '#1E293B',         // 12.6:1 contrast (AAA)
-      textSecondary: '#334155',    // 9.5:1 contrast (AAA)
-      textMuted: '#475569',        // 7.1:1 contrast (AAA)
-      textSubtle: '#64748B',       // 4.6:1 contrast (AA)
-      placeholder: '#64748B',      // 4.6:1 contrast
+      // Text tokens (contrast measured on #FFFFFF and #F3F1EC)
+      textPrimary: '#1C1C1E',      // 16:1
+      textBody: '#2A2724',         // 13:1
+      textSecondary: '#3B372F',    // 10:1
+      textMuted: '#4A463F',        // 8:1
+      textSubtle: '#6E6A63',       // 5.3:1 (AA)
+      placeholder: '#6E6A63',
 
-      // Brand & Functional Accents
-      primary: '#2563EB',          // iOS System Blue
-      primaryHover: '#1D4ED8',
-      primaryTint: '#EFF6FF',
-      primaryBorder: '#BFDBFE',
+      // Primary actions are ink pills; pastels carry role colour.
+      primary: '#1C1C1E',
+      primaryHover: '#121212',
+      primaryTint: '#E3EDFA',
+      primaryBorder: '#C9DCF4',
 
-      success: '#059669',          // Emerald
-      successTint: '#ECFDF5',
-      successBorder: '#A7F3D0',
-      successText: '#065F46',
+      success: '#1D7A43',
+      successTint: '#E4F4E9',
+      successBorder: '#CDEBD7',
+      successText: '#1D4A2E',
 
-      warning: '#D97706',          // Amber
-      warningTint: '#FFFBEB',
-      warningBorder: '#FDE68A',
-      warningText: '#92400E',
+      warning: '#B7791F',
+      warningTint: '#FBF2D5',
+      warningBorder: '#F7E7B0',
+      warningText: '#6B4E00',
 
-      error: '#E11D48',            // Rose
-      errorTint: '#FFF1F2',
-      errorBorder: '#FECDD3',
-      errorText: '#9F1239',
+      error: '#B42318',
+      errorTint: '#FBE3EE',
+      errorBorder: '#F6C6DD',
+      errorText: '#8A1C12',
 
-      purple: '#7C3AED',
-      purpleTint: '#F5F3FF',
-      purpleBorder: '#DDD6FE',
-      purpleText: '#5B21B6',
+      purple: '#5B3AA8',
+      purpleTint: '#ECE3FA',
+      purpleBorder: '#D9C8F2',
+      purpleText: '#3A2466',
     },
     dark: {
       backgroundPrimary: '#0A0F1D',
@@ -146,14 +147,33 @@ export const DesignTokens = {
 
   radii: {
     none: 0,
-    xs: 6,
-    sm: 8,
-    md: 12,
-    lg: 16,
-    xl: 20,
-    '2xl': 24,
+    xs: 8,
+    sm: 12,
+    md: 16,
+    lg: 20,
+    xl: 24,
+    '2xl': 28,
     '3xl': 32,
     full: 9999,
+  },
+
+  /** Pastel colour carried by each role; text on pastels is always ink. */
+  rolePastel: {
+    student: { base: '#F6C6DD', soft: '#FBE3EE' },
+    teacher: { base: '#C9DCF4', soft: '#E3EDFA' },
+    parent: { base: '#F9D7BF', soft: '#FCEADD' },
+    admin: { base: '#CDEBD7', soft: '#E4F4E9' },
+  },
+
+  fonts: {
+    display: 'BricolageGrotesque_800ExtraBold',
+    displayBold: 'BricolageGrotesque_700Bold',
+    serif: 'Newsreader_600SemiBold',
+    serifMedium: 'Newsreader_500Medium',
+    body: 'Figtree_500Medium',
+    bodyRegular: 'Figtree_400Regular',
+    bodySemibold: 'Figtree_600SemiBold',
+    bodyBold: 'Figtree_700Bold',
   },
 
   touchTarget: {
@@ -163,21 +183,21 @@ export const DesignTokens = {
 
   shadows: {
     sm: {
-      shadowColor: '#0F172A',
+      shadowColor: '#1C1C1E',
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.05,
       shadowRadius: 2,
       elevation: 1,
     },
     md: {
-      shadowColor: '#0F172A',
+      shadowColor: '#1C1C1E',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.08,
       shadowRadius: 4,
       elevation: 2,
     },
     lg: {
-      shadowColor: '#0F172A',
+      shadowColor: '#1C1C1E',
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.12,
       shadowRadius: 8,

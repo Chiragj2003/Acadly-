@@ -4,6 +4,7 @@ import {
   getBatchById,
   createBatch,
   getBatchStudents,
+  getStudentEnrollments,
   getSubjects,
 } from '@/services/batchService';
 import { type Batch } from '@/types/database';
@@ -16,6 +17,14 @@ export function useBatches(instituteId?: string) {
     queryKey: [BATCHES_QUERY_KEY, instituteId],
     queryFn: () => getBatches(instituteId!),
     enabled: Boolean(instituteId),
+  });
+}
+
+export function useStudentEnrollments(studentId?: string) {
+  return useQuery({
+    queryKey: [BATCHES_QUERY_KEY, 'enrollments', studentId],
+    queryFn: () => getStudentEnrollments(studentId!),
+    enabled: Boolean(studentId),
   });
 }
 

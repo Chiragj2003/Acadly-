@@ -56,7 +56,7 @@ export const RoleOnboardingFields: React.FC<RoleOnboardingFieldsProps> = ({
   if (role === 'teacher') {
     return (
       <View className="gap-2.5 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
-        <Text className="text-[11px] font-bold text-slate-700 uppercase">
+        <Text className="text-[11px] font-sans-bold text-slate-700 uppercase">
           Teacher Profile Setup
         </Text>
 
@@ -70,7 +70,7 @@ export const RoleOnboardingFields: React.FC<RoleOnboardingFieldsProps> = ({
             }`}
           >
             <Text
-              className={`text-xs font-bold ${
+              className={`text-xs font-sans-bold ${
                 teacherOption === 'solo' ? 'text-white' : 'text-slate-700'
               }`}
             >
@@ -86,7 +86,7 @@ export const RoleOnboardingFields: React.FC<RoleOnboardingFieldsProps> = ({
             }`}
           >
             <Text
-              className={`text-xs font-bold ${
+              className={`text-xs font-sans-bold ${
                 teacherOption === 'coaching_faculty' ? 'text-white' : 'text-slate-700'
               }`}
             >
@@ -97,7 +97,7 @@ export const RoleOnboardingFields: React.FC<RoleOnboardingFieldsProps> = ({
 
         {teacherOption === 'coaching_faculty' && (
           <View>
-            <Text className="text-[10px] text-slate-500 font-bold mb-1">Center Invite Code</Text>
+            <Text className="text-[10px] text-slate-500 font-sans-bold mb-1">Center Invite Code</Text>
             <TextInput
               value={facultyCoachingCode}
               onChangeText={setFacultyCoachingCode}
@@ -108,7 +108,7 @@ export const RoleOnboardingFields: React.FC<RoleOnboardingFieldsProps> = ({
         )}
 
         <View>
-          <Text className="text-[10px] text-slate-500 font-bold mb-1">Qualification</Text>
+          <Text className="text-[10px] text-slate-500 font-sans-bold mb-1">Qualification</Text>
           <TextInput
             value={teacherQualification}
             onChangeText={setTeacherQualification}
@@ -119,7 +119,7 @@ export const RoleOnboardingFields: React.FC<RoleOnboardingFieldsProps> = ({
 
         <View className="flex-row gap-2">
           <View className="flex-1">
-            <Text className="text-[10px] text-slate-500 font-bold mb-1">Specialization Subjects</Text>
+            <Text className="text-[10px] text-slate-500 font-sans-bold mb-1">Specialization Subjects</Text>
             <TextInput
               value={teacherSubjects}
               onChangeText={setTeacherSubjects}
@@ -128,7 +128,7 @@ export const RoleOnboardingFields: React.FC<RoleOnboardingFieldsProps> = ({
             />
           </View>
           <View className="w-20">
-            <Text className="text-[10px] text-slate-500 font-bold mb-1">Exp (Yrs)</Text>
+            <Text className="text-[10px] text-slate-500 font-sans-bold mb-1">Exp (Yrs)</Text>
             <TextInput
               value={teacherExperience}
               onChangeText={setTeacherExperience}
@@ -145,12 +145,12 @@ export const RoleOnboardingFields: React.FC<RoleOnboardingFieldsProps> = ({
   if (role === 'admin') {
     return (
       <View className="gap-2.5 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
-        <Text className="text-[11px] font-bold text-slate-700 uppercase">
+        <Text className="text-[11px] font-sans-bold text-slate-700 uppercase">
           Coaching Institute Registration
         </Text>
 
         <View>
-          <Text className="text-[10px] text-slate-500 font-bold mb-1">Institute / Academy Name</Text>
+          <Text className="text-[10px] text-slate-500 font-sans-bold mb-1">Institute / Academy Name</Text>
           <TextInput
             value={instituteName}
             onChangeText={setInstituteName}
@@ -161,7 +161,7 @@ export const RoleOnboardingFields: React.FC<RoleOnboardingFieldsProps> = ({
 
         <View className="flex-row gap-2">
           <View className="flex-1">
-            <Text className="text-[10px] text-slate-500 font-bold mb-1">City</Text>
+            <Text className="text-[10px] text-slate-500 font-sans-bold mb-1">City</Text>
             <TextInput
               value={instituteCity}
               onChangeText={setInstituteCity}
@@ -170,7 +170,7 @@ export const RoleOnboardingFields: React.FC<RoleOnboardingFieldsProps> = ({
             />
           </View>
           <View className="flex-1">
-            <Text className="text-[10px] text-slate-500 font-bold mb-1">Director Contact Phone</Text>
+            <Text className="text-[10px] text-slate-500 font-sans-bold mb-1">Director Contact Phone</Text>
             <TextInput
               value={directorPhone}
               onChangeText={setDirectorPhone}
@@ -186,7 +186,7 @@ export const RoleOnboardingFields: React.FC<RoleOnboardingFieldsProps> = ({
   if (role === 'parent') {
     return (
       <View className="gap-2.5 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
-        <Text className="text-[11px] font-bold text-slate-700 uppercase">
+        <Text className="text-[11px] font-sans-bold text-slate-700 uppercase">
           Link Student Account
         </Text>
         <Text className="text-[11px] text-slate-500">
@@ -197,7 +197,7 @@ export const RoleOnboardingFields: React.FC<RoleOnboardingFieldsProps> = ({
           onChangeText={setParentWardCode}
           placeholder="e.g. STU-12-AMELIA"
           autoCapitalize="characters"
-          className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold"
+          className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-sans-bold"
         />
       </View>
     );

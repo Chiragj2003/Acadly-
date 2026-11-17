@@ -34,11 +34,11 @@ export const SubjectRadarOrBarChart: React.FC<SubjectRadarOrBarChartProps> = ({
     <View className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs mb-4">
       <View className="flex-row items-center justify-between mb-3">
         <View>
-          <Text className="text-base font-black text-slate-900">{title}</Text>
+          <Text className="text-base font-display text-slate-900">{title}</Text>
           <Text className="text-xs text-slate-600">Based on quizzes, assignments & unit tests</Text>
         </View>
         <View className="bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
-          <Text className="text-[10px] font-bold text-blue-700">Avg {avg}% ⭐</Text>
+          <Text className="text-[10px] font-sans-bold text-blue-700">Avg {avg}% ⭐</Text>
         </View>
       </View>
 
@@ -48,16 +48,16 @@ export const SubjectRadarOrBarChart: React.FC<SubjectRadarOrBarChartProps> = ({
             <View className="flex-row items-center justify-between mb-1.5">
               <View className="flex-row items-center gap-2">
                 <Text className="text-lg">{item.emoji}</Text>
-                <Text className="text-xs font-black text-slate-900">{item.subject}</Text>
+                <Text className="text-xs font-display text-slate-900">{item.subject}</Text>
               </View>
 
               <View className="flex-row items-center gap-2">
-                <Text className="text-xs font-black text-slate-900">{item.percentage}%</Text>
+                <Text className="text-xs font-display text-slate-900">{item.percentage}%</Text>
                 <View
                   style={{ backgroundColor: item.bgLight, borderColor: item.color }}
                   className="px-2 py-0.5 rounded-md border"
                 >
-                  <Text style={{ color: item.color }} className="text-[9px] font-bold uppercase">
+                  <Text style={{ color: item.color }} className="text-[9px] font-sans-bold uppercase">
                     {item.status}
                   </Text>
                 </View>

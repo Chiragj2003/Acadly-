@@ -52,8 +52,8 @@ export default function VerifyStudentsScreen() {
     return (
       <ScreenWrapper headerProps={{ title: 'Verification Desk', onBackPress: () => router.back() }}>
         <View className="flex-1 items-center justify-center p-8">
-          <ActivityIndicator size="small" color="#2563EB" />
-          <Text className="text-xs text-slate-500 mt-2 font-medium">Verifying credentials...</Text>
+          <ActivityIndicator size="small" color="#1C1C1E" />
+          <Text className="text-xs text-slate-500 mt-2 font-sans">Verifying credentials...</Text>
         </View>
       </ScreenWrapper>
     );
@@ -152,7 +152,7 @@ export default function VerifyStudentsScreen() {
         onBackPress: () => router.back(),
         rightAction: (
           <TouchableOpacity onPress={() => refetchRequests()} className="p-1">
-            <RefreshCw size={18} color="#2563EB" />
+            <RefreshCw size={18} color="#1C1C1E" />
           </TouchableOpacity>
         ),
       }}
@@ -165,7 +165,7 @@ export default function VerifyStudentsScreen() {
         <View className="bg-blue-600 rounded-3xl p-5 shadow-xs">
           <View className="flex-row items-center gap-2 mb-1">
             <UserCheck size={18} color="#93C5FD" />
-            <Text className="text-sm font-black text-white">Student Admission Desk</Text>
+            <Text className="text-sm font-display text-white">Student Admission Desk</Text>
           </View>
           <Text className="text-xs text-blue-100 leading-relaxed">
             Review incoming student registration applications, assign batches, and verify enrolled

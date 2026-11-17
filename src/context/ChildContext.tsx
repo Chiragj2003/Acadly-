@@ -78,7 +78,10 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               full_name,
               avatar_url
             ),
+            class_grade,
+            parent_link_code,
             batch_students (
+              batch_id,
               batches (
                 name
               )
@@ -104,11 +107,14 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           id: string;
           admission_number?: string;
           user_id: string;
+          class_grade?: string;
+          parent_link_code?: string;
           profiles?: {
             full_name?: string;
             avatar_url?: string;
           } | null;
           batch_students?: {
+            batch_id?: string;
             batches?: {
               name?: string;
             } | null;
@@ -118,17 +124,18 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       const list: ChildStudent[] = (mappings as unknown as MappingItem[]).map((m) => {
         const s = m.students;
-        const batchName = s?.batch_students?.[0]?.batches?.name || 'Class 12 • JEE Advanced (Morning)';
+        // Only real values: no invented batch, admission number or grade.
+        const enrolment = s?.batch_students?.[0];
         return {
           id: s?.id || m.student_id,
-          admission_number: s?.admission_number || 'ADM-2026-088',
+          admission_number: s?.admission_number || '',
           user_id: s?.user_id || '',
-          full_name: s?.profiles?.full_name || 'Enrolled Student',
+          full_name: s?.profiles?.full_name || 'Student',
           avatar_url: s?.profiles?.avatar_url || undefined,
-          batch_name: batchName,
-          grade: 'Class 12',
-          parent_code: 'STU-LINK-CODE',
-          emoji: '🎓',
+          batch_id: enrolment?.batch_id,
+          batch_name: enrolment?.batches?.name || '',
+          grade: s?.class_grade || '',
+          parent_code: s?.parent_link_code || '',
         };
       });
 
@@ -179,18 +186,19 @@ export const ChildProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Re-fetch mapped children
       await fetchChildren();
 
-      // Find linked child
-      const linkedStudentId = (rpcData as any)?.student_id;
-      const linkedChild = childrenList.find((c) => c.id === linkedStudentId) || {
-        id: linkedStudentId || 'student-linked',
-        admission_number: 'ADM-LINKED',
-        user_id: '',
-        full_name: 'Linked Student',
-        batch_name: 'Enrolled Batch',
-        grade: 'Class 12',
-        parent_code: clean,
-        emoji: '🎓',
-      };
+      // Find the linked child in the freshly fetched list. Reading `childrenList`
+      // here gave the stale pre-fetch value, so a fake "Linked Student" with
+      // id "student-linked" was selected instead of the real child.
+      const linkedStudentId = (rpcData as { student_id?: string } | null)?.student_id;
+      const freshList = useChildStore.getState().childrenList;
+      const linkedChild = freshList.find((c) => c.id === linkedStudentId) ?? freshList[freshList.length - 1];
+
+      if (!linkedChild) {
+        return {
+          success: false,
+          error: 'Link request sent. Your child will appear here once the institute confirms it.',
+        };
+      }
 
       setSelectedChild(linkedChild);
       return { success: true, child: linkedChild };

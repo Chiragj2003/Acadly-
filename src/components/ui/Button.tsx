@@ -31,58 +31,59 @@ export interface ButtonProps extends Omit<PressableProps, 'children'> {
   className?: string;
 }
 
+// "Soft Desk": primary actions are ink pills; secondary actions are white pills on paper.
 const variantStyles: Record<ButtonVariant, { container: string; text: string; spinner: string }> = {
   primary: {
-    container: 'bg-blue-600 active:bg-blue-700 shadow-xs',
-    text: 'text-white font-bold',
+    container: 'bg-ink active:opacity-90',
+    text: 'text-white font-sans-bold',
     spinner: '#ffffff',
   },
   secondary: {
-    container: 'bg-slate-900 active:bg-slate-800 shadow-xs',
-    text: 'text-white font-bold',
+    container: 'bg-ink active:opacity-90',
+    text: 'text-white font-sans-bold',
     spinner: '#ffffff',
   },
   secondaryContainer: {
-    container: 'bg-blue-50 border border-blue-200 active:bg-blue-100',
-    text: 'text-blue-900 font-bold',
-    spinner: '#2563EB',
+    container: 'bg-pastel-sky active:opacity-90',
+    text: 'text-ink font-sans-bold',
+    spinner: '#1C1C1E',
   },
   outline: {
-    container: 'bg-white border border-slate-200 active:bg-slate-50',
-    text: 'text-slate-800 font-bold',
-    spinner: '#2563EB',
+    container: 'bg-white border border-hairline active:bg-paper',
+    text: 'text-ink font-sans-bold',
+    spinner: '#1C1C1E',
   },
   ghost: {
-    container: 'bg-transparent active:bg-slate-100',
-    text: 'text-blue-600 font-bold',
-    spinner: '#2563EB',
+    container: 'bg-transparent active:bg-hairline',
+    text: 'text-ink font-sans-bold',
+    spinner: '#1C1C1E',
   },
   surface: {
-    container: 'bg-slate-100 border border-slate-200 active:bg-slate-200',
-    text: 'text-slate-800 font-bold',
-    spinner: '#0F172A',
+    container: 'bg-white active:bg-hairline',
+    text: 'text-ink font-sans-bold',
+    spinner: '#1C1C1E',
   },
   destructive: {
-    container: 'bg-rose-600 active:bg-rose-700 shadow-xs',
-    text: 'text-white font-bold',
+    container: 'bg-rose-700 active:opacity-90',
+    text: 'text-white font-sans-bold',
     spinner: '#ffffff',
   },
 };
 
 const sizeStyles: Record<ButtonSize, { container: string; text: string; iconGap: string }> = {
   sm: {
-    container: 'px-3 py-2 min-h-[44px] min-w-[44px] rounded-lg',
-    text: 'text-xs',
-    iconGap: 'gap-1',
+    container: 'px-4 py-2 min-h-[44px] min-w-[44px] rounded-full',
+    text: 'text-sm',
+    iconGap: 'gap-1.5',
   },
   md: {
-    container: 'px-4 py-2.5 min-h-[44px] min-w-[44px] rounded-xl',
-    text: 'text-sm',
+    container: 'px-5 py-3 min-h-[48px] min-w-[48px] rounded-full',
+    text: 'text-[15px]',
     iconGap: 'gap-2',
   },
   lg: {
-    container: 'px-5 py-3.5 min-h-[48px] min-w-[48px] rounded-2xl',
-    text: 'text-base',
+    container: 'px-6 py-4 min-h-[56px] min-w-[56px] rounded-full',
+    text: 'text-[17px]',
     iconGap: 'gap-2.5',
   },
 };

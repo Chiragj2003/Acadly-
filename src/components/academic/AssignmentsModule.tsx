@@ -49,13 +49,24 @@ import {
 } from '@/services/submissionService';
 import { type Assignment } from '@/types/database';
 
-export const AssignmentsModule: React.FC = () => {
+interface AssignmentsModuleProps {
+  /**
+   * Batch to show. Students pass their enrolled batch; without it the module
+   * falls back to the staff-selected batch (previously students silently saw
+   * the institute's first batch instead of their own).
+   */
+  batchId?: string;
+}
+
+export const AssignmentsModule: React.FC<AssignmentsModuleProps> = ({ batchId }) => {
   const { user, userRole, activeInstitute } = useAuth();
   const { selectedBatchId } = useUI();
 
-  const { data: batches = [] } = useBatches(activeInstitute?.id);
-  const activeBatch = batches.find((b) => b.id === selectedBatchId) || batches[0];
-  const activeBatchId = activeBatch?.id;
+  const { data: batches = [] } = useBatches(batchId ? undefined : activeInstitute?.id);
+  const activeBatch = batchId
+    ? batches.find((b) => b.id === batchId)
+    : batches.find((b) => b.id === selectedBatchId) || batches[0];
+  const activeBatchId = batchId ?? activeBatch?.id;
 
   const {
     data: assignments = [],
@@ -259,7 +270,7 @@ export const AssignmentsModule: React.FC = () => {
             }`}
           >
             <Text
-              className={`text-xs font-bold ${
+              className={`text-xs font-sans-bold ${
                 activeTab === 'pending' ? 'text-white' : 'text-slate-600'
               }`}
             >
@@ -274,7 +285,7 @@ export const AssignmentsModule: React.FC = () => {
             }`}
           >
             <Text
-              className={`text-xs font-bold ${
+              className={`text-xs font-sans-bold ${
                 activeTab === 'submitted' ? 'text-white' : 'text-slate-600'
               }`}
             >
@@ -296,8 +307,8 @@ export const AssignmentsModule: React.FC = () => {
       {/* Loading State */}
       {isAssignmentsLoading && (
         <View className="p-8 items-center justify-center bg-white rounded-2xl border border-slate-200">
-          <ActivityIndicator size="small" color="#2563EB" />
-          <Text className="text-xs text-slate-500 mt-2 font-medium">Loading batch assignments...</Text>
+          <ActivityIndicator size="small" color="#1C1C1E" />
+          <Text className="text-xs text-slate-500 mt-2 font-sans">Loading batch assignments...</Text>
         </View>
       )}
 
@@ -306,8 +317,8 @@ export const AssignmentsModule: React.FC = () => {
         <View className="gap-2.5">
           {assignments.length === 0 ? (
             <View className="p-8 items-center justify-center bg-white rounded-2xl border border-slate-200">
-              <FileCheck size={28} color="#94A3B8" />
-              <Text className="text-sm font-bold text-slate-800 mt-2">No Assignments Created</Text>
+              <FileCheck size={28} color="#8C877E" />
+              <Text className="text-sm font-sans-bold text-slate-800 mt-2">No Assignments Created</Text>
               <Text className="text-xs text-slate-500 text-center mt-1">
                 Active assignments published by faculty will appear here.
               </Text>
@@ -317,7 +328,7 @@ export const AssignmentsModule: React.FC = () => {
               <Card key={asg.id} elevation="lowest" className="gap-2.5 border border-slate-200/80">
                 <View className="flex-row items-start justify-between gap-2">
                   <View className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 items-center justify-center shrink-0">
-                    <FileCheck size={18} color="#2563EB" />
+                    <FileCheck size={18} color="#1C1C1E" />
                   </View>
 
                   <View className="flex-1 min-w-0">
@@ -326,11 +337,11 @@ export const AssignmentsModule: React.FC = () => {
                         label={asg.due_label || 'Due Soon'}
                         variant={asg.due_label?.includes('Tomorrow') ? 'due' : 'neutral'}
                       />
-                      <Text className="text-[11px] text-slate-500 font-medium">
+                      <Text className="text-[11px] text-slate-500 font-sans">
                         Total {asg.total_marks} Marks
                       </Text>
                     </View>
-                    <Text className="text-sm font-extrabold text-slate-900">{asg.title}</Text>
+                    <Text className="text-sm font-display text-slate-900">{asg.title}</Text>
                     {asg.description ? (
                       <Text className="text-xs text-slate-500 mt-0.5 leading-relaxed" numberOfLines={2}>
                         {asg.description}
@@ -340,8 +351,8 @@ export const AssignmentsModule: React.FC = () => {
                 </View>
 
                 <View className="flex-row items-center justify-between pt-2 border-t border-slate-100">
-                  <Text className="text-[11px] text-slate-500 font-medium">
-                    Max Marks: <Text className="font-bold text-slate-800">{asg.total_marks}</Text>
+                  <Text className="text-[11px] text-slate-500 font-sans">
+                    Max Marks: <Text className="font-sans-bold text-slate-800">{asg.total_marks}</Text>
                   </Text>
 
                   {userRole === 'student' && asg.type === 'quiz' && (
@@ -351,7 +362,7 @@ export const AssignmentsModule: React.FC = () => {
                       className="px-3.5 py-1.5 rounded-xl bg-purple-600 shadow-xs flex-row items-center gap-1.5"
                     >
                       <Sparkles size={13} color="#FFFFFF" />
-                      <Text className="text-xs font-bold text-white">Start Quiz</Text>
+                      <Text className="text-xs font-sans-bold text-white">Start Quiz</Text>
                     </TouchableOpacity>
                   )}
 
@@ -361,7 +372,7 @@ export const AssignmentsModule: React.FC = () => {
                       onPress={() => setSelectedAsgId(asg.id)}
                       className="px-3 py-1.5 rounded-xl bg-blue-600 shadow-xs"
                     >
-                      <Text className="text-xs font-bold text-white">Submit Work</Text>
+                      <Text className="text-xs font-sans-bold text-white">Submit Work</Text>
                     </TouchableOpacity>
                   )}
 
@@ -373,7 +384,7 @@ export const AssignmentsModule: React.FC = () => {
                           className="px-2.5 py-1 rounded-lg bg-purple-50 border border-purple-200 flex-row items-center gap-1 active:scale-95"
                         >
                           <BarChart3 size={12} color="#7C3AED" />
-                          <Text className="text-[11px] font-bold text-purple-700">Analytics</Text>
+                          <Text className="text-[11px] font-sans-bold text-purple-700">Analytics</Text>
                         </TouchableOpacity>
                       )}
                       <TouchableOpacity
@@ -383,7 +394,7 @@ export const AssignmentsModule: React.FC = () => {
                         }}
                         className="px-2.5 py-1 rounded-lg bg-slate-100 active:scale-95"
                       >
-                        <Text className="text-[11px] font-bold text-blue-600">Review Submissions →</Text>
+                        <Text className="text-[11px] font-sans-bold text-blue-600">Review Submissions →</Text>
                       </TouchableOpacity>
                     </View>
                   )}
@@ -398,11 +409,11 @@ export const AssignmentsModule: React.FC = () => {
       {!isAssignmentsLoading && activeTab === 'submitted' && (
         <View className="gap-2.5">
           {isSubmissionsLoading ? (
-            <ActivityIndicator size="small" color="#2563EB" className="my-4" />
+            <ActivityIndicator size="small" color="#1C1C1E" className="my-4" />
           ) : submissions.length === 0 ? (
             <View className="p-8 items-center justify-center bg-white rounded-2xl border border-slate-200">
-              <FileText size={28} color="#94A3B8" />
-              <Text className="text-sm font-bold text-slate-800 mt-2">No Submissions Yet</Text>
+              <FileText size={28} color="#8C877E" />
+              <Text className="text-sm font-sans-bold text-slate-800 mt-2">No Submissions Yet</Text>
               <Text className="text-xs text-slate-500 text-center mt-1">
                 Student homework uploads will display here for review and grading.
               </Text>
@@ -417,30 +428,30 @@ export const AssignmentsModule: React.FC = () => {
                         label={sub.status === 'graded' ? 'Graded' : 'Pending Review'}
                         variant={sub.status === 'graded' ? 'success' : 'warning'}
                       />
-                      <Text className="text-[11px] text-slate-500 font-medium">
+                      <Text className="text-[11px] text-slate-500 font-sans">
                         Roll {sub.roll_number || '#01'}
                       </Text>
                     </View>
-                    <Text className="text-sm font-extrabold text-slate-900">{sub.student_name}</Text>
+                    <Text className="text-sm font-display text-slate-900">{sub.student_name}</Text>
                   </View>
 
                   {sub.status === 'graded' && sub.score !== undefined && sub.score !== null ? (
                     <View className="items-end">
-                      <Text className="text-base font-black text-blue-600">{sub.score} Marks</Text>
-                      <Text className="text-[10px] text-emerald-600 font-bold">Evaluated</Text>
+                      <Text className="text-base font-display text-blue-600">{sub.score} Marks</Text>
+                      <Text className="text-[10px] text-emerald-600 font-sans-bold">Evaluated</Text>
                     </View>
                   ) : sub.ai_status === 'pending_review' ? (
                     <View className="items-end">
                       <View className="bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md flex-row items-center gap-1">
                         <Bot size={11} color="#D97706" />
-                        <Text className="text-[10px] font-bold text-amber-800">
+                        <Text className="text-[10px] font-sans-bold text-amber-800">
                           AI-checked, awaiting teacher review
                         </Text>
                       </View>
                     </View>
                   ) : (
                     <View className="items-end">
-                      <Text className="text-[10px] text-slate-500 font-semibold">Under Evaluation</Text>
+                      <Text className="text-[10px] text-slate-500 font-sans-semibold">Under Evaluation</Text>
                     </View>
                   )}
                 </View>
@@ -458,7 +469,7 @@ export const AssignmentsModule: React.FC = () => {
                         <View className="flex-1 mr-2">
                           <View className="flex-row items-center gap-1">
                             <Sparkles size={11} color="#4F46E5" />
-                            <Text className="text-[10px] font-bold text-indigo-950">
+                            <Text className="text-[10px] font-sans-bold text-indigo-950">
                               Gemini Suggestion: {sub.ai_score} Marks
                             </Text>
                           </View>
@@ -468,7 +479,7 @@ export const AssignmentsModule: React.FC = () => {
                             </Text>
                           ) : null}
                         </View>
-                        <Text className="text-[9px] font-bold text-indigo-600 bg-white px-2 py-0.5 rounded-full border border-indigo-100">
+                        <Text className="text-[9px] font-sans-bold text-indigo-600 bg-white px-2 py-0.5 rounded-full border border-indigo-100">
                           Pending Approval
                         </Text>
                       </View>
@@ -484,7 +495,7 @@ export const AssignmentsModule: React.FC = () => {
                           }`}
                         >
                           <Sparkles size={12} color="#4F46E5" />
-                          <Text className="text-xs font-bold text-indigo-700">AI Suggest</Text>
+                          <Text className="text-xs font-sans-bold text-indigo-700">AI Suggest</Text>
                         </TouchableOpacity>
                       )}
 
@@ -501,7 +512,7 @@ export const AssignmentsModule: React.FC = () => {
                         }}
                         className="px-3 py-1.5 rounded-xl bg-blue-600 active:scale-95"
                       >
-                        <Text className="text-xs font-bold text-white">
+                        <Text className="text-xs font-sans-bold text-white">
                           {sub.status === 'graded'
                             ? 'Edit Marks'
                             : sub.ai_status === 'pending_review'
@@ -526,41 +537,41 @@ export const AssignmentsModule: React.FC = () => {
         >
           <View className="bg-white rounded-t-3xl p-5 gap-3.5 max-h-[85%]">
             <View className="flex-row items-center justify-between">
-              <Text className="text-base font-black text-slate-900">Create Batch Assignment</Text>
+              <Text className="text-base font-display text-slate-900">Create Batch Assignment</Text>
               <TouchableOpacity onPress={() => setIsCreateOpen(false)}>
-                <X size={20} color="#64748B" />
+                <X size={20} color="#6E6A63" />
               </TouchableOpacity>
             </View>
 
             <View className="gap-1">
-              <Text className="text-xs font-bold text-slate-700">Assignment Title</Text>
+              <Text className="text-xs font-sans-bold text-slate-700">Assignment Title</Text>
               <TextInput
                 value={asgTitle}
                 onChangeText={setAsgTitle}
                 placeholder="e.g. Gauss Law & Electric Flux Numerical DPP"
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-sans"
               />
             </View>
 
             <View className="gap-1">
-              <Text className="text-xs font-bold text-slate-700">Instructions</Text>
+              <Text className="text-xs font-sans-bold text-slate-700">Instructions</Text>
               <TextInput
                 value={asgInstructions}
                 onChangeText={setAsgInstructions}
                 placeholder="Instructions for students (due date, step by step requirements)..."
                 multiline
                 numberOfLines={2}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-sans"
               />
             </View>
 
             <View className="gap-1">
-              <Text className="text-xs font-bold text-slate-700">Total Marks</Text>
+              <Text className="text-xs font-sans-bold text-slate-700">Total Marks</Text>
               <TextInput
                 value={asgMarks}
                 onChangeText={setAsgMarks}
                 keyboardType="numeric"
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-sans"
               />
             </View>
 
@@ -568,7 +579,7 @@ export const AssignmentsModule: React.FC = () => {
               onPress={handlePickQuestionPdf}
               className="p-3 rounded-xl border border-dashed border-slate-200 items-center justify-center bg-slate-50"
             >
-              <Text className="text-xs font-bold text-blue-600">
+              <Text className="text-xs font-sans-bold text-blue-600">
                 {asgAttachedPdfName ? `Attached: ${asgAttachedPdfName}` : '+ Attach Question Sheet PDF'}
               </Text>
             </TouchableOpacity>
@@ -583,7 +594,7 @@ export const AssignmentsModule: React.FC = () => {
               {createAssignmentMutation.isPending ? (
                 <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
-                <Text className="text-sm font-black text-white">Publish Assignment</Text>
+                <Text className="text-sm font-display text-white">Publish Assignment</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -598,21 +609,21 @@ export const AssignmentsModule: React.FC = () => {
         >
           <View className="bg-white rounded-t-3xl p-5 gap-3.5 max-h-[85%]">
             <View className="flex-row items-center justify-between">
-              <Text className="text-base font-black text-slate-900">Submit Solutions</Text>
+              <Text className="text-base font-display text-slate-900">Submit Solutions</Text>
               <TouchableOpacity onPress={() => setSelectedAsgId(null)}>
-                <X size={20} color="#64748B" />
+                <X size={20} color="#6E6A63" />
               </TouchableOpacity>
             </View>
 
             <View className="gap-1">
-              <Text className="text-xs font-bold text-slate-700">Submission Notes (Optional)</Text>
+              <Text className="text-xs font-sans-bold text-slate-700">Submission Notes (Optional)</Text>
               <TextInput
                 value={solutionNotes}
                 onChangeText={setSolutionNotes}
                 placeholder="Notes for faculty evaluation..."
                 multiline
                 numberOfLines={2}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-sans"
               />
             </View>
 
@@ -620,8 +631,8 @@ export const AssignmentsModule: React.FC = () => {
               onPress={handlePickSolutionDocument}
               className="p-4 rounded-xl border-2 border-dashed border-blue-200 bg-blue-50/50 items-center justify-center"
             >
-              <Upload size={24} color="#2563EB" />
-              <Text className="text-xs font-bold text-blue-600 mt-1">
+              <Upload size={24} color="#1C1C1E" />
+              <Text className="text-xs font-sans-bold text-blue-600 mt-1">
                 {pickedFileName ? pickedFileName : 'Attach Solution PDF'}
               </Text>
             </TouchableOpacity>
@@ -636,7 +647,7 @@ export const AssignmentsModule: React.FC = () => {
               {submitHomeworkMutation.isPending ? (
                 <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
-                <Text className="text-sm font-black text-white">Upload & Submit Homework</Text>
+                <Text className="text-sm font-display text-white">Upload & Submit Homework</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -651,9 +662,9 @@ export const AssignmentsModule: React.FC = () => {
         >
           <View className="bg-white rounded-t-3xl p-5 gap-3.5 max-h-[85%]">
             <View className="flex-row items-center justify-between">
-              <Text className="text-base font-black text-slate-900">Evaluate Homework</Text>
+              <Text className="text-base font-display text-slate-900">Evaluate Homework</Text>
               <TouchableOpacity onPress={() => setGradingSubId(null)}>
-                <X size={20} color="#64748B" />
+                <X size={20} color="#6E6A63" />
               </TouchableOpacity>
             </View>
 
@@ -662,11 +673,11 @@ export const AssignmentsModule: React.FC = () => {
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center gap-1.5">
                   <ShieldCheck size={13} color="#4338CA" />
-                  <Text className="text-[10px] font-bold text-indigo-900">
+                  <Text className="text-[10px] font-sans-bold text-indigo-900">
                     AI Assistance (Optional)
                   </Text>
                 </View>
-                <Text className="text-[9px] font-semibold text-indigo-700">
+                <Text className="text-[9px] font-sans-semibold text-indigo-700">
                   Quota: {aiQuota?.remaining ?? 25}/25 left
                 </Text>
               </View>
@@ -684,7 +695,7 @@ export const AssignmentsModule: React.FC = () => {
                   ) : (
                     <>
                       <Sparkles size={11} color="#FFFFFF" />
-                      <Text className="text-[10px] font-bold text-white">
+                      <Text className="text-[10px] font-sans-bold text-white">
                         Fetch Gemini Evaluation Suggestion
                       </Text>
                     </>
@@ -694,23 +705,23 @@ export const AssignmentsModule: React.FC = () => {
             </View>
 
             <View className="gap-1">
-              <Text className="text-xs font-bold text-slate-700">Score / Marks</Text>
+              <Text className="text-xs font-sans-bold text-slate-700">Score / Marks</Text>
               <TextInput
                 value={gradeMarks}
                 onChangeText={setGradeMarks}
                 keyboardType="numeric"
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-bold"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-sans-bold"
               />
             </View>
 
             <View className="gap-1">
-              <Text className="text-xs font-bold text-slate-700">Faculty Feedback</Text>
+              <Text className="text-xs font-sans-bold text-slate-700">Faculty Feedback</Text>
               <TextInput
                 value={gradeFeedback}
                 onChangeText={setGradeFeedback}
                 multiline
                 numberOfLines={3}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-sans"
               />
             </View>
 
@@ -724,7 +735,7 @@ export const AssignmentsModule: React.FC = () => {
               {gradeSubmissionMutation.isPending ? (
                 <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
-                <Text className="text-sm font-black text-white">Save Evaluation & Notify Student</Text>
+                <Text className="text-sm font-display text-white">Save Evaluation & Notify Student</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -755,7 +766,7 @@ export const AssignmentsModule: React.FC = () => {
                 <BarChart3 size={16} color="#C084FC" />
               </View>
               <View>
-                <Text className="text-sm font-extrabold text-white">Quiz Analytics</Text>
+                <Text className="text-sm font-display text-white">Quiz Analytics</Text>
                 <Text className="text-[11px] text-slate-400">
                   {activeQuizAnalytics?.assignmentTitle || 'Assignment Overview'}
                 </Text>
@@ -766,7 +777,7 @@ export const AssignmentsModule: React.FC = () => {
               onPress={() => setActiveQuizAnalytics(null)}
               className="w-8 h-8 rounded-full bg-slate-800 items-center justify-center border border-slate-700"
             >
-              <X size={16} color="#94A3B8" />
+              <X size={16} color="#8C877E" />
             </TouchableOpacity>
           </View>
 
@@ -776,24 +787,24 @@ export const AssignmentsModule: React.FC = () => {
                 {/* Metrics Cards */}
                 <View className="flex-row gap-3">
                   <View className="flex-1 bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/80">
-                    <Text className="text-[11px] text-slate-400 font-bold uppercase">Submissions</Text>
-                    <Text className="text-xl font-black text-white mt-1">
+                    <Text className="text-[11px] text-slate-400 font-sans-bold uppercase">Submissions</Text>
+                    <Text className="text-xl font-display text-white mt-1">
                       {activeQuizAnalytics.submittedCount}
                     </Text>
                     <Text className="text-[10px] text-slate-500 mt-0.5">Students Completed</Text>
                   </View>
 
                   <View className="flex-1 bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/80">
-                    <Text className="text-[11px] text-slate-400 font-bold uppercase">Average Score</Text>
-                    <Text className="text-xl font-black text-purple-400 mt-1">
+                    <Text className="text-[11px] text-slate-400 font-sans-bold uppercase">Average Score</Text>
+                    <Text className="text-xl font-display text-purple-400 mt-1">
                       {activeQuizAnalytics.averageScore}
                     </Text>
                     <Text className="text-[10px] text-slate-500 mt-0.5">Batch Mean</Text>
                   </View>
 
                   <View className="flex-1 bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/80">
-                    <Text className="text-[11px] text-slate-400 font-bold uppercase">Pass Rate</Text>
-                    <Text className="text-xl font-black text-emerald-400 mt-1">
+                    <Text className="text-[11px] text-slate-400 font-sans-bold uppercase">Pass Rate</Text>
+                    <Text className="text-xl font-display text-emerald-400 mt-1">
                       {activeQuizAnalytics.passRate}%
                     </Text>
                     <Text className="text-[10px] text-slate-500 mt-0.5">≥40% Threshold</Text>
@@ -802,7 +813,7 @@ export const AssignmentsModule: React.FC = () => {
 
                 {/* Per-Question Accuracy Breakdown */}
                 <View className="gap-3">
-                  <Text className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  <Text className="text-xs font-sans-bold uppercase tracking-wider text-slate-400">
                     Per-Question Performance
                   </Text>
 
@@ -812,7 +823,7 @@ export const AssignmentsModule: React.FC = () => {
                       className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 gap-2"
                     >
                       <View className="flex-row items-center justify-between">
-                        <Text className="text-xs font-bold text-purple-400">
+                        <Text className="text-xs font-sans-bold text-purple-400">
                           Question #{idx + 1}
                         </Text>
                         <Badge
@@ -822,16 +833,16 @@ export const AssignmentsModule: React.FC = () => {
                         />
                       </View>
 
-                      <Text className="text-sm font-semibold text-white leading-relaxed">
+                      <Text className="text-sm font-sans-semibold text-white leading-relaxed">
                         {q.questionText}
                       </Text>
 
                       <View className="mt-1 gap-1">
                         <View className="flex-row justify-between text-[11px]">
-                          <Text className="text-[11px] text-emerald-400 font-bold">
+                          <Text className="text-[11px] text-emerald-400 font-sans-bold">
                             {q.correctCount} Correct
                           </Text>
-                          <Text className="text-[11px] text-rose-400 font-bold">
+                          <Text className="text-[11px] text-rose-400 font-sans-bold">
                             {q.incorrectCount} Incorrect
                           </Text>
                         </View>

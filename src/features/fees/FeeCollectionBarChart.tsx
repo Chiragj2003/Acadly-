@@ -27,11 +27,11 @@ export const FeeCollectionBarChart: React.FC = () => {
     <View className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs mb-4">
       <View className="flex-row items-center justify-between mb-3">
         <View>
-          <Text className="text-base font-black text-slate-900">Fee Recovery & Dues Trend</Text>
+          <Text className="text-base font-display text-slate-900">Fee Recovery & Dues Trend</Text>
           <Text className="text-xs text-slate-600">Monthly collection vs. outstanding balance</Text>
         </View>
         <View className="bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-          <Text className="text-[10px] font-bold text-emerald-800">88.4% Recovery</Text>
+          <Text className="text-[10px] font-sans-bold text-emerald-800">88.4% Recovery</Text>
         </View>
       </View>
 
@@ -39,11 +39,11 @@ export const FeeCollectionBarChart: React.FC = () => {
       <View className="flex-row items-center gap-4 mb-3">
         <View className="flex-row items-center gap-1.5">
           <View className="w-3 h-3 rounded-full bg-emerald-500" />
-          <Text className="text-[11px] font-bold text-slate-900">Collected (₹K)</Text>
+          <Text className="text-[11px] font-sans-bold text-slate-900">Collected (₹K)</Text>
         </View>
         <View className="flex-row items-center gap-1.5">
           <View className="w-3 h-3 rounded-full bg-rose-400" />
-          <Text className="text-[11px] font-bold text-slate-600">Pending Dues (₹K)</Text>
+          <Text className="text-[11px] font-sans-bold text-slate-600">Pending Dues (₹K)</Text>
         </View>
       </View>
 
@@ -59,11 +59,11 @@ export const FeeCollectionBarChart: React.FC = () => {
                   y1={y}
                   x2={svgWidth}
                   y2={y}
-                  stroke="#E2E8F0"
+                  stroke="#E6E2DA"
                   strokeWidth="1"
                   strokeDasharray="4,4"
                 />
-                <SvgText x="5" y={y + 3} fontSize="9" fill="#64748B" fontWeight="600">
+                <SvgText x="5" y={y + 3} fontSize="9" fill="#6E6A63" fontWeight="600">
                   {val}k
                 </SvgText>
               </React.Fragment>
@@ -102,7 +102,7 @@ export const FeeCollectionBarChart: React.FC = () => {
                   x={groupX + 15}
                   y={chartHeight + 26}
                   fontSize="10"
-                  fill="#64748B"
+                  fill="#6E6A63"
                   fontWeight="bold"
                   textAnchor="middle"
                 >

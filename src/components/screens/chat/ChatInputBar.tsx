@@ -42,7 +42,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
                 onPress={() => setInputText(chip)}
                 className="bg-white border border-slate-200 px-2.5 py-1 rounded-xl active:scale-95"
               >
-                <Text className="text-[10px] font-bold text-slate-600">{chip}</Text>
+                <Text className="text-[10px] font-sans-bold text-slate-600">{chip}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -53,9 +53,9 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
       {stagedAttachment && (
         <View className="bg-blue-50 border border-blue-200 p-2.5 rounded-2xl flex-row items-center justify-between shadow-xs">
           <View className="flex-row items-center gap-2 flex-1 pr-2">
-            <FileText size={16} color="#2563EB" />
+            <FileText size={16} color="#1C1C1E" />
             <View className="flex-1">
-              <Text className="text-xs font-bold text-slate-800" numberOfLines={1}>
+              <Text className="text-xs font-sans-bold text-slate-800" numberOfLines={1}>
                 {stagedAttachment.name}
               </Text>
               <Text className="text-[10px] text-slate-500">
@@ -64,7 +64,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
             </View>
           </View>
           <TouchableOpacity onPress={() => setStagedAttachment(null)} className="p-1">
-            <X size={14} color="#2563EB" />
+            <X size={14} color="#1C1C1E" />
           </TouchableOpacity>
         </View>
       )}
@@ -76,7 +76,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
           onPress={onPickAttachment}
           className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-200 items-center justify-center active:scale-95"
         >
-          <Paperclip size={18} color="#64748B" />
+          <Paperclip size={18} color="#6E6A63" />
         </TouchableOpacity>
 
         <TextInput
@@ -85,11 +85,11 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
               ? 'Send message or announcement to batch...'
               : 'Ask doubt or message teacher...'
           }
-          placeholderTextColor="#94a3b8"
+          placeholderTextColor="#8C877E"
           value={inputText}
           onChangeText={setInputText}
           multiline
-          className="flex-1 max-h-24 text-xs font-bold text-slate-800 px-2 py-1"
+          className="flex-1 max-h-24 text-xs font-sans-bold text-slate-800 px-2 py-1"
         />
 
         <TouchableOpacity
@@ -102,7 +102,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
         >
           <Send
             size={16}
-            color={inputText.trim() || stagedAttachment ? '#ffffff' : '#94a3b8'}
+            color={inputText.trim() || stagedAttachment ? '#ffffff' : '#8C877E'}
           />
         </TouchableOpacity>
       </View>

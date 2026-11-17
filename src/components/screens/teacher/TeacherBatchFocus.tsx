@@ -30,13 +30,13 @@ export const TeacherBatchFocus: React.FC<TeacherBatchFocusProps> = ({
     <View className="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-xs">
       <View className="flex-row items-center justify-between mb-2 px-1">
         <View className="flex-row items-center gap-1.5">
-          <Clock size={13} color="#2563EB" />
-          <Text className="text-xs font-black text-slate-800 uppercase tracking-wider">
+          <Clock size={13} color="#1C1C1E" />
+          <Text className="text-xs font-display text-slate-800 uppercase tracking-wider">
             {t('teacher.activeBatches', 'Active Batches')} • {t('teacher.batchFocus', 'Batch & Schedule Focus')}
           </Text>
         </View>
         <View className="bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
-          <Text className="text-[10px] font-bold text-blue-700">
+          <Text className="text-[10px] font-sans-bold text-blue-700">
             {currentBatch.time}
           </Text>
         </View>
@@ -59,7 +59,7 @@ export const TeacherBatchFocus: React.FC<TeacherBatchFocusProps> = ({
               >
                 <View className="items-start">
                   <Text
-                    className={`text-xs font-extrabold ${
+                    className={`text-xs font-display ${
                       isSelected ? 'text-white' : 'text-slate-800'
                     }`}
                     numberOfLines={1}
@@ -68,7 +68,7 @@ export const TeacherBatchFocus: React.FC<TeacherBatchFocusProps> = ({
                   </Text>
                   <Text
                     className={`text-[10px] ${
-                      isSelected ? 'text-blue-100 font-medium' : 'text-slate-500'
+                      isSelected ? 'text-blue-100 font-sans' : 'text-slate-500'
                     }`}
                   >
                     {b.time.split(' - ')[0]} • {b.count} Students

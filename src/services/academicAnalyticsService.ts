@@ -1,3 +1,4 @@
+import { calculateAttendancePercentage, type AttendanceItem } from '@/lib/academicHelpers';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { type ExamResult, type Examination } from '@/types/database';
 
@@ -111,13 +112,22 @@ export async function computeAttendanceTrend(
     else if (r.status === 'E') excusedCount++;
   });
 
-  const attendanceRate = totalClasses > 0 ? Math.round((presentCount / totalClasses) * 100) : 0;
+  // Use the shared, unit-tested rule (Late = half, Excused left out of the total)
+  // so every screen shows the same percentage for the same student.
+  const attendanceRate = Math.round(
+    calculateAttendancePercentage(
+      records.map((r) => ({ status: (r.status === 'E' ? 'excused' : r.status) as AttendanceItem['status'] }))
+    )
+  );
 
   // Compute streak of presence from latest to past
   let streak = 0;
   for (const r of records) {
     if (r.status === 'P') {
       streak++;
+    } else if (r.status === 'E') {
+      // Approved leave neither extends nor breaks the streak.
+      continue;
     } else {
       break;
     }

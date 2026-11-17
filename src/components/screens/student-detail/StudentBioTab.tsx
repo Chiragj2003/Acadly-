@@ -34,30 +34,30 @@ export const StudentBioTab: React.FC<StudentBioTabProps> = ({ student }) => {
     <View className="gap-3.5">
       {/* Student Background Details */}
       <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
-        <Text className="text-sm font-bold text-slate-900">Student Profile & Identity</Text>
+        <Text className="text-sm font-sans-bold text-slate-900">Student Profile & Identity</Text>
 
         <View className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 gap-2">
           <View className="flex-row justify-between">
             <Text className="text-xs text-slate-500">Board & School:</Text>
-            <Text className="text-xs font-bold text-slate-800">
+            <Text className="text-xs font-sans-bold text-slate-800">
               {student.board} • {student.school}
             </Text>
           </View>
           <View className="flex-row justify-between">
             <Text className="text-xs text-slate-500">Target Exam:</Text>
-            <Text className="text-xs font-bold text-slate-800">{student.targetExam}</Text>
+            <Text className="text-xs font-sans-bold text-slate-800">{student.targetExam}</Text>
           </View>
           <View className="flex-row justify-between">
             <Text className="text-xs text-slate-500">Previous Exam Score:</Text>
-            <Text className="text-xs font-bold text-blue-600">{student.previousPercentage}</Text>
+            <Text className="text-xs font-sans-bold text-blue-600">{student.previousPercentage}</Text>
           </View>
           <View className="flex-row justify-between">
             <Text className="text-xs text-slate-500">Blood Group:</Text>
-            <Text className="text-xs font-bold text-slate-800">{student.bloodGroup}</Text>
+            <Text className="text-xs font-sans-bold text-slate-800">{student.bloodGroup}</Text>
           </View>
           <View className="flex-row justify-between">
             <Text className="text-xs text-slate-500">Residential Address:</Text>
-            <Text className="text-xs font-bold text-slate-800 max-w-[200px] text-right">
+            <Text className="text-xs font-sans-bold text-slate-800 max-w-[200px] text-right">
               {student.address}
             </Text>
           </View>
@@ -66,13 +66,13 @@ export const StudentBioTab: React.FC<StudentBioTabProps> = ({ student }) => {
         {/* Weak Subjects Tags */}
         {student.weakSubjects && student.weakSubjects.length > 0 && (
           <View>
-            <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+            <Text className="text-xs font-sans-bold text-slate-500 uppercase tracking-wider mb-1.5">
               Focus / Revision Priority:
             </Text>
             <View className="flex-row flex-wrap gap-1.5">
               {student.weakSubjects.map((sub, i) => (
                 <View key={i} className="bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-xl">
-                  <Text className="text-xs font-bold text-rose-700">{sub}</Text>
+                  <Text className="text-xs font-sans-bold text-rose-700">{sub}</Text>
                 </View>
               ))}
             </View>
@@ -84,18 +84,18 @@ export const StudentBioTab: React.FC<StudentBioTabProps> = ({ student }) => {
       <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs">
         <View className="flex-row items-center justify-between mb-2">
           <View className="flex-row items-center gap-1.5">
-            <DollarSign size={16} color="#2563EB" />
-            <Text className="text-sm font-bold text-slate-900">Tuition Fee Status</Text>
+            <DollarSign size={16} color="#1C1C1E" />
+            <Text className="text-sm font-sans-bold text-slate-900">Tuition Fee Status</Text>
           </View>
           <TouchableOpacity
             onPress={handleCycleFeeStatus}
             className="bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200 active:scale-98"
           >
-            <Text className="text-[10px] font-bold text-blue-700">Update Status ↺</Text>
+            <Text className="text-[10px] font-sans-bold text-blue-700">Update Status ↺</Text>
           </TouchableOpacity>
         </View>
         <View className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
-          <Text className="text-xs font-bold text-slate-800">{feeStatus}</Text>
+          <Text className="text-xs font-sans-bold text-slate-800">{feeStatus}</Text>
           <Text className="text-[10px] text-slate-500 mt-0.5">
             UPI payments automatically reconcile via parent notifications.
           </Text>
@@ -105,8 +105,8 @@ export const StudentBioTab: React.FC<StudentBioTabProps> = ({ student }) => {
       {/* Teacher Remarks & Observations */}
       <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
         <View className="flex-row items-center gap-1.5">
-          <MessageSquare size={16} color="#2563EB" />
-          <Text className="text-sm font-bold text-slate-900">Teacher Observations & Remarks</Text>
+          <MessageSquare size={16} color="#1C1C1E" />
+          <Text className="text-sm font-sans-bold text-slate-900">Teacher Observations & Remarks</Text>
         </View>
 
         <View className="gap-2">
@@ -125,7 +125,7 @@ export const StudentBioTab: React.FC<StudentBioTabProps> = ({ student }) => {
         <View className="flex-row gap-2 mt-1">
           <TextInput
             placeholder="Record mentor note..."
-            placeholderTextColor="#94a3b8"
+            placeholderTextColor="#8C877E"
             value={newRemarkText}
             onChangeText={setNewRemarkText}
             className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs text-slate-800"

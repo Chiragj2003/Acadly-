@@ -34,12 +34,12 @@ export const AdminAnalyticsView: React.FC = () => {
       <Card elevation="lowest" className="p-4 gap-3">
         <View className="flex-row items-center justify-between">
           <View>
-            <Text className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+            <Text className="text-xs font-sans-bold text-on-surface-variant uppercase tracking-wider">
               Institute Revenue Realization
             </Text>
-            <Text className="text-xl font-bold text-on-surface mt-0.5">
+            <Text className="text-xl font-sans-bold text-on-surface mt-0.5">
               ₹{(analytics.total_collected_amount / 10000000).toFixed(2)} Cr
-              <Text className="text-xs text-on-surface-variant font-medium"> / ₹{(totalFeePool / 10000000).toFixed(2)} Cr</Text>
+              <Text className="text-xs text-on-surface-variant font-sans"> / ₹{(totalFeePool / 10000000).toFixed(2)} Cr</Text>
             </Text>
           </View>
           <Badge label={`${collectionRate}% Collected`} variant="success" />
@@ -73,7 +73,7 @@ export const AdminAnalyticsView: React.FC = () => {
       {/* Attendance & Faculty Roll Metrics */}
       <Card elevation="lowest" className="p-4 gap-2.5">
         <View className="flex-row items-center justify-between">
-          <Text className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+          <Text className="text-xs font-sans-bold text-on-surface-variant uppercase tracking-wider">
             Daily Academic Operations
           </Text>
           <Badge label="Kota Campus" variant="info" />
@@ -81,25 +81,25 @@ export const AdminAnalyticsView: React.FC = () => {
 
         <View className="flex-row gap-2 pt-1">
           <View className="flex-1 p-3 rounded-xl bg-surface-container-low items-center">
-            <Text className="text-lg font-bold text-on-tertiary-container">{analytics.present_count}</Text>
-            <Text className="text-[11px] text-on-surface-variant font-medium">Present Today</Text>
+            <Text className="text-lg font-sans-bold text-on-tertiary-container">{analytics.present_count}</Text>
+            <Text className="text-[11px] text-on-surface-variant font-sans">Present Today</Text>
           </View>
 
           <View className="flex-1 p-3 rounded-xl bg-surface-container-low items-center">
-            <Text className="text-lg font-bold text-error">{analytics.absent_count}</Text>
-            <Text className="text-[11px] text-on-surface-variant font-medium">Unexcused Absences</Text>
+            <Text className="text-lg font-sans-bold text-error">{analytics.absent_count}</Text>
+            <Text className="text-[11px] text-on-surface-variant font-sans">Unexcused Absences</Text>
           </View>
 
           <View className="flex-1 p-3 rounded-xl bg-surface-container-low items-center">
-            <Text className="text-lg font-bold text-secondary">{analytics.faculty_count}</Text>
-            <Text className="text-[11px] text-on-surface-variant font-medium">Active Faculty</Text>
+            <Text className="text-lg font-sans-bold text-secondary">{analytics.faculty_count}</Text>
+            <Text className="text-[11px] text-on-surface-variant font-sans">Active Faculty</Text>
           </View>
         </View>
       </Card>
 
       {/* Official Audit Report Exports */}
       <View className="gap-2">
-        <Text className="text-xs font-bold text-on-surface-variant uppercase tracking-wider px-1">
+        <Text className="text-xs font-sans-bold text-on-surface-variant uppercase tracking-wider px-1">
           Generate Institutional Reports
         </Text>
 
@@ -113,7 +113,7 @@ export const AdminAnalyticsView: React.FC = () => {
                 <FileSpreadsheet size={18} color="#069669" />
               </View>
               <View>
-                <Text className="text-xs font-bold text-on-surface">Daily Attendance Audit Report</Text>
+                <Text className="text-xs font-sans-bold text-on-surface">Daily Attendance Audit Report</Text>
                 <Text className="text-[11px] text-on-surface-variant">Roll call, timings, and parent WhatsApp dispatch logs</Text>
               </View>
             </View>
@@ -129,7 +129,7 @@ export const AdminAnalyticsView: React.FC = () => {
                 <FileSpreadsheet size={18} color="#0051d5" />
               </View>
               <View>
-                <Text className="text-xs font-bold text-on-surface">Fee Collection & Dues Ledger</Text>
+                <Text className="text-xs font-sans-bold text-on-surface">Fee Collection & Dues Ledger</Text>
                 <Text className="text-[11px] text-on-surface-variant">Razorpay order IDs, GST breakdown, pending 34 accounts</Text>
               </View>
             </View>
@@ -145,7 +145,7 @@ export const AdminAnalyticsView: React.FC = () => {
                 <FileSpreadsheet size={18} color="#ba1a1a" />
               </View>
               <View>
-                <Text className="text-xs font-bold text-on-surface">All-India Rank Mock Performance</Text>
+                <Text className="text-xs font-sans-bold text-on-surface">All-India Rank Mock Performance</Text>
                 <Text className="text-[11px] text-on-surface-variant">Batch-wise percentile scores and top-rank tracking</Text>
               </View>
             </View>

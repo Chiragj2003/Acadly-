@@ -230,7 +230,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
               <Sparkles size={16} color="#A855F7" />
             </View>
             <View className="flex-1">
-              <Text className="text-sm font-extrabold text-white" numberOfLines={1}>
+              <Text className="text-sm font-display text-white" numberOfLines={1}>
                 {assignment.title}
               </Text>
               <Text className="text-[11px] text-slate-400">
@@ -242,8 +242,8 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
           <View className="flex-row items-center gap-2">
             {!result && (
               <View className="flex-row items-center gap-1 bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700">
-                <Clock size={12} color="#94A3B8" />
-                <Text className="text-xs font-mono font-bold text-slate-300">
+                <Clock size={12} color="#8C877E" />
+                <Text className="text-xs font-mono font-sans-bold text-slate-300">
                   {formatTimer(elapsedSeconds)}
                 </Text>
               </View>
@@ -252,7 +252,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
               onPress={onClose}
               className="w-8 h-8 rounded-full bg-slate-800 items-center justify-center border border-slate-700"
             >
-              <X size={16} color="#94A3B8" />
+              <X size={16} color="#8C877E" />
             </TouchableOpacity>
           </View>
         </View>
@@ -260,7 +260,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
         {loading ? (
           <View className="flex-1 items-center justify-center p-6">
             <ActivityIndicator size="large" color="#A855F7" />
-            <Text className="text-xs text-slate-400 mt-3 font-medium">Preparing quiz questions...</Text>
+            <Text className="text-xs text-slate-400 mt-3 font-sans">Preparing quiz questions...</Text>
           </View>
         ) : result ? (
           /* ================= RESULT SCREEN ================= */
@@ -276,16 +276,16 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                   label={result.isPassed ? 'QUIZ COMPLETED • PASSED' : 'QUIZ COMPLETED • REVISION NEEDED'}
                   variant={result.isPassed ? 'success' : 'warning'}
                 />
-                <Text className="text-3xl font-black text-white mt-2">
+                <Text className="text-3xl font-display text-white mt-2">
                   {result.totalScore} / {result.totalMarks}
                 </Text>
                 <Text className="text-xs text-slate-400 mt-0.5">
-                  Accuracy Score: <Text className="font-bold text-purple-400">{result.percentage}%</Text> • Time: {formatTimer(elapsedSeconds)}
+                  Accuracy Score: <Text className="font-sans-bold text-purple-400">{result.percentage}%</Text> • Time: {formatTimer(elapsedSeconds)}
                 </Text>
               </View>
 
               {alreadyCompleted && (
-                <Text className="text-[11px] text-amber-400 font-semibold bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/30">
+                <Text className="text-[11px] text-amber-400 font-sans-semibold bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/30">
                   You already submitted this quiz previously.
                 </Text>
               )}
@@ -294,7 +294,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
             {/* Questions Detailed Breakdown */}
             {result.questions && result.questions.length > 0 && (
               <View className="mt-6 gap-3">
-                <Text className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                <Text className="text-xs font-sans-bold uppercase tracking-wider text-slate-400">
                   Question Breakdown & Explanations
                 </Text>
 
@@ -308,7 +308,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                       className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 gap-2.5"
                     >
                       <View className="flex-row items-start justify-between gap-2">
-                        <Text className="text-xs font-bold text-purple-400">
+                        <Text className="text-xs font-sans-bold text-purple-400">
                           Question #{idx + 1} ({rq.maxMarks} Marks)
                         </Text>
                         {isSubjective ? (
@@ -320,7 +320,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                         )}
                       </View>
 
-                      <Text className="text-sm font-bold text-white leading-relaxed">
+                      <Text className="text-sm font-sans-bold text-white leading-relaxed">
                         {rq.questionText}
                       </Text>
 
@@ -335,10 +335,10 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
 
                             if (isCorrectChoice) {
                               optBg = 'bg-emerald-950/60 border-emerald-500/60';
-                              optTextColor = 'text-emerald-300 font-bold';
+                              optTextColor = 'text-emerald-300 font-sans-bold';
                             } else if (isStudentChoice && !isCorrect) {
                               optBg = 'bg-rose-950/60 border-rose-500/60';
-                              optTextColor = 'text-rose-300 font-bold';
+                              optTextColor = 'text-rose-300 font-sans-bold';
                             }
 
                             return (
@@ -360,7 +360,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                       {rq.explanation ? (
                         <View className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 mt-1">
                           <Text className="text-[11px] text-slate-400">
-                            <Text className="font-bold text-purple-300">Explanation: </Text>
+                            <Text className="font-sans-bold text-purple-300">Explanation: </Text>
                             {rq.explanation}
                           </Text>
                         </View>
@@ -385,10 +385,10 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
           <View className="flex-1">
             {/* Progress Bar */}
             <View className="bg-slate-800/80 px-4 py-2.5 flex-row items-center justify-between border-b border-slate-800">
-              <Text className="text-xs font-bold text-slate-300">
+              <Text className="text-xs font-sans-bold text-slate-300">
                 Question {currentIndex + 1} of {totalQuestions}
               </Text>
-              <Text className="text-xs font-semibold text-purple-400">
+              <Text className="text-xs font-sans-semibold text-purple-400">
                 {answeredCount}/{totalQuestions} Answered
               </Text>
             </View>
@@ -418,13 +418,13 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                       }
                       variant="pro"
                     />
-                    <Text className="text-xs font-extrabold text-slate-400">
+                    <Text className="text-xs font-display text-slate-400">
                       {String(currentQ.marks || 1)} Marks
                     </Text>
                   </View>
 
                   {/* Question Prompt */}
-                  <Text className="text-base font-extrabold text-white leading-relaxed">
+                  <Text className="text-base font-display text-white leading-relaxed">
                     {String(currentQ.questionText || currentQ.question || '')}
                   </Text>
 
@@ -449,14 +449,14 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                           >
                             <View className="flex-row items-center gap-3 flex-1 mr-2">
                               <View
-                                className={`w-7 h-7 rounded-xl items-center justify-center border font-bold text-xs ${
+                                className={`w-7 h-7 rounded-xl items-center justify-center border font-sans-bold text-xs ${
                                   isSelected
                                     ? 'bg-purple-600 border-purple-400 text-white'
                                     : 'bg-slate-800 border-slate-700 text-slate-400'
                                 }`}
                               >
                                 <Text
-                                  className={`text-xs font-black ${
+                                  className={`text-xs font-display ${
                                     isSelected ? 'text-white' : 'text-slate-400'
                                   }`}
                                 >
@@ -464,7 +464,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                                 </Text>
                               </View>
                               <Text
-                                className={`text-sm font-semibold flex-1 ${
+                                className={`text-sm font-sans-semibold flex-1 ${
                                   isSelected ? 'text-white' : 'text-slate-200'
                                 }`}
                               >
@@ -505,8 +505,8 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                     : 'border-slate-700 bg-slate-800 active:bg-slate-700'
                 }`}
               >
-                <ChevronLeft size={16} color="#E2E8F0" />
-                <Text className="text-xs font-bold text-slate-200">Previous</Text>
+                <ChevronLeft size={16} color="#E6E2DA" />
+                <Text className="text-xs font-sans-bold text-slate-200">Previous</Text>
               </TouchableOpacity>
 
               {currentIndex === totalQuestions - 1 ? (
@@ -521,7 +521,7 @@ export const QuizRunner: React.FC<QuizRunnerProps> = ({
                   onPress={handleNext}
                   className="flex-row items-center gap-1 px-4 py-2.5 rounded-xl bg-purple-600 active:bg-purple-700"
                 >
-                  <Text className="text-xs font-bold text-white">Next</Text>
+                  <Text className="text-xs font-sans-bold text-white">Next</Text>
                   <ChevronRight size={16} color="#FFFFFF" />
                 </TouchableOpacity>
               )}

@@ -43,26 +43,26 @@ export const Input: React.FC<InputProps> = ({
       {(label || rightLabel) && (
         <View className="flex-row items-center justify-between">
           {label && (
-            <Text className="text-sm font-bold text-slate-800 dark:text-slate-200">{label}</Text>
+            <Text className="text-sm font-sans-bold text-slate-800 dark:text-slate-200">{label}</Text>
           )}
           {rightLabel && (
-            <Text className="text-xs text-slate-500 dark:text-slate-400 font-medium">{rightLabel}</Text>
+            <Text className="text-xs text-slate-500 dark:text-slate-400 font-sans">{rightLabel}</Text>
           )}
         </View>
       )}
 
       <View
-        className={`flex-row items-center rounded-xl overflow-hidden min-h-[44px] ${
+        className={`flex-row items-center rounded-2xl overflow-hidden min-h-[52px] ${
           error
             ? 'bg-rose-50 border border-rose-300 dark:bg-rose-950/40 dark:border-rose-800'
             : isFocused
-            ? 'bg-white dark:bg-slate-900 border-2 border-blue-600 shadow-xs'
-            : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs'
+            ? 'bg-white border-[1.5px] border-ink'
+            : 'bg-white border-[1.5px] border-transparent'
         }`}
       >
         {showPhonePrefix && (
           <View className="flex-row items-center px-3 py-3 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700">
-            <Text className="text-sm font-bold text-slate-900 dark:text-slate-100">🇮🇳 +91</Text>
+            <Text className="text-sm font-sans-bold text-slate-900 dark:text-slate-100">🇮🇳 +91</Text>
           </View>
         )}
 
@@ -73,9 +73,9 @@ export const Input: React.FC<InputProps> = ({
         )}
 
         <TextInput
-          placeholderTextColor="#64748b"
+          placeholderTextColor="#6E6A63"
           accessibilityLabel={textInputProps.accessibilityLabel || label || 'Input field'}
-          className="flex-1 py-3 px-3.5 text-sm text-slate-900 dark:text-slate-100 font-medium min-h-[44px]"
+          className="flex-1 py-3 px-3.5 text-sm text-slate-900 dark:text-slate-100 font-sans min-h-[44px]"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           secureTextEntry={shouldSecureText}
@@ -90,9 +90,9 @@ export const Input: React.FC<InputProps> = ({
             className="p-3 min-w-[44px] min-h-[44px] items-center justify-center"
           >
             {isPasswordVisible ? (
-              <EyeOff size={18} color="#64748B" />
+              <EyeOff size={18} color="#6E6A63" />
             ) : (
-              <Eye size={18} color="#64748B" />
+              <Eye size={18} color="#6E6A63" />
             )}
           </Pressable>
         )}
@@ -105,9 +105,9 @@ export const Input: React.FC<InputProps> = ({
       </View>
 
       {error ? (
-        <Text className="text-xs text-rose-600 font-semibold px-1">{error}</Text>
+        <Text className="text-xs text-rose-600 font-sans-semibold px-1">{error}</Text>
       ) : helperText ? (
-        <Text className="text-xs text-slate-500 font-medium px-1">{helperText}</Text>
+        <Text className="text-xs text-slate-500 font-sans px-1">{helperText}</Text>
       ) : null}
     </View>
   );

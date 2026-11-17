@@ -45,8 +45,8 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 
   return (
     <View
-      style={{ height: 56 }}
-      className={`px-4 flex-row items-center justify-between border-b border-slate-100 bg-white ${className}`}
+      style={{ height: 64 }}
+      className={`px-4 flex-row items-center justify-between bg-paper ${className}`}
     >
       {/* Left & Title Zone */}
       <View className="flex-row items-center gap-2.5 flex-1 min-w-0 mr-2">
@@ -56,9 +56,9 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             accessibilityLabel="Go back"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             onPress={onBackPress}
-            className="w-9 h-9 rounded-full bg-slate-50 border border-slate-200/80 items-center justify-center active:scale-95 shadow-2xs"
+            className="w-11 h-11 rounded-full bg-white items-center justify-center active:opacity-80"
           >
-            <ArrowLeft size={17} color="#334155" />
+            <ArrowLeft size={17} color="#3B372F" />
           </Pressable>
         )}
 
@@ -71,24 +71,24 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
               className="flex-row items-center gap-1 self-start"
             >
               <Text
-                className="text-[11px] font-bold tracking-tight text-blue-600"
+                className="text-xs font-sans-semibold text-muted"
                 numberOfLines={1}
               >
                 {instituteName}
               </Text>
-              {onInstitutePress && <ChevronDown size={11} color="#2563EB" />}
+              {onInstitutePress && <ChevronDown size={12} color="#6E6A63" />}
             </Pressable>
           )}
 
           <Text
-            className="text-base font-black tracking-tight text-slate-900"
+            className="text-[22px] leading-[26px] font-display text-ink"
             numberOfLines={1}
           >
             {title}
           </Text>
 
           {instituteSubtitle && (
-            <Text className="text-[10px] font-medium text-slate-500" numberOfLines={1}>
+            <Text className="text-[10px] font-sans text-slate-500" numberOfLines={1}>
               {instituteSubtitle}
             </Text>
           )}
@@ -102,10 +102,10 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           accessibilityLabel="Toggle app language"
           hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
           onPress={handleToggleLanguage}
-          className="h-8 px-2 rounded-full bg-blue-50 border border-blue-200 flex-row items-center gap-1 active:scale-95 shadow-2xs"
+          className="h-11 px-3 rounded-full bg-white flex-row items-center gap-1.5 active:opacity-80"
         >
-          <Languages size={13} color="#2563EB" />
-          <Text className="text-[10px] font-black text-blue-700 uppercase">
+          <Languages size={14} color="#1C1C1E" />
+          <Text className="text-xs font-sans-bold text-ink">
             {isHindi ? 'हिन्दी' : 'EN'}
           </Text>
         </Pressable>
@@ -118,11 +118,11 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             accessibilityLabel="Notifications"
             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
             onPress={onNotificationPress}
-            className="w-9 h-9 rounded-full bg-slate-50 border border-slate-200/80 items-center justify-center relative active:scale-95 shadow-2xs"
+            className="w-11 h-11 rounded-full bg-white items-center justify-center relative active:opacity-80"
           >
-            <Bell size={16} color="#475569" />
+            <Bell size={18} color="#1C1C1E" />
             {hasUnreadNotifications && (
-              <View className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 border border-white" />
+              <View className="absolute top-2.5 right-3 w-2.5 h-2.5 rounded-full bg-rose-600 border-2 border-white" />
             )}
           </Pressable>
         )}
@@ -133,14 +133,16 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             accessibilityLabel="User profile"
             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
             onPress={onProfilePress}
-            className="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 items-center justify-center active:scale-95 shadow-2xs"
+            className={`w-11 h-11 rounded-full border-2 border-white items-center justify-center active:opacity-80 ${
+              variant === 'student' ? 'bg-pastel-pink' : variant === 'calm' ? 'bg-pastel-sky' : 'bg-pastel-peach'
+            }`}
           >
             {profileInitials ? (
-              <Text className="text-[11px] font-black text-white">
+              <Text className="text-sm font-display text-ink">
                 {profileInitials.toUpperCase().slice(0, 2)}
               </Text>
             ) : (
-              <User size={16} color="#FFFFFF" />
+              <User size={18} color="#1C1C1E" />
             )}
           </Pressable>
         )}
@@ -151,9 +153,9 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             accessibilityLabel="Log out"
             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
             onPress={onLogoutPress}
-            className="w-9 h-9 rounded-full bg-rose-50 border border-rose-200/80 items-center justify-center active:scale-95 shadow-2xs"
+            className="w-11 h-11 rounded-full bg-white items-center justify-center active:opacity-80"
           >
-            <LogOut size={14} color="#E11D48" />
+            <LogOut size={16} color="#B42318" />
           </Pressable>
         )}
       </View>

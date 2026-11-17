@@ -24,21 +24,21 @@ export const ListEmptyState: React.FC<ListEmptyStateProps> = ({
   const bodyText = description || message;
   return (
     <View
-      className={`bg-slate-50 border border-dashed border-slate-200 rounded-3xl p-8 items-center justify-center gap-2 ${className}`}
+      className={`bg-white rounded-3xl p-8 items-center justify-center gap-2 ${className}`}
     >
-      {icon || <Inbox size={32} color="#94a3b8" />}
-      <Text className="text-sm font-bold text-slate-800 text-center mt-1">{title}</Text>
+      {icon || <Inbox size={32} color="#8C877E" />}
+      <Text className="text-xl font-display text-ink text-center mt-1">{title}</Text>
       {bodyText && (
-        <Text className="text-xs text-slate-500 text-center max-w-[280px] leading-relaxed">
+        <Text className="text-sm font-sans text-slate-600 text-center max-w-[280px] leading-5">
           {bodyText}
         </Text>
       )}
       {actionLabel && onAction && (
         <TouchableOpacity
           onPress={onAction}
-          className="mt-3 bg-blue-600 px-4 py-2 rounded-xl active:scale-95"
+          className="mt-3 bg-paper px-5 min-h-[44px] justify-center rounded-full active:opacity-80"
         >
-          <Text className="text-xs font-bold text-white">{actionLabel}</Text>
+          <Text className="text-[15px] font-sans-bold text-ink">{actionLabel}</Text>
         </TouchableOpacity>
       )}
     </View>

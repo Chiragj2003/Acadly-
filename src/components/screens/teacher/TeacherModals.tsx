@@ -56,9 +56,9 @@ export const DualModeModal: React.FC<DualModeModalProps> = ({
       >
         <View className="bg-white rounded-t-3xl p-6 gap-3.5 max-h-[85%] border-t border-slate-200">
           <View className="flex-row items-center justify-between">
-            <Text className="text-base font-extrabold text-slate-900">Teacher Workspace Mode</Text>
+            <Text className="text-base font-display text-slate-900">Teacher Workspace Mode</Text>
             <TouchableOpacity onPress={onClose}>
-              <X size={20} color="#64748B" />
+              <X size={20} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
@@ -77,12 +77,12 @@ export const DualModeModal: React.FC<DualModeModalProps> = ({
             } flex-row items-center justify-between`}
           >
             <View className="flex-1 pr-2">
-              <Text className="text-sm font-bold text-slate-900">Solo Tutor Mode</Text>
+              <Text className="text-sm font-sans-bold text-slate-900">Solo Tutor Mode</Text>
               <Text className="text-xs text-slate-500 mt-0.5">
                 Direct student enrollment via your unique Teacher Code. Full ownership of schedule & fees.
               </Text>
             </View>
-            {teacherMode === 'solo' && <Check size={18} color="#2563EB" />}
+            {teacherMode === 'solo' && <Check size={18} color="#1C1C1E" />}
           </TouchableOpacity>
 
           <View
@@ -91,24 +91,24 @@ export const DualModeModal: React.FC<DualModeModalProps> = ({
             } gap-2.5`}
           >
             <View className="flex-row items-center justify-between">
-              <Text className="text-sm font-bold text-slate-900">Coaching Center Faculty</Text>
-              {teacherMode === 'coaching_faculty' && <Check size={18} color="#2563EB" />}
+              <Text className="text-sm font-sans-bold text-slate-900">Coaching Center Faculty</Text>
+              {teacherMode === 'coaching_faculty' && <Check size={18} color="#1C1C1E" />}
             </View>
             <Text className="text-xs text-slate-500">
               Link to an existing Coaching Center / Institute Admin using their Invite Code.
             </Text>
             <TextInput
               placeholder="Enter Coaching Code (e.g. BLOOM2026)"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor="#8C877E"
               value={code}
               onChangeText={setCode}
-              className="bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
+              className="bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-sans-bold"
             />
             <TouchableOpacity
               onPress={handleLink}
               className="bg-blue-600 py-2.5 rounded-xl items-center active:scale-98"
             >
-              <Text className="text-xs font-bold text-white">Verify & Link Coaching Center</Text>
+              <Text className="text-xs font-sans-bold text-white">Verify & Link Coaching Center</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -190,26 +190,26 @@ export const UploadPdfModal: React.FC<UploadPdfModalProps> = ({
       >
         <View className="bg-white rounded-t-3xl p-6 gap-3 max-h-[85%] border-t border-slate-200">
           <View className="flex-row items-center justify-between">
-            <Text className="text-base font-extrabold text-slate-900">Upload PDF Study Material</Text>
+            <Text className="text-base font-display text-slate-900">Upload PDF Study Material</Text>
             <TouchableOpacity onPress={onClose}>
-              <X size={20} color="#64748B" />
+              <X size={20} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
           <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3" contentContainerStyle={{ paddingBottom: 60 }}>
             <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Document Title</Text>
+              <Text className="text-xs font-sans-bold text-slate-700 mb-1">Document Title</Text>
               <TextInput
                 placeholder="e.g. Rotational Mechanics Master Formula Sheet"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="#8C877E"
                 value={title}
                 onChangeText={setTitle}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-medium"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-sans"
               />
             </View>
 
             <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Subject</Text>
+              <Text className="text-xs font-sans-bold text-slate-700 mb-1">Subject</Text>
               <View className="flex-row flex-wrap gap-1.5">
                 {['Physics', 'Chemistry', 'Mathematics', 'Biology'].map((sub) => (
                   <TouchableOpacity
@@ -219,7 +219,7 @@ export const UploadPdfModal: React.FC<UploadPdfModalProps> = ({
                       subject === sub ? 'bg-blue-600 border-blue-600' : 'bg-slate-50 border-slate-200'
                     }`}
                   >
-                    <Text className={`text-[11px] font-bold ${subject === sub ? 'text-white' : 'text-slate-700'}`}>
+                    <Text className={`text-[11px] font-sans-bold ${subject === sub ? 'text-white' : 'text-slate-700'}`}>
                       {sub}
                     </Text>
                   </TouchableOpacity>
@@ -228,7 +228,7 @@ export const UploadPdfModal: React.FC<UploadPdfModalProps> = ({
             </View>
 
             <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Category</Text>
+              <Text className="text-xs font-sans-bold text-slate-700 mb-1">Category</Text>
               <View className="flex-row flex-wrap gap-1.5">
                 {[
                   { id: 'notes', label: 'Notes 📖' },
@@ -243,7 +243,7 @@ export const UploadPdfModal: React.FC<UploadPdfModalProps> = ({
                       category === cat.id ? 'bg-blue-600 border-blue-600' : 'bg-slate-50 border-slate-200'
                     }`}
                   >
-                    <Text className={`text-[10px] font-bold ${category === cat.id ? 'text-white' : 'text-slate-700'}`}>
+                    <Text className={`text-[10px] font-sans-bold ${category === cat.id ? 'text-white' : 'text-slate-700'}`}>
                       {cat.label}
                     </Text>
                   </TouchableOpacity>
@@ -256,12 +256,12 @@ export const UploadPdfModal: React.FC<UploadPdfModalProps> = ({
               className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex-row items-center justify-between"
             >
               <View className="flex-row items-center gap-2 flex-1 pr-2">
-                <FileText size={18} color="#2563EB" />
-                <Text className="text-xs font-bold text-slate-800" numberOfLines={1}>
+                <FileText size={18} color="#1C1C1E" />
+                <Text className="text-xs font-sans-bold text-slate-800" numberOfLines={1}>
                   {file ? file.name : 'Pick PDF File from Phone'}
                 </Text>
               </View>
-              <Text className="text-xs font-bold text-blue-600">Browse</Text>
+              <Text className="text-xs font-sans-bold text-blue-600">Browse</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -269,7 +269,7 @@ export const UploadPdfModal: React.FC<UploadPdfModalProps> = ({
               disabled={isSubmitting}
               className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-2 mb-4"
             >
-              <Text className="text-xs font-bold text-white">
+              <Text className="text-xs font-sans-bold text-white">
                 {isSubmitting ? 'Uploading PDF...' : 'Publish PDF to Batch'}
               </Text>
             </TouchableOpacity>
@@ -325,40 +325,40 @@ export const ExamMarksModal: React.FC<ExamMarksModalProps> = ({
         <View className="bg-white rounded-t-3xl p-6 gap-3 max-h-[85%] border-t border-slate-200">
           <View className="flex-row items-center justify-between">
             <View>
-              <Text className="text-base font-extrabold text-slate-900">Record Test Marks & Auto-Rank</Text>
+              <Text className="text-base font-display text-slate-900">Record Test Marks & Auto-Rank</Text>
               <Text className="text-xs text-slate-500">Computes batch average, topper & ranks</Text>
             </View>
             <TouchableOpacity onPress={onClose}>
-              <X size={20} color="#64748B" />
+              <X size={20} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
           <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60 }}>
             <View className="flex-row gap-2 mb-3">
               <View className="flex-1">
-                <Text className="text-[11px] font-bold text-slate-700 mb-1">Test Title</Text>
+                <Text className="text-[11px] font-sans-bold text-slate-700 mb-1">Test Title</Text>
                 <TextInput
                   placeholder="e.g. Unit Mock Test 04"
-                  placeholderTextColor="#94a3b8"
+                  placeholderTextColor="#8C877E"
                   value={testName}
                   onChangeText={setTestName}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-sans-bold"
                 />
               </View>
               <View className="w-24">
-                <Text className="text-[11px] font-bold text-slate-700 mb-1">Max Marks</Text>
+                <Text className="text-[11px] font-sans-bold text-slate-700 mb-1">Max Marks</Text>
                 <TextInput
                   placeholder="100"
                   keyboardType="numeric"
-                  placeholderTextColor="#94a3b8"
+                  placeholderTextColor="#8C877E"
                   value={maxScore}
                   onChangeText={setMaxScore}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-sans-bold"
                 />
               </View>
             </View>
 
-            <Text className="text-xs font-bold text-slate-700 mb-2">
+            <Text className="text-xs font-sans-bold text-slate-700 mb-2">
               Enter Student Scores (out of {maxScore}):
             </Text>
             <View className="gap-2 mb-3">
@@ -368,8 +368,8 @@ export const ExamMarksModal: React.FC<ExamMarksModalProps> = ({
                   className="flex-row items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200"
                 >
                   <View className="flex-1 pr-2">
-                    <Text className="text-xs font-bold text-slate-800">{st.name}</Text>
-                    <Text className="text-[10px] text-slate-500 font-semibold">{st.rollNumber}</Text>
+                    <Text className="text-xs font-sans-bold text-slate-800">{st.name}</Text>
+                    <Text className="text-[10px] text-slate-500 font-sans-semibold">{st.rollNumber}</Text>
                   </View>
 
                   <View className="w-20">
@@ -378,7 +378,7 @@ export const ExamMarksModal: React.FC<ExamMarksModalProps> = ({
                       keyboardType="numeric"
                       value={scores[st.id] ?? '85'}
                       onChangeText={(val) => setScores((prev) => ({ ...prev, [st.id]: val }))}
-                      className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 text-center font-bold"
+                      className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 text-center font-sans-bold"
                     />
                   </View>
                 </View>
@@ -389,7 +389,7 @@ export const ExamMarksModal: React.FC<ExamMarksModalProps> = ({
               onPress={handleSave}
               className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mb-4"
             >
-              <Text className="text-xs font-bold text-white">Save Marks & Compute Ranks</Text>
+              <Text className="text-xs font-sans-bold text-white">Save Marks & Compute Ranks</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -448,9 +448,9 @@ export const GradingModal: React.FC<GradingModalProps> = ({
       >
         <View className="bg-white rounded-t-3xl p-6 gap-3.5 max-h-[85%] border-t border-slate-200">
           <View className="flex-row items-center justify-between">
-            <Text className="text-base font-extrabold text-slate-900">Grade Student Homework</Text>
+            <Text className="text-base font-display text-slate-900">Grade Student Homework</Text>
             <TouchableOpacity onPress={onClose}>
-              <X size={20} color="#64748B" />
+              <X size={20} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
@@ -459,16 +459,16 @@ export const GradingModal: React.FC<GradingModalProps> = ({
             {aiStatus === 'pending_review' && aiScore !== null && aiScore !== undefined && (
               <View className="bg-indigo-50 border border-indigo-200 rounded-2xl p-3.5 gap-2">
                 <View className="flex-row items-center justify-between">
-                  <Text className="text-xs font-black text-indigo-950">
+                  <Text className="text-xs font-display text-indigo-950">
                     🤖 Gemini Evaluation Suggestion
                   </Text>
-                  <Text className="text-[10px] font-bold text-indigo-700 bg-white px-2 py-0.5 rounded-full border border-indigo-100">
+                  <Text className="text-[10px] font-sans-bold text-indigo-700 bg-white px-2 py-0.5 rounded-full border border-indigo-100">
                     Pending Teacher Review
                   </Text>
                 </View>
 
-                <Text className="text-xs text-indigo-900 font-semibold">
-                  Suggested Score: <Text className="font-black text-indigo-600">{aiScore} / 25</Text>
+                <Text className="text-xs text-indigo-900 font-sans-semibold">
+                  Suggested Score: <Text className="font-display text-indigo-600">{aiScore} / 25</Text>
                 </Text>
 
                 {aiFeedback ? (
@@ -484,21 +484,21 @@ export const GradingModal: React.FC<GradingModalProps> = ({
             )}
 
             <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Marks Awarded (out of 25)</Text>
+              <Text className="text-xs font-sans-bold text-slate-700 mb-1">Marks Awarded (out of 25)</Text>
               <TextInput
                 placeholder="24"
                 keyboardType="numeric"
                 value={score}
                 onChangeText={setScore}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-sans-bold"
               />
             </View>
 
             <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Teacher Feedback / Observations</Text>
+              <Text className="text-xs font-sans-bold text-slate-700 mb-1">Teacher Feedback / Observations</Text>
               <TextInput
                 placeholder="Add teacher feedback or step correction..."
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="#8C877E"
                 value={feedback}
                 onChangeText={setFeedback}
                 multiline
@@ -511,7 +511,7 @@ export const GradingModal: React.FC<GradingModalProps> = ({
               onPress={handleConfirm}
               className="bg-emerald-600 py-3 rounded-2xl items-center shadow-xs mt-2 mb-4"
             >
-              <Text className="text-xs font-bold text-white">Approve Grade & Publish to Student ✅</Text>
+              <Text className="text-xs font-sans-bold text-white">Approve Grade & Publish to Student ✅</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -569,42 +569,42 @@ export const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({
       >
         <View className="bg-white rounded-t-3xl p-6 gap-3 max-h-[85%] border-t border-slate-200">
           <View className="flex-row items-center justify-between">
-            <Text className="text-base font-extrabold text-slate-900">Create New DPP / Assignment</Text>
+            <Text className="text-base font-display text-slate-900">Create New DPP / Assignment</Text>
             <TouchableOpacity onPress={onClose}>
-              <X size={20} color="#64748B" />
+              <X size={20} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
           <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3" contentContainerStyle={{ paddingBottom: 60 }}>
             <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Title</Text>
+              <Text className="text-xs font-sans-bold text-slate-700 mb-1">Title</Text>
               <TextInput
                 placeholder="e.g. DPP 05: Rotational Torque & Angular Momentum"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="#8C877E"
                 value={title}
                 onChangeText={setTitle}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-sans-bold"
               />
             </View>
 
             <View className="flex-row gap-2">
               <View className="flex-1">
-                <Text className="text-[11px] font-bold text-slate-700 mb-1">Subject</Text>
+                <Text className="text-[11px] font-sans-bold text-slate-700 mb-1">Subject</Text>
                 <TextInput
                   placeholder="Physics"
                   value={subject}
                   onChangeText={setSubject}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-sans-bold"
                 />
               </View>
               <View className="w-24">
-                <Text className="text-[11px] font-bold text-slate-700 mb-1">Max Marks</Text>
+                <Text className="text-[11px] font-sans-bold text-slate-700 mb-1">Max Marks</Text>
                 <TextInput
                   placeholder="25"
                   keyboardType="numeric"
                   value={maxMarks}
                   onChangeText={setMaxMarks}
-                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-sans-bold"
                 />
               </View>
             </View>
@@ -625,17 +625,17 @@ export const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({
               }}
               className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex-row items-center justify-between"
             >
-              <Text className="text-xs text-slate-700 font-medium" numberOfLines={1}>
+              <Text className="text-xs text-slate-700 font-sans" numberOfLines={1}>
                 {pdfName || 'Attach Question Paper PDF (Optional)'}
               </Text>
-              <Text className="text-xs font-bold text-blue-600">Pick</Text>
+              <Text className="text-xs font-sans-bold text-blue-600">Pick</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={handleSubmit}
               className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-2 mb-4"
             >
-              <Text className="text-xs font-bold text-white">Publish Assignment to Batch</Text>
+              <Text className="text-xs font-sans-bold text-white">Publish Assignment to Batch</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -688,43 +688,43 @@ export const AddLectureModal: React.FC<AddLectureModalProps> = ({
       >
         <View className="bg-white rounded-t-3xl p-6 gap-3 max-h-[85%] border-t border-slate-200">
           <View className="flex-row items-center justify-between">
-            <Text className="text-base font-extrabold text-slate-900">Link YouTube Lecture</Text>
+            <Text className="text-base font-display text-slate-900">Link YouTube Lecture</Text>
             <TouchableOpacity onPress={onClose}>
-              <X size={20} color="#64748B" />
+              <X size={20} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
           <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3" contentContainerStyle={{ paddingBottom: 60 }}>
             <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Lecture Title</Text>
+              <Text className="text-xs font-sans-bold text-slate-700 mb-1">Lecture Title</Text>
               <TextInput
                 placeholder="e.g. Kinematics Lecture 08: Projectile Motion"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="#8C877E"
                 value={title}
                 onChangeText={setTitle}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-sans-bold"
               />
             </View>
 
             <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">Subject</Text>
+              <Text className="text-xs font-sans-bold text-slate-700 mb-1">Subject</Text>
               <TextInput
                 placeholder="Physics / Chemistry / Mathematics"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="#8C877E"
                 value={subject}
                 onChangeText={setSubject}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-sans-bold"
               />
             </View>
 
             <View>
-              <Text className="text-xs font-bold text-slate-700 mb-1">YouTube Video ID or Unlisted URL</Text>
+              <Text className="text-xs font-sans-bold text-slate-700 mb-1">YouTube Video ID or Unlisted URL</Text>
               <TextInput
                 placeholder="e.g. dQw4w9WgXcQ or https://youtu.be/..."
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="#8C877E"
                 value={videoId}
                 onChangeText={setVideoId}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-bold"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-sans-bold"
               />
             </View>
 
@@ -732,7 +732,7 @@ export const AddLectureModal: React.FC<AddLectureModalProps> = ({
               onPress={handleSubmit}
               className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-2 mb-4"
             >
-              <Text className="text-xs font-bold text-white">Publish Video Lecture</Text>
+              <Text className="text-xs font-sans-bold text-white">Publish Video Lecture</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>

@@ -54,9 +54,9 @@ export const LinkChildModal: React.FC<LinkChildModalProps> = ({
       >
         <View className="bg-white rounded-t-3xl p-6 gap-3.5 max-h-[85%] border-t border-slate-200">
           <View className="flex-row items-center justify-between">
-            <Text className="text-base font-extrabold text-slate-900">Link Another Child</Text>
+            <Text className="text-base font-display text-slate-900">Link Another Child</Text>
             <TouchableOpacity onPress={onClose}>
-              <X size={20} color="#64748B" />
+              <X size={20} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
@@ -71,11 +71,11 @@ export const LinkChildModal: React.FC<LinkChildModalProps> = ({
 
             <TextInput
               placeholder="e.g. STU-AMELIA-902 or 9823044551"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor="#8C877E"
               value={childCodeInput}
               onChangeText={setChildCodeInput}
               autoCapitalize="characters"
-              className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-bold"
+              className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-sans-bold"
             />
 
             <TouchableOpacity
@@ -83,7 +83,7 @@ export const LinkChildModal: React.FC<LinkChildModalProps> = ({
               disabled={isLinkingChild}
               className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-1 active:scale-98"
             >
-              <Text className="text-xs font-bold text-white">
+              <Text className="text-xs font-sans-bold text-white">
                 {isLinkingChild ? 'Verifying Student Code...' : 'Verify & Link Child'}
               </Text>
             </TouchableOpacity>

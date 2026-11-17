@@ -32,11 +32,11 @@ export const AttendanceRingAndTrendChart: React.FC<AttendanceRingAndTrendChartPr
     <View className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs mb-4">
       <View className="flex-row items-center justify-between mb-4">
         <View>
-          <Text className="text-base font-black text-slate-900">Attendance Consistency</Text>
+          <Text className="text-base font-display text-slate-900">Attendance Consistency</Text>
           <Text className="text-xs text-slate-600">Monthly ring + 6-month trend</Text>
         </View>
         <View className="bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-          <Text className="text-[10px] font-bold text-emerald-700">
+          <Text className="text-[10px] font-sans-bold text-emerald-700">
             {effectiveRate >= 90 ? 'Target 90%+ Met' : `${effectiveRate}% Current`}
           </Text>
         </View>
@@ -51,7 +51,7 @@ export const AttendanceRingAndTrendChart: React.FC<AttendanceRingAndTrendChartPr
               cx="55"
               cy="55"
               r={radius}
-              stroke="#E2E8F0"
+              stroke="#E6E2DA"
               strokeWidth={strokeWidth}
               fill="transparent"
             />
@@ -70,28 +70,28 @@ export const AttendanceRingAndTrendChart: React.FC<AttendanceRingAndTrendChartPr
             />
           </Svg>
           <View className="absolute items-center">
-            <Text className="text-xl font-black text-slate-900">{effectiveRate}%</Text>
-            <Text className="text-[9px] font-bold text-slate-600 uppercase">Rate</Text>
+            <Text className="text-xl font-display text-slate-900">{effectiveRate}%</Text>
+            <Text className="text-[9px] font-sans-bold text-slate-600 uppercase">Rate</Text>
           </View>
         </View>
 
         {/* 6-Month Trend Curve */}
         <View className="flex-1 bg-slate-50 rounded-2xl p-3 border border-slate-200/80">
-          <Text className="text-[10px] font-bold text-slate-600 uppercase mb-1">
+          <Text className="text-[10px] font-sans-bold text-slate-600 uppercase mb-1">
             6-Month Attendance Streak
           </Text>
           <Svg width="100%" height={60} viewBox="0 0 145 60">
-            <Line x1="10" y1="55" x2="140" y2="55" stroke="#CBD5E1" strokeWidth="1" />
+            <Line x1="10" y1="55" x2="140" y2="55" stroke="#D8D3CA" strokeWidth="1" />
             <Polyline
               points={trendPoints}
               fill="none"
-              stroke="#2563EB"
+              stroke="#1C1C1E"
               strokeWidth="3"
               strokeLinecap="round"
             />
-            <SvgText x="10" y="58" fontSize="8" fill="#64748B">Jun</SvgText>
-            <SvgText x="70" y="58" fontSize="8" fill="#64748B">Aug</SvgText>
-            <SvgText x="130" y="58" fontSize="8" fill="#64748B">Nov</SvgText>
+            <SvgText x="10" y="58" fontSize="8" fill="#6E6A63">Jun</SvgText>
+            <SvgText x="70" y="58" fontSize="8" fill="#6E6A63">Aug</SvgText>
+            <SvgText x="130" y="58" fontSize="8" fill="#6E6A63">Nov</SvgText>
           </Svg>
         </View>
       </View>
@@ -99,18 +99,18 @@ export const AttendanceRingAndTrendChart: React.FC<AttendanceRingAndTrendChartPr
       {/* Stats Counter Trio */}
       <View className="flex-row gap-2">
         <View className="flex-1 bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 items-center">
-          <Text className="text-xs font-bold text-emerald-800">Present</Text>
-          <Text className="text-base font-black text-emerald-900">{presentCount} Days</Text>
+          <Text className="text-xs font-sans-bold text-emerald-800">Present</Text>
+          <Text className="text-base font-display text-emerald-900">{presentCount} Days</Text>
         </View>
 
         <View className="flex-1 bg-amber-50 border border-amber-200 rounded-xl p-2.5 items-center">
-          <Text className="text-xs font-bold text-amber-800">Late</Text>
-          <Text className="text-base font-black text-amber-900">{lateCount} Days</Text>
+          <Text className="text-xs font-sans-bold text-amber-800">Late</Text>
+          <Text className="text-base font-display text-amber-900">{lateCount} Days</Text>
         </View>
 
         <View className="flex-1 bg-rose-50 border border-rose-200 rounded-xl p-2.5 items-center">
-          <Text className="text-xs font-bold text-rose-800">Absent</Text>
-          <Text className="text-base font-black text-rose-900">{absentCount} Day</Text>
+          <Text className="text-xs font-sans-bold text-rose-800">Absent</Text>
+          <Text className="text-base font-display text-rose-900">{absentCount} Day</Text>
         </View>
       </View>
     </View>

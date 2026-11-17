@@ -183,7 +183,7 @@ export const StudyMaterialsViewer: React.FC = () => {
                 }`}
               >
                 <Text
-                  className={`text-xs font-bold ${
+                  className={`text-xs font-sans-bold ${
                     selectedSubject === sub ? 'text-white' : 'text-slate-600'
                   }`}
                 >
@@ -200,7 +200,7 @@ export const StudyMaterialsViewer: React.FC = () => {
             className="flex-row items-center gap-1.5 bg-blue-600 px-3 py-1.5 rounded-xl shadow-xs active:scale-95"
           >
             <Upload size={13} color="#FFFFFF" />
-            <Text className="text-xs font-bold text-white">Upload Notes</Text>
+            <Text className="text-xs font-sans-bold text-white">Upload Notes</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -208,16 +208,16 @@ export const StudyMaterialsViewer: React.FC = () => {
       {/* Loading Skeleton */}
       {isLoading && (
         <View className="p-8 items-center justify-center bg-white rounded-2xl border border-slate-200">
-          <ActivityIndicator size="small" color="#2563EB" />
-          <Text className="text-xs text-slate-500 mt-2 font-medium">Loading PDF repository...</Text>
+          <ActivityIndicator size="small" color="#1C1C1E" />
+          <Text className="text-xs text-slate-500 mt-2 font-sans">Loading PDF repository...</Text>
         </View>
       )}
 
       {/* Empty State */}
       {!isLoading && filtered.length === 0 && (
         <View className="p-8 items-center justify-center bg-white rounded-2xl border border-slate-200">
-          <FileText size={28} color="#94A3B8" />
-          <Text className="text-sm font-bold text-slate-800 mt-2">No Study Materials Found</Text>
+          <FileText size={28} color="#8C877E" />
+          <Text className="text-sm font-sans-bold text-slate-800 mt-2">No Study Materials Found</Text>
           <Text className="text-xs text-slate-500 text-center mt-1">
             {selectedSubject === 'All'
               ? 'No notes or DPPs published yet. Tap Upload Notes to publish PDF materials.'
@@ -238,18 +238,18 @@ export const StudyMaterialsViewer: React.FC = () => {
               >
                 <View className="flex-row items-start justify-between gap-3">
                   <View className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 items-center justify-center shrink-0">
-                    <FileText size={20} color="#2563EB" />
+                    <FileText size={20} color="#1C1C1E" />
                   </View>
 
                   <View className="flex-1 min-w-0">
                     <View className="flex-row items-center gap-2 mb-1">
                       <Badge label={item.subject || 'Physics'} variant="info" />
-                      <Text className="text-[10px] text-slate-400 font-bold">
+                      <Text className="text-[10px] text-slate-400 font-sans-bold">
                         {item.fileSizeBytes || '1.8 MB'}
                       </Text>
                     </View>
 
-                    <Text className="text-sm font-extrabold text-slate-900" numberOfLines={1}>
+                    <Text className="text-sm font-display text-slate-900" numberOfLines={1}>
                       {item.title}
                     </Text>
 
@@ -267,8 +267,8 @@ export const StudyMaterialsViewer: React.FC = () => {
                     onPress={() => handleOpenReader(item)}
                     className="flex-row items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 active:scale-95"
                   >
-                    <BookOpen size={13} color="#334155" />
-                    <Text className="text-xs font-bold text-slate-700">Preview</Text>
+                    <BookOpen size={13} color="#3B372F" />
+                    <Text className="text-xs font-sans-bold text-slate-700">Preview</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -280,12 +280,12 @@ export const StudyMaterialsViewer: React.FC = () => {
                     {isDownloaded ? (
                       <>
                         <CheckCircle size={13} color="#059669" />
-                        <Text className="text-xs font-bold text-emerald-800">Downloaded</Text>
+                        <Text className="text-xs font-sans-bold text-emerald-800">Downloaded</Text>
                       </>
                     ) : (
                       <>
                         <Download size={13} color="#FFFFFF" />
-                        <Text className="text-xs font-bold text-white">Save PDF</Text>
+                        <Text className="text-xs font-sans-bold text-white">Save PDF</Text>
                       </>
                     )}
                   </TouchableOpacity>
@@ -301,24 +301,24 @@ export const StudyMaterialsViewer: React.FC = () => {
         <View className="flex-1 bg-black/50 justify-end">
           <View className="bg-white rounded-t-3xl p-5 gap-3.5 max-h-[85%]">
             <View className="flex-row items-center justify-between">
-              <Text className="text-base font-black text-slate-900">Upload Study Material</Text>
+              <Text className="text-base font-display text-slate-900">Upload Study Material</Text>
               <TouchableOpacity onPress={() => setIsUploadOpen(false)}>
-                <X size={20} color="#64748B" />
+                <X size={20} color="#6E6A63" />
               </TouchableOpacity>
             </View>
 
             <View className="gap-1">
-              <Text className="text-xs font-bold text-slate-700">Title</Text>
+              <Text className="text-xs font-sans-bold text-slate-700">Title</Text>
               <TextInput
                 value={title}
                 onChangeText={setTitle}
                 placeholder="e.g. Rotational Mechanics Complete Formula Sheet"
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-sans"
               />
             </View>
 
             <View className="gap-1">
-              <Text className="text-xs font-bold text-slate-700">Subject</Text>
+              <Text className="text-xs font-sans-bold text-slate-700">Subject</Text>
               <View className="flex-row gap-2">
                 {['Physics', 'Chemistry', 'Mathematics'].map((s) => (
                   <TouchableOpacity
@@ -329,7 +329,7 @@ export const StudyMaterialsViewer: React.FC = () => {
                     }`}
                   >
                     <Text
-                      className={`text-xs font-bold ${
+                      className={`text-xs font-sans-bold ${
                         subject === s ? 'text-blue-600' : 'text-slate-600'
                       }`}
                     >
@@ -341,14 +341,14 @@ export const StudyMaterialsViewer: React.FC = () => {
             </View>
 
             <View className="gap-1">
-              <Text className="text-xs font-bold text-slate-700">Description (Optional)</Text>
+              <Text className="text-xs font-sans-bold text-slate-700">Description (Optional)</Text>
               <TextInput
                 value={description}
                 onChangeText={setDescription}
                 placeholder="Brief summary of what this document covers..."
                 multiline
                 numberOfLines={2}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-sans"
               />
             </View>
 
@@ -360,15 +360,15 @@ export const StudyMaterialsViewer: React.FC = () => {
               {selectedFile ? (
                 <View className="items-center">
                   <FileText size={24} color="#059669" />
-                  <Text className="text-xs font-bold text-slate-900 mt-1" numberOfLines={1}>
+                  <Text className="text-xs font-sans-bold text-slate-900 mt-1" numberOfLines={1}>
                     {selectedFile.name}
                   </Text>
                   <Text className="text-[10px] text-slate-500">{selectedFile.sizeFormatted}</Text>
                 </View>
               ) : (
                 <View className="items-center">
-                  <Upload size={24} color="#64748B" />
-                  <Text className="text-xs font-bold text-slate-700 mt-1">Tap to select PDF</Text>
+                  <Upload size={24} color="#6E6A63" />
+                  <Text className="text-xs font-sans-bold text-slate-700 mt-1">Tap to select PDF</Text>
                   <Text className="text-[10px] text-slate-400">PDF documents up to 20 MB</Text>
                 </View>
               )}
@@ -384,7 +384,7 @@ export const StudyMaterialsViewer: React.FC = () => {
               {uploadMutation.isPending ? (
                 <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
-                <Text className="text-sm font-black text-white">Publish Study Material</Text>
+                <Text className="text-sm font-display text-white">Publish Study Material</Text>
               )}
             </TouchableOpacity>
           </View>

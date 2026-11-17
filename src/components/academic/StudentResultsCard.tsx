@@ -25,13 +25,13 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
   if (error) {
     return (
       <View className="bg-rose-50 border border-rose-200 rounded-3xl p-5">
-        <Text className="text-xs font-bold text-rose-800">Failed to load examination results</Text>
+        <Text className="text-xs font-sans-bold text-rose-800">Failed to load examination results</Text>
         <Text className="text-[11px] text-rose-600 mt-1">{(error as Error).message}</Text>
         <TouchableOpacity
           onPress={() => refetch()}
           className="mt-3 bg-rose-600 py-2 px-3 rounded-xl self-start"
         >
-          <Text className="text-xs font-bold text-white">Retry</Text>
+          <Text className="text-xs font-sans-bold text-white">Retry</Text>
         </TouchableOpacity>
       </View>
     );
@@ -40,8 +40,8 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
   if (!report || report.recentResults.length === 0) {
     return (
       <View className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-xs items-center justify-center">
-        <Award size={36} color="#94a3b8" />
-        <Text className="text-sm font-bold text-slate-800 mt-2">No Examination Records Yet</Text>
+        <Award size={36} color="#8C877E" />
+        <Text className="text-sm font-sans-bold text-slate-800 mt-2">No Examination Records Yet</Text>
         <Text className="text-xs text-slate-400 text-center mt-1">
           {studentName || 'Student'} has not participated in any published tests or exams yet.
         </Text>
@@ -55,11 +55,11 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
       <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
-            <Award size={18} color="#2563eb" />
-            <Text className="text-sm font-bold text-slate-900">Academic Mastery & Results</Text>
+            <Award size={18} color="#1C1C1E" />
+            <Text className="text-sm font-sans-bold text-slate-900">Academic Mastery & Results</Text>
           </View>
           <View className="bg-blue-100 px-2.5 py-1 rounded-full border border-blue-200">
-            <Text className="text-[11px] font-bold text-blue-800">
+            <Text className="text-[11px] font-sans-bold text-blue-800">
               Rank #{report.rankInBatch || 1}
             </Text>
           </View>
@@ -68,14 +68,14 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
         {/* Aggregate Stats */}
         <View className="flex-row items-center justify-between bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
           <View>
-            <Text className="text-xs font-bold text-slate-700">Cumulative Average</Text>
-            <Text className="text-xl font-black text-blue-700 mt-0.5">
+            <Text className="text-xs font-sans-bold text-slate-700">Cumulative Average</Text>
+            <Text className="text-xl font-display text-blue-700 mt-0.5">
               {report.overallPercentage}%
             </Text>
           </View>
           <View className="items-end">
-            <Text className="text-xs font-bold text-slate-700">Tests Recorded</Text>
-            <Text className="text-base font-black text-slate-900 mt-0.5">
+            <Text className="text-xs font-sans-bold text-slate-700">Tests Recorded</Text>
+            <Text className="text-base font-display text-slate-900 mt-0.5">
               {report.totalExamsTaken} Exams
             </Text>
           </View>
@@ -84,7 +84,7 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
         {/* Subject Mastery Progress Bars */}
         {report.subjectMastery.length > 0 && (
           <View className="gap-2.5 pt-1">
-            <Text className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+            <Text className="text-xs font-sans-bold text-slate-600 uppercase tracking-wider">
               Subject Breakdown
             </Text>
             {report.subjectMastery.map((sub) => {
@@ -100,12 +100,12 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
               return (
                 <View key={sub.subject} className="gap-1">
                   <View className="flex-row items-center justify-between">
-                    <Text className="text-xs font-bold text-slate-800">{sub.subject}</Text>
+                    <Text className="text-xs font-sans-bold text-slate-800">{sub.subject}</Text>
                     <View className="flex-row items-center gap-1.5">
                       <View className={`px-2 py-0.5 rounded-full border ${badgeVariant}`}>
-                        <Text className="text-[10px] font-bold">{sub.masteryLevel}</Text>
+                        <Text className="text-[10px] font-sans-bold">{sub.masteryLevel}</Text>
                       </View>
-                      <Text className="text-xs font-black text-slate-900">
+                      <Text className="text-xs font-display text-slate-900">
                         {sub.averagePercentage}%
                       </Text>
                     </View>
@@ -116,7 +116,7 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
                       className="h-full rounded-full"
                       style={{
                         width: `${Math.min(100, Math.max(5, sub.averagePercentage))}%`,
-                        backgroundColor: sub.colorHex || '#2563eb',
+                        backgroundColor: sub.colorHex || '#1C1C1E',
                       }}
                     />
                   </View>
@@ -129,7 +129,7 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
 
       {/* Recent Examinations List */}
       <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
-        <Text className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+        <Text className="text-xs font-sans-bold text-slate-600 uppercase tracking-wider">
           Recent Exam Performances
         </Text>
 
@@ -143,13 +143,13 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
               >
                 <View className="flex-row items-center justify-between">
                   <View className="flex-1 mr-2">
-                    <Text className="text-xs font-bold text-slate-900">{exam.title}</Text>
+                    <Text className="text-xs font-sans-bold text-slate-900">{exam.title}</Text>
                     <Text className="text-[11px] text-slate-500">
                       {exam.subject} • {exam.examDate}
                     </Text>
                   </View>
                   <View className="items-end">
-                    <Text className="text-sm font-black text-slate-900">
+                    <Text className="text-sm font-display text-slate-900">
                       {exam.marksObtained}/{exam.maxMarks}
                     </Text>
                     <View
@@ -158,7 +158,7 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
                       }`}
                     >
                       <Text
-                        className={`text-[10px] font-bold ${
+                        className={`text-[10px] font-sans-bold ${
                           isPassing ? 'text-emerald-800' : 'text-rose-800'
                         }`}
                       >

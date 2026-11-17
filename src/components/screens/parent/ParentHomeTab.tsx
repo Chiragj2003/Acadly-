@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { CalendarCheck, MessageSquare, Plus, Users } from 'lucide-react-native';
-import { Badge } from '@/components/ui';
+import { MessageSquare, Plus } from 'lucide-react-native';
+import { BigNumber, InsightCard, Mascot, StatTile, DisplayTitle } from '@/components/ui';
+import { useAttendanceTrend } from '@/hooks/queries/useAnalyticsQueries';
 import { StudentScheduleSection } from '@/components/screens/student/StudentScheduleSection';
 import { StudentResultsCard } from '@/components/academic/StudentResultsCard';
 import { StudentAnnouncementFeed } from '@/components/academic/StudentAnnouncementFeed';
@@ -18,24 +19,22 @@ export const ParentHomeTab: React.FC<ParentHomeTabProps> = ({
   onOpenLinkChild,
   onOpenChat,
 }) => {
+  const { data: trend } = useAttendanceTrend(selectedChild?.id, selectedChild?.batch_id);
+
   if (!selectedChild) {
     return (
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-8 items-center justify-center gap-3 shadow-xs">
-        <View className="w-16 h-16 rounded-full bg-blue-50 border border-blue-200 items-center justify-center">
-          <Users size={28} color="#2563EB" />
-        </View>
-        <Text className="text-base font-extrabold text-slate-900 text-center">
-          No children linked yet, enter a student code
-        </Text>
+      <View className="bg-white rounded-3xl p-8 items-center justify-center gap-3">
+        <Mascot mood="curious" size="lg" />
+        <DisplayTitle center>Link your child to get started</DisplayTitle>
         <Text className="text-xs text-slate-500 text-center leading-relaxed">
           Ask your tuition teacher for your ward's unique Student Link Code to view real-time attendance, test performance, and batch schedule.
         </Text>
         <TouchableOpacity
           onPress={onOpenLinkChild}
-          className="bg-blue-600 px-5 py-3 rounded-2xl flex-row items-center gap-2 active:scale-95 shadow-xs mt-2"
+          className="bg-ink px-6 min-h-[56px] rounded-full flex-row items-center gap-2 active:opacity-90 mt-2"
         >
-          <Plus size={16} color="#ffffff" />
-          <Text className="text-xs font-bold text-white">Enter Student Link Code</Text>
+          <Plus size={18} color="#ffffff" />
+          <Text className="text-[17px] font-sans-bold text-white">Enter student code</Text>
         </TouchableOpacity>
       </View>
     );
@@ -48,25 +47,47 @@ export const ParentHomeTab: React.FC<ParentHomeTabProps> = ({
         batchId={selectedChild.batch_id}
       />
 
-      {/* 1. Today's Attendance Overview */}
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center gap-2">
-            <CalendarCheck size={18} color="#059669" />
-            <Text className="text-sm font-bold text-slate-900">Today's Attendance</Text>
+      {/* 1. Attendance at a glance — one number, one sentence (real data only) */}
+      {(() => {
+        const firstName = selectedChild.full_name.split(' ')[0];
+        const hasData = (trend?.totalClasses ?? 0) > 0;
+        const now = new Date();
+        const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const todayStatus = trend?.recentRecords.find((r) => r.date.slice(0, 10) === todayKey)?.status;
+        const todayMessage =
+          todayStatus === 'P'
+            ? `${firstName} was marked present today.`
+            : todayStatus === 'L'
+              ? `${firstName} was marked late today.`
+              : todayStatus === 'A'
+                ? `${firstName} was marked absent today.`
+                : todayStatus === 'E'
+                  ? `${firstName} is on approved leave today.`
+                  : `No roll call for ${firstName} yet today.`;
+        return (
+          <View className="gap-4">
+            <BigNumber
+              label={`${firstName}'s attendance`}
+              value={hasData ? String(Math.round(trend!.attendanceRate)) : '—'}
+              unit={hasData ? '%' : undefined}
+            />
+            {hasData && (
+              <View className="flex-row gap-2.5">
+                <StatTile value={String(trend!.presentCount)} label="Present" />
+                <StatTile value={String(trend!.absentCount)} label="Absent" />
+                <StatTile value={String(trend!.streak)} unit=" days" label="Streak" />
+              </View>
+            )}
+            <InsightCard
+              eyebrow={selectedChild.batch_name || 'Today'}
+              message={todayMessage}
+              tone={todayStatus === 'A' ? 'pink' : 'mint'}
+              onPress={onOpenChat}
+              actionLabel="Message the teacher"
+            />
           </View>
-          <Badge label="Enrolled" variant="success" showDot />
-        </View>
-
-        <View className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
-          <Text className="text-xs font-bold text-slate-800">
-            {selectedChild.full_name}
-          </Text>
-          <Text className="text-[11px] text-slate-500 mt-0.5">
-            {selectedChild.batch_name} • Adm: {selectedChild.admission_number || selectedChild.id.slice(0, 8)}
-          </Text>
-        </View>
-      </View>
+        );
+      })()}
 
       {/* 2. Batch Schedule (Real DB Queries) */}
       <StudentScheduleSection batchId={selectedChild.batch_id} />
@@ -78,13 +99,12 @@ export const ParentHomeTab: React.FC<ParentHomeTabProps> = ({
       />
 
       {/* 4. Connect with Tuition Teacher */}
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
+      <View className="bg-white rounded-3xl p-5 gap-3">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
-            <MessageSquare size={16} color="#2563EB" />
-            <Text className="text-sm font-bold text-slate-900">Connect with Teacher</Text>
+            <MessageSquare size={16} color="#1C1C1E" />
+            <Text className="text-sm font-sans-bold text-slate-900">Connect with Teacher</Text>
           </View>
-          <Badge label="Active Today" variant="info" />
         </View>
 
         <Text className="text-xs text-slate-600 leading-relaxed">
@@ -93,10 +113,10 @@ export const ParentHomeTab: React.FC<ParentHomeTabProps> = ({
 
         <TouchableOpacity
           onPress={onOpenChat}
-          className="bg-blue-600 py-3 rounded-2xl items-center flex-row justify-center gap-2 active:scale-98 shadow-xs"
+          className="bg-ink min-h-[52px] rounded-full items-center flex-row justify-center gap-2 active:opacity-90"
         >
           <MessageSquare size={16} color="#ffffff" />
-          <Text className="text-xs font-bold text-white">Open In-App Faculty Chat</Text>
+          <Text className="text-[15px] font-sans-bold text-white">Message the teacher</Text>
         </TouchableOpacity>
       </View>
     </View>

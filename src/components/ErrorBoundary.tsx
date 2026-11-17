@@ -88,7 +88,7 @@ export class ErrorBoundary extends Component<Props, State> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F3F1EC',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 4,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#EDE9E1',
   },
   iconContainer: {
     width: 64,
@@ -120,21 +120,21 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#1C1C1E',
     marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
     lineHeight: 20,
-    color: '#64748B',
+    color: '#6E6A63',
     textAlign: 'center',
     marginBottom: 20,
   },
   devErrorBox: {
     maxHeight: 140,
     width: '100%',
-    backgroundColor: '#0F172A',
+    backgroundColor: '#1C1C1E',
     borderRadius: 8,
     padding: 10,
     marginBottom: 16,
@@ -149,13 +149,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   devErrorText: {
-    color: '#F1F5F9',
+    color: '#EDE9E1',
     fontSize: 11,
     fontFamily: 'monospace',
     marginBottom: 6,
   },
   devStackText: {
-    color: '#94A3B8',
+    color: '#8C877E',
     fontSize: 9,
     fontFamily: 'monospace',
   },

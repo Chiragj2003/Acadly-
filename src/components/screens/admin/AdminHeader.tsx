@@ -23,11 +23,11 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
       <View className="flex-1 pr-2">
         <View className="flex-row items-center gap-1.5">
           <Building2 size={16} color="#7c3aed" />
-          <Text className="text-sm font-black text-slate-900 dark:text-slate-100" numberOfLines={1}>
+          <Text className="text-sm font-display text-slate-900 dark:text-slate-100" numberOfLines={1}>
             {instituteName}
           </Text>
         </View>
-        <Text className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
+        <Text className="text-[10px] text-slate-500 dark:text-slate-400 font-sans-semibold mt-0.5">
           Center Code: {instituteCode}
         </Text>
       </View>
@@ -42,7 +42,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
           <UserCheck size={18} color="#7c3aed" />
           {pendingJoinCount > 0 && (
             <View className="absolute -top-1 -right-1 bg-rose-500 rounded-full w-4 h-4 items-center justify-center">
-              <Text className="text-[9px] font-bold text-white">{pendingJoinCount}</Text>
+              <Text className="text-[9px] font-sans-bold text-white">{pendingJoinCount}</Text>
             </View>
           )}
         </TouchableOpacity>
@@ -53,7 +53,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
           accessibilityLabel="Community Forum"
           className="bg-slate-100 dark:bg-slate-800 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 active:scale-95"
         >
-          <MessageSquare size={18} color="#475569" />
+          <MessageSquare size={18} color="#4A463F" />
         </TouchableOpacity>
 
         <NotificationBell size={18} />

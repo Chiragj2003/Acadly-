@@ -19,15 +19,15 @@ export const ParentChildSelector: React.FC<ParentChildSelectorProps> = ({
   return (
     <View className="bg-white border border-slate-200/90 rounded-3xl p-4 shadow-xs">
       <View className="flex-row items-center justify-between mb-2.5">
-        <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+        <Text className="text-xs font-sans-bold text-slate-500 uppercase tracking-wider">
           Enrolled Children ({childrenList.length})
         </Text>
         <TouchableOpacity
           onPress={onOpenLinkModal}
           className="flex-row items-center gap-1 active:scale-95"
         >
-          <Plus size={13} color="#2563EB" />
-          <Text className="text-xs font-bold text-blue-600">Link Child</Text>
+          <Plus size={13} color="#1C1C1E" />
+          <Text className="text-xs font-sans-bold text-blue-600">Link Child</Text>
         </TouchableOpacity>
       </View>
 
@@ -36,8 +36,8 @@ export const ParentChildSelector: React.FC<ParentChildSelectorProps> = ({
           onPress={onOpenLinkModal}
           className="p-5 rounded-2xl bg-slate-50 border border-dashed border-slate-300 items-center justify-center gap-1.5 active:scale-98"
         >
-          <Text className="text-xs font-bold text-slate-800">No children linked yet</Text>
-          <Text className="text-[11px] text-blue-600 font-semibold">
+          <Text className="text-xs font-sans-bold text-slate-800">No children linked yet</Text>
+          <Text className="text-[11px] text-blue-600 font-sans-semibold">
             Enter a student link code to view your ward's attendance, marks & timetable
           </Text>
         </TouchableOpacity>
@@ -59,7 +59,7 @@ export const ParentChildSelector: React.FC<ParentChildSelectorProps> = ({
                   <Text className="text-base">{c.emoji || '🎓'}</Text>
                 </View>
                 <View className="flex-1 min-w-0">
-                  <Text className="text-xs font-bold text-slate-900" numberOfLines={1}>
+                  <Text className="text-xs font-sans-bold text-slate-900" numberOfLines={1}>
                     {c.full_name}
                   </Text>
                   <Text className="text-[10px] text-slate-500" numberOfLines={1}>

@@ -35,7 +35,7 @@ export const OfflineAttendanceSyncBadge: React.FC = () => {
       <View className="flex-row items-center gap-2 flex-1 mr-2">
         <CloudOff size={18} color="white" />
         <View className="flex-1">
-          <Text className="text-xs font-black text-white">Offline Attendance Queued</Text>
+          <Text className="text-xs font-display text-white">Offline Attendance Queued</Text>
           <Text className="text-[11px] text-amber-100">
             {pendingCount} {pendingCount === 1 ? 'batch' : 'batches'} pending automatic cloud sync
           </Text>
@@ -52,7 +52,7 @@ export const OfflineAttendanceSyncBadge: React.FC = () => {
         ) : (
           <RefreshCw size={13} color="white" />
         )}
-        <Text className="text-xs font-bold text-white">
+        <Text className="text-xs font-sans-bold text-white">
           {isSyncing ? 'Syncing...' : 'Sync Now'}
         </Text>
       </TouchableOpacity>

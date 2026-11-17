@@ -20,3 +20,4 @@ export * from './OnboardingWalkthroughModal';
 export * from './NotificationCenterModal';
 export * from './NotificationBell';
 
+export * from './SoftDesk';

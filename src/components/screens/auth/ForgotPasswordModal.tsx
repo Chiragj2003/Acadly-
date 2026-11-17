@@ -36,12 +36,12 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       >
         <View className="bg-white rounded-t-3xl p-6 border-t border-slate-200 gap-4">
           <View className="flex-row items-center justify-between pb-2 border-b border-slate-100">
-            <Text className="text-base font-bold text-slate-900">Reset Password</Text>
+            <Text className="text-base font-sans-bold text-slate-900">Reset Password</Text>
             <TouchableOpacity
               onPress={onClose}
               className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center"
             >
-              <X size={18} color="#64748b" />
+              <X size={18} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
@@ -50,14 +50,14 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           </Text>
 
           <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-3">
-            <Mail size={16} color="#94a3b8" />
+            <Mail size={16} color="#8C877E" />
             <TextInput
               value={email}
               onChangeText={onChangeEmail}
               placeholder="Registered email address"
               keyboardType="email-address"
               autoCapitalize="none"
-              className="flex-1 ml-2.5 text-xs text-slate-800 font-medium"
+              className="flex-1 ml-2.5 text-xs text-slate-800 font-sans"
             />
           </View>
 
@@ -69,7 +69,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
             {loading ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
-              <Text className="text-xs font-bold text-white">Send Password Reset Link</Text>
+              <Text className="text-xs font-sans-bold text-white">Send Password Reset Link</Text>
             )}
           </TouchableOpacity>
         </View>

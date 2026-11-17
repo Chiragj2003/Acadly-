@@ -17,7 +17,7 @@ export const StudentAttendanceSection: React.FC<StudentAttendanceSectionProps> =
   if (isLoading) {
     return (
       <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs items-center">
-        <ActivityIndicator size="small" color="#2563eb" />
+        <ActivityIndicator size="small" color="#1C1C1E" />
         <Text className="text-xs text-slate-400 mt-2">Computing attendance records...</Text>
       </View>
     );
@@ -31,14 +31,14 @@ export const StudentAttendanceSection: React.FC<StudentAttendanceSectionProps> =
     <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
-          <CalendarCheck size={18} color="#2563eb" />
-          <Text className="text-sm font-bold text-slate-900">Attendance & Class Streak</Text>
+          <CalendarCheck size={18} color="#1C1C1E" />
+          <Text className="text-sm font-sans-bold text-slate-900">Attendance & Class Streak</Text>
         </View>
 
         {trend.streak > 0 && (
           <View className="bg-amber-100 px-2.5 py-1 rounded-full flex-row items-center gap-1 border border-amber-200">
             <Flame size={12} color="#d97706" />
-            <Text className="text-[10px] font-black text-amber-800">{trend.streak} Day Streak</Text>
+            <Text className="text-[10px] font-display text-amber-800">{trend.streak} Day Streak</Text>
           </View>
         )}
       </View>
@@ -46,23 +46,23 @@ export const StudentAttendanceSection: React.FC<StudentAttendanceSectionProps> =
       {/* Aggregate KPI */}
       <View className="flex-row items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
         <View>
-          <Text className="text-xs font-bold text-slate-500">Overall Rate</Text>
-          <Text className="text-2xl font-black text-blue-700 mt-0.5">
+          <Text className="text-xs font-sans-bold text-slate-500">Overall Rate</Text>
+          <Text className="text-2xl font-display text-blue-700 mt-0.5">
             {trend.attendanceRate}%
           </Text>
         </View>
         <View className="flex-row gap-3">
           <View className="items-center">
-            <Text className="text-[10px] font-bold text-emerald-600">Present</Text>
-            <Text className="text-sm font-black text-slate-800">{trend.presentCount}</Text>
+            <Text className="text-[10px] font-sans-bold text-emerald-600">Present</Text>
+            <Text className="text-sm font-display text-slate-800">{trend.presentCount}</Text>
           </View>
           <View className="items-center">
-            <Text className="text-[10px] font-bold text-rose-600">Absent</Text>
-            <Text className="text-sm font-black text-slate-800">{trend.absentCount}</Text>
+            <Text className="text-[10px] font-sans-bold text-rose-600">Absent</Text>
+            <Text className="text-sm font-display text-slate-800">{trend.absentCount}</Text>
           </View>
           <View className="items-center">
-            <Text className="text-[10px] font-bold text-amber-600">Late</Text>
-            <Text className="text-sm font-black text-slate-800">{trend.lateCount}</Text>
+            <Text className="text-[10px] font-sans-bold text-amber-600">Late</Text>
+            <Text className="text-sm font-display text-slate-800">{trend.lateCount}</Text>
           </View>
         </View>
       </View>
@@ -70,7 +70,7 @@ export const StudentAttendanceSection: React.FC<StudentAttendanceSectionProps> =
       {/* Recent History Grid */}
       {trend.recentRecords.length > 0 && (
         <View className="gap-2 pt-1">
-          <Text className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+          <Text className="text-xs font-sans-bold text-slate-600 uppercase tracking-wider">
             Recent Class Records
           </Text>
           <View className="flex-row flex-wrap gap-2">
@@ -96,7 +96,7 @@ export const StudentAttendanceSection: React.FC<StudentAttendanceSectionProps> =
                   ) : (
                     <Clock size={12} color="#d97706" />
                   )}
-                  <Text className="text-[11px] font-bold">
+                  <Text className="text-[11px] font-sans-bold">
                     {r.date.substring(5)}: {r.status}
                   </Text>
                 </View>

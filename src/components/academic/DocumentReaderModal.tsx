@@ -27,10 +27,10 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
               <FileText size={16} color="#60A5FA" />
             </View>
             <View className="flex-1 min-w-0">
-              <Text className="text-xs font-bold text-white" numberOfLines={1}>
+              <Text className="text-xs font-sans-bold text-white" numberOfLines={1}>
                 {document.title}
               </Text>
-              <Text className="text-[10px] text-slate-300 font-medium" numberOfLines={1}>
+              <Text className="text-[10px] text-slate-300 font-sans" numberOfLines={1}>
                 {document.subject} • {document.author}
               </Text>
             </View>
@@ -42,14 +42,14 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
               className="bg-blue-600 px-3 py-1.5 rounded-xl flex-row items-center gap-1.5 active:scale-95 shadow-xs"
             >
               <Download size={13} color="#FFFFFF" />
-              <Text className="text-xs font-bold text-white">Save PDF</Text>
+              <Text className="text-xs font-sans-bold text-white">Save PDF</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={onClose}
               className="w-8 h-8 rounded-full bg-slate-800 items-center justify-center active:scale-95"
             >
-              <X size={16} color="#94A3B8" />
+              <X size={16} color="#8C877E" />
             </TouchableOpacity>
           </View>
         </View>
@@ -60,10 +60,10 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
           <View className="border-b border-slate-200 pb-4 mb-4">
             <View className="flex-row items-center justify-between mb-2">
               <Badge label={document.subject} variant="primary" />
-              <Text className="text-[11px] font-semibold text-slate-500">{document.date}</Text>
+              <Text className="text-[11px] font-sans-semibold text-slate-500">{document.date}</Text>
             </View>
 
-            <Text className="text-lg font-black text-slate-900 leading-snug">
+            <Text className="text-lg font-display text-slate-900 leading-snug">
               {document.title}
             </Text>
             <Text className="text-xs text-slate-500 mt-1 leading-relaxed">
@@ -71,11 +71,11 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
             </Text>
 
             <View className="flex-row items-center gap-3 mt-3 pt-2.5 border-t border-slate-100">
-              <Text className="text-[11px] font-bold text-slate-700">
-                Author: <Text className="font-semibold text-slate-500">{document.author}</Text>
+              <Text className="text-[11px] font-sans-bold text-slate-700">
+                Author: <Text className="font-sans-semibold text-slate-500">{document.author}</Text>
               </Text>
-              <Text className="text-[11px] font-bold text-slate-700">
-                Type: <Text className="font-semibold text-slate-500 uppercase">{document.category}</Text>
+              <Text className="text-[11px] font-sans-bold text-slate-700">
+                Type: <Text className="font-sans-semibold text-slate-500 uppercase">{document.category}</Text>
               </Text>
             </View>
           </View>
@@ -86,9 +86,9 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
               <View key={idx} className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 gap-2.5">
                 <View className="flex-row items-center gap-2">
                   <View className="w-6 h-6 rounded-lg bg-blue-100 items-center justify-center">
-                    <Text className="text-xs font-black text-blue-700">{idx + 1}</Text>
+                    <Text className="text-xs font-display text-blue-700">{idx + 1}</Text>
                   </View>
-                  <Text className="text-sm font-black text-slate-900 flex-1">
+                  <Text className="text-sm font-display text-slate-900 flex-1">
                     {sec.heading}
                   </Text>
                 </View>
@@ -110,8 +110,8 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
           {/* Footer Notice */}
           <View className="mt-6 p-4 rounded-2xl bg-blue-50/60 border border-blue-200/60 items-center gap-1">
             <View className="flex-row items-center gap-1.5">
-              <CheckCircle2 size={14} color="#2563EB" />
-              <Text className="text-xs font-bold text-blue-900">Verified Acadly Classroom Study Note</Text>
+              <CheckCircle2 size={14} color="#1C1C1E" />
+              <Text className="text-xs font-sans-bold text-blue-900">Verified Acadly Classroom Study Note</Text>
             </View>
             <Text className="text-[11px] text-blue-700/80 text-center">
               Tap "Save PDF" above to export this document directly to your device storage or print.

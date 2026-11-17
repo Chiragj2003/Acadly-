@@ -28,7 +28,7 @@ export const VideoPlayerModal: React.FC = () => {
           <View className="h-14 px-4 flex-row items-center justify-between border-b border-black/5 bg-surface-container-low">
             <View className="flex-row items-center gap-2 flex-1 min-w-0 mr-2">
               <Badge label={activeLecture.subject} variant="info" />
-              <Text className="text-sm font-bold text-on-surface flex-1" numberOfLines={1}>
+              <Text className="text-sm font-sans-bold text-on-surface flex-1" numberOfLines={1}>
                 {activeLecture.title}
               </Text>
             </View>
@@ -71,19 +71,19 @@ export const VideoPlayerModal: React.FC = () => {
           <View className="p-4 gap-3 bg-surface">
             <View className="flex-row items-start justify-between gap-2">
               <View className="flex-1 min-w-0">
-                <Text className="text-base font-bold text-on-surface">
+                <Text className="text-base font-sans-bold text-on-surface">
                   {activeLecture.title}
                 </Text>
                 <View className="flex-row items-center gap-3 mt-1 text-on-surface-variant">
                   <View className="flex-row items-center gap-1">
                     <User size={13} color="#76777d" />
-                    <Text className="text-xs text-on-surface-variant font-medium">
+                    <Text className="text-xs text-on-surface-variant font-sans">
                       {activeLecture.faculty_name}
                     </Text>
                   </View>
                   <View className="flex-row items-center gap-1">
                     <Clock size={13} color="#76777d" />
-                    <Text className="text-xs text-on-surface-variant font-medium">
+                    <Text className="text-xs text-on-surface-variant font-sans">
                       {activeLecture.duration_formatted}
                     </Text>
                   </View>
@@ -101,7 +101,7 @@ export const VideoPlayerModal: React.FC = () => {
 
             <View className="p-3 rounded-xl bg-surface-container-low flex-row items-center justify-between">
               <Text className="text-xs text-on-surface-variant">
-                Provider: <Text className="font-semibold text-secondary">YouTube Unlisted (Private CDN)</Text>
+                Provider: <Text className="font-sans-semibold text-secondary">YouTube Unlisted (Private CDN)</Text>
               </Text>
               <Badge label="1080p HD" variant="neutral" />
             </View>

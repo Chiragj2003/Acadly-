@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, Alert, ActivityIndicator, Share } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
   Home,
   ClipboardCheck,
-  Upload,
-  MessageSquare,
+  Plus,
+  Inbox,
   GraduationCap,
+  MessageCircle,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useRoleGuard } from '@/hooks/useRoleGuard';
@@ -19,7 +20,7 @@ import { useStudentsRoster } from '@/hooks/queries/useStudentQueries';
 import { useJoinRequests } from '@/hooks/queries/useAdmissionQueries';
 import {
   useAssignments,
-  useSubmissions,
+  useBatchSubmissions,
 } from '@/hooks/queries/useAssignmentQueries';
 import {
   ScreenWrapper,
@@ -41,6 +42,7 @@ import {
   TeacherScreenModals,
   useTeacherActions,
 } from '@/components/screens/teacher';
+import { TeacherToday } from '@/components/screens/teacher/TeacherToday';
 
 export default function TeacherScreen() {
   const { t } = useTranslation();
@@ -72,26 +74,28 @@ export default function TeacherScreen() {
     return dbBatches.map((b) => ({
       id: b.id,
       name: b.name,
-      time: `${b.start_time || '04:30 PM'} - ${b.end_time || '06:00 PM'}`,
-      subject: b.subject || 'Physics',
-      room: b.room_number || 'Room 204',
+      time: b.start_time && b.end_time ? `${b.start_time} - ${b.end_time}` : '',
+      subject: b.subject || '',
+      room: b.room_number || '',
       count: b.student_count || 0,
     }));
   }, [dbBatches]);
 
   const activeBatch = useMemo(() => {
     if (batchesList.length === 0) {
+      // No batches yet: use an empty id so batch-scoped queries stay disabled
+      // instead of querying a fake UUID.
       return {
-        id: globalBatchId || '00000000-0000-0000-0000-000000000000',
-        name: 'General Batch',
-        time: '04:30 PM - 06:00 PM',
-        subject: 'General Science',
-        room: 'Room 101',
+        id: '',
+        name: t('teacher.noBatch', 'No batch yet'),
+        time: '',
+        subject: '',
+        room: '',
         count: 0,
       };
     }
     return batchesList.find((b) => b.id === globalBatchId) || batchesList[0];
-  }, [batchesList, globalBatchId]);
+  }, [batchesList, globalBatchId, t]);
 
   const selectedBatchId = activeBatch.id;
 
@@ -100,26 +104,32 @@ export default function TeacherScreen() {
   }, [setGlobalBatchId]);
 
   // Attendance & Roster queries
-  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
-  const { data: dbAttendance = [], isLoading: isAttendanceLoading } = useAttendance(selectedBatchId, todayStr);
+  // Local calendar date (toISOString() is UTC and gives yesterday's date in IST before 5:30 AM).
+  const todayStr = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }, []);
+  const { data: dbAttendance, isLoading: isAttendanceLoading } = useAttendance(selectedBatchId, todayStr);
   const { data: studentsRoster = [] } = useStudentsRoster(activeInstitute?.id, selectedBatchId);
   const { data: joinRequests = [] } = useJoinRequests(activeInstitute?.id);
   const { data: assignments = [] } = useAssignments(selectedBatchId);
-  const { data: submissions = [] } = useSubmissions();
+  // Previously useSubmissions() was called with no assignment id, so it never ran.
+  const { data: submissions = [] } = useBatchSubmissions(selectedBatchId || undefined);
 
   const [localAttendance, setLocalAttendance] = useState<Record<string, AttendanceStatus>>({});
   const [localFeeOverrides, setLocalFeeOverrides] = useState<Record<string, string>>({});
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
+  // Rebuild the local roll call whenever the batch or its saved records change.
+  // Previously the map was only replaced when records existed, so marks from the
+  // previous batch leaked into a batch with no attendance yet.
   useEffect(() => {
-    if (dbAttendance && dbAttendance.length > 0) {
-      const initialMap: Record<string, AttendanceStatus> = {};
-      dbAttendance.forEach((rec) => {
-        initialMap[rec.student_id] = rec.status === 'E' ? 'P' : (rec.status as AttendanceStatus);
-      });
-      setLocalAttendance(initialMap);
-    }
-  }, [dbAttendance]);
+    const initialMap: Record<string, AttendanceStatus> = {};
+    (dbAttendance ?? []).forEach((rec) => {
+      initialMap[rec.student_id] = rec.status === 'E' ? 'P' : (rec.status as AttendanceStatus);
+    });
+    setLocalAttendance(initialMap);
+  }, [dbAttendance, selectedBatchId]);
 
   const {
     isSyncing,
@@ -133,7 +143,7 @@ export default function TeacherScreen() {
     selectedBatchId,
     activeBatchName: activeBatch.name,
     activeInstituteId: activeInstitute?.id,
-    teacherFullName: teacherProfile.fullName,
+    teacherFullName: user?.full_name || teacherProfile.fullName,
     userId: user?.id,
     studentsRoster,
     localAttendance,
@@ -159,6 +169,19 @@ export default function TeacherScreen() {
 
   const pendingJoinCount = joinRequests.filter((r) => r.status === 'pending').length;
 
+  const initials = (user?.full_name || '')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
+
+  // There is no clipboard module in the app, so "copy" opens the share sheet
+  // instead of claiming the code was copied.
+  const shareTeacherCode = () => {
+    Share.share({ message: `${t('teacher.codeShareLabel', 'Teacher code')}: ${teacherProfile.teacherCode}` }).catch(() => null);
+  };
+
   const handleStatusChange = useCallback((studentId: string, status: AttendanceStatus) => {
     setLocalAttendance((prev) => ({ ...prev, [studentId]: status }));
   }, []);
@@ -181,29 +204,29 @@ export default function TeacherScreen() {
     );
   };
 
+  const papersToGrade = submissions.filter((sub) => sub.status === 'submitted').length;
+
   const tabs: TabItem[] = [
     {
       key: 'home',
-      label: t('navigation.home', 'Home'),
+      label: t('navigation.today', 'Today'),
       icon: (color, size) => <Home color={color} size={size} />,
-      badgeCount: pendingJoinCount > 0 ? pendingJoinCount : undefined,
     },
     {
       key: 'roster',
-      label: t('navigation.roster', 'Roster'),
+      label: t('navigation.rollCall', 'Roll call'),
       icon: (color, size) => <ClipboardCheck color={color} size={size} />,
     },
     {
       key: 'publish',
-      label: t('academic.assignments', 'Publish'),
-      icon: (color, size) => <Upload color={color} size={size} />,
-      badgeCount: submissions.filter((s) => s.status === 'submitted').length,
+      label: t('navigation.publish', 'Publish'),
+      icon: (color, size) => <Plus color={color} size={size} />,
+      badgeCount: papersToGrade,
     },
     {
       key: 'exams_chat',
-      label: t('navigation.exams', 'Exams & Chat'),
-      icon: (color, size) => <MessageSquare color={color} size={size} />,
-      badgeCount: 1,
+      label: t('navigation.exams', 'Exams'),
+      icon: (color, size) => <Inbox color={color} size={size} />,
     },
     {
       key: 'profile',
@@ -212,12 +235,13 @@ export default function TeacherScreen() {
     },
   ];
 
+
   if (isLoading || !isAuthorized) {
     return (
       <ScreenWrapper headerProps={{ title: t('teacher.soloDesk', 'Teacher Desk') }}>
         <View className="flex-1 items-center justify-center p-8">
-          <ActivityIndicator size="small" color="#2563EB" />
-          <Text className="text-xs text-slate-500 mt-2 font-medium">
+          <ActivityIndicator size="small" color="#1C1C1E" />
+          <Text className="text-xs text-slate-500 mt-2 font-sans">
             {t('common.loading', 'Verifying authorization...')}
           </Text>
         </View>
@@ -228,23 +252,48 @@ export default function TeacherScreen() {
   return (
     <ScreenWrapper
       headerProps={{
-        title: teacherMode === 'solo' ? t('teacher.soloDesk', 'Solo Tutor Desk') : t('teacher.facultyDesk', 'Faculty Command Desk'),
-        instituteName: teacherMode === 'solo' ? 'Private Tuition' : (activeInstitute?.name || 'Academy Hub'),
-        profileInitials: 'RV',
+        title: teacherMode === 'solo' ? t('teacher.soloDesk', 'My tuition') : t('teacher.facultyDesk', 'Teacher desk'),
+        instituteName: teacherMode === 'solo' ? t('teacher.privateTuition', 'Private tuition') : (activeInstitute?.name || ''),
+        variant: 'calm',
+        profileInitials: initials,
         onNotificationPress: () => setIsNotificationOpen(true),
         onProfilePress: handleLogout,
         onLogoutPress: handleLogout,
       }}
-      contentContainerClassName="gap-3.5 px-4 py-4"
+      contentContainerClassName="gap-5 px-5 py-3"
       footer={
         <BottomTabBar
           tabs={tabs}
           activeTab={activeTab}
-          onTabChange={(key) => setActiveTab(key as any)}
-          accentColor="#2563EB"
+          onTabChange={(key) => setActiveTab(key as typeof activeTab)}
+          trailingAction={{
+            label: t('teacher.messages', 'Messages'),
+            icon: (color, size) => <MessageCircle color={color} size={size} fill={color} />,
+            onPress: () => router.push('/chat'),
+          }}
         />
       }
     >
+      {activeTab === 'home' && (
+        <TeacherToday
+          firstName={(user?.full_name || '').split(' ')[0] || t('teacher.there', 'there')}
+          batchId={selectedBatchId || undefined}
+          batchName={activeBatch.name}
+          studentCount={studentsRoster.length}
+          papersToGrade={papersToGrade}
+          pendingJoinCount={pendingJoinCount}
+          onRollCall={() => setActiveTab('roster')}
+          onGoLive={() => router.push('/chat')}
+          onPostDpp={() => setIsInteractiveDppOpen(true)}
+          onUploadNotes={() => setIsUploadPdfOpen(true)}
+          onEnterMarks={() => setMarksEntryOpen(true)}
+          onAnnounce={() => setIsAnnouncementOpen(true)}
+          onGrade={() => setActiveTab('publish')}
+          onReviewRequests={() => router.push('/verify-students')}
+          onOpenDoubts={() => router.push('/community')}
+        />
+      )}
+
       <TeacherBatchFocus
         batches={batchesList}
         selectedBatchId={selectedBatchId}
@@ -258,8 +307,8 @@ export default function TeacherScreen() {
           teacherProfile={teacherProfile}
           pendingJoinCount={pendingJoinCount}
           onOpenDualMode={() => setIsDualModeOpen(true)}
-          onCopyTeacherCode={() => Alert.alert('Code Copied', teacherProfile.teacherCode)}
-          onShareTeacherCode={() => Alert.alert('Share Code', `Teacher Code: ${teacherProfile.teacherCode}`)}
+          onCopyTeacherCode={shareTeacherCode}
+          onShareTeacherCode={shareTeacherCode}
           onReviewPending={() => router.push('/verify-students')}
           onNavigateTab={setActiveTab}
           onOpenCreateDpp={() => setIsCreateAssignmentOpen(true)}
@@ -318,7 +367,7 @@ export default function TeacherScreen() {
           studentsRoster={studentsRoster}
           localFeeOverrides={localFeeOverrides}
           onSelectBatch={handleSelectBatch}
-          onShareTeacherCode={() => Alert.alert('Share Code', `Teacher Code: ${teacherProfile.teacherCode}`)}
+          onShareTeacherCode={shareTeacherCode}
           onOpenDualMode={() => setIsDualModeOpen(true)}
           onOpenScheduleEditor={() => setScheduleEditorOpen(true)}
           onUpdateFeeStatus={(stId, st) => setLocalFeeOverrides((prev) => ({ ...prev, [stId]: st }))}

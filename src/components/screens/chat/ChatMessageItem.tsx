@@ -31,7 +31,7 @@ export const ChatMessageItem = React.memo(function ChatMessageItem({
       <View className="max-w-[80%]">
         {!isMine && activeRoom?.type === 'batch_group' && (
           <View className="flex-row items-center gap-1.5 mb-1 px-1">
-            <Text className="text-[11px] font-bold text-slate-700">
+            <Text className="text-[11px] font-sans-bold text-slate-700">
               {message.senderName}
             </Text>
             <View
@@ -42,7 +42,7 @@ export const ChatMessageItem = React.memo(function ChatMessageItem({
               }`}
             >
               <Text
-                className={`text-[9px] font-bold ${
+                className={`text-[9px] font-sans-bold ${
                   message.senderRole === 'teacher' ? 'text-blue-800' : 'text-emerald-800'
                 }`}
               >
@@ -74,12 +74,12 @@ export const ChatMessageItem = React.memo(function ChatMessageItem({
               >
                 <FileText
                   size={18}
-                  color={message.attachmentType === 'pdf' ? '#e11d48' : '#2563eb'}
+                  color={message.attachmentType === 'pdf' ? '#e11d48' : '#1C1C1E'}
                 />
               </View>
               <View className="flex-1">
                 <Text
-                  className={`text-xs font-bold ${
+                  className={`text-xs font-sans-bold ${
                     isMine ? 'text-white' : 'text-slate-800'
                   }`}
                   numberOfLines={1}
@@ -100,7 +100,7 @@ export const ChatMessageItem = React.memo(function ChatMessageItem({
           {message.text ? (
             <Text
               className={`text-xs leading-relaxed ${
-                isMine ? 'text-white font-medium' : 'text-slate-800 font-medium'
+                isMine ? 'text-white font-sans' : 'text-slate-800 font-sans'
               }`}
             >
               {message.text}
@@ -109,7 +109,7 @@ export const ChatMessageItem = React.memo(function ChatMessageItem({
 
           <View className="flex-row items-center justify-end gap-1.5 mt-1.5">
             <Text
-              className={`text-[9px] font-medium ${
+              className={`text-[9px] font-sans ${
                 isMine ? 'text-white/80' : 'text-slate-500'
               }`}
             >
@@ -122,7 +122,7 @@ export const ChatMessageItem = React.memo(function ChatMessageItem({
                 hitSlop={8}
                 className="opacity-70"
               >
-                <Pin size={10} color={isMine ? '#ffffff' : '#64748B'} />
+                <Pin size={10} color={isMine ? '#ffffff' : '#6E6A63'} />
               </TouchableOpacity>
             )}
           </View>

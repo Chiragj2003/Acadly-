@@ -46,7 +46,8 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
   const applyBottomInset = !footer && withBottomInset;
 
   // Header background continuity for status bar area on modern iOS devices
-  const headerBgColor = colors.surface;
+  // Soft Desk: the header sits on the same paper ground as the page.
+  const headerBgColor = colors.backgroundSecondary;
   const activeStatusBarStyle = statusBarStyle || (isDark ? 'light' : 'dark');
 
   const bodyContent = scrollable ? (

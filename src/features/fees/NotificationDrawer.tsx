@@ -63,7 +63,7 @@ export const NotificationDrawer: React.FC = () => {
           <View className="h-14 px-4 flex-row items-center justify-between border-b border-black/5 bg-surface-container-low">
             <View className="flex-row items-center gap-2">
               <Bell size={18} color="#0051d5" />
-              <Text className="text-sm font-bold text-on-surface">Notifications</Text>
+              <Text className="text-sm font-sans-bold text-on-surface">Notifications</Text>
               <Badge label={`${notifications.length} Alerts`} variant="info" />
             </View>
 
@@ -87,7 +87,7 @@ export const NotificationDrawer: React.FC = () => {
                   }`}
                 >
                   <Text
-                    className={`text-xs font-semibold capitalize ${
+                    className={`text-xs font-sans-semibold capitalize ${
                       activeFilter === cat ? 'text-on-primary' : 'text-on-surface-variant'
                     }`}
                   >
@@ -126,7 +126,7 @@ export const NotificationDrawer: React.FC = () => {
 
                 <View className="flex-1 min-w-0">
                   <View className="flex-row items-center justify-between gap-1 mb-0.5">
-                    <Text className="text-xs font-bold text-on-surface flex-1" numberOfLines={1}>
+                    <Text className="text-xs font-sans-bold text-on-surface flex-1" numberOfLines={1}>
                       {item.title}
                     </Text>
                     {!item.is_read && (
@@ -136,7 +136,7 @@ export const NotificationDrawer: React.FC = () => {
                   <Text className="text-xs text-on-surface-variant leading-snug">
                     {item.message}
                   </Text>
-                  <Text className="text-[10px] text-on-surface-variant font-medium mt-1">
+                  <Text className="text-[10px] text-on-surface-variant font-sans mt-1">
                     {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </Text>
                 </View>

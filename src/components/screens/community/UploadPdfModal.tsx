@@ -78,18 +78,18 @@ export const UploadPdfModal: React.FC<UploadPdfModalProps> = ({
       >
         <View className="bg-white rounded-t-3xl max-h-[85%] p-5 border-t border-slate-200">
           <View className="flex-row items-center justify-between pb-3 border-b border-slate-100">
-            <Text className="text-base font-bold text-slate-900">Upload Study Material (PDF)</Text>
+            <Text className="text-base font-sans-bold text-slate-900">Upload Study Material (PDF)</Text>
             <TouchableOpacity
               onPress={onClose}
               className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center"
             >
-              <X size={18} color="#64748b" />
+              <X size={18} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
           <ScrollView className="py-3 gap-3" keyboardShouldPersistTaps="handled">
             <View>
-              <Text className="text-[11px] font-semibold text-slate-600 mb-1">Title</Text>
+              <Text className="text-[11px] font-sans-semibold text-slate-600 mb-1">Title</Text>
               <TextInput
                 value={title}
                 onChangeText={setTitle}
@@ -100,7 +100,7 @@ export const UploadPdfModal: React.FC<UploadPdfModalProps> = ({
 
             <View className="flex-row gap-2">
               <View className="flex-1">
-                <Text className="text-[11px] font-semibold text-slate-600 mb-1">Subject</Text>
+                <Text className="text-[11px] font-sans-semibold text-slate-600 mb-1">Subject</Text>
                 <TextInput
                   value={subject}
                   onChangeText={setSubject}
@@ -109,7 +109,7 @@ export const UploadPdfModal: React.FC<UploadPdfModalProps> = ({
                 />
               </View>
               <View className="flex-1">
-                <Text className="text-[11px] font-semibold text-slate-600 mb-1">Category</Text>
+                <Text className="text-[11px] font-sans-semibold text-slate-600 mb-1">Category</Text>
                 <TextInput
                   value={category}
                   onChangeText={setCategory}
@@ -123,8 +123,8 @@ export const UploadPdfModal: React.FC<UploadPdfModalProps> = ({
               onPress={handlePick}
               className="bg-slate-50 border border-dashed border-slate-300 rounded-2xl p-4 items-center justify-center gap-1.5"
             >
-              <FileText size={24} color="#64748b" />
-              <Text className="text-xs font-bold text-slate-700">
+              <FileText size={24} color="#6E6A63" />
+              <Text className="text-xs font-sans-bold text-slate-700">
                 {pickedFile ? pickedFile.name : 'Select PDF from Device'}
               </Text>
               <Text className="text-[10px] text-slate-400">PDF documents up to 20 MB</Text>
@@ -136,7 +136,7 @@ export const UploadPdfModal: React.FC<UploadPdfModalProps> = ({
               className="mt-3 bg-blue-600 py-3 rounded-2xl items-center flex-row justify-center gap-2 shadow-xs active:scale-98"
             >
               <Upload size={15} color="white" />
-              <Text className="text-xs font-bold text-white">
+              <Text className="text-xs font-sans-bold text-white">
                 {loading ? 'Uploading...' : 'Publish to Library'}
               </Text>
             </TouchableOpacity>

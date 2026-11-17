@@ -33,32 +33,32 @@ export const JoinWaitingView: React.FC<JoinWaitingViewProps> = ({
         {status === 'pending' && (
           <View className="bg-amber-50 border border-amber-200 px-3 py-1 rounded-full mt-3 flex-row items-center gap-1.5">
             <Clock size={12} color="#D97706" />
-            <Text className="text-[11px] font-extrabold text-amber-800">Verification Pending</Text>
+            <Text className="text-[11px] font-display text-amber-800">Verification Pending</Text>
           </View>
         )}
 
         {status === 'waitlisted' && (
           <View className="bg-purple-50 border border-purple-200 px-3 py-1 rounded-full mt-3 flex-row items-center gap-1.5">
             <Clock size={12} color="#7C3AED" />
-            <Text className="text-[11px] font-extrabold text-purple-800">Admissions Waitlist</Text>
+            <Text className="text-[11px] font-display text-purple-800">Admissions Waitlist</Text>
           </View>
         )}
 
         {status === 'rejected' && (
           <View className="bg-rose-50 border border-rose-200 px-3 py-1 rounded-full mt-3 flex-row items-center gap-1.5">
             <AlertCircle size={12} color="#E11D48" />
-            <Text className="text-[11px] font-extrabold text-rose-800">Application Not Accepted</Text>
+            <Text className="text-[11px] font-display text-rose-800">Application Not Accepted</Text>
           </View>
         )}
 
         {status === 'approved' && (
           <View className="bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full mt-3 flex-row items-center gap-1.5">
             <CheckCircle2 size={12} color="#059669" />
-            <Text className="text-[11px] font-extrabold text-emerald-800">Approved & Enrolled</Text>
+            <Text className="text-[11px] font-display text-emerald-800">Approved & Enrolled</Text>
           </View>
         )}
 
-        <Text className="text-xl font-black text-slate-800 mt-3 text-center">
+        <Text className="text-xl font-display text-slate-800 mt-3 text-center">
           {status === 'approved'
             ? 'Welcome to Your Classroom!'
             : status === 'waitlisted'
@@ -88,7 +88,7 @@ export const JoinWaitingView: React.FC<JoinWaitingViewProps> = ({
             }`}
           >
             <Text
-              className={`text-xs font-bold ${
+              className={`text-xs font-sans-bold ${
                 status === 'rejected' ? 'text-rose-900' : 'text-purple-900'
               }`}
             >
@@ -109,11 +109,11 @@ export const JoinWaitingView: React.FC<JoinWaitingViewProps> = ({
         {/* Target Card */}
         <View className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 my-3">
           <View className="flex-row items-center justify-between pb-2 mb-2 border-b border-slate-200">
-            <Text className="text-xs font-black text-slate-800">
+            <Text className="text-xs font-display text-slate-800">
               {activeJoinRequest?.matchedTargetName || 'Faculty Mentor'}
             </Text>
             <View className="bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
-              <Text className="text-[10px] font-bold text-blue-600">
+              <Text className="text-[10px] font-sans-bold text-blue-600">
                 Code: {activeJoinRequest?.codeUsed || 'JOIN'}
               </Text>
             </View>
@@ -122,20 +122,20 @@ export const JoinWaitingView: React.FC<JoinWaitingViewProps> = ({
           <View className="gap-1">
             <View className="flex-row justify-between">
               <Text className="text-xs text-slate-500">Target Exam:</Text>
-              <Text className="text-xs font-bold text-slate-800">
+              <Text className="text-xs font-sans-bold text-slate-800">
                 {activeJoinRequest?.studentDetails.targetExam || 'Competitive Exam'}
               </Text>
             </View>
             <View className="flex-row justify-between">
               <Text className="text-xs text-slate-500">School & Board:</Text>
-              <Text className="text-xs font-bold text-slate-800">
+              <Text className="text-xs font-sans-bold text-slate-800">
                 {activeJoinRequest?.studentDetails.board || 'CBSE'} •{' '}
                 {activeJoinRequest?.studentDetails.grade || 'Class 12'}
               </Text>
             </View>
             <View className="flex-row justify-between">
               <Text className="text-xs text-slate-500">Guardian Phone:</Text>
-              <Text className="text-xs font-bold text-slate-800">
+              <Text className="text-xs font-sans-bold text-slate-800">
                 {activeJoinRequest?.studentDetails.guardianPhone || 'N/A'}
               </Text>
             </View>
@@ -145,7 +145,7 @@ export const JoinWaitingView: React.FC<JoinWaitingViewProps> = ({
           {activeJoinRequest?.studentDetails.weakSubjects &&
             activeJoinRequest.studentDetails.weakSubjects.length > 0 && (
               <View className="mt-2.5 pt-2.5 border-t border-slate-200">
-                <Text className="text-[10px] font-bold text-slate-500 mb-1.5">
+                <Text className="text-[10px] font-sans-bold text-slate-500 mb-1.5">
                   Focus / Weak Areas:
                 </Text>
                 <View className="flex-row flex-wrap gap-1.5">
@@ -154,7 +154,7 @@ export const JoinWaitingView: React.FC<JoinWaitingViewProps> = ({
                       key={idx}
                       className="bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md"
                     >
-                      <Text className="text-[10px] font-bold text-rose-800">{ws}</Text>
+                      <Text className="text-[10px] font-sans-bold text-rose-800">{ws}</Text>
                     </View>
                   ))}
                 </View>
@@ -169,7 +169,7 @@ export const JoinWaitingView: React.FC<JoinWaitingViewProps> = ({
             onPress={() => router.replace('/student')}
             className="w-full bg-blue-600 py-3 rounded-2xl items-center shadow-xs flex-row justify-center gap-1.5 active:scale-98"
           >
-            <Text className="text-xs font-bold text-white">Go to Student Dashboard</Text>
+            <Text className="text-xs font-sans-bold text-white">Go to Student Dashboard</Text>
             <ArrowRight size={14} color="#ffffff" />
           </TouchableOpacity>
         ) : status === 'rejected' || status === 'waitlisted' ? (
@@ -179,7 +179,7 @@ export const JoinWaitingView: React.FC<JoinWaitingViewProps> = ({
             className="w-full bg-blue-600 py-3 rounded-2xl items-center shadow-xs flex-row justify-center gap-1.5 active:scale-98"
           >
             <RotateCcw size={14} color="#ffffff" />
-            <Text className="text-xs font-bold text-white">Edit Details & Re-apply</Text>
+            <Text className="text-xs font-sans-bold text-white">Edit Details & Re-apply</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
@@ -187,7 +187,7 @@ export const JoinWaitingView: React.FC<JoinWaitingViewProps> = ({
             onPress={() => router.replace('/student')}
             className="w-full bg-slate-900 py-3 rounded-2xl items-center shadow-xs active:scale-98"
           >
-            <Text className="text-xs font-bold text-white">Return to Student Home</Text>
+            <Text className="text-xs font-sans-bold text-white">Return to Student Home</Text>
           </TouchableOpacity>
         )}
       </View>

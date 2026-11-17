@@ -5,6 +5,7 @@ import { AppState, AppStateStatus } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import * as Linking from 'expo-linking';
 import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
 import NetInfo from '@react-native-community/netinfo';
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -35,12 +36,30 @@ try {
   // Graceful fallback if unsupported
 }
 
+// Keep the splash up until the Soft Desk fonts are ready (avoids a flash of system font).
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
 export default function RootLayout() {
   const router = useRouter();
 
+  const [fontsLoaded, fontError] = useFonts({
+    BricolageGrotesque_700Bold: require('../../assets/fonts/BricolageGrotesque_700Bold.ttf'),
+    BricolageGrotesque_800ExtraBold: require('../../assets/fonts/BricolageGrotesque_800ExtraBold.ttf'),
+    Figtree_400Regular: require('../../assets/fonts/Figtree_400Regular.ttf'),
+    Figtree_500Medium: require('../../assets/fonts/Figtree_500Medium.ttf'),
+    Figtree_600SemiBold: require('../../assets/fonts/Figtree_600SemiBold.ttf'),
+    Figtree_700Bold: require('../../assets/fonts/Figtree_700Bold.ttf'),
+    Newsreader_500Medium: require('../../assets/fonts/Newsreader_500Medium.ttf'),
+    Newsreader_600SemiBold: require('../../assets/fonts/Newsreader_600SemiBold.ttf'),
+  });
+  // If a font fails to load, carry on with system fonts rather than blocking the app.
+  const fontsReady = fontsLoaded || Boolean(fontError);
+
   useEffect(() => {
-    SplashScreen.hideAsync().catch(() => {});
-  }, []);
+    if (fontsReady) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [fontsReady]);
 
   // Deep Link handler for OAuth callback & password reset
   useEffect(() => {
@@ -119,6 +138,10 @@ export default function RootLayout() {
       appStateSub.remove();
     };
   }, []);
+
+  if (!fontsReady) {
+    return null;
+  }
 
   return (
     <ErrorBoundary>

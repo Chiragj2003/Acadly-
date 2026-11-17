@@ -73,11 +73,11 @@ export const AnnouncementComposerModal: React.FC<AnnouncementComposerModalProps>
         <View className="bg-white rounded-t-3xl p-5 max-h-[88%] border-t border-slate-200">
           <View className="flex-row items-center justify-between pb-3 border-b border-slate-100">
             <View className="flex-row items-center gap-2">
-              <Megaphone size={18} color="#2563EB" />
-              <Text className="text-base font-extrabold text-slate-900">Broadcast Notice</Text>
+              <Megaphone size={18} color="#1C1C1E" />
+              <Text className="text-base font-display text-slate-900">Broadcast Notice</Text>
             </View>
             <TouchableOpacity onPress={onClose}>
-              <X size={18} color="#64748B" />
+              <X size={18} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
@@ -90,7 +90,7 @@ export const AnnouncementComposerModal: React.FC<AnnouncementComposerModalProps>
                   scope === 'batch' ? 'bg-blue-600 border-blue-600' : 'bg-slate-50 border-slate-200'
                 }`}
               >
-                <Text className={`text-xs font-bold ${scope === 'batch' ? 'text-white' : 'text-slate-700'}`}>
+                <Text className={`text-xs font-sans-bold ${scope === 'batch' ? 'text-white' : 'text-slate-700'}`}>
                   {batchName ? `Batch: ${batchName}` : 'Current Batch'}
                 </Text>
               </TouchableOpacity>
@@ -100,7 +100,7 @@ export const AnnouncementComposerModal: React.FC<AnnouncementComposerModalProps>
                   scope === 'all' ? 'bg-blue-600 border-blue-600' : 'bg-slate-50 border-slate-200'
                 }`}
               >
-                <Text className={`text-xs font-bold ${scope === 'all' ? 'text-white' : 'text-slate-700'}`}>
+                <Text className={`text-xs font-sans-bold ${scope === 'all' ? 'text-white' : 'text-slate-700'}`}>
                   All Institute Batches
                 </Text>
               </TouchableOpacity>
@@ -108,14 +108,14 @@ export const AnnouncementComposerModal: React.FC<AnnouncementComposerModalProps>
 
             {/* Priority Selector */}
             <View className="flex-row items-center gap-2">
-              <Text className="text-[11px] font-bold text-slate-500 uppercase">Priority:</Text>
+              <Text className="text-[11px] font-sans-bold text-slate-500 uppercase">Priority:</Text>
               <TouchableOpacity
                 onPress={() => setPriority('normal')}
                 className={`px-3 py-1 rounded-full border ${
                   priority === 'normal' ? 'bg-blue-50 border-blue-400' : 'bg-slate-50 border-slate-200'
                 }`}
               >
-                <Text className={`text-[10px] font-bold ${priority === 'normal' ? 'text-blue-700' : 'text-slate-600'}`}>
+                <Text className={`text-[10px] font-sans-bold ${priority === 'normal' ? 'text-blue-700' : 'text-slate-600'}`}>
                   Normal
                 </Text>
               </TouchableOpacity>
@@ -125,7 +125,7 @@ export const AnnouncementComposerModal: React.FC<AnnouncementComposerModalProps>
                   priority === 'urgent' ? 'bg-rose-50 border-rose-400' : 'bg-slate-50 border-slate-200'
                 }`}
               >
-                <Text className={`text-[10px] font-bold ${priority === 'urgent' ? 'text-rose-700' : 'text-slate-600'}`}>
+                <Text className={`text-[10px] font-sans-bold ${priority === 'urgent' ? 'text-rose-700' : 'text-slate-600'}`}>
                   Urgent ⚡
                 </Text>
               </TouchableOpacity>
@@ -133,24 +133,24 @@ export const AnnouncementComposerModal: React.FC<AnnouncementComposerModalProps>
 
             {/* Title */}
             <View>
-              <Text className="text-[11px] font-bold text-slate-600 mb-1">Notice Headline</Text>
+              <Text className="text-[11px] font-sans-bold text-slate-600 mb-1">Notice Headline</Text>
               <TextInput
                 value={title}
                 onChangeText={setTitle}
                 placeholder="e.g. Extra Physics Problem Solving Session Tomorrow"
-                placeholderTextColor="#94a3b8"
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-semibold"
+                placeholderTextColor="#8C877E"
+                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-sans-semibold"
               />
             </View>
 
             {/* Content */}
             <View>
-              <Text className="text-[11px] font-bold text-slate-600 mb-1">Detailed Message</Text>
+              <Text className="text-[11px] font-sans-bold text-slate-600 mb-1">Detailed Message</Text>
               <TextInput
                 value={content}
                 onChangeText={setContent}
                 placeholder="Write the full instructions or details for students..."
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="#8C877E"
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
@@ -169,7 +169,7 @@ export const AnnouncementComposerModal: React.FC<AnnouncementComposerModalProps>
               ) : (
                 <>
                   <Bell size={14} color="#ffffff" />
-                  <Text className="text-xs font-bold text-white">Broadcast Announcement & Push</Text>
+                  <Text className="text-xs font-sans-bold text-white">Broadcast Announcement & Push</Text>
                 </>
               )}
             </TouchableOpacity>

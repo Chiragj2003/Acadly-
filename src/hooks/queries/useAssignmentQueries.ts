@@ -6,6 +6,7 @@ import {
 } from '@/services/assignmentService';
 import {
   getSubmissionsForAssignment,
+  getSubmissionsForBatch,
   getStudentSubmission,
   submitHomework,
   gradeSubmission,
@@ -51,6 +52,15 @@ export function useSubmissions(assignmentId?: string) {
     queryKey: [SUBMISSIONS_QUERY_KEY, assignmentId],
     queryFn: () => getSubmissionsForAssignment(assignmentId!),
     enabled: Boolean(assignmentId),
+  });
+}
+
+/** All submissions across a batch's assignments (teacher grading inbox). */
+export function useBatchSubmissions(batchId?: string) {
+  return useQuery({
+    queryKey: [SUBMISSIONS_QUERY_KEY, 'batch', batchId],
+    queryFn: () => getSubmissionsForBatch(batchId!),
+    enabled: Boolean(batchId),
   });
 }
 

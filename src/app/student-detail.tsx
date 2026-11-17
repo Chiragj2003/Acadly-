@@ -31,8 +31,8 @@ export default function StudentDetailScreen() {
     return (
       <ScreenWrapper headerProps={{ title: 'Student Profile', onBackPress: () => router.back() }}>
         <View className="flex-1 items-center justify-center p-8">
-          <ActivityIndicator size="small" color="#2563EB" />
-          <Text className="text-xs text-slate-500 mt-2 font-medium">Verifying authorization...</Text>
+          <ActivityIndicator size="small" color="#1C1C1E" />
+          <Text className="text-xs text-slate-500 mt-2 font-sans">Verifying authorization...</Text>
         </View>
       </ScreenWrapper>
     );
@@ -118,7 +118,7 @@ export default function StudentDetailScreen() {
             }`}
           >
             <Text
-              className={`text-xs font-bold ${
+              className={`text-xs font-sans-bold ${
                 activeTab === 'analytics' ? 'text-white' : 'text-slate-500'
               }`}
             >
@@ -133,7 +133,7 @@ export default function StudentDetailScreen() {
             }`}
           >
             <Text
-              className={`text-xs font-bold ${
+              className={`text-xs font-sans-bold ${
                 activeTab === 'attendance' ? 'text-white' : 'text-slate-500'
               }`}
             >
@@ -148,7 +148,7 @@ export default function StudentDetailScreen() {
             }`}
           >
             <Text
-              className={`text-xs font-bold ${
+              className={`text-xs font-sans-bold ${
                 activeTab === 'bio' ? 'text-white' : 'text-slate-500'
               }`}
             >

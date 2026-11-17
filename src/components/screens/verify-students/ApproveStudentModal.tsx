@@ -43,25 +43,25 @@ export const ApproveStudentModal: React.FC<ApproveStudentModalProps> = ({
         <View className="bg-white rounded-[32px] p-6 w-full max-w-sm border border-slate-200 shadow-lg">
           <View className="flex-row items-center justify-between mb-3">
             <View className="flex-row items-center gap-2">
-              <HeartHandshake size={18} color="#2563EB" />
-              <Text className="text-base font-black text-slate-800">Admit Student</Text>
+              <HeartHandshake size={18} color="#1C1C1E" />
+              <Text className="text-base font-display text-slate-800">Admit Student</Text>
             </View>
             <TouchableOpacity onPress={onClose}>
-              <X size={18} color="#64748B" />
+              <X size={18} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
           <Text className="text-xs text-slate-500 mb-4">
             Enrolling{' '}
-            <Text className="font-bold text-slate-800">
+            <Text className="font-sans-bold text-slate-800">
               {selectedRequest?.student_details?.fullName || selectedRequest?.user?.full_name}
             </Text>
           </Text>
 
           {/* Select Batch */}
-          <Text className="text-xs font-black text-slate-800 mb-1.5">1. Select Batch</Text>
+          <Text className="text-xs font-display text-slate-800 mb-1.5">1. Select Batch</Text>
           {isBatchesLoading ? (
-            <ActivityIndicator size="small" color="#2563EB" className="my-2" />
+            <ActivityIndicator size="small" color="#1C1C1E" className="my-2" />
           ) : batches.length === 0 ? (
             <View className="p-3 bg-amber-50 border border-amber-200 rounded-xl mb-4">
               <Text className="text-xs text-amber-800">
@@ -82,7 +82,7 @@ export const ApproveStudentModal: React.FC<ApproveStudentModalProps> = ({
                     }`}
                   >
                     <Text
-                      className={`text-xs font-bold ${
+                      className={`text-xs font-sans-bold ${
                         (selectedBatchId || batches[0]?.id) === b.id
                           ? 'text-blue-600'
                           : 'text-slate-800'
@@ -100,7 +100,7 @@ export const ApproveStudentModal: React.FC<ApproveStudentModalProps> = ({
           )}
 
           {/* Select Fee Plan */}
-          <Text className="text-xs font-black text-slate-800 mb-1.5">2. Fee Plan Structure</Text>
+          <Text className="text-xs font-display text-slate-800 mb-1.5">2. Fee Plan Structure</Text>
           <View className="gap-1.5 mb-5">
             {DYNAMIC_FEE_PLANS.map((plan) => (
               <TouchableOpacity
@@ -113,7 +113,7 @@ export const ApproveStudentModal: React.FC<ApproveStudentModalProps> = ({
                 }`}
               >
                 <Text
-                  className={`text-xs font-bold ${
+                  className={`text-xs font-sans-bold ${
                     selectedFeePlan === plan ? 'text-blue-600' : 'text-slate-800'
                   }`}
                 >
@@ -134,7 +134,7 @@ export const ApproveStudentModal: React.FC<ApproveStudentModalProps> = ({
             {isPending ? (
               <ActivityIndicator color="#FFFFFF" size="small" />
             ) : (
-              <Text className="text-xs font-black text-white">
+              <Text className="text-xs font-display text-white">
                 Confirm Admission & Notify Student
               </Text>
             )}

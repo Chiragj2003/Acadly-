@@ -62,7 +62,7 @@ export const AttendanceCorrectionModal: React.FC<AttendanceCorrectionModalProps>
           <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ gap: 14 }}>
             <View className="flex-row items-center justify-between">
               <View>
-                <Text className="text-lg font-bold text-on-surface">Correct Attendance</Text>
+                <Text className="text-lg font-sans-bold text-on-surface">Correct Attendance</Text>
                 <Text className="text-xs text-on-surface-variant">
                   Student: {record.student_name} ({record.roll_number})
                 </Text>
@@ -74,13 +74,13 @@ export const AttendanceCorrectionModal: React.FC<AttendanceCorrectionModalProps>
 
             <View className="p-3 rounded-xl bg-surface-container-low flex-row items-center justify-between">
               <Text className="text-xs text-on-surface-variant">Current Logged Status:</Text>
-              <Text className="text-xs font-bold text-secondary">
+              <Text className="text-xs font-sans-bold text-secondary">
                 {record.status === 'P' ? 'Present' : record.status === 'A' ? 'Absent' : 'Late'}
               </Text>
             </View>
 
             <View className="gap-1.5">
-              <Text className="text-sm font-semibold text-on-surface">Select New Status</Text>
+              <Text className="text-sm font-sans-semibold text-on-surface">Select New Status</Text>
               <AttendanceToggle
                 value={newStatus}
                 onChange={(s) => setNewStatus(s)}

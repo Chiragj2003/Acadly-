@@ -29,10 +29,10 @@ export const WaitlistStudentModal: React.FC<WaitlistStudentModalProps> = ({
           <View className="flex-row items-center justify-between mb-3">
             <View className="flex-row items-center gap-2">
               <Clock size={16} color="#7C3AED" />
-              <Text className="text-base font-black text-slate-800">Place on Waitlist</Text>
+              <Text className="text-base font-display text-slate-800">Place on Waitlist</Text>
             </View>
             <TouchableOpacity onPress={onClose}>
-              <X size={18} color="#64748B" />
+              <X size={18} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
@@ -55,7 +55,7 @@ export const WaitlistStudentModal: React.FC<WaitlistStudentModalProps> = ({
               onPress={onClose}
               className="flex-1 py-3 bg-slate-100 rounded-xl items-center"
             >
-              <Text className="text-xs font-bold text-slate-700">Cancel</Text>
+              <Text className="text-xs font-sans-bold text-slate-700">Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={onConfirmWaitlist}
@@ -65,7 +65,7 @@ export const WaitlistStudentModal: React.FC<WaitlistStudentModalProps> = ({
               {isPending ? (
                 <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
-                <Text className="text-xs font-bold text-white">Place on Waitlist</Text>
+                <Text className="text-xs font-sans-bold text-white">Place on Waitlist</Text>
               )}
             </TouchableOpacity>
           </View>

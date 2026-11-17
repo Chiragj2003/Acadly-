@@ -49,7 +49,26 @@ export function useTeacherActions({
   const gradeSubmissionMutation = useGradeSubmission();
   const uploadMaterialMutation = useUploadMaterial();
 
+  /**
+   * Guard for every write. Previously each write fell back to a hard-coded
+   * placeholder UUID when the institute/batch/user was missing, which either
+   * failed RLS with a confusing error or wrote into the dev-seed institute.
+   */
+  const requireWriteContext = (needsBatch = true): { instituteId: string; userId: string } | null => {
+    if (!activeInstituteId || !userId) {
+      Alert.alert('Not ready', 'Select an institute before publishing.');
+      return null;
+    }
+    if (needsBatch && !selectedBatchId) {
+      Alert.alert('No batch selected', 'Create or pick a batch first.');
+      return null;
+    }
+    return { instituteId: activeInstituteId, userId };
+  };
+
   const handleCommitAttendance = async () => {
+    const ctx = requireWriteContext();
+    if (!ctx) return;
     setIsSyncing(true);
     try {
       const records = studentsRoster.map((st) => ({
@@ -61,7 +80,7 @@ export function useTeacherActions({
       await commitAttendanceMutation.mutateAsync({
         batchId: selectedBatchId,
         date: todayStr,
-        instituteId: activeInstituteId || '00000000-0000-0000-0000-000000000001',
+        instituteId: ctx.instituteId,
         records,
       });
 
@@ -70,8 +89,8 @@ export function useTeacherActions({
         `Roll call for ${activeBatchName} (${records.length} students) has been successfully saved to database.`
       );
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Attendance queued locally for background sync.';
-      Alert.alert('Offline Queue Active', msg);
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      Alert.alert('Attendance not saved', msg);
     } finally {
       setIsSyncing(false);
     }
@@ -84,12 +103,14 @@ export function useTeacherActions({
     totalMarks: number;
     questions: InteractiveQuestion[];
   }) => {
+    const ctx = requireWriteContext();
+    if (!ctx) return;
     const due = new Date();
     due.setDate(due.getDate() + 2);
 
     await createAssignmentMutation.mutateAsync({
       batch_id: selectedBatchId,
-      institute_id: activeInstituteId || '00000000-0000-0000-0000-000000000001',
+      institute_id: ctx.instituteId,
       title: dppData.title,
       subject: dppData.subject,
       instructions: `Interactive Quiz Form (${dppData.questions.length} Questions).`,
@@ -104,7 +125,7 @@ export function useTeacherActions({
     });
 
     notifyHomeworkPublished({
-      instituteId: activeInstituteId || '00000000-0000-0000-0000-000000000001',
+      instituteId: ctx.instituteId,
       batchId: selectedBatchId,
       title: dppData.title,
       subject: dppData.subject,
@@ -119,18 +140,22 @@ export function useTeacherActions({
     category: 'notes' | 'formula_sheet' | 'pyq' | 'dpp';
     file: { name: string; size?: string; uri?: string };
   }) => {
-    if (data.file.uri) {
-      await uploadMaterialMutation.mutateAsync({
-        fileUri: data.file.uri,
-        fileName: data.file.name,
-        title: data.title,
-        batchId: selectedBatchId,
-        category: data.category,
-        instituteId: activeInstituteId || '00000000-0000-0000-0000-000000000001',
-        uploadedBy: userId || '00000000-0000-0000-0000-000000000001',
-      });
-      Alert.alert('PDF Published! 📄', 'All linked batch students can now view and download this note.');
+    const ctx = requireWriteContext();
+    if (!ctx) return;
+    if (!data.file.uri) {
+      Alert.alert('No file selected', 'Pick a PDF to upload.');
+      return;
     }
+    await uploadMaterialMutation.mutateAsync({
+      fileUri: data.file.uri,
+      fileName: data.file.name,
+      title: data.title,
+      batchId: selectedBatchId,
+      category: data.category,
+      instituteId: ctx.instituteId,
+      uploadedBy: ctx.userId,
+    });
+    Alert.alert('PDF Published! 📄', 'All linked batch students can now view and download this note.');
   };
 
   const handleCreateAssignment = async (data: {
@@ -140,12 +165,14 @@ export function useTeacherActions({
     dueDays: number;
     pdfName?: string;
   }) => {
+    const ctx = requireWriteContext();
+    if (!ctx) return;
     const due = new Date();
     due.setDate(due.getDate() + data.dueDays);
 
     await createAssignmentMutation.mutateAsync({
       batch_id: selectedBatchId,
-      institute_id: activeInstituteId || '00000000-0000-0000-0000-000000000001',
+      institute_id: ctx.instituteId,
       title: data.title,
       subject: data.subject,
       instructions: 'Solve all problem sets and upload handwritten PDF solution.',
@@ -156,12 +183,14 @@ export function useTeacherActions({
       type: 'file',
       question_count: 5,
       created_by: teacherFullName,
-      question_paper_url: data.pdfName ? `https://storage.acadly.app/${data.pdfName}` : undefined,
+      // The PDF is not uploaded in this flow, so don't fabricate a URL for it.
+      question_paper_url: undefined,
     });
     Alert.alert('DPP Created! ⚡', 'Assignment published with instant push notification to batch.');
   };
 
   const handleAddLecture = async (data: { title: string; subject: string; videoId: string; duration: number }) => {
+    if (!requireWriteContext()) return;
     await addLecture({
       batch_id: selectedBatchId,
       title: data.title,
@@ -176,11 +205,13 @@ export function useTeacherActions({
   };
 
   const handleGradeSubmission = async (submissionId: string, score: number, feedback: string) => {
+    const ctx = requireWriteContext(false);
+    if (!ctx) return;
     await gradeSubmissionMutation.mutateAsync({
       submissionId,
       marks: score,
       feedback,
-      graderId: userId || 'teacher',
+      graderId: ctx.userId,
     });
     Alert.alert('Submission Graded ✅', `Recorded ${score} marks.`);
   };

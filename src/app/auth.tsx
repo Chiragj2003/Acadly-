@@ -14,6 +14,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Mail, Lock, User, ArrowRight } from 'lucide-react-native';
+import Svg, { Path } from 'react-native-svg';
 import { useAuth, useInstitute } from '@/context/AuthContext';
 import { useChild } from '@/context/ChildContext';
 import { checkRateLimit } from '@/lib/rateLimiter';
@@ -27,7 +28,7 @@ export default function CleanAuthScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { signIn, signUp, loading } = useAuth();
+  const { signIn, signUp, signInWithGoogle, loading } = useAuth();
   const { currentInstitute } = useInstitute();
   const { addChildByCodeOrPhone } = useChild();
 
@@ -72,6 +73,15 @@ export default function CleanAuthScreen() {
       case 'admin':
         router.replace('/admin');
         break;
+    }
+  };
+
+  const handleGoogle = async () => {
+    const result = await signInWithGoogle(selectedRole);
+    if (result.success) {
+      router.replace('/');
+    } else if (result.error) {
+      Alert.alert('Google sign-in', result.error);
     }
   };
 
@@ -157,7 +167,7 @@ export default function CleanAuthScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      className="flex-1 bg-slate-50"
+      className="flex-1 bg-paper"
     >
       <ScrollView
         contentContainerStyle={{
@@ -168,29 +178,31 @@ export default function CleanAuthScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <AuthHeader
-          title={authMode === 'signin' ? 'Welcome Back!' : 'Join Acadly'}
-          subtitle="Tuition, attendance, tests & fees in one unified platform"
+          title={authMode === 'signin' ? 'Good to see you.' : 'Welcome to Acadly'}
+          subtitle={authMode === 'signin' ? 'Sign in with the email your institute has on file.' : 'Class, practice and progress, in one calm place.'}
         />
 
         {/* Role Selector */}
         <View className="mb-4">
-          <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-            Select Your Role
+          <Text className="text-sm font-sans-semibold text-muted mb-3 text-center">
+            Who's using Acadly today?
           </Text>
           <RoleSelector selectedRole={selectedRole} onSelectRole={setSelectedRole} />
         </View>
 
         {/* Mode Toggle (Sign In / Sign Up) */}
-        <View className="flex-row bg-slate-200/80 p-1 rounded-2xl mb-4">
+        <View accessibilityRole="tablist" className="flex-row bg-white p-1.5 rounded-full mb-4">
           <TouchableOpacity
             onPress={() => setAuthMode('signin')}
-            className={`flex-1 py-2.5 rounded-xl items-center ${
-              authMode === 'signin' ? 'bg-white shadow-xs' : ''
+            accessibilityRole="tab"
+            accessibilityState={{ selected: authMode === 'signin' }}
+            className={`flex-1 min-h-[44px] justify-center rounded-full items-center ${
+              authMode === 'signin' ? 'bg-ink' : ''
             }`}
           >
             <Text
-              className={`text-xs font-bold ${
-                authMode === 'signin' ? 'text-slate-900' : 'text-slate-600'
+              className={`text-sm font-sans-bold ${
+                authMode === 'signin' ? 'text-white' : 'text-slate-600'
               }`}
             >
               {t('auth.signIn', 'Sign In')}
@@ -198,13 +210,15 @@ export default function CleanAuthScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setAuthMode('signup')}
-            className={`flex-1 py-2.5 rounded-xl items-center ${
-              authMode === 'signup' ? 'bg-white shadow-xs' : ''
+            accessibilityRole="tab"
+            accessibilityState={{ selected: authMode === 'signup' }}
+            className={`flex-1 min-h-[44px] justify-center rounded-full items-center ${
+              authMode === 'signup' ? 'bg-ink' : ''
             }`}
           >
             <Text
-              className={`text-xs font-bold ${
-                authMode === 'signup' ? 'text-slate-900' : 'text-slate-600'
+              className={`text-sm font-sans-bold ${
+                authMode === 'signup' ? 'text-white' : 'text-slate-600'
               }`}
             >
               {t('auth.signUp', 'Create Account')}
@@ -213,54 +227,54 @@ export default function CleanAuthScreen() {
         </View>
 
         {/* Form Body */}
-        <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
+        <View className="bg-white rounded-3xl p-5 gap-4">
           {authMode === 'signup' && (
             <View>
-              <Text className="text-[11px] font-semibold text-slate-600 mb-1">{t('auth.fullName', 'Full Name')}</Text>
-              <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5">
-                <User size={16} color="#94a3b8" />
+              <Text className="text-xs font-sans-bold text-muted mb-1.5">{t('auth.fullName', 'Full Name')}</Text>
+              <View className="flex-row items-center bg-paper rounded-2xl px-4 min-h-[52px]">
+                <User size={16} color="#8C877E" />
                 <TextInput
                   value={fullName}
                   onChangeText={setFullName}
                   placeholder="e.g. Vikram Joshi / Amelia Sharma"
-                  className="flex-1 ml-2 text-xs text-slate-800"
+                  className="flex-1 ml-2 text-base font-sans text-ink"
                 />
               </View>
             </View>
           )}
 
           <View>
-            <Text className="text-[11px] font-semibold text-slate-600 mb-1">{t('auth.emailAddress', 'Email Address')}</Text>
-            <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5">
-              <Mail size={16} color="#94a3b8" />
+            <Text className="text-xs font-sans-bold text-muted mb-1.5">{t('auth.emailAddress', 'Email Address')}</Text>
+            <View className="flex-row items-center bg-paper rounded-2xl px-4 min-h-[52px]">
+              <Mail size={16} color="#8C877E" />
               <TextInput
                 value={email}
                 onChangeText={setEmail}
                 placeholder="name@example.com"
                 keyboardType="email-address"
                 autoCapitalize="none"
-                className="flex-1 ml-2 text-xs text-slate-800"
+                className="flex-1 ml-2 text-base font-sans text-ink"
               />
             </View>
           </View>
 
           <View>
             <View className="flex-row items-center justify-between mb-1">
-              <Text className="text-[11px] font-semibold text-slate-600">{t('auth.password', 'Password')}</Text>
+              <Text className="text-xs font-sans-bold text-muted">{t('auth.password', 'Password')}</Text>
               {authMode === 'signin' && (
                 <TouchableOpacity onPress={() => setIsForgotPasswordOpen(true)}>
-                  <Text className="text-[10px] font-bold text-blue-600">{t('auth.forgotPassword', 'Forgot Password?')}</Text>
+                  <Text className="text-xs font-sans-bold text-ink underline">{t('auth.forgotPassword', 'Forgot Password?')}</Text>
                 </TouchableOpacity>
               )}
             </View>
-            <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5">
-              <Lock size={16} color="#94a3b8" />
+            <View className="flex-row items-center bg-paper rounded-2xl px-4 min-h-[52px]">
+              <Lock size={16} color="#8C877E" />
               <TextInput
                 value={password}
                 onChangeText={setPassword}
                 placeholder="••••••••"
                 secureTextEntry
-                className="flex-1 ml-2 text-xs text-slate-800"
+                className="flex-1 ml-2 text-base font-sans text-ink"
               />
             </View>
           </View>
@@ -296,22 +310,50 @@ export default function CleanAuthScreen() {
           <TouchableOpacity
             onPress={handleSubmit}
             disabled={loading}
-            className="bg-blue-600 py-3.5 rounded-2xl items-center flex-row justify-center gap-2 mt-2 shadow-xs active:scale-98"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: loading, busy: loading }}
+            className="bg-ink min-h-[56px] rounded-full items-center flex-row justify-center gap-2 mt-2 active:opacity-90"
           >
             {loading ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
               <>
-                <Text className="text-xs font-bold text-white">
+                <Text className="text-[17px] font-sans-bold text-white">
                   {authMode === 'signin'
                     ? t('auth.signInAs', { role: t(`roles.${selectedRole}`, selectedRole), defaultValue: `Sign In as ${selectedRole}` })
                     : t('auth.completeRegistration', { role: t(`roles.${selectedRole}`, selectedRole), defaultValue: `Complete ${selectedRole} Registration` })}
                 </Text>
-                <ArrowRight size={14} color="white" />
+                <ArrowRight size={18} color="white" />
               </>
             )}
           </TouchableOpacity>
         </View>
+
+        {authMode === 'signin' && (
+          <>
+            <View className="flex-row items-center gap-3 my-5">
+              <View className="flex-1 h-px bg-slate-300" />
+              <Text className="text-[13px] font-sans-semibold text-muted">or</Text>
+              <View className="flex-1 h-px bg-slate-300" />
+            </View>
+            <TouchableOpacity
+              onPress={handleGoogle}
+              disabled={loading}
+              accessibilityRole="button"
+              className="bg-white min-h-[56px] rounded-full flex-row items-center justify-center gap-2.5 active:opacity-90"
+            >
+              <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+              <Svg width={20} height={20} viewBox="0 0 24 24">
+                <Path fill="#4285F4" d="M22.6 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.3-4.8 3.3-8.1z" />
+                <Path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1.1-3.7 1.1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z" />
+                <Path fill="#FBBC05" d="M5.8 14.2a6.6 6.6 0 0 1 0-4.3V7H2.1a11 11 0 0 0 0 9.9z" />
+                <Path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7l3.7 2.9C6.7 7.3 9.1 5.4 12 5.4z" />
+              </Svg>
+              </View>
+              <Text className="text-base font-sans-bold text-ink">Continue with Google</Text>
+            </TouchableOpacity>
+          </>
+        )}
 
         <ForgotPasswordModal
           visible={isForgotPasswordOpen}

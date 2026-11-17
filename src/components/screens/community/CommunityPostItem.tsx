@@ -25,7 +25,7 @@ export const CommunityPostItem: React.FC<CommunityPostItemProps> = ({
             <Text className="text-xs">{post.avatarEmoji || '👤'}</Text>
           </View>
           <View>
-            <Text className="text-xs font-bold text-slate-800">{post.author}</Text>
+            <Text className="text-xs font-sans-bold text-slate-800">{post.author}</Text>
             <Text className="text-[10px] text-slate-400">{post.timeAgo}</Text>
           </View>
         </View>
@@ -33,14 +33,14 @@ export const CommunityPostItem: React.FC<CommunityPostItemProps> = ({
         {post.hasTeacherAnswer && (
           <View className="flex-row items-center gap-1 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
             <CheckCircle2 size={11} color="#059669" />
-            <Text className="text-[10px] font-bold text-emerald-700">Teacher Verified</Text>
+            <Text className="text-[10px] font-sans-bold text-emerald-700">Teacher Verified</Text>
           </View>
         )}
       </View>
 
       {/* Content */}
       <View className="gap-1">
-        <Text className="text-sm font-black text-slate-900 leading-snug">{post.title}</Text>
+        <Text className="text-sm font-display text-slate-900 leading-snug">{post.title}</Text>
         <Text className="text-xs text-slate-600 leading-relaxed">{post.content}</Text>
       </View>
 
@@ -50,8 +50,8 @@ export const CommunityPostItem: React.FC<CommunityPostItemProps> = ({
           onPress={() => onOpenAttachment(post.attachmentUri!)}
           className="flex-row items-center gap-1.5 self-start bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200"
         >
-          <Paperclip size={12} color="#64748b" />
-          <Text className="text-[11px] font-semibold text-slate-700">
+          <Paperclip size={12} color="#6E6A63" />
+          <Text className="text-[11px] font-sans-semibold text-slate-700">
             {post.attachmentName || 'View Attachment'}
           </Text>
         </TouchableOpacity>
@@ -63,16 +63,16 @@ export const CommunityPostItem: React.FC<CommunityPostItemProps> = ({
           onPress={() => onUpvote(post.id)}
           className="flex-row items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl active:scale-95"
         >
-          <ThumbsUp size={13} color="#2563eb" />
-          <Text className="text-xs font-bold text-slate-700">{post.upvotes || 0}</Text>
+          <ThumbsUp size={13} color="#1C1C1E" />
+          <Text className="text-xs font-sans-bold text-slate-700">{post.upvotes || 0}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => onOpenComments(post)}
           className="flex-row items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl active:scale-95"
         >
-          <MessageSquare size={13} color="#64748b" />
-          <Text className="text-xs font-bold text-slate-700">
+          <MessageSquare size={13} color="#6E6A63" />
+          <Text className="text-xs font-sans-bold text-slate-700">
             {post.comments ? post.comments.length : 0} Replies
           </Text>
         </TouchableOpacity>

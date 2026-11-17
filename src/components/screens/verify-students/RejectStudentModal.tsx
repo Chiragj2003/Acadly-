@@ -27,9 +27,9 @@ export const RejectStudentModal: React.FC<RejectStudentModalProps> = ({
       <View className="flex-1 bg-black/40 items-center justify-center p-5">
         <View className="bg-white rounded-[32px] p-6 w-full max-w-sm border border-slate-200 shadow-lg">
           <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-base font-black text-slate-800">Decline Admission Request</Text>
+            <Text className="text-base font-display text-slate-800">Decline Admission Request</Text>
             <TouchableOpacity onPress={onClose}>
-              <X size={18} color="#64748B" />
+              <X size={18} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
@@ -52,7 +52,7 @@ export const RejectStudentModal: React.FC<RejectStudentModalProps> = ({
               onPress={onClose}
               className="flex-1 py-3 bg-slate-100 rounded-xl items-center"
             >
-              <Text className="text-xs font-bold text-slate-700">Cancel</Text>
+              <Text className="text-xs font-sans-bold text-slate-700">Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={onConfirmReject}
@@ -62,7 +62,7 @@ export const RejectStudentModal: React.FC<RejectStudentModalProps> = ({
               {isPending ? (
                 <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
-                <Text className="text-xs font-bold text-white">Decline Application</Text>
+                <Text className="text-xs font-sans-bold text-white">Decline Application</Text>
               )}
             </TouchableOpacity>
           </View>

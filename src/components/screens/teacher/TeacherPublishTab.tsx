@@ -39,7 +39,7 @@ export const TeacherPublishTab: React.FC<TeacherPublishTabProps> = ({
               <FileQuestion size={18} color="#ffffff" />
             </View>
             <View>
-              <Text className="text-sm font-black text-white">
+              <Text className="text-sm font-display text-white">
                 In-App Interactive DPP & Quiz Builder
               </Text>
               <Text className="text-[11px] text-blue-100">
@@ -48,7 +48,7 @@ export const TeacherPublishTab: React.FC<TeacherPublishTabProps> = ({
             </View>
           </View>
           <View className="bg-white/20 px-2 py-0.5 rounded-full">
-            <Text className="text-[10px] font-bold text-white">MCQ & T/F</Text>
+            <Text className="text-[10px] font-sans-bold text-white">MCQ & T/F</Text>
           </View>
         </View>
         <Text className="text-xs text-blue-50/90 leading-relaxed mb-3">
@@ -58,8 +58,8 @@ export const TeacherPublishTab: React.FC<TeacherPublishTabProps> = ({
           onPress={onOpenInteractiveDpp}
           className="bg-white py-2.5 px-4 rounded-2xl items-center flex-row justify-center gap-2 shadow-xs active:scale-98"
         >
-          <Plus size={16} color="#2563EB" />
-          <Text className="text-xs font-black text-blue-600">
+          <Plus size={16} color="#1C1C1E" />
+          <Text className="text-xs font-display text-blue-600">
             Create In-App Interactive DPP →
           </Text>
         </TouchableOpacity>
@@ -74,7 +74,7 @@ export const TeacherPublishTab: React.FC<TeacherPublishTabProps> = ({
           <View className="w-9 h-9 rounded-xl bg-emerald-50 items-center justify-center">
             <FileText size={18} color="#059669" />
           </View>
-          <Text className="text-xs font-bold text-slate-800">+ Upload PDF</Text>
+          <Text className="text-xs font-sans-bold text-slate-800">+ Upload PDF</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -82,9 +82,9 @@ export const TeacherPublishTab: React.FC<TeacherPublishTabProps> = ({
           className="flex-1 bg-white border border-slate-200/90 p-3.5 rounded-2xl items-center gap-2 shadow-xs active:scale-98"
         >
           <View className="w-9 h-9 rounded-xl bg-blue-50 items-center justify-center">
-            <Plus size={18} color="#2563EB" />
+            <Plus size={18} color="#1C1C1E" />
           </View>
-          <Text className="text-xs font-bold text-slate-800">+ Offline DPP</Text>
+          <Text className="text-xs font-sans-bold text-slate-800">+ Offline DPP</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -94,7 +94,7 @@ export const TeacherPublishTab: React.FC<TeacherPublishTabProps> = ({
           <View className="w-9 h-9 rounded-xl bg-rose-50 items-center justify-center">
             <Video size={18} color="#e11d48" />
           </View>
-          <Text className="text-xs font-bold text-slate-800">+ Video Class</Text>
+          <Text className="text-xs font-sans-bold text-slate-800">+ Video Class</Text>
         </TouchableOpacity>
       </View>
 
@@ -102,8 +102,8 @@ export const TeacherPublishTab: React.FC<TeacherPublishTabProps> = ({
       <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
-            <Award size={16} color="#2563EB" />
-            <Text className="text-sm font-bold text-slate-900">Student Homework Submissions</Text>
+            <Award size={16} color="#1C1C1E" />
+            <Text className="text-sm font-sans-bold text-slate-900">Student Homework Submissions</Text>
           </View>
           <Badge label={`${pendingCount} Pending`} variant="warning" />
         </View>
@@ -119,14 +119,14 @@ export const TeacherPublishTab: React.FC<TeacherPublishTabProps> = ({
               >
                 <View className="flex-1 pr-2">
                   <View className="flex-row items-center gap-2 mb-0.5">
-                    <Text className="text-xs font-bold text-slate-900">{sub.student_name}</Text>
+                    <Text className="text-xs font-sans-bold text-slate-900">{sub.student_name}</Text>
                     <View
                       className={`px-2 py-0.5 rounded-md ${
                         isGraded ? 'bg-emerald-100' : 'bg-amber-100'
                       }`}
                     >
                       <Text
-                        className={`text-[10px] font-bold ${
+                        className={`text-[10px] font-sans-bold ${
                           isGraded ? 'text-emerald-800' : 'text-amber-800'
                         }`}
                       >
@@ -136,7 +136,7 @@ export const TeacherPublishTab: React.FC<TeacherPublishTabProps> = ({
                       </Text>
                     </View>
                   </View>
-                  <Text className="text-[11px] text-slate-600 font-medium" numberOfLines={1}>
+                  <Text className="text-[11px] text-slate-600 font-sans" numberOfLines={1}>
                     {assignment?.title || 'Mechanics DPP 04'}
                   </Text>
 
@@ -153,8 +153,8 @@ export const TeacherPublishTab: React.FC<TeacherPublishTabProps> = ({
                     }}
                     className="flex-row items-center gap-1.5 mt-1.5 self-start bg-blue-50 px-2 py-1 rounded-lg border border-blue-200/60 active:scale-95"
                   >
-                    <FileText size={11} color="#2563EB" />
-                    <Text className="text-[10px] font-semibold text-blue-700" numberOfLines={1}>
+                    <FileText size={11} color="#1C1C1E" />
+                    <Text className="text-[10px] font-sans-semibold text-blue-700" numberOfLines={1}>
                       Open & Review: {sub.file_name || 'handwritten_solution.pdf'} ↗
                     </Text>
                   </TouchableOpacity>
@@ -166,7 +166,7 @@ export const TeacherPublishTab: React.FC<TeacherPublishTabProps> = ({
                     isGraded ? 'bg-white border-slate-200' : 'bg-blue-600 border-blue-600'
                   } active:scale-95`}
                 >
-                  <Text className={`text-xs font-bold ${isGraded ? 'text-slate-700' : 'text-white'}`}>
+                  <Text className={`text-xs font-sans-bold ${isGraded ? 'text-slate-700' : 'text-white'}`}>
                     {isGraded ? 'Re-grade' : 'Grade ✍️'}
                   </Text>
                 </TouchableOpacity>

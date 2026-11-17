@@ -2035,6 +2035,8 @@ export interface AnalyticsSummary {
 
 export interface Student360Profile {
   id: string;
+  /** profiles.id of the student's auth user (students.user_id). */
+  userId?: string;
   name: string;
   rollNumber: string;
   grade: string;

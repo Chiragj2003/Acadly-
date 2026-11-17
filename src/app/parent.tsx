@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Alert, ActivityIndicator } from 'react-native';
-import { Home, Users, Wallet, ShieldCheck, Award } from 'lucide-react-native';
+import { Home, Users, Wallet, ShieldCheck, ChartLine, MessageCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useRoleGuard } from '@/hooks/useRoleGuard';
 import { useAuth, useInstitute } from '@/context/AuthContext';
@@ -65,6 +65,19 @@ export default function ParentScreen() {
     await generateAndSharePDF(doc);
   };
 
+  // Progress-report PDFs are not generated from real data yet. Say so instead of
+  // sharing an unrelated sample invoice as the child's report.
+  const handleDownloadReport = () => {
+    Alert.alert('Coming soon', 'Downloadable progress reports are on the way.');
+  };
+
+  const initials = (user?.full_name || '')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
+
   const tabs: TabItem[] = [
     {
       key: 'home',
@@ -79,8 +92,8 @@ export default function ParentScreen() {
     },
     {
       key: 'fees_reports',
-      label: FEATURE_FEES ? 'Fees & Invoices' : 'Progress Reports',
-      icon: (color, size) => (FEATURE_FEES ? <Wallet color={color} size={size} /> : <Award color={color} size={size} />),
+      label: FEATURE_FEES ? 'Fees' : 'Reports',
+      icon: (color, size) => (FEATURE_FEES ? <Wallet color={color} size={size} /> : <ChartLine color={color} size={size} />),
     },
     {
       key: 'profile',
@@ -93,8 +106,8 @@ export default function ParentScreen() {
     return (
       <ScreenWrapper headerProps={{ title: 'Parent Portal' }}>
         <View className="flex-1 items-center justify-center p-8">
-          <ActivityIndicator size="small" color="#2563EB" />
-          <Text className="text-xs text-slate-500 mt-2 font-medium">Verifying authorization...</Text>
+          <ActivityIndicator size="small" color="#1C1C1E" />
+          <Text className="text-xs text-slate-500 mt-2 font-sans">Verifying authorization...</Text>
         </View>
       </ScreenWrapper>
     );
@@ -103,21 +116,25 @@ export default function ParentScreen() {
   return (
     <ScreenWrapper
       headerProps={{
-        title: 'Parent Portal',
-        instituteName: currentInstitute?.name || 'Academy Hub',
-        profileInitials: 'PR',
+        title: user?.full_name ? `Hi, ${user.full_name.split(' ')[0]}` : 'Parent',
+        instituteName: currentInstitute?.name || '',
+        profileInitials: initials,
         onNotificationPress: openNotificationDrawer,
         onProfilePress: handleLogout,
         onLogoutPress: handleLogout,
         hasUnreadNotifications: unreadCount > 0,
       }}
-      contentContainerClassName="gap-3.5 px-4 py-4"
+      contentContainerClassName="gap-5 px-5 py-3"
       footer={
         <BottomTabBar
           tabs={tabs}
           activeTab={activeTab}
-          onTabChange={(key) => setActiveTab(key as any)}
-          accentColor="#2563EB"
+          onTabChange={(key) => setActiveTab(key as typeof activeTab)}
+          trailingAction={{
+            label: 'Message teachers',
+            icon: (color, size) => <MessageCircle color={color} size={size} fill={color} />,
+            onPress: () => router.push('/chat'),
+          }}
         />
       }
     >
@@ -151,7 +168,7 @@ export default function ParentScreen() {
           onOpenRazorpay={openRazorpayCheckout}
           onOpenReceipt={openReceipt}
           onDownloadInvoice={handleDownloadInvoice}
-          onDownloadReport={handleDownloadInvoice}
+          onDownloadReport={handleDownloadReport}
         />
       )}
 

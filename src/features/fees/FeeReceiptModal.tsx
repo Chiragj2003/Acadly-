@@ -36,30 +36,30 @@ export const FeeReceiptModal: React.FC = () => {
             @page { margin: 20mm; }
             body {
               font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-              color: #0F172A;
+              color: #1C1C1E;
               padding: 24px;
               background: #ffffff;
             }
             .header {
-              border-bottom: 2px solid #2563EB;
+              border-bottom: 2px solid #1C1C1E;
               padding-bottom: 16px;
               margin-bottom: 20px;
             }
             .inst-name {
               font-size: 22px;
               font-weight: 800;
-              color: #0F172A;
+              color: #1C1C1E;
               margin: 0;
             }
             .inst-sub {
               font-size: 12px;
-              color: #64748B;
+              color: #6E6A63;
               margin-top: 4px;
             }
             .badge {
               display: inline-block;
-              background: #EFF6FF;
-              color: #1D4ED8;
+              background: #EEF4FC;
+              color: #121212;
               font-size: 11px;
               font-weight: 700;
               padding: 4px 10px;
@@ -78,30 +78,30 @@ export const FeeReceiptModal: React.FC = () => {
               margin: 20px 0;
             }
             .table th {
-              background: #F8FAFC;
+              background: #F3F1EC;
               padding: 10px;
               text-align: left;
               font-size: 12px;
-              border-bottom: 1px solid #E2E8F0;
-              color: #64748B;
+              border-bottom: 1px solid #E6E2DA;
+              color: #6E6A63;
             }
             .table td {
               padding: 12px 10px;
               font-size: 13px;
-              border-bottom: 1px solid #E2E8F0;
+              border-bottom: 1px solid #E6E2DA;
             }
             .total-row {
               font-size: 16px;
               font-weight: 800;
-              color: #2563EB;
+              color: #1C1C1E;
             }
             .footer {
               margin-top: 40px;
               padding-top: 14px;
-              border-top: 1px solid #E2E8F0;
+              border-top: 1px solid #E6E2DA;
               text-align: center;
               font-size: 11px;
-              color: #94A3B8;
+              color: #8C877E;
             }
           </style>
         </head>
@@ -147,7 +147,7 @@ export const FeeReceiptModal: React.FC = () => {
             </tbody>
           </table>
 
-          <div style="font-size: 11px; color: #64748B;">
+          <div style="font-size: 11px; color: #6E6A63;">
             <div><strong>Transaction Reference:</strong> ${selectedReceipt.razorpay_payment_id || 'UPI-GATEWAY-RECONCILED'}</div>
             <div>Computer generated invoice. No signature required.</div>
           </div>
@@ -193,15 +193,15 @@ export const FeeReceiptModal: React.FC = () => {
           {/* Top Bar */}
           <View className="h-14 px-5 flex-row items-center justify-between border-b border-slate-100 bg-slate-50">
             <View className="flex-row items-center gap-2">
-              <Receipt size={18} color="#2563EB" />
-              <Text className="text-sm font-bold text-slate-900">Official Tax Receipt</Text>
+              <Receipt size={18} color="#1C1C1E" />
+              <Text className="text-sm font-sans-bold text-slate-900">Official Tax Receipt</Text>
             </View>
 
             <TouchableOpacity
               onPress={closeReceipt}
               className="w-8 h-8 rounded-full bg-slate-200/70 items-center justify-center active:scale-95"
             >
-              <X size={16} color="#64748B" />
+              <X size={16} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
@@ -210,7 +210,7 @@ export const FeeReceiptModal: React.FC = () => {
             {/* Institute Identity Banner */}
             <View className="p-5 rounded-2xl border border-slate-200 bg-slate-50 gap-3">
               <View className="items-center text-center gap-0.5 pb-3 border-b border-slate-200">
-                <Text className="text-base font-extrabold text-slate-900 text-center">
+                <Text className="text-base font-display text-slate-900 text-center">
                   {activeInstitute?.name || 'Academy Center'}
                 </Text>
                 <Text className="text-xs text-slate-500 text-center">
@@ -225,18 +225,18 @@ export const FeeReceiptModal: React.FC = () => {
               <View className="flex-row items-start justify-between py-1">
                 <View className="gap-1">
                   <Text className="text-[11px] text-slate-400 uppercase tracking-wider">Receipt No:</Text>
-                  <Text className="text-xs font-mono font-bold text-blue-600">
+                  <Text className="text-xs font-mono font-sans-bold text-blue-600">
                     {selectedReceipt.receipt_number}
                   </Text>
                   <Text className="text-[11px] text-slate-400 uppercase tracking-wider mt-1">Student:</Text>
-                  <Text className="text-xs font-bold text-slate-900">
+                  <Text className="text-xs font-sans-bold text-slate-900">
                     {selectedReceipt.student_name}
                   </Text>
                 </View>
 
                 <View className="items-end gap-1">
                   <Text className="text-[11px] text-slate-400 uppercase tracking-wider">Date:</Text>
-                  <Text className="text-xs font-semibold text-slate-800">
+                  <Text className="text-xs font-sans-semibold text-slate-800">
                     {new Date(selectedReceipt.paid_at).toLocaleDateString('en-IN', {
                       day: '2-digit',
                       month: 'short',
@@ -252,16 +252,16 @@ export const FeeReceiptModal: React.FC = () => {
               <View className="p-3.5 rounded-xl bg-white border border-slate-200/90 gap-2">
                 <View className="flex-row items-center justify-between">
                   <Text className="text-xs text-slate-500">Tuition & Academic Base:</Text>
-                  <Text className="text-xs font-semibold text-slate-800">{baseAmount}</Text>
+                  <Text className="text-xs font-sans-semibold text-slate-800">{baseAmount}</Text>
                 </View>
                 <View className="flex-row items-center justify-between">
                   <Text className="text-xs text-slate-500">GST (18% Integrated):</Text>
-                  <Text className="text-xs font-semibold text-slate-800">{gstAmount}</Text>
+                  <Text className="text-xs font-sans-semibold text-slate-800">{gstAmount}</Text>
                 </View>
                 <View className="h-[1px] bg-slate-200 my-1" />
                 <View className="flex-row items-center justify-between">
-                  <Text className="text-sm font-bold text-slate-900">Total Amount Paid:</Text>
-                  <Text className="text-base font-extrabold text-blue-600">
+                  <Text className="text-sm font-sans-bold text-slate-900">Total Amount Paid:</Text>
+                  <Text className="text-base font-display text-blue-600">
                     {formattedAmount}
                   </Text>
                 </View>
@@ -271,7 +271,7 @@ export const FeeReceiptModal: React.FC = () => {
               <View className="flex-row items-center justify-between pt-1">
                 <View className="flex-row items-center gap-1.5">
                   <CheckCircle size={15} color="#059669" />
-                  <Text className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                  <Text className="text-xs font-sans-bold text-emerald-800 uppercase tracking-wider">
                     Reconciled
                   </Text>
                 </View>
@@ -288,7 +288,7 @@ export const FeeReceiptModal: React.FC = () => {
                 className="flex-1 bg-blue-600 py-3 rounded-2xl flex-row items-center justify-center gap-2 active:scale-98 shadow-xs"
               >
                 <Download size={15} color="#ffffff" />
-                <Text className="text-xs font-bold text-white">Download GST PDF</Text>
+                <Text className="text-xs font-sans-bold text-white">Download GST PDF</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -296,7 +296,7 @@ export const FeeReceiptModal: React.FC = () => {
                 className="bg-emerald-50 border border-emerald-200 px-4 py-3 rounded-2xl flex-row items-center justify-center gap-1.5 active:scale-98"
               >
                 <Share2 size={15} color="#059669" />
-                <Text className="text-xs font-bold text-emerald-800">WhatsApp</Text>
+                <Text className="text-xs font-sans-bold text-emerald-800">WhatsApp</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>

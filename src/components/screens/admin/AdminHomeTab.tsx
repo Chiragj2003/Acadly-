@@ -25,26 +25,26 @@ export const AdminHomeTab: React.FC<AdminHomeTabProps> = ({
       <View className="flex-row gap-2.5">
         <View className="flex-1 bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs">
           <View className="flex-row items-center justify-between">
-            <Text className="text-[11px] font-bold text-slate-500 uppercase">Students</Text>
-            <GraduationCap size={16} color="#2563eb" />
+            <Text className="text-[11px] font-sans-bold text-slate-500 uppercase">Students</Text>
+            <GraduationCap size={16} color="#1C1C1E" />
           </View>
-          <Text className="text-xl font-black text-slate-900 mt-1">{enrolledStudentsCount}</Text>
-          <Text className="text-[10px] text-emerald-600 font-semibold mt-0.5">Active Enrollment</Text>
+          <Text className="text-xl font-display text-slate-900 mt-1">{enrolledStudentsCount}</Text>
+          <Text className="text-[10px] text-emerald-600 font-sans-semibold mt-0.5">Active Enrollment</Text>
         </View>
 
         <View className="flex-1 bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-xs">
           <View className="flex-row items-center justify-between">
-            <Text className="text-[11px] font-bold text-slate-500 uppercase">Batches</Text>
+            <Text className="text-[11px] font-sans-bold text-slate-500 uppercase">Batches</Text>
             <Users size={16} color="#7c3aed" />
           </View>
-          <Text className="text-xl font-black text-slate-900 mt-1">{activeBatchesCount}</Text>
-          <Text className="text-[10px] text-purple-600 font-semibold mt-0.5">Ongoing Batches</Text>
+          <Text className="text-xl font-display text-slate-900 mt-1">{activeBatchesCount}</Text>
+          <Text className="text-[10px] text-purple-600 font-sans-semibold mt-0.5">Ongoing Batches</Text>
         </View>
       </View>
 
       {/* Quick Action Cards */}
       <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
-        <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+        <Text className="text-xs font-sans-bold text-slate-500 uppercase tracking-wider">
           Quick Management Actions
         </Text>
 
@@ -57,8 +57,8 @@ export const AdminHomeTab: React.FC<AdminHomeTabProps> = ({
               <UserCheck size={18} color="#7c3aed" />
             </View>
             <View>
-              <Text className="text-xs font-bold text-slate-900">Admissions & Join Requests</Text>
-              <Text className="text-[11px] text-purple-700 font-semibold mt-0.5">
+              <Text className="text-xs font-sans-bold text-slate-900">Admissions & Join Requests</Text>
+              <Text className="text-[11px] text-purple-700 font-sans-semibold mt-0.5">
                 {pendingRequestsCount} Pending Approval
               </Text>
             </View>
@@ -72,14 +72,14 @@ export const AdminHomeTab: React.FC<AdminHomeTabProps> = ({
         >
           <View className="flex-row items-center gap-3">
             <View className="w-10 h-10 rounded-xl bg-blue-100 items-center justify-center">
-              <GraduationCap size={18} color="#2563eb" />
+              <GraduationCap size={18} color="#1C1C1E" />
             </View>
             <View>
-              <Text className="text-xs font-bold text-slate-900">Student 360 Directory</Text>
+              <Text className="text-xs font-sans-bold text-slate-900">Student 360 Directory</Text>
               <Text className="text-[11px] text-slate-500 mt-0.5">View profiles & fee statuses</Text>
             </View>
           </View>
-          <ArrowRight size={16} color="#64748b" />
+          <ArrowRight size={16} color="#6E6A63" />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -88,14 +88,14 @@ export const AdminHomeTab: React.FC<AdminHomeTabProps> = ({
         >
           <View className="flex-row items-center gap-3">
             <View className="w-10 h-10 rounded-xl bg-slate-100 items-center justify-center">
-              <Users size={18} color="#475569" />
+              <Users size={18} color="#4A463F" />
             </View>
             <View>
-              <Text className="text-xs font-bold text-slate-900">Batch Configurations</Text>
+              <Text className="text-xs font-sans-bold text-slate-900">Batch Configurations</Text>
               <Text className="text-[11px] text-slate-500 mt-0.5">Manage timings & assigned tutors</Text>
             </View>
           </View>
-          <ArrowRight size={16} color="#64748b" />
+          <ArrowRight size={16} color="#6E6A63" />
         </TouchableOpacity>
       </View>
     </View>

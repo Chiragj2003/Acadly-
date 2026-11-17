@@ -1,59 +1,62 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  Share,
-} from 'react-native';
+import { View, Text, Pressable, Alert, Share } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Home, Layers, Inbox, Building2, Plus, ChevronRight, LogOut, Send, MessageCircle, Share2 } from 'lucide-react-native';
 import {
-  Building2,
-  Users,
-  LogOut,
-  Plus,
-  Send,
-  GraduationCap,
-  Sparkles,
-  BookOpen,
-  DollarSign,
-} from 'lucide-react-native';
-import { ScreenWrapper, BottomTabBar, LanguageSwitcher, type TabItem, OnboardingWalkthroughModal } from '@/components/ui';
+  ScreenWrapper,
+  BottomTabBar,
+  LanguageSwitcher,
+  type TabItem,
+  OnboardingWalkthroughModal,
+  Card,
+  Chip,
+  CountPill,
+  DisplayTitle,
+  Eyebrow,
+  ListRow,
+  ListEmptyState,
+  Mascot,
+  StatTile,
+} from '@/components/ui';
 import { useRoleGuard } from '@/hooks/useRoleGuard';
 import { useAuth } from '@/context/AuthContext';
-import { useUI } from '@/context/UIContext';
 import { useJoinRequests } from '@/hooks/queries/useAdmissionQueries';
-import { useStudentsRoster } from '@/hooks/queries/useStudentQueries';
-import { AdminHeader } from '@/components/screens/admin/AdminHeader';
-import { AdminHomeTab } from '@/components/screens/admin/AdminHomeTab';
+import { useStudentCount } from '@/hooks/queries/useStudentQueries';
+import { useBatches, useCreateBatch } from '@/hooks/queries/useBatchQueries';
 import { AdminCreateBatchModal } from '@/components/screens/admin/AdminCreateBatchModal';
+import { FEATURE_FEES } from '@/config/features';
 
-export default function PinterestAdminScreen() {
+type AdminTab = 'home' | 'batches' | 'requests' | 'profile';
+
+export default function AdminScreen() {
   const { isAuthorized, isLoading } = useRoleGuard(['admin']);
   const router = useRouter();
-  const { activeInstitute, batches, createBatch, signOut } = useAuth();
-  const { coachingProfile } = useUI();
-  const { data: joinRequests = [] } = useJoinRequests(activeInstitute?.id);
-  const { data: studentsRoster = [] } = useStudentsRoster(activeInstitute?.id);
+  const { activeInstitute, signOut } = useAuth();
+  const instituteId = activeInstitute?.id;
 
-  const [activeTab, setActiveTab] = useState<'home' | 'batches' | 'admissions_dues' | 'profile'>('home');
+  // Real data only: batches and counts come from the database (previously the
+  // list came from in-memory AuthContext state and the student count was the
+  // length of one 30-row roster page).
+  const { data: batches = [] } = useBatches(instituteId);
+  const { data: studentCount = 0 } = useStudentCount(instituteId);
+  const { data: joinRequests = [] } = useJoinRequests(instituteId);
+  const createBatchMutation = useCreateBatch();
 
-  // Create Batch modal state
+  const [activeTab, setActiveTab] = useState<AdminTab>('home');
   const [isCreateBatchModalOpen, setIsCreateBatchModalOpen] = useState(false);
   const [batchName, setBatchName] = useState('');
   const [batchSubject, setBatchSubject] = useState('');
   const [batchExam, setBatchExam] = useState('');
   const [batchRoom, setBatchRoom] = useState('');
-  const [batchTeacher, setBatchTeacher] = useState('');
 
   const pendingJoinCount = joinRequests.filter((r) => r.status === 'pending').length;
+  const liveBatches = batches.filter((b) => b.status !== 'archived' && !b.is_archived);
 
   const handleLogout = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to log out of the Institute Admin Console?', [
+    Alert.alert('Sign out', 'Sign out of the institute console?', [
       { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Sign Out',
+        text: 'Sign out',
         style: 'destructive',
         onPress: async () => {
           await signOut();
@@ -63,206 +66,260 @@ export default function PinterestAdminScreen() {
     ]);
   };
 
+  // Saves to the database. The old handler only added the batch to local state
+  // (it vanished on reload) and filled blanks with invented subject/room/time.
   const handleCreateBatch = async () => {
     if (!batchName.trim()) {
-      Alert.alert('Required', 'Please enter a name for the batch.');
+      Alert.alert('Name needed', 'Give the batch a name.');
       return;
     }
-
+    if (!instituteId) {
+      Alert.alert('Not ready', 'Select an institute first.');
+      return;
+    }
     try {
-      await createBatch({
+      await createBatchMutation.mutateAsync({
+        institute_id: instituteId,
         name: batchName.trim(),
-        subject: batchSubject.trim() || 'General Academics',
-        target_exam: batchExam.trim() || 'Board / Entrance',
-        room_number: batchRoom.trim() || 'Room 1',
-        start_time: '04:30 PM',
-        end_time: '06:00 PM',
-        assigned_teacher_name: batchTeacher.trim() || 'Assigned Faculty',
-        academic_year: '2026-2027',
+        subject: batchSubject.trim(),
+        target_exam: batchExam.trim(),
+        room_number: batchRoom.trim(),
+        start_time: '',
+        end_time: '',
         status: 'in_progress',
       });
-
       setIsCreateBatchModalOpen(false);
       setBatchName('');
       setBatchSubject('');
       setBatchExam('');
       setBatchRoom('');
-      setBatchTeacher('');
-      Alert.alert('Success', `Batch "${batchName}" launched successfully.`);
+      Alert.alert('Batch created', `"${batchName.trim()}" is ready. Share a join code so students can request to join.`);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to create batch';
-      Alert.alert('Error', msg);
+      Alert.alert('Could not create batch', err instanceof Error ? err.message : 'Please try again.');
     }
+  };
+
+  const handleShareCode = () => {
+    const code = activeInstitute?.code || activeInstitute?.join_code;
+    if (!code) {
+      Alert.alert('No code yet', 'This institute does not have a join code yet.');
+      return;
+    }
+    Share.share({ message: `Join ${activeInstitute?.name ?? 'our institute'} on Acadly with code ${code}` }).catch(() => null);
   };
 
   const handleWhatsAppFeeBlast = async () => {
     try {
       await Share.share({
-        message: `[${activeInstitute?.name || 'Academy'}] Reminder: Monthly tuition fee statements for November 2026 are generated. Please clear dues via the Acadly Parent App to receive automated GST receipts.`,
+        message: `[${activeInstitute?.name || 'Institute'}] Reminder: this month's fee statements are ready in the Acadly parent app.`,
       });
     } catch {
-      // Ignored
+      // Share sheet dismissed
     }
   };
 
   const tabs: TabItem[] = [
-    { key: 'home', label: 'Overview', icon: (color, size) => <Sparkles color={color} size={size} /> },
-    { key: 'batches', label: 'Batches', icon: (color, size) => <BookOpen color={color} size={size} /> },
-    { key: 'admissions_dues', label: 'Dues', icon: (color, size) => <DollarSign color={color} size={size} />, badgeCount: pendingJoinCount },
-    { key: 'profile', label: 'Center', icon: (color, size) => <Building2 color={color} size={size} /> },
+    { key: 'home', label: 'Overview', icon: (color, size) => <Home color={color} size={size} /> },
+    { key: 'batches', label: 'Batches', icon: (color, size) => <Layers color={color} size={size} /> },
+    { key: 'requests', label: 'Requests', icon: (color, size) => <Inbox color={color} size={size} />, badgeCount: pendingJoinCount },
+    { key: 'profile', label: 'Institute', icon: (color, size) => <Building2 color={color} size={size} /> },
   ];
 
   if (isLoading || !isAuthorized) {
     return (
-      <ScreenWrapper>
-        <View className="flex-1 items-center justify-center p-8">
-          <Text className="text-xs text-slate-500 font-medium">Authorizing admin console...</Text>
+      <ScreenWrapper scrollable={false}>
+        <View className="flex-1 items-center justify-center p-8 gap-4">
+          <Mascot mood="sleepy" size="lg" />
+          <Text className="text-sm text-muted font-sans">Checking access…</Text>
         </View>
       </ScreenWrapper>
     );
   }
 
+  const instituteInitial = (activeInstitute?.name || 'A').charAt(0).toUpperCase();
+
   return (
-    <ScreenWrapper>
-      <View className="px-4 pt-3 pb-1">
-        <AdminHeader
-          instituteName={activeInstitute?.name || coachingProfile.name}
-          instituteCode={activeInstitute?.code || coachingProfile.inviteCode}
-          pendingJoinCount={pendingJoinCount}
-          onOpenVerify={() => router.push('/verify-students')}
-          onOpenCommunity={() => router.push('/community')}
+    <ScreenWrapper
+      contentContainerClassName="gap-5 px-5 pt-4"
+      footer={
+        <BottomTabBar
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={(key) => setActiveTab(key as AdminTab)}
+          trailingAction={{
+            label: 'Messages',
+            icon: (color, size) => <MessageCircle color={color} size={size} fill={color} />,
+            onPress: () => router.push('/chat'),
+          }}
         />
+      }
+    >
+      {/* Institute row */}
+      <View className="flex-row items-center gap-3">
+        <View className="w-11 h-11 rounded-2xl bg-ink items-center justify-center">
+          <Text className="font-serif text-white text-[22px]">{instituteInitial}</Text>
+        </View>
+        <View className="flex-1 min-w-0">
+          <Text className="font-sans-bold text-ink text-[15px]" numberOfLines={1}>
+            {activeInstitute?.name || 'Your institute'}
+          </Text>
+          {activeInstitute?.city ? <Text className="font-sans text-muted text-xs">{activeInstitute.city}</Text> : null}
+        </View>
       </View>
 
-      <ScrollView className="flex-1" contentContainerClassName="gap-3.5 px-4 py-3">
-        {activeTab === 'home' && (
-          <AdminHomeTab
-            enrolledStudentsCount={studentsRoster.length}
-            activeBatchesCount={batches.length}
-            pendingRequestsCount={pendingJoinCount}
-            onOpenBatches={() => setActiveTab('batches')}
-            onOpenAdmissions={() => router.push('/verify-students')}
-            onOpenStudentDirectory={() => router.push('/student-detail')}
-          />
-        )}
+      {activeTab === 'home' && (
+        <>
+          <DisplayTitle>
+            {studentCount} {studentCount === 1 ? 'student' : 'students'} across{'\n'}
+            {liveBatches.length} {liveBatches.length === 1 ? 'batch' : 'batches'}.
+          </DisplayTitle>
 
-        {activeTab === 'batches' && (
-          <View className="gap-3">
-            <View className="flex-row items-center justify-between">
-              <Text className="text-xs font-bold text-slate-600 uppercase tracking-wider">
-                Active Batches ({batches.length})
+          <View className="flex-row gap-2.5">
+            <StatTile value={String(studentCount)} label="Students" />
+            <StatTile value={String(liveBatches.length)} label="Batches" />
+            <StatTile value={String(pendingJoinCount)} label="Requests" />
+          </View>
+
+          {pendingJoinCount > 0 ? (
+            <Card elevation="hero" tone="mint" onPress={() => router.push('/verify-students')}>
+              <Chip label="Needs you" tone="mint" />
+              <Text className="font-display text-ink text-[23px] leading-[27px] mt-3">
+                {pendingJoinCount} join {pendingJoinCount === 1 ? 'request is' : 'requests are'} waiting
               </Text>
-              <TouchableOpacity
-                onPress={() => setIsCreateBatchModalOpen(true)}
-                className="bg-purple-600 px-3 py-1.5 rounded-xl flex-row items-center gap-1 active:scale-95"
-              >
-                <Plus size={14} color="white" />
-                <Text className="text-xs font-bold text-white">New Batch</Text>
-              </TouchableOpacity>
-            </View>
+              <View className="flex-row justify-end mt-3">
+                <View className="h-11 px-5 rounded-full bg-ink items-center justify-center">
+                  <Text className="font-sans-bold text-white text-[15px]">Review</Text>
+                </View>
+              </View>
+            </Card>
+          ) : (
+            <Card elevation="hero" tone="mint" onPress={handleShareCode}>
+              <Chip label="All caught up" tone="mint" />
+              <Text className="font-display text-ink text-[23px] leading-[27px] mt-3">
+                No requests waiting. Share your join code to grow your batches.
+              </Text>
+            </Card>
+          )}
 
-            {batches.map((b) => (
-              <View
-                key={b.id}
-                className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs gap-1.5"
-              >
-                <View className="flex-row items-center justify-between">
-                  <Text className="text-sm font-bold text-slate-900">{b.name}</Text>
-                  <View className="bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
-                    <Text className="text-[10px] font-bold text-purple-700">
-                      {b.student_count || 0} Students
+          {liveBatches.length > 0 && (
+            <View className="bg-white rounded-3xl px-4 py-1">
+              {liveBatches.slice(0, 4).map((b, i, arr) => (
+                <ListRow
+                  key={b.id}
+                  title={b.name}
+                  subtitle={[b.subject, b.room_number].filter(Boolean).join(' · ') || undefined}
+                  trailing={<Text className="font-serif text-ink text-lg">{b.student_count}</Text>}
+                  onPress={() => setActiveTab('batches')}
+                  last={i === arr.length - 1}
+                />
+              ))}
+            </View>
+          )}
+        </>
+      )}
+
+      {activeTab === 'batches' && (
+        <>
+          <View className="flex-row items-center justify-between">
+            <DisplayTitle>Batches</DisplayTitle>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setIsCreateBatchModalOpen(true)}
+              className="h-12 pl-4 pr-5 rounded-full bg-ink flex-row items-center gap-1.5 active:opacity-90"
+            >
+              <Plus size={18} color="#FFFFFF" />
+              <Text className="font-sans-bold text-white text-[15px]">New</Text>
+            </Pressable>
+          </View>
+
+          {batches.length === 0 ? (
+            <ListEmptyState
+              title="No batches yet"
+              message="Create your first batch, then share its join code with students."
+              actionLabel="Create a batch"
+              onAction={() => setIsCreateBatchModalOpen(true)}
+            />
+          ) : (
+            batches.map((b, i) => (
+              <Card key={b.id} elevation={i === 0 ? 'hero' : 'lowest'} tone="sky" className="gap-1">
+                <View className="flex-row items-start justify-between gap-3">
+                  <View className="flex-1">
+                    <Text className="font-display text-ink text-[19px]">{b.name}</Text>
+                    <Text className="font-sans text-slate-700 text-[13px]">
+                      {[b.subject, b.target_exam, b.room_number, b.assigned_teacher_name].filter(Boolean).join(' · ') ||
+                        'No details added yet'}
                     </Text>
                   </View>
+                  <Text className="font-serif text-ink text-[28px] leading-[30px]">{b.student_count}</Text>
                 </View>
-                <Text className="text-xs text-slate-500">
-                  {b.subject} • {b.target_exam || 'Board'}
-                </Text>
-                <Text className="text-[11px] text-slate-400">
-                  Room: {b.room_number || 'Hall A'} • Teacher: {b.assigned_teacher_name || 'Faculty'}
-                </Text>
-              </View>
-            ))}
-          </View>
-        )}
+              </Card>
+            ))
+          )}
+        </>
+      )}
 
-        {activeTab === 'admissions_dues' && (
-          <View className="gap-3.5">
-            <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
-              <Text className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Fee Notifications & WhatsApp Dispatch
-              </Text>
-              <Text className="text-xs text-slate-600 leading-relaxed">
-                Dispatch monthly fee invoices and payment links directly to parents' registered WhatsApp numbers.
-              </Text>
-              <TouchableOpacity
-                onPress={handleWhatsAppFeeBlast}
-                className="bg-emerald-600 py-3 rounded-2xl flex-row items-center justify-center gap-2 shadow-xs active:scale-98"
-              >
-                <Send size={15} color="white" />
-                <Text className="text-xs font-bold text-white">Broadcast Fee Statements</Text>
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity
+      {activeTab === 'requests' && (
+        <>
+          <DisplayTitle>Requests</DisplayTitle>
+          <View className="bg-white rounded-3xl px-4 py-1">
+            <ListRow
+              title="Join requests"
+              subtitle="Approve, waitlist or reject students"
+              leading={<CountPill count={pendingJoinCount} tone="butter" />}
+              trailing={<ChevronRight size={18} color="#8C877E" />}
               onPress={() => router.push('/verify-students')}
-              className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs flex-row items-center justify-between"
-            >
-              <View>
-                <Text className="text-sm font-bold text-slate-900">Pending Join Requests</Text>
-                <Text className="text-xs text-slate-500 mt-0.5">
-                  Review student admission applications
-                </Text>
-              </View>
-              <View className="bg-rose-100 px-3 py-1 rounded-full border border-rose-200">
-                <Text className="text-xs font-bold text-rose-800">{pendingJoinCount} Pending</Text>
-              </View>
-            </TouchableOpacity>
+            />
+            <ListRow
+              title="Class doubts"
+              subtitle="See what students are asking"
+              trailing={<ChevronRight size={18} color="#8C877E" />}
+              onPress={() => router.push('/community')}
+              last
+            />
           </View>
-        )}
 
-        {activeTab === 'profile' && (
-          <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
-            <View className="flex-row items-center gap-3">
-              <View className="w-14 h-14 rounded-2xl bg-purple-100 border border-purple-200 items-center justify-center">
-                <Building2 size={26} color="#7c3aed" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-base font-black text-slate-900">
-                  {activeInstitute?.name || coachingProfile.name}
-                </Text>
-                <Text className="text-xs text-slate-500">
-                  {activeInstitute?.city || coachingProfile.city} • Verified Institute
-                </Text>
-              </View>
-            </View>
+          {FEATURE_FEES && (
+            <Card elevation="lowest" className="gap-3">
+              <Text className="font-display text-ink text-lg">Fee reminders</Text>
+              <Text className="font-sans text-slate-600 text-sm">Send this month's fee reminder to parents.</Text>
+              <Pressable
+                accessibilityRole="button"
+                onPress={handleWhatsAppFeeBlast}
+                className="bg-ink min-h-[48px] rounded-full flex-row items-center justify-center gap-2 active:opacity-90"
+              >
+                <Send size={16} color="white" />
+                <Text className="font-sans-bold text-white text-[15px]">Send reminder</Text>
+              </Pressable>
+            </Card>
+          )}
+        </>
+      )}
 
-            <View className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 gap-2 mt-1">
-              <View className="flex-row justify-between">
-                <Text className="text-xs text-slate-500">Center Code:</Text>
-                <Text className="text-xs font-bold text-slate-800">
-                  {activeInstitute?.code || coachingProfile.inviteCode}
-                </Text>
-              </View>
-              <View className="flex-row justify-between">
-                <Text className="text-xs text-slate-500">Director Contact:</Text>
-                <Text className="text-xs font-bold text-slate-800">
-                  {coachingProfile.phone || '+91 98230 11223'}
-                </Text>
-              </View>
-            </View>
-
-            <LanguageSwitcher className="mt-2" />
-
-            <TouchableOpacity
-              onPress={handleLogout}
-              className="bg-rose-50 border border-rose-200 py-3 rounded-2xl flex-row items-center justify-center gap-2 active:scale-98 mt-2"
-            >
-              <LogOut size={16} color="#be123c" />
-              <Text className="text-xs font-bold text-rose-700">Sign Out of Admin Console</Text>
-            </TouchableOpacity>
+      {activeTab === 'profile' && (
+        <>
+          <DisplayTitle>Institute</DisplayTitle>
+          <View className="bg-white rounded-3xl px-4 py-1">
+            <ListRow title={activeInstitute?.name || 'Your institute'} subtitle={activeInstitute?.city || undefined} />
+            <ListRow
+              title="Join code"
+              subtitle={activeInstitute?.code || activeInstitute?.join_code || 'Not set yet'}
+              trailing={<Share2 size={18} color="#1C1C1E" />}
+              onPress={handleShareCode}
+              last
+            />
           </View>
-        )}
-      </ScrollView>
+          <Eyebrow>Language</Eyebrow>
+          <LanguageSwitcher />
+          <Pressable
+            accessibilityRole="button"
+            onPress={handleLogout}
+            className="self-center min-h-[44px] flex-row items-center gap-2 px-4"
+          >
+            <LogOut size={16} color="#B42318" />
+            <Text className="font-sans-bold text-rose-700 text-[15px]">Sign out</Text>
+          </Pressable>
+        </>
+      )}
 
       <AdminCreateBatchModal
         visible={isCreateBatchModalOpen}
@@ -275,12 +332,10 @@ export default function PinterestAdminScreen() {
         onChangeBatchExam={setBatchExam}
         batchRoom={batchRoom}
         onChangeBatchRoom={setBatchRoom}
-        batchTeacher={batchTeacher}
-        onChangeBatchTeacher={setBatchTeacher}
+        isSaving={createBatchMutation.isPending}
         onCreate={handleCreateBatch}
       />
 
-      <BottomTabBar tabs={tabs} activeTab={activeTab} onTabChange={(t) => setActiveTab(t as typeof activeTab)} />
       <OnboardingWalkthroughModal role="admin" />
     </ScreenWrapper>
   );

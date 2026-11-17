@@ -37,13 +37,13 @@ const AttendanceRosterRow = React.memo(function AttendanceRosterRow({
         className="flex-row items-center gap-2.5 flex-1 min-w-0"
       >
         <View className="min-w-[36px] h-8 px-1.5 rounded-xl bg-white border border-slate-200 items-center justify-center shrink-0">
-          <Text className="text-[11px] font-bold text-blue-600 font-mono" numberOfLines={1}>
+          <Text className="text-[11px] font-sans-bold text-blue-600 font-mono" numberOfLines={1}>
             {roll}
           </Text>
         </View>
         <View className="flex-1 min-w-0">
           <View className="flex-row items-center gap-1.5">
-            <Text className="text-xs font-bold text-slate-900" numberOfLines={1}>
+            <Text className="text-xs font-sans-bold text-slate-900" numberOfLines={1}>
               {student.name}
             </Text>
             <TouchableOpacity
@@ -62,7 +62,7 @@ const AttendanceRosterRow = React.memo(function AttendanceRosterRow({
               }
               hitSlop={8}
             >
-              <Edit2 size={12} color="#64748B" />
+              <Edit2 size={12} color="#6E6A63" />
             </TouchableOpacity>
           </View>
           <Text className="text-[11px] text-slate-500" numberOfLines={1}>
@@ -139,10 +139,10 @@ export const TeacherAttendanceTab: React.FC<TeacherAttendanceTabProps> = ({
       <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
         <View className="flex-row items-center justify-between">
           <View className="flex-1 pr-2">
-            <Text className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+            <Text className="text-xs font-sans-bold text-slate-600 uppercase tracking-wider">
               Classroom Roll Call
             </Text>
-            <Text className="text-base font-extrabold text-slate-900" numberOfLines={1}>
+            <Text className="text-base font-display text-slate-900" numberOfLines={1}>
               {batchName}
             </Text>
           </View>
@@ -153,7 +153,7 @@ export const TeacherAttendanceTab: React.FC<TeacherAttendanceTabProps> = ({
             className="bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-xl flex-row items-center gap-1 active:scale-98"
           >
             <CheckCheck size={12} color="#059669" />
-            <Text className="text-[10px] font-bold text-emerald-800">Mark All Present</Text>
+            <Text className="text-[10px] font-sans-bold text-emerald-800">Mark All Present</Text>
           </TouchableOpacity>
         </View>
 
@@ -161,28 +161,28 @@ export const TeacherAttendanceTab: React.FC<TeacherAttendanceTabProps> = ({
         <View className="flex-row items-center gap-1.5 flex-wrap">
           {presentCount > 0 && (
             <View className="bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-lg">
-              <Text className="text-[10px] font-extrabold text-emerald-800">
+              <Text className="text-[10px] font-display text-emerald-800">
                 {presentCount} Present
               </Text>
             </View>
           )}
           {absentCount > 0 && (
             <View className="bg-rose-50 border border-rose-200/80 px-2 py-0.5 rounded-lg">
-              <Text className="text-[10px] font-extrabold text-rose-800">
+              <Text className="text-[10px] font-display text-rose-800">
                 {absentCount} Absent
               </Text>
             </View>
           )}
           {lateCount > 0 && (
             <View className="bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-lg">
-              <Text className="text-[10px] font-extrabold text-amber-800">
+              <Text className="text-[10px] font-display text-amber-800">
                 {lateCount} Late
               </Text>
             </View>
           )}
           {unmarkedCount > 0 && (
             <View className="bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-lg">
-              <Text className="text-[10px] font-bold text-slate-600">
+              <Text className="text-[10px] font-sans-bold text-slate-600">
                 {unmarkedCount} Unmarked
               </Text>
             </View>
@@ -193,10 +193,10 @@ export const TeacherAttendanceTab: React.FC<TeacherAttendanceTabProps> = ({
         <View className="flex-row items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
           <View className="flex-row items-center gap-2.5 flex-1 mr-2">
             <View className="w-8 h-8 rounded-full bg-blue-100 items-center justify-center">
-              <MessageSquare size={14} color="#2563EB" />
+              <MessageSquare size={14} color="#1C1C1E" />
             </View>
             <View className="flex-1">
-              <Text className="text-xs font-bold text-slate-800">Batched Parent Absence Alerts</Text>
+              <Text className="text-xs font-sans-bold text-slate-800">Batched Parent Absence Alerts</Text>
               <Text className="text-[11px] text-slate-500">
                 Dispatches a single batched notification to parents of absent students
               </Text>
@@ -205,17 +205,17 @@ export const TeacherAttendanceTab: React.FC<TeacherAttendanceTabProps> = ({
           <Switch
             value={waParentPing}
             onValueChange={onWaParentPingChange}
-            trackColor={{ false: '#cbd5e1', true: '#2563EB' }}
+            trackColor={{ false: '#D8D3CA', true: '#1C1C1E' }}
           />
         </View>
 
         {/* Student Roll List using FlashList */}
         <View className="gap-2">
           <View className="flex-row items-center justify-between px-1">
-            <Text className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+            <Text className="text-xs font-sans-bold text-slate-600 uppercase tracking-wider">
               Enrolled Students ({students.length})
             </Text>
-            <Text className="text-[11px] text-slate-500 font-medium">
+            <Text className="text-[11px] text-slate-500 font-sans">
               Tap P / A / L to mark
             </Text>
           </View>
@@ -259,7 +259,7 @@ export const TeacherAttendanceTab: React.FC<TeacherAttendanceTabProps> = ({
           ) : (
             <Save size={16} color="#ffffff" />
           )}
-          <Text className="text-sm font-bold text-white">
+          <Text className="text-sm font-sans-bold text-white">
             {isSyncing
               ? t('teacher.savingToDatabase', 'Saving to Database...')
               : t('teacher.commitAndDispatch', 'Commit & Dispatch Roll Call')}

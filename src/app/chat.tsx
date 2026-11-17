@@ -164,7 +164,7 @@ export default function ChatScreen() {
             <Text className="text-base">📌</Text>
             <View className="flex-1">
               <View className="flex-row items-center justify-between">
-                <Text className="text-[10px] font-bold text-amber-900 uppercase tracking-wider">
+                <Text className="text-[10px] font-sans-bold text-amber-900 uppercase tracking-wider">
                   Pinned by {activeRoom.pinnedMessage.senderName}
                 </Text>
                 {isTeacher && (
@@ -176,7 +176,7 @@ export default function ChatScreen() {
                   </TouchableOpacity>
                 )}
               </View>
-              <Text className="text-xs text-amber-950 font-bold mt-0.5 leading-snug">
+              <Text className="text-xs text-amber-950 font-sans-bold mt-0.5 leading-snug">
                 {activeRoom.pinnedMessage.text}
               </Text>
             </View>
@@ -188,9 +188,9 @@ export default function ChatScreen() {
           {displayMessages.length === 0 ? (
             <View className="items-center justify-center py-12">
               <View className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center mb-2">
-                <Users size={24} color="#2563EB" />
+                <Users size={24} color="#1C1C1E" />
               </View>
-              <Text className="text-sm font-bold text-slate-800">
+              <Text className="text-sm font-sans-bold text-slate-800">
                 Start the conversation!
               </Text>
               <Text className="text-xs text-slate-500 text-center max-w-[220px] mt-0.5">

@@ -32,62 +32,62 @@ const variantStyles: Record<
 > = {
   pro: {
     container: 'bg-indigo-50 border border-indigo-200/80',
-    text: 'text-indigo-900 font-bold',
+    text: 'text-indigo-900 font-sans-bold',
     dotColor: 'bg-indigo-600',
   },
   live: {
     container: 'bg-rose-50 border border-rose-200/80',
-    text: 'text-rose-900 font-bold',
+    text: 'text-rose-900 font-sans-bold',
     dotColor: 'bg-rose-600',
   },
   success: {
     container: 'bg-emerald-50 border border-emerald-200/80',
-    text: 'text-emerald-900 font-bold',
+    text: 'text-emerald-900 font-sans-bold',
     dotColor: 'bg-emerald-600',
   },
   active: {
     container: 'bg-emerald-50 border border-emerald-200/80',
-    text: 'text-emerald-900 font-bold',
+    text: 'text-emerald-900 font-sans-bold',
     dotColor: 'bg-emerald-600',
   },
   warning: {
     container: 'bg-amber-50 border border-amber-200/80',
-    text: 'text-amber-900 font-bold',
+    text: 'text-amber-900 font-sans-bold',
     dotColor: 'bg-amber-600',
   },
   due: {
     container: 'bg-rose-50 border border-rose-200/80',
-    text: 'text-rose-900 font-bold',
+    text: 'text-rose-900 font-sans-bold',
     dotColor: 'bg-rose-600',
   },
   info: {
     container: 'bg-blue-50 border border-blue-200/80',
-    text: 'text-blue-900 font-bold',
+    text: 'text-blue-900 font-sans-bold',
     dotColor: 'bg-blue-600',
   },
   neutral: {
     container: 'bg-slate-100 border border-slate-200/90',
-    text: 'text-slate-800 font-semibold',
+    text: 'text-slate-800 font-sans-semibold',
     dotColor: 'bg-slate-500',
   },
   admin: {
     container: 'bg-slate-900 border border-slate-950',
-    text: 'text-white font-bold',
+    text: 'text-white font-sans-bold',
     dotColor: 'bg-slate-400',
   },
   primary: {
     container: 'bg-blue-50 border border-blue-200/80',
-    text: 'text-blue-900 font-bold',
+    text: 'text-blue-900 font-sans-bold',
     dotColor: 'bg-blue-600',
   },
   negative: {
     container: 'bg-rose-50 border border-rose-200/80',
-    text: 'text-rose-900 font-bold',
+    text: 'text-rose-900 font-sans-bold',
     dotColor: 'bg-rose-600',
   },
   error: {
     container: 'bg-rose-50 border border-rose-200/80',
-    text: 'text-rose-900 font-bold',
+    text: 'text-rose-900 font-sans-bold',
     dotColor: 'bg-rose-600',
   },
 };

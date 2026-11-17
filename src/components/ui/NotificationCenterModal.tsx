@@ -91,10 +91,10 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
           <View className="flex-row items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
             <View className="flex-row items-center gap-2">
               <View className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 items-center justify-center">
-                <Bell size={16} color="#2563EB" />
+                <Bell size={16} color="#1C1C1E" />
               </View>
               <View>
-                <Text className="text-base font-black text-slate-900 dark:text-slate-100">
+                <Text className="text-base font-display text-slate-900 dark:text-slate-100">
                   Notification Center
                 </Text>
                 <Text className="text-[11px] text-slate-500">
@@ -109,8 +109,8 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
                   onPress={handleMarkAllRead}
                   className="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 flex-row items-center gap-1"
                 >
-                  <CheckCheck size={12} color="#475569" />
-                  <Text className="text-[10px] font-bold text-slate-700 dark:text-slate-300">
+                  <CheckCheck size={12} color="#4A463F" />
+                  <Text className="text-[10px] font-sans-bold text-slate-700 dark:text-slate-300">
                     Mark Read
                   </Text>
                 </TouchableOpacity>
@@ -119,27 +119,27 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
                 onPress={onClose}
                 className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 items-center justify-center"
               >
-                <X size={16} color="#64748B" />
+                <X size={16} color="#6E6A63" />
               </TouchableOpacity>
             </View>
           </View>
 
           {isLoading ? (
             <View className="py-12 items-center justify-center">
-              <ActivityIndicator color="#2563EB" size="small" />
-              <Text className="text-xs text-slate-500 mt-2 font-medium">
+              <ActivityIndicator color="#1C1C1E" size="small" />
+              <Text className="text-xs text-slate-500 mt-2 font-sans">
                 Fetching notifications...
               </Text>
             </View>
           ) : error ? (
             <View className="py-8 items-center justify-center gap-2">
               <AlertCircle size={28} color="#EF4444" />
-              <Text className="text-xs text-rose-600 font-semibold">{error}</Text>
+              <Text className="text-xs text-rose-600 font-sans-semibold">{error}</Text>
             </View>
           ) : notifications.length === 0 ? (
             <View className="py-12 items-center justify-center">
               <ListEmptyState
-                icon={<Bell size={28} color="#94A3B8" />}
+                icon={<Bell size={28} color="#8C877E" />}
                 title="No Notifications"
                 description="You are completely caught up with all attendance and class updates."
               />
@@ -158,7 +158,7 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
                     }`}
                   >
                     <View className="flex-row items-center justify-between mb-1">
-                      <Text className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                      <Text className="text-xs font-sans-bold text-slate-900 dark:text-slate-100">
                         {n.title}
                       </Text>
                       {isUnread && (
@@ -169,8 +169,8 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
                       {n.body}
                     </Text>
                     <View className="flex-row items-center gap-1 mt-2">
-                      <Clock size={10} color="#94A3B8" />
-                      <Text className="text-[10px] text-slate-500 font-medium">
+                      <Clock size={10} color="#8C877E" />
+                      <Text className="text-[10px] text-slate-500 font-sans">
                         {new Date(n.created_at).toLocaleDateString([], {
                           month: 'short',
                           day: 'numeric',

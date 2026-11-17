@@ -196,11 +196,11 @@ export function buildDocumentHTML(doc: PDFDocumentContent): string {
   const sectionsHTML = doc.sections
     .map(
       sec => `
-      <div style="margin-top: 20px; padding: 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
-        <h3 style="margin: 0 0 10px 0; color: #0f172a; font-size: 15px; font-weight: 700; border-bottom: 2px solid #2563eb; padding-bottom: 6px;">
+      <div style="margin-top: 20px; padding: 18px; background: #F3F1EC; border: 1px solid #E6E2DA; border-radius: 12px;">
+        <h3 style="margin: 0 0 10px 0; color: #1C1C1E; font-size: 15px; font-weight: 700; border-bottom: 2px solid #1C1C1E; padding-bottom: 6px;">
           ${sec.heading}
         </h3>
-        <ul style="margin: 0; padding-left: 20px; color: #334155; font-size: 13px; line-height: 1.8;">
+        <ul style="margin: 0; padding-left: 20px; color: #3B372F; font-size: 13px; line-height: 1.8;">
           ${sec.items.map(item => `<li style="margin-bottom: 6px;">${item}</li>`).join('')}
         </ul>
       </div>
@@ -220,20 +220,20 @@ export function buildDocumentHTML(doc: PDFDocumentContent): string {
           body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #ffffff;
-            color: #0f172a;
+            color: #1C1C1E;
             margin: 0;
             padding: 24px;
           }
           .header {
             text-align: left;
-            border-bottom: 2px solid #2563eb;
+            border-bottom: 2px solid #1C1C1E;
             padding-bottom: 18px;
             margin-bottom: 20px;
           }
           .tag {
             display: inline-block;
-            background: #eff6ff;
-            color: #1d4ed8;
+            background: #EEF4FC;
+            color: #121212;
             font-weight: 700;
             font-size: 11px;
             padding: 4px 12px;
@@ -245,32 +245,32 @@ export function buildDocumentHTML(doc: PDFDocumentContent): string {
           .title {
             font-size: 22px;
             font-weight: 800;
-            color: #0f172a;
+            color: #1C1C1E;
             margin: 12px 0 6px 0;
             line-height: 1.25;
           }
           .subtitle {
             font-size: 13px;
-            color: #64748b;
+            color: #6E6A63;
             margin: 0 0 14px 0;
           }
           .meta {
             display: flex;
             justify-content: space-between;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: #F3F1EC;
+            border: 1px solid #E6E2DA;
             padding: 10px 16px;
             border-radius: 10px;
             font-size: 12px;
             font-weight: 600;
-            color: #334155;
+            color: #3B372F;
           }
           .footer {
             margin-top: 36px;
             text-align: center;
             font-size: 11px;
-            color: #94a3b8;
-            border-top: 1px solid #e2e8f0;
+            color: #8C877E;
+            border-top: 1px solid #E6E2DA;
             padding-top: 14px;
           }
         </style>

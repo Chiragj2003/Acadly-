@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import {
   type UserRole,
@@ -296,19 +299,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async (_role: UserRole) => {
     setLoading(true);
     try {
-      if (isSupabaseConfigured) {
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: 'acadly://auth/callback',
-          },
-        });
-        if (error) {
-          return { success: false, error: error.message };
-        }
+      if (!isSupabaseConfigured) {
+        return { success: false, error: 'Google sign-in requires active Supabase OAuth configuration.' };
+      }
+      const redirectTo = Platform.OS === 'web' ? undefined : Linking.createURL('auth/callback');
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        // On native, signInWithOAuth only returns a URL; it must be opened in an
+        // auth session (previously nothing happened when tapping Google on a phone).
+        options: { redirectTo, skipBrowserRedirect: Platform.OS !== 'web' },
+      });
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      if (Platform.OS === 'web' || !data?.url || !redirectTo) {
         return { success: true };
       }
-      return { success: false, error: 'Google sign-in requires active Supabase OAuth configuration.' };
+
+      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+      if (result.type !== 'success') {
+        return { success: false, error: 'Google sign-in was cancelled.' };
+      }
+      const code = Linking.parse(result.url).queryParams?.code;
+      if (typeof code !== 'string') {
+        return { success: false, error: 'Google did not return a sign-in code.' };
+      }
+      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+      if (exchangeError) {
+        return { success: false, error: exchangeError.message };
+      }
+      await syncSessionUser();
+      return { success: true };
     } catch (e: unknown) {
       const errMessage = e instanceof Error ? e.message : 'Google sign-in failed';
       return { success: false, error: errMessage };

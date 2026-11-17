@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Platform, StyleSheet } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export interface TabItem {
@@ -9,85 +9,106 @@ export interface TabItem {
   badgeCount?: number;
 }
 
+export interface TabBarTrailingAction {
+  /** Accessible name, e.g. "Messages". */
+  label: string;
+  icon: (color: string, size: number) => React.ReactNode;
+  onPress: () => void;
+  badgeCount?: number;
+}
+
 interface BottomTabBarProps {
   tabs: TabItem[];
   activeTab: string;
   onTabChange: (key: string) => void;
+  /** Kept for API compatibility; the Soft Desk bar is always ink on white. */
   accentColor?: string;
   variant?: 'student' | 'calm' | 'default';
+  /** Optional round button to the right of the bar (chat / helper). */
+  trailingAction?: TabBarTrailingAction;
 }
 
-export const BottomTabBar: React.FC<BottomTabBarProps> = ({
-  tabs,
-  activeTab,
-  onTabChange,
-  accentColor = '#2563EB',
-  variant = 'default',
-}) => {
+const INK = '#1C1C1E';
+const MUTED = '#6E6A63';
+
+const floatingShadow = {
+  shadowColor: INK,
+  shadowOffset: { width: 0, height: 10 },
+  shadowOpacity: 0.1,
+  shadowRadius: 24,
+  elevation: 10,
+};
+
+const CountBadge: React.FC<{ count: number }> = ({ count }) => (
+  <View className="absolute -top-1 -right-2.5 bg-rose-600 rounded-full min-w-[16px] h-4 px-1 items-center justify-center border-2 border-white">
+    <Text className="text-[9px] font-sans-bold text-white leading-none">{count > 9 ? '9+' : count}</Text>
+  </View>
+);
+
+/**
+ * "Soft Desk" floating tab bar: a white pill with icon + label for every tab,
+ * the active tab on a paper chip, and an optional round action beside it.
+ */
+export const BottomTabBar: React.FC<BottomTabBarProps> = ({ tabs, activeTab, onTabChange, trailingAction }) => {
   const insets = useSafeAreaInsets();
-  // Safe floating bottom margin accounting for Home Indicator
-  const bottomMargin = insets.bottom > 0 ? insets.bottom + 6 : 18;
+  const bottomMargin = insets.bottom > 0 ? insets.bottom + 4 : 18;
 
   return (
     <View
-      style={{
-        position: 'absolute',
-        bottom: bottomMargin,
-        left: 0,
-        right: 0,
-        alignItems: 'center',
-        justifyContent: 'center',
-        pointerEvents: 'box-none',
-        zIndex: 50,
-      }}
-      className="px-4"
+      pointerEvents="box-none"
+      style={{ position: 'absolute', bottom: bottomMargin, left: 0, right: 0, zIndex: 50 }}
+      className="px-4 items-center"
     >
-      <View
-        style={{
-          shadowColor: '#000000',
-          shadowOffset: { width: 0, height: 10 },
-          shadowOpacity: 0.22,
-          shadowRadius: 20,
-          elevation: 16,
-        }}
-        className="bg-slate-950/95 border border-white/10 rounded-full p-1.5 flex-row items-center justify-between gap-1 w-full max-w-sm md:max-w-2xl"
-      >
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.key;
-          return (
-            <TouchableOpacity
-              key={tab.key}
-              activeOpacity={0.8}
-              onPress={() => onTabChange(tab.key)}
-              accessibilityRole="tab"
-              accessibilityLabel={tab.label}
-              accessibilityState={{ selected: isActive }}
-              hitSlop={{ top: 10, bottom: 10, left: 6, right: 6 }}
-              className={`flex-1 items-center justify-center min-h-[44px] min-w-[44px] py-2 px-2 rounded-full flex-row gap-1.5 ${
-                isActive ? 'bg-white shadow-sm' : 'bg-transparent'
-              }`}
-            >
-              <View className="relative">
-                {tab.icon(isActive ? '#0F172A' : '#94A3B8', 19)}
-                {tab.badgeCount !== undefined && tab.badgeCount > 0 && (
-                  <View className="absolute -top-1.5 -right-2 bg-rose-500 rounded-full min-w-[14px] h-3.5 px-0.5 items-center justify-center border border-slate-950">
-                    <Text className="text-[8px] font-black text-white leading-none">
-                      {tab.badgeCount > 9 ? '9+' : tab.badgeCount}
-                    </Text>
-                  </View>
-                )}
-              </View>
-              {isActive && (
+      <View className="flex-row items-center gap-2.5 w-full max-w-md">
+        <View
+          accessibilityRole="tablist"
+          style={floatingShadow}
+          className="flex-1 flex-row bg-white rounded-full p-1.5 gap-0.5"
+        >
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.key;
+            return (
+              <Pressable
+                key={tab.key}
+                onPress={() => onTabChange(tab.key)}
+                accessibilityRole="tab"
+                accessibilityLabel={tab.label}
+                accessibilityState={{ selected: isActive }}
+                className={`flex-1 items-center justify-center min-h-[54px] rounded-full gap-0.5 ${
+                  isActive ? 'bg-paper' : 'bg-transparent'
+                }`}
+              >
+                <View>
+                  {tab.icon(isActive ? INK : MUTED, 21)}
+                  {tab.badgeCount !== undefined && tab.badgeCount > 0 && <CountBadge count={tab.badgeCount} />}
+                </View>
                 <Text
-                  className="text-[11px] font-black text-slate-900 leading-none"
                   numberOfLines={1}
+                  className={`text-[11px] leading-[14px] ${isActive ? 'font-sans-bold text-ink' : 'font-sans-semibold text-muted'}`}
                 >
                   {tab.label}
                 </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {trailingAction && (
+          <Pressable
+            onPress={trailingAction.onPress}
+            accessibilityRole="button"
+            accessibilityLabel={trailingAction.label}
+            style={floatingShadow}
+            className="w-[66px] h-[66px] rounded-full bg-white items-center justify-center active:opacity-90"
+          >
+            <View>
+              {trailingAction.icon(INK, 24)}
+              {trailingAction.badgeCount !== undefined && trailingAction.badgeCount > 0 && (
+                <CountBadge count={trailingAction.badgeCount} />
               )}
-            </TouchableOpacity>
-          );
-        })}
+            </View>
+          </Pressable>
+        )}
       </View>
     </View>
   );

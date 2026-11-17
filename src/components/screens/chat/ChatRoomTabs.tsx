@@ -46,7 +46,7 @@ export const ChatRoomTabs: React.FC<ChatRoomTabsProps> = ({
               >
                 <Text className="text-sm">{room.avatarEmoji}</Text>
                 <Text
-                  className={`text-xs font-bold ${
+                  className={`text-xs font-sans-bold ${
                     isSelected ? 'text-white' : 'text-slate-800'
                   }`}
                 >
@@ -55,7 +55,7 @@ export const ChatRoomTabs: React.FC<ChatRoomTabsProps> = ({
 
                 {room.unreadCount > 0 && !isSelected && (
                   <View className="bg-rose-500 w-4 h-4 rounded-full items-center justify-center">
-                    <Text className="text-[9px] font-black text-white">
+                    <Text className="text-[9px] font-display text-white">
                       {room.unreadCount}
                     </Text>
                   </View>
@@ -78,8 +78,8 @@ export const ChatRoomTabs: React.FC<ChatRoomTabsProps> = ({
               }}
               className="px-3 py-2 rounded-2xl bg-white border border-slate-200 flex-row items-center gap-1 active:scale-95"
             >
-              <Plus size={13} color="#2563EB" />
-              <Text className="text-xs font-bold text-blue-600">Direct Student</Text>
+              <Plus size={13} color="#1C1C1E" />
+              <Text className="text-xs font-sans-bold text-blue-600">Direct Student</Text>
             </TouchableOpacity>
           )}
         </View>

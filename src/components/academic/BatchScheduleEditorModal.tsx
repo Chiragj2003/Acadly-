@@ -141,14 +141,14 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
           {/* Header */}
           <View className="flex-row items-center justify-between pb-3 border-b border-slate-100">
             <View>
-              <Text className="text-base font-bold text-slate-900">Weekly Batch Schedule</Text>
+              <Text className="text-base font-sans-bold text-slate-900">Weekly Batch Schedule</Text>
               <Text className="text-xs text-slate-500">{batchName}</Text>
             </View>
             <TouchableOpacity
               onPress={onClose}
               className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center"
             >
-              <X size={18} color="#64748b" />
+              <X size={18} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
@@ -169,7 +169,7 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
                   }`}
                 >
                   <Text
-                    className={`text-xs font-bold ${
+                    className={`text-xs font-sans-bold ${
                       isSelected ? 'text-white' : 'text-slate-600'
                     }`}
                   >
@@ -191,12 +191,12 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
           <ScrollView className="py-3" keyboardShouldPersistTaps="handled">
             {isEditing ? (
               <View className="gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                <Text className="text-xs font-bold text-slate-700 uppercase">
+                <Text className="text-xs font-sans-bold text-slate-700 uppercase">
                   {editingId ? 'Edit Schedule Slot' : `Add Slot for ${selectedDay}`}
                 </Text>
 
                 <View>
-                  <Text className="text-[11px] font-semibold text-slate-600 mb-1">Subject / Title</Text>
+                  <Text className="text-[11px] font-sans-semibold text-slate-600 mb-1">Subject / Title</Text>
                   <TextInput
                     value={subjectName}
                     onChangeText={setSubjectName}
@@ -207,7 +207,7 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
 
                 <View className="flex-row gap-2">
                   <View className="flex-1">
-                    <Text className="text-[11px] font-semibold text-slate-600 mb-1">Start Time (HH:MM)</Text>
+                    <Text className="text-[11px] font-sans-semibold text-slate-600 mb-1">Start Time (HH:MM)</Text>
                     <TextInput
                       value={startTime}
                       onChangeText={setStartTime}
@@ -216,7 +216,7 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
                     />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-[11px] font-semibold text-slate-600 mb-1">End Time (HH:MM)</Text>
+                    <Text className="text-[11px] font-sans-semibold text-slate-600 mb-1">End Time (HH:MM)</Text>
                     <TextInput
                       value={endTime}
                       onChangeText={setEndTime}
@@ -228,7 +228,7 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
 
                 <View className="flex-row gap-2">
                   <View className="flex-1">
-                    <Text className="text-[11px] font-semibold text-slate-600 mb-1">Faculty Name</Text>
+                    <Text className="text-[11px] font-sans-semibold text-slate-600 mb-1">Faculty Name</Text>
                     <TextInput
                       value={teacherName}
                       onChangeText={setTeacherName}
@@ -237,7 +237,7 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
                     />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-[11px] font-semibold text-slate-600 mb-1">Room</Text>
+                    <Text className="text-[11px] font-sans-semibold text-slate-600 mb-1">Room</Text>
                     <TextInput
                       value={room}
                       onChangeText={setRoom}
@@ -259,7 +259,7 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
                     >
                       {isLive && <Check size={12} color="white" />}
                     </View>
-                    <Text className="text-xs text-slate-700 font-medium">Broadcast Live Stream</Text>
+                    <Text className="text-xs text-slate-700 font-sans">Broadcast Live Stream</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -268,14 +268,14 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
                     onPress={resetForm}
                     className="flex-1 py-2.5 rounded-xl bg-slate-200 items-center"
                   >
-                    <Text className="text-xs font-bold text-slate-700">Cancel</Text>
+                    <Text className="text-xs font-sans-bold text-slate-700">Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={handleSave}
                     disabled={upsertMutation.isPending}
                     className="flex-1 py-2.5 rounded-xl bg-blue-600 items-center"
                   >
-                    <Text className="text-xs font-bold text-white">
+                    <Text className="text-xs font-sans-bold text-white">
                       {upsertMutation.isPending ? 'Saving...' : 'Save Slot'}
                     </Text>
                   </TouchableOpacity>
@@ -284,15 +284,15 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
             ) : (
               <View className="gap-2.5">
                 <View className="flex-row items-center justify-between mb-1">
-                  <Text className="text-xs font-bold text-slate-700">
+                  <Text className="text-xs font-sans-bold text-slate-700">
                     Classes on {selectedDay} ({daySlots.length})
                   </Text>
                   <TouchableOpacity
                     onPress={handleStartCreate}
                     className="flex-row items-center gap-1 bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-200"
                   >
-                    <Plus size={14} color="#2563eb" />
-                    <Text className="text-xs font-bold text-blue-600">Add Slot</Text>
+                    <Plus size={14} color="#1C1C1E" />
+                    <Text className="text-xs font-sans-bold text-blue-600">Add Slot</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -302,8 +302,8 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
                   </View>
                 ) : daySlots.length === 0 ? (
                   <View className="p-8 items-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                    <Calendar size={28} color="#94a3b8" />
-                    <Text className="text-xs font-bold text-slate-600 mt-2">
+                    <Calendar size={28} color="#8C877E" />
+                    <Text className="text-xs font-sans-bold text-slate-600 mt-2">
                       No classes scheduled for {selectedDay}
                     </Text>
                     <Text className="text-[11px] text-slate-400 mt-0.5 text-center">
@@ -318,26 +318,26 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
                     >
                       <View className="flex-1 mr-2">
                         <View className="flex-row items-center gap-2 mb-1">
-                          <Text className="text-xs font-bold text-slate-900">
+                          <Text className="text-xs font-sans-bold text-slate-900">
                             {slot.subject_name}
                           </Text>
                           {slot.is_live && (
                             <View className="bg-red-100 px-1.5 py-0.5 rounded flex-row items-center gap-1">
                               <Radio size={10} color="#dc2626" />
-                              <Text className="text-[10px] font-bold text-red-600">LIVE</Text>
+                              <Text className="text-[10px] font-sans-bold text-red-600">LIVE</Text>
                             </View>
                           )}
                         </View>
                         <View className="flex-row items-center gap-3 text-slate-500">
                           <View className="flex-row items-center gap-1">
-                            <Clock size={11} color="#64748b" />
+                            <Clock size={11} color="#6E6A63" />
                             <Text className="text-[11px] text-slate-500">
                               {slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}
                             </Text>
                           </View>
                           {slot.room && (
                             <View className="flex-row items-center gap-1">
-                              <MapPin size={11} color="#64748b" />
+                              <MapPin size={11} color="#6E6A63" />
                               <Text className="text-[11px] text-slate-500">{slot.room}</Text>
                             </View>
                           )}
@@ -354,7 +354,7 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
                           onPress={() => handleStartEdit(slot)}
                           className="px-2 py-1 bg-slate-100 rounded-lg"
                         >
-                          <Text className="text-[11px] font-semibold text-slate-700">Edit</Text>
+                          <Text className="text-[11px] font-sans-semibold text-slate-700">Edit</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           onPress={() => handleDelete(slot.id)}
