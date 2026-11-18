@@ -22,7 +22,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useUI } from '@/context/UIContext';
 import { useStudyMaterials, useUploadMaterial } from '@/hooks/queries/useMaterialQueries';
 import { Badge } from '@/components/ui';
-import { generateAndSharePDF, DUMMY_PDF_CATALOG, type PDFDocumentContent } from '@/services/dummyPdfService';
+import { type PDFDocumentContent } from '@/services/dummyPdfService';
+import { openStudyMaterial } from '@/lib/openStudyMaterial';
 import { type StudyMaterial } from '@/types/database';
 import { type PDFMaterialItem } from '@/services/materialService';
 import { DocumentReaderModal } from './DocumentReaderModal';
@@ -84,46 +85,14 @@ export const StudyMaterialsViewer: React.FC = () => {
     }
   };
 
-  const getItemDoc = (item: PDFMaterialItem): PDFDocumentContent => {
-    const matched = DUMMY_PDF_CATALOG.find(
-      (d) => d.subject.toLowerCase() === (item.subject || '').toLowerCase()
-    );
-    return (
-      matched || {
-        id: item.id,
-        title: item.title,
-        subtitle: item.subtitle || 'Verified Classroom Reference Document',
-        subject: item.subject || 'Physics',
-        author: item.author || 'Faculty Mentor',
-        category: 'notes',
-        date: 'Class 12 • JEE Advanced 2026',
-        sections: [
-          {
-            heading: 'Key Conceptual Summaries',
-            items: [
-              'Fundamental derivations and vector formulations.',
-              'Standard properties, limits, and boundary conditions.',
-              'Worked example problems from recent national test series.',
-            ],
-          },
-        ],
-      }
-    );
-  };
-
   const handleDownload = async (item: PDFMaterialItem) => {
-    try {
-      const doc = getItemDoc(item);
-      await generateAndSharePDF(doc);
+    if (await openStudyMaterial(item.storagePath)) {
       setDownloadedIds((prev) => [...prev, item.id]);
-    } catch {
-      Alert.alert('PDF Viewer', 'Could not open document preview.');
     }
   };
 
   const handleOpenReader = (item: PDFMaterialItem) => {
-    const doc = getItemDoc(item);
-    setActiveReaderDoc(doc);
+    openStudyMaterial(item.storagePath);
   };
 
   const handleUpload = async () => {

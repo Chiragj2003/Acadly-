@@ -103,6 +103,7 @@ describe('QuizRunner Component Integration', () => {
         visible={true}
         onClose={handleClose}
         onCompleted={handleCompleted}
+        studentId="student-record-test"
       />
     );
 
@@ -141,7 +142,8 @@ describe('QuizRunner Component Integration', () => {
       expect(submissionService.submitQuiz).toHaveBeenCalledWith(
         expect.objectContaining({
           assignmentId: mockAssignment.id,
-          studentId: 'student-uuid-test',
+          // students.id, not the auth user id
+          studentId: 'student-record-test',
           answers: expect.objectContaining({
             'q-kin-1': 0,
           }),

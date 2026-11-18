@@ -41,13 +41,30 @@ import {
 } from '@/hooks/queries/useAssignmentQueries';
 import { useGradeSubmissionWithAI, useTeacherAiQuota } from '@/hooks/queries/useAiQueries';
 import { useBatches } from '@/hooks/queries/useBatchQueries';
-import { Card, Button, Input, Badge } from '@/components/ui';
+import { Card, Button, Input, Badge, ListEmptyState, ListLoadingSkeleton } from '@/components/ui';
 import { QuizRunner } from './QuizRunner';
 import {
   getQuizAnalytics,
   type QuizAnalyticsSummary,
 } from '@/services/submissionService';
 import { type Assignment } from '@/types/database';
+
+const SUBJECT_TILES = ['bg-pastel-lilac', 'bg-pastel-mint', 'bg-pastel-peach', 'bg-pastel-pink', 'bg-pastel-sky', 'bg-pastel-butter'];
+
+/** "Due today" / "Due tomorrow" / "Due Fri" from a real due date. */
+const relativeDue = (iso?: string): { label: string; short: string; urgent: boolean } => {
+  if (!iso) return { label: 'No due date', short: '', urgent: false };
+  const due = new Date(iso);
+  const start = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const days = Math.round((start(due) - start(new Date())) / 86400000);
+  if (days < 0) return { label: 'Overdue', short: 'Overdue', urgent: true };
+  if (days === 0) return { label: 'Due today', short: 'Today', urgent: true };
+  if (days === 1) return { label: 'Due tomorrow', short: 'Tomorrow', urgent: true };
+  const weekday = due.toLocaleDateString('en-IN', { weekday: 'short' });
+  if (days < 7) return { label: `Due ${weekday}`, short: weekday, urgent: false };
+  const date = due.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+  return { label: `Due ${date}`, short: date, urgent: false };
+};
 
 interface AssignmentsModuleProps {
   /**
@@ -56,9 +73,11 @@ interface AssignmentsModuleProps {
    * the institute's first batch instead of their own).
    */
   batchId?: string;
+  /** Student's students.id; required for submitting homework and quizzes. */
+  studentRecordId?: string;
 }
 
-export const AssignmentsModule: React.FC<AssignmentsModuleProps> = ({ batchId }) => {
+export const AssignmentsModule: React.FC<AssignmentsModuleProps> = ({ batchId, studentRecordId }) => {
   const { user, userRole, activeInstitute } = useAuth();
   const { selectedBatchId } = useUI();
 
@@ -98,8 +117,9 @@ export const AssignmentsModule: React.FC<AssignmentsModuleProps> = ({ batchId })
 
   // Grade Modal
   const [gradingSubId, setGradingSubId] = useState<string | null>(null);
-  const [gradeMarks, setGradeMarks] = useState('85');
-  const [gradeFeedback, setGradeFeedback] = useState('Solid derivation and accurate final answer.');
+  // Start empty: a pre-filled "85 / Solid derivation…" grade was easy to publish by accident.
+  const [gradeMarks, setGradeMarks] = useState('');
+  const [gradeFeedback, setGradeFeedback] = useState('');
 
   // Quiz Runner & Analytics State
   const [activeQuizForRunner, setActiveQuizForRunner] = useState<Assignment | null>(null);
@@ -218,11 +238,16 @@ export const AssignmentsModule: React.FC<AssignmentsModuleProps> = ({ batchId })
 
   const handleSubmitSolution = async () => {
     if (!selectedAsgId || !user) return;
+    if (!studentRecordId) {
+      Alert.alert('Not enrolled', 'Join your batch before submitting work.');
+      return;
+    }
 
     try {
       await submitHomeworkMutation.mutateAsync({
         assignmentId: selectedAsgId,
-        studentId: user.id,
+        // submissions.student_id references students.id, not the auth user id.
+        studentId: studentRecordId,
         notes: solutionNotes.trim() || 'Solution PDF submission',
         fileUri: pickedFileUri || undefined,
         fileName: pickedFileName || undefined,
@@ -241,6 +266,10 @@ export const AssignmentsModule: React.FC<AssignmentsModuleProps> = ({ batchId })
 
   const handleGrade = async () => {
     if (!gradingSubId || !user) return;
+    if (gradeMarks.trim() === '' || Number.isNaN(Number(gradeMarks))) {
+      Alert.alert('Marks needed', 'Enter the marks before saving.');
+      return;
+    }
 
     try {
       await gradeSubmissionMutation.mutateAsync({
@@ -261,146 +290,135 @@ export const AssignmentsModule: React.FC<AssignmentsModuleProps> = ({ batchId })
   return (
     <View className="gap-3">
       {/* Header & Tabs */}
-      <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center gap-2">
-          <Pressable
-            onPress={() => setActiveTab('pending')}
-            className={`px-3 py-1.5 rounded-xl ${
-              activeTab === 'pending' ? 'bg-blue-600' : 'bg-slate-100'
-            }`}
-          >
-            <Text
-              className={`text-xs font-sans-bold ${
-                activeTab === 'pending' ? 'text-white' : 'text-slate-600'
-              }`}
-            >
-              Assignments ({assignments.length})
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => setActiveTab('submitted')}
-            className={`px-3 py-1.5 rounded-xl ${
-              activeTab === 'submitted' ? 'bg-blue-600' : 'bg-slate-100'
-            }`}
-          >
-            <Text
-              className={`text-xs font-sans-bold ${
-                activeTab === 'submitted' ? 'text-white' : 'text-slate-600'
-              }`}
-            >
-              Submissions ({submissions.length})
-            </Text>
-          </Pressable>
+      <View className="flex-row items-center justify-between gap-2">
+        <View accessibilityRole="tablist" className="flex-row items-center gap-2">
+          {([
+            ['pending', userRole === 'student' ? 'To do' : 'Assignments', assignments.length],
+            ['submitted', userRole === 'student' ? 'Submitted' : 'Submissions', submissions.length],
+          ] as const).map(([key, label, count]) => {
+            const selected = activeTab === key;
+            return (
+              <Pressable
+                key={key}
+                accessibilityRole="tab"
+                accessibilityState={{ selected }}
+                onPress={() => setActiveTab(key)}
+                className={`h-10 px-4 rounded-full justify-center ${selected ? 'bg-ink' : 'bg-white'}`}
+              >
+                <Text className={`text-sm font-sans-bold ${selected ? 'text-white' : 'text-ink'}`}>
+                  {label} · {count}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
 
         {(userRole === 'admin' || userRole === 'teacher') && (
-          <Button
-            size="sm"
-            variant="surface"
-            title="+ Assignment"
-            onPress={() => setIsCreateOpen(true)}
-          />
+          <Button size="sm" variant="primary" title="New" leftIcon={<Plus size={16} color="#FFFFFF" />} onPress={() => setIsCreateOpen(true)} />
         )}
       </View>
 
       {/* Loading State */}
-      {isAssignmentsLoading && (
-        <View className="p-8 items-center justify-center bg-white rounded-2xl border border-slate-200">
-          <ActivityIndicator size="small" color="#1C1C1E" />
-          <Text className="text-xs text-slate-500 mt-2 font-sans">Loading batch assignments...</Text>
-        </View>
-      )}
+      {isAssignmentsLoading && <ListLoadingSkeleton count={3} height={84} />}
 
       {/* TAB 1: ASSIGNMENTS */}
       {!isAssignmentsLoading && activeTab === 'pending' && (
         <View className="gap-2.5">
           {assignments.length === 0 ? (
-            <View className="p-8 items-center justify-center bg-white rounded-2xl border border-slate-200">
-              <FileCheck size={28} color="#8C877E" />
-              <Text className="text-sm font-sans-bold text-slate-800 mt-2">No Assignments Created</Text>
-              <Text className="text-xs text-slate-500 text-center mt-1">
-                Active assignments published by faculty will appear here.
-              </Text>
-            </View>
+            <ListEmptyState
+              title={userRole === 'student' ? 'Nothing due right now' : 'No assignments yet'}
+              message={
+                userRole === 'student'
+                  ? 'New DPPs and homework from your teachers show up here first.'
+                  : 'Create a DPP, quiz or homework for this batch.'
+              }
+            />
           ) : (
-            assignments.map((asg) => (
-              <Card key={asg.id} elevation="lowest" className="gap-2.5 border border-slate-200/80">
-                <View className="flex-row items-start justify-between gap-2">
-                  <View className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 items-center justify-center shrink-0">
-                    <FileCheck size={18} color="#1C1C1E" />
-                  </View>
+            assignments.map((asg, index) => {
+              const isHero = index === 0;
+              const tile = SUBJECT_TILES[(asg.subject || 'X').charCodeAt(0) % SUBJECT_TILES.length];
+              const meta = [
+                asg.subject,
+                asg.type === 'quiz' ? `${asg.question_count || 0} MCQs` : 'Upload',
+                asg.total_marks ? `${asg.total_marks} marks` : null,
+              ]
+                .filter(Boolean)
+                .join(' · ');
+              const due = relativeDue(asg.due_date);
+              const studentAction =
+                userRole === 'student'
+                  ? asg.type === 'quiz'
+                    ? { label: 'Start quiz', onPress: () => setActiveQuizForRunner(asg) }
+                    : { label: 'Submit work', onPress: () => setSelectedAsgId(asg.id) }
+                  : null;
 
-                  <View className="flex-1 min-w-0">
-                    <View className="flex-row items-center gap-1.5 mb-0.5">
-                      <Badge
-                        label={asg.due_label || 'Due Soon'}
-                        variant={asg.due_label?.includes('Tomorrow') ? 'due' : 'neutral'}
-                      />
-                      <Text className="text-[11px] text-slate-500 font-sans">
-                        Total {asg.total_marks} Marks
+              return (
+                <View
+                  key={asg.id}
+                  className={`rounded-[26px] p-4 gap-3 ${isHero ? 'bg-pastel-sky border-[1.5px] border-ink' : 'bg-white'}`}
+                >
+                  <View className="flex-row items-center gap-3.5">
+                    {!isHero && (
+                      <View className={`w-[52px] h-[52px] rounded-[18px] items-center justify-center ${tile}`}>
+                        <Text className="font-display text-ink text-xl">{(asg.subject || asg.title).charAt(0).toUpperCase()}</Text>
+                      </View>
+                    )}
+                    <View className="flex-1 min-w-0 gap-0.5">
+                      {isHero && (
+                        <View className="self-start px-3 py-1 rounded-xl bg-pastel-sky-soft mb-1">
+                          <Text className="font-sans-bold text-ink text-[13px]">{due.label}</Text>
+                        </View>
+                      )}
+                      <Text className={`font-display text-ink ${isHero ? 'text-2xl leading-7' : 'text-base'}`} numberOfLines={2}>
+                        {asg.title}
+                      </Text>
+                      <Text className="font-sans text-slate-600 text-[13px]" numberOfLines={1}>
+                        {meta}
                       </Text>
                     </View>
-                    <Text className="text-sm font-display text-slate-900">{asg.title}</Text>
-                    {asg.description ? (
-                      <Text className="text-xs text-slate-500 mt-0.5 leading-relaxed" numberOfLines={2}>
-                        {asg.description}
-                      </Text>
+                    {!isHero && due.short ? (
+                      <Text className={`font-sans-bold text-[13px] ${due.urgent ? 'text-rose-700' : 'text-slate-600'}`}>{due.short}</Text>
                     ) : null}
                   </View>
-                </View>
 
-                <View className="flex-row items-center justify-between pt-2 border-t border-slate-100">
-                  <Text className="text-[11px] text-slate-500 font-sans">
-                    Max Marks: <Text className="font-sans-bold text-slate-800">{asg.total_marks}</Text>
-                  </Text>
-
-                  {userRole === 'student' && asg.type === 'quiz' && (
-                    <TouchableOpacity
-                      activeOpacity={0.85}
-                      onPress={() => setActiveQuizForRunner(asg)}
-                      className="px-3.5 py-1.5 rounded-xl bg-purple-600 shadow-xs flex-row items-center gap-1.5"
+                  {studentAction && (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`${studentAction.label}: ${asg.title}`}
+                      onPress={studentAction.onPress}
+                      className={`min-h-[48px] rounded-full items-center justify-center ${isHero ? 'bg-ink' : 'bg-paper'}`}
                     >
-                      <Sparkles size={13} color="#FFFFFF" />
-                      <Text className="text-xs font-sans-bold text-white">Start Quiz</Text>
-                    </TouchableOpacity>
-                  )}
-
-                  {userRole === 'student' && asg.type !== 'quiz' && (
-                    <TouchableOpacity
-                      activeOpacity={0.85}
-                      onPress={() => setSelectedAsgId(asg.id)}
-                      className="px-3 py-1.5 rounded-xl bg-blue-600 shadow-xs"
-                    >
-                      <Text className="text-xs font-sans-bold text-white">Submit Work</Text>
-                    </TouchableOpacity>
+                      <Text className={`font-sans-bold text-[15px] ${isHero ? 'text-white' : 'text-ink'}`}>{studentAction.label}</Text>
+                    </Pressable>
                   )}
 
                   {(userRole === 'teacher' || userRole === 'admin') && (
                     <View className="flex-row items-center gap-2">
                       {asg.type === 'quiz' && (
-                        <TouchableOpacity
+                        <Pressable
+                          accessibilityRole="button"
                           onPress={() => handleOpenAnalytics(asg.id)}
-                          className="px-2.5 py-1 rounded-lg bg-purple-50 border border-purple-200 flex-row items-center gap-1 active:scale-95"
+                          className="h-10 px-4 rounded-full bg-paper flex-row items-center gap-1.5"
                         >
-                          <BarChart3 size={12} color="#7C3AED" />
-                          <Text className="text-[11px] font-sans-bold text-purple-700">Analytics</Text>
-                        </TouchableOpacity>
+                          <BarChart3 size={14} color="#1C1C1E" />
+                          <Text className="text-sm font-sans-bold text-ink">Analytics</Text>
+                        </Pressable>
                       )}
-                      <TouchableOpacity
+                      <Pressable
+                        accessibilityRole="button"
                         onPress={() => {
                           setSelectedAsgId(asg.id);
                           setActiveTab('submitted');
                         }}
-                        className="px-2.5 py-1 rounded-lg bg-slate-100 active:scale-95"
+                        className={`h-10 px-4 rounded-full justify-center ${isHero ? 'bg-ink' : 'bg-paper'}`}
                       >
-                        <Text className="text-[11px] font-sans-bold text-blue-600">Review Submissions →</Text>
-                      </TouchableOpacity>
+                        <Text className={`text-sm font-sans-bold ${isHero ? 'text-white' : 'text-ink'}`}>Review submissions</Text>
+                      </Pressable>
                     </View>
                   )}
                 </View>
-              </Card>
-            ))
+              );
+            })
           )}
         </View>
       )}
@@ -506,8 +524,8 @@ export const AssignmentsModule: React.FC<AssignmentsModuleProps> = ({ batchId })
                             setGradeMarks(String(sub.ai_score));
                             if (sub.ai_feedback) setGradeFeedback(sub.ai_feedback);
                           } else {
-                            if (sub.score) setGradeMarks(String(sub.score));
-                            if (sub.feedback) setGradeFeedback(sub.feedback);
+                            setGradeMarks(sub.score !== undefined && sub.score !== null ? String(sub.score) : '');
+                            setGradeFeedback(sub.feedback ?? '');
                           }
                         }}
                         className="px-3 py-1.5 rounded-xl bg-blue-600 active:scale-95"
@@ -747,6 +765,7 @@ export const AssignmentsModule: React.FC<AssignmentsModuleProps> = ({ batchId })
         assignment={activeQuizForRunner}
         visible={Boolean(activeQuizForRunner)}
         onClose={() => setActiveQuizForRunner(null)}
+        studentId={studentRecordId}
       />
 
       {/* QUIZ ANALYTICS MODAL FOR TEACHERS */}

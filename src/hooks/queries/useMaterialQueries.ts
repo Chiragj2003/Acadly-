@@ -20,18 +20,22 @@ export function useStudyMaterials(
     queryFn: async () => {
       const rows = await getStudyMaterials(instituteId!, batchId, category);
       if (rows && rows.length > 0) {
+        // Real fields only (previously subject was always "Subject", the author
+        // "Faculty Mentor" and a missing size became a fake "1.8 MB PDF").
         return rows.map((r) => ({
           id: r.id,
-          subject: 'Subject',
-          emoji: '📄',
+          subject: r.subject || '',
+          emoji: '',
           title: r.title,
-          subtitle: r.description || 'Study document',
-          category: (r.category as any) || 'notes',
-          author: 'Faculty Mentor',
-          fileSizeBytes: r.file_size_bytes
-            ? `${(r.file_size_bytes / (1024 * 1024)).toFixed(1)} MB PDF`
-            : '1.8 MB PDF',
-          createdAt: 'Recently',
+          subtitle: r.description || '',
+          category: (['notes', 'formula_sheet', 'pyq', 'dpp'].includes(r.category ?? '')
+            ? r.category
+            : 'notes') as PDFMaterialItem['category'],
+          author: '',
+          fileSizeBytes: r.file_size_bytes ? `${(r.file_size_bytes / (1024 * 1024)).toFixed(1)} MB` : '',
+          createdAt: r.created_at
+            ? new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+            : '',
           storagePath: r.file_url,
         }));
       }

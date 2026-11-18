@@ -1,137 +1,109 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Clock, MapPin, Radio, Calendar } from 'lucide-react-native';
+import { View, Text, Pressable } from 'react-native';
 import { useBatchSchedule } from '@/hooks/queries/useScheduleQueries';
 import { type Weekday } from '@/services/scheduleService';
+import { type BatchSchedule } from '@/types/database';
+import { ListEmptyState, ListErrorState, ListLoadingSkeleton } from '@/components/ui';
 
 const WEEKDAYS: Weekday[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const JS_DAYS: Weekday[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 interface StudentScheduleSectionProps {
   batchId?: string;
-  onJoinLiveStream?: (slot: any) => void;
+  onJoinLiveStream?: (slot: BatchSchedule) => void;
 }
 
-export const StudentScheduleSection: React.FC<StudentScheduleSectionProps> = ({
-  batchId,
-  onJoinLiveStream,
-}) => {
-  // Current weekday prefix: e.g. "Thu"
-  const currentDayPrefix = (new Date().toLocaleDateString('en-US', { weekday: 'short' }) as Weekday) || 'Mon';
-  const [selectedDay, setSelectedDay] = useState<Weekday>(currentDayPrefix);
+/** Splits "08:00" / "14:30:00" into a 12-hour clock and AM/PM. */
+const clock = (hhmm?: string) => {
+  const [h = '0', m = '00'] = (hhmm || '').split(':');
+  const hour = Number(h);
+  return { time: `${hour % 12 || 12}:${m.slice(0, 2)}`, ampm: hour < 12 ? 'AM' : 'PM' };
+};
 
-  const { data: schedule = [], isLoading, error } = useBatchSchedule(batchId);
+/** Soft Desk timetable: a week of day pills, then one card per class. */
+export const StudentScheduleSection: React.FC<StudentScheduleSectionProps> = ({ batchId, onJoinLiveStream }) => {
+  const today = new Date();
+  const todayName = JS_DAYS[today.getDay()];
+  const [selectedDay, setSelectedDay] = useState<Weekday>(todayName);
 
-  const daySlots = schedule.filter((s) => s.weekday === selectedDay);
+  const { data: schedule = [], isLoading, error, refetch } = useBatchSchedule(batchId);
+  const daySlots = schedule.filter((s) => s.weekday?.slice(0, 3) === selectedDay);
+
+  // Dates for this week (Mon–Sun) so the pills show real day numbers.
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
 
   return (
-    <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
-      <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center gap-2">
-          <Calendar size={18} color="#1C1C1E" />
-          <Text className="text-sm font-sans-bold text-slate-900">Weekly Timetable & Live Classes</Text>
-        </View>
-        <Text className="text-[10px] font-sans-bold text-slate-400">Fixed Institute Schedule</Text>
-      </View>
-
-      {/* Weekday Switcher */}
-      <View className="flex-row justify-between bg-slate-50 p-1 rounded-2xl border border-slate-200/80">
-        {WEEKDAYS.map((day) => {
+    <View className="gap-4">
+      <View accessibilityRole="tablist" className="flex-row gap-1.5">
+        {WEEKDAYS.map((day, i) => {
+          const date = new Date(monday);
+          date.setDate(monday.getDate() + i);
           const isSelected = selectedDay === day;
-          const isToday = currentDayPrefix === day;
-          const hasClasses = schedule.some((s) => s.weekday === day);
-
+          const hasClasses = schedule.some((s) => s.weekday?.slice(0, 3) === day);
           return (
-            <TouchableOpacity
+            <Pressable
               key={day}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: isSelected }}
+              accessibilityLabel={`${day} ${date.getDate()}${hasClasses ? ', has classes' : ''}`}
               onPress={() => setSelectedDay(day)}
-              className={`flex-1 py-2 items-center rounded-xl ${
-                isSelected ? 'bg-blue-600 shadow-xs' : ''
-              }`}
+              className={`flex-1 h-[66px] rounded-[22px] items-center justify-center ${isSelected ? 'bg-ink' : 'bg-white'}`}
             >
-              <Text
-                className={`text-[11px] font-sans-bold ${
-                  isSelected ? 'text-white' : isToday ? 'text-blue-600' : 'text-slate-600'
-                }`}
-              >
-                {day}
-              </Text>
-              {hasClasses && !isSelected && (
-                <View className="w-1 h-1 rounded-full bg-blue-500 mt-0.5" />
-              )}
-            </TouchableOpacity>
+              <Text className={`text-xs font-sans-semibold ${isSelected ? 'text-white' : 'text-ink'}`}>{day[0]}</Text>
+              <Text className={`text-xl font-serif ${isSelected ? 'text-white' : 'text-ink'}`}>{date.getDate()}</Text>
+              {hasClasses && !isSelected ? <View className="w-1 h-1 rounded-full bg-ink mt-0.5" /> : null}
+            </Pressable>
           );
         })}
       </View>
 
-      {/* Slot Content */}
       {isLoading ? (
-        <View className="p-6 items-center">
-          <ActivityIndicator size="small" color="#1C1C1E" />
-          <Text className="text-xs text-slate-400 mt-2">Loading timetable...</Text>
-        </View>
+        <ListLoadingSkeleton />
       ) : error ? (
-        <View className="p-4 bg-rose-50 rounded-2xl border border-rose-200">
-          <Text className="text-xs text-rose-700">Unable to load schedule.</Text>
-        </View>
+        <ListErrorState title="Couldn't load the timetable" message="Check your connection and try again." onRetry={() => refetch()} />
       ) : daySlots.length === 0 ? (
-        <View className="p-6 items-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-          <Text className="text-xs font-sans-bold text-slate-600">No classes scheduled for {selectedDay}</Text>
-          <Text className="text-[11px] text-slate-400 mt-0.5">Enjoy your self-study time or revise past DPPs.</Text>
-        </View>
+        <ListEmptyState title={`No classes on ${selectedDay}`} message="A good day to revise or catch up on practice." />
       ) : (
         <View className="gap-2.5">
-          {daySlots.map((slot) => (
-            <View
-              key={slot.id}
-              className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 gap-2"
-            >
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <Text className="text-xs font-display text-slate-900">{slot.subject_name}</Text>
-                  {slot.is_live && (
-                    <View className="bg-red-100 px-2 py-0.5 rounded-full flex-row items-center gap-1">
-                      <Radio size={10} color="#dc2626" />
-                      <Text className="text-[9px] font-display text-red-600">LIVE NOW</Text>
-                    </View>
-                  )}
+          {daySlots.map((slot) => {
+            const { time, ampm } = clock(slot.start_time);
+            const live = Boolean(slot.is_live);
+            return (
+              <View
+                key={slot.id}
+                className={`flex-row items-center gap-3 px-4 py-3.5 rounded-3xl ${
+                  live ? 'bg-pastel-sky border-[1.5px] border-ink' : 'bg-white'
+                }`}
+              >
+                <View className="w-14">
+                  <Text className="font-serif text-ink text-[22px]">{time}</Text>
+                  <Text className="font-sans-semibold text-slate-600 text-xs">{ampm}</Text>
                 </View>
-                <View className="bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
-                  <Text className="text-[10px] font-sans-bold text-blue-700">{slot.tag || 'Class'}</Text>
-                </View>
-              </View>
-
-              <View className="flex-row items-center gap-4 text-slate-500">
-                <View className="flex-row items-center gap-1">
-                  <Clock size={12} color="#6E6A63" />
-                  <Text className="text-[11px] font-sans-semibold text-slate-600">
-                    {slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}
+                <View className="flex-1 min-w-0">
+                  <Text className="font-sans-bold text-ink text-base" numberOfLines={1}>
+                    {slot.subject_name || 'Class'}
+                  </Text>
+                  <Text className="font-sans text-slate-600 text-[13px]" numberOfLines={1}>
+                    {[slot.teacher_name, slot.room].filter(Boolean).join(' · ')}
                   </Text>
                 </View>
-                {slot.room && (
-                  <View className="flex-row items-center gap-1">
-                    <MapPin size={12} color="#6E6A63" />
-                    <Text className="text-[11px] font-sans-semibold text-slate-600">{slot.room}</Text>
+                {live && onJoinLiveStream ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => onJoinLiveStream(slot)}
+                    className="h-11 px-4 rounded-full bg-ink items-center justify-center active:opacity-90"
+                  >
+                    <Text className="font-sans-bold text-white text-sm">Join</Text>
+                  </Pressable>
+                ) : (
+                  <View className={`px-2.5 py-1 rounded-xl ${live ? 'bg-white' : 'bg-paper'}`}>
+                    <Text className="font-sans-bold text-ink text-xs">{live ? 'Live' : slot.tag || 'Class'}</Text>
                   </View>
                 )}
               </View>
-
-              {slot.teacher_name && (
-                <Text className="text-[11px] text-slate-500 font-sans">
-                  Faculty: <Text className="font-sans-bold text-slate-800">{slot.teacher_name}</Text>
-                </Text>
-              )}
-
-              {slot.is_live && onJoinLiveStream && (
-                <TouchableOpacity
-                  onPress={() => onJoinLiveStream(slot)}
-                  className="bg-red-600 py-2.5 rounded-xl items-center flex-row justify-center gap-1.5 mt-1 active:scale-98"
-                >
-                  <Radio size={14} color="white" />
-                  <Text className="text-xs font-sans-bold text-white">Join Live Stream</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          ))}
+            );
+          })}
         </View>
       )}
     </View>

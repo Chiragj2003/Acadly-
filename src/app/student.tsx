@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Alert, Pressable } from 'react-native';
-import { Home, CalendarDays, PencilLine, ChartLine, MessageCircle } from 'lucide-react-native';
+import { Home, CalendarDays, PencilLine, ChartLine, MessageCircle, BookOpen, ChevronLeft } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -19,6 +19,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useMyStudentRecord } from '@/hooks/queries/useStudentQueries';
 import { useStudentEnrollments } from '@/hooks/queries/useBatchQueries';
 import { StudentToday } from '@/components/screens/student/StudentToday';
+import { StudentLibrary } from '@/components/screens/student/StudentLibrary';
 import { StudentScheduleSection } from '@/components/screens/student/StudentScheduleSection';
 import { StudentAttendanceSection } from '@/components/screens/student/StudentAttendanceSection';
 import { StudentProfileSection } from '@/components/screens/student/StudentProfileSection';
@@ -32,7 +33,7 @@ export default function PinterestStudentScreen() {
   const router = useRouter();
   const { user, activeInstitute, signOut } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'home' | 'schedule' | 'academics' | 'performance' | 'profile'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'schedule' | 'academics' | 'library' | 'performance' | 'profile'>('home');
 
   // Load the signed-in user's own student record (by students.user_id). Never fall
   // back to another student's record or to hard-coded demo IDs.
@@ -68,8 +69,8 @@ export default function PinterestStudentScreen() {
 
   const tabs: TabItem[] = [
     { key: 'home', label: t('student.today', 'Today'), icon: (color, size) => <Home color={color} size={size} /> },
-    { key: 'schedule', label: t('student.schedule', 'Schedule'), icon: (color, size) => <CalendarDays color={color} size={size} /> },
     { key: 'academics', label: t('student.practice', 'Practice'), icon: (color, size) => <PencilLine color={color} size={size} /> },
+    { key: 'library', label: t('student.library', 'Library'), icon: (color, size) => <BookOpen color={color} size={size} /> },
     { key: 'performance', label: t('student.progress', 'Progress'), icon: (color, size) => <ChartLine color={color} size={size} /> },
   ];
 
@@ -79,6 +80,7 @@ export default function PinterestStudentScreen() {
   const pageTitles: Record<Exclude<typeof activeTab, 'home'>, string> = {
     schedule: t('student.schedule', 'Schedule'),
     academics: t('student.practice', 'Practice'),
+    library: t('student.library', 'Library'),
     performance: t('student.progress', 'Progress'),
     profile: t('student.account', 'Account'),
   };
@@ -155,7 +157,16 @@ export default function PinterestStudentScreen() {
             <Eyebrow>{batchName}</Eyebrow>
             <DisplayTitle>{pageTitles[activeTab]}</DisplayTitle>
           </View>
-          {activeTab !== 'profile' && (
+          {activeTab === 'schedule' ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('student.backToToday', 'Back to Today')}
+              onPress={() => setActiveTab('home')}
+              className="w-12 h-12 rounded-full bg-white items-center justify-center"
+            >
+              <ChevronLeft size={22} color="#1C1C1E" />
+            </Pressable>
+          ) : activeTab !== 'profile' && (
             <Avatar initials={initials} tone="pink" onPress={() => setActiveTab('profile')} label={t('student.account', 'Account')} />
           )}
         </View>
@@ -165,7 +176,9 @@ export default function PinterestStudentScreen() {
         <StudentScheduleSection batchId={batchId} onJoinLiveStream={() => router.push('/chat')} />
       )}
 
-      {activeTab === 'academics' && <AssignmentsModule batchId={batchId} />}
+      {activeTab === 'library' && <StudentLibrary instituteId={activeInstitute?.id} batchId={batchId} />}
+
+      {activeTab === 'academics' && <AssignmentsModule batchId={batchId} studentRecordId={currentStudent?.id} />}
 
       {activeTab === 'performance' && (
         <View className="gap-4">
