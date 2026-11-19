@@ -20,8 +20,8 @@ import { useMyStudentRecord } from '@/hooks/queries/useStudentQueries';
 import { useStudentEnrollments } from '@/hooks/queries/useBatchQueries';
 import { StudentToday } from '@/components/screens/student/StudentToday';
 import { StudentLibrary } from '@/components/screens/student/StudentLibrary';
+import { StudentProgress } from '@/components/screens/student/StudentProgress';
 import { StudentScheduleSection } from '@/components/screens/student/StudentScheduleSection';
-import { StudentAttendanceSection } from '@/components/screens/student/StudentAttendanceSection';
 import { StudentProfileSection } from '@/components/screens/student/StudentProfileSection';
 import { StudentResultsCard } from '@/components/academic/StudentResultsCard';
 import { StudentAnnouncementFeed } from '@/components/academic/StudentAnnouncementFeed';
@@ -181,8 +181,8 @@ export default function PinterestStudentScreen() {
       {activeTab === 'academics' && <AssignmentsModule batchId={batchId} studentRecordId={currentStudent?.id} />}
 
       {activeTab === 'performance' && (
-        <View className="gap-4">
-          <StudentAttendanceSection studentId={currentStudent?.id ?? ''} batchId={batchId} />
+        <View className="gap-6">
+          <StudentProgress studentId={currentStudent?.id} batchId={batchId} onPractice={() => setActiveTab('academics')} />
           <StudentResultsCard studentId={currentStudent?.id ?? ''} studentName={studentName} />
         </View>
       )}

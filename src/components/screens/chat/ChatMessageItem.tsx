@@ -23,8 +23,15 @@ export const ChatMessageItem = React.memo(function ChatMessageItem({
       className={`flex-row ${isMine ? 'justify-end' : 'justify-start'} items-end gap-1.5 mb-2.5`}
     >
       {!isMine && (
-        <View className="w-8 h-8 rounded-full bg-white border border-slate-200 items-center justify-center shadow-xs mb-1">
-          <Text className="text-xs">{message.senderAvatarEmoji}</Text>
+        <View className="w-8 h-8 rounded-full bg-pastel-sky items-center justify-center mb-1">
+          <Text className="text-[11px] font-display text-ink">
+            {(message.senderName || '?')
+              .split(' ')
+              .filter(Boolean)
+              .slice(0, 2)
+              .map((p: string) => p[0]?.toUpperCase())
+              .join('')}
+          </Text>
         </View>
       )}
 
@@ -55,11 +62,7 @@ export const ChatMessageItem = React.memo(function ChatMessageItem({
         <TouchableOpacity
           activeOpacity={0.92}
           onLongPress={() => onPin(message)}
-          className={`p-3.5 rounded-3xl shadow-xs ${
-            isMine
-              ? 'bg-blue-600 rounded-br-sm'
-              : 'bg-white border border-slate-200/90 rounded-bl-sm'
-          }`}
+          className={`px-4 py-3 rounded-[22px] ${isMine ? 'bg-ink rounded-br-md' : 'bg-white rounded-bl-md'}`}
         >
           {message.attachmentName && (
             <View
@@ -99,9 +102,7 @@ export const ChatMessageItem = React.memo(function ChatMessageItem({
 
           {message.text ? (
             <Text
-              className={`text-xs leading-relaxed ${
-                isMine ? 'text-white font-sans' : 'text-slate-800 font-sans'
-              }`}
+              className={`text-[15px] leading-[21px] font-sans ${isMine ? 'text-white' : 'text-ink'}`}
             >
               {message.text}
             </Text>

@@ -1,3 +1,4 @@
+import { FEATURE_FEES } from '@/config/features';
 import React from 'react';
 import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator } from 'react-native';
 import { HeartHandshake, X } from 'lucide-react-native';
@@ -99,7 +100,8 @@ export const ApproveStudentModal: React.FC<ApproveStudentModalProps> = ({
             </View>
           )}
 
-          {/* Select Fee Plan */}
+          {/* Select Fee Plan — only when the fees feature is on (v1 is free) */}
+          {FEATURE_FEES && (<>
           <Text className="text-xs font-display text-slate-800 mb-1.5">2. Fee Plan Structure</Text>
           <View className="gap-1.5 mb-5">
             {DYNAMIC_FEE_PLANS.map((plan) => (
@@ -122,6 +124,7 @@ export const ApproveStudentModal: React.FC<ApproveStudentModalProps> = ({
               </TouchableOpacity>
             ))}
           </View>
+          </>)}
 
           {/* Confirm Button */}
           <TouchableOpacity

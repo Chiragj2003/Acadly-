@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { ArrowRight, RotateCcw } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
 import { ScreenWrapper } from '@/components/ui';
 import { useUI } from '@/context/UIContext';
 import {
@@ -40,15 +42,15 @@ export default function JoinInstituteScreen() {
 
   // Form State
   const [fullName, setFullName] = useState(user?.full_name || '');
-  const [grade, setGrade] = useState('Class 11 Science');
-  const [board, setBoard] = useState('CBSE');
-  const [targetExam, setTargetExam] = useState('IIT-JEE 2026');
+  const [grade, setGrade] = useState('');
+  const [board, setBoard] = useState('');
+  const [targetExam, setTargetExam] = useState('');
   const [school, setSchool] = useState('');
   const [previousScore, setPreviousScore] = useState('');
   const [selectedWeakSubjects, setSelectedWeakSubjects] = useState<string[]>([]);
   const [guardianName, setGuardianName] = useState('');
   const [guardianPhone, setGuardianPhone] = useState('');
-  const [bloodGroup, setBloodGroup] = useState('B+');
+  const [bloodGroup, setBloodGroup] = useState('');
   const [teacherCode, setTeacherCode] = useState('');
 
   // Pre-fill teacherCode from deep link param if available
@@ -98,29 +100,25 @@ export default function JoinInstituteScreen() {
   };
 
   const cleanCode = teacherCode.trim().toUpperCase();
-  let matchedTarget: { name: string; type: string; detail: string; rate: string } | null = null;
-  if (teacherProfile?.teacherCode && cleanCode === teacherProfile.teacherCode.toUpperCase()) {
-    matchedTarget = {
-      name: teacherProfile.fullName,
-      type: 'Solo Faculty Desk',
-      detail: `${teacherProfile.qualification} • ${teacherProfile.specializationSubjects.join(', ')}`,
-      rate: `₹${teacherProfile.monthlyFeeRate.toLocaleString('en-IN')}/month`,
-    };
-  } else if (coachingProfile?.inviteCode && cleanCode === coachingProfile.inviteCode.toUpperCase()) {
-    matchedTarget = {
-      name: coachingProfile?.name || 'Academy Hub',
-      type: 'Coaching Center',
-      detail: `${coachingProfile?.city} Campus • ${coachingProfile?.subjectsOffered.join(', ')}`,
-      rate: 'Comprehensive Tier Plan',
-    };
-  } else if (cleanCode.length >= 4) {
-    matchedTarget = {
-      name: `Teacher / Institute (${cleanCode})`,
-      type: 'Verified Provider',
-      detail: 'Curriculum & Live Batches',
-      rate: 'Standard Batch Rate',
-    };
-  }
+
+  // Look the code up on the server (rate-limited RPC that returns only id + name).
+  // Previously any 4+ character code showed a fake "Verified Provider" card, and the
+  // sample teacher / coaching profiles from UIContext were matched instead.
+  const { data: codeMatch } = useQuery({
+    queryKey: ['lookup_institute_by_code', cleanCode],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('lookup_institute_by_code', { p_code: cleanCode });
+      if (error) return null;
+      const inst = data as { id?: string; name?: string } | null;
+      return inst?.id ? { id: inst.id, name: inst.name ?? '' } : null;
+    },
+    enabled: cleanCode.length >= 6,
+    retry: false,
+    staleTime: 60_000,
+  });
+  const matchedTarget: { name: string; type: string; detail: string; rate: string } | null = codeMatch
+    ? { name: codeMatch.name, type: 'Institute', detail: '', rate: '' }
+    : null;
 
   if (isLoading || isExistingLoading || !isAuthorized) {
     return (
@@ -221,7 +219,7 @@ export default function JoinInstituteScreen() {
     <ScreenWrapper
       scrollable={false}
       headerProps={{
-        title: 'Join Classes or Mentor',
+        title: 'Join with a code',
         onBackPress: () => router.back(),
       }}
     >
@@ -267,7 +265,8 @@ export default function JoinInstituteScreen() {
             activeOpacity={0.88}
             onPress={handleSubmit}
             disabled={submitJoinRequestMutation.isPending || reapplyMutation.isPending}
-            className={`w-full bg-blue-600 py-3.5 rounded-2xl items-center shadow-xs flex-row justify-center gap-2 active:scale-98 ${
+            accessibilityRole="button"
+            className={`w-full bg-ink min-h-[56px] rounded-full items-center flex-row justify-center gap-2 active:opacity-90 ${
               submitJoinRequestMutation.isPending || reapplyMutation.isPending ? 'opacity-60' : ''
             }`}
           >
@@ -275,10 +274,10 @@ export default function JoinInstituteScreen() {
               <ActivityIndicator color="#FFFFFF" size="small" />
             ) : (
               <>
-                <Text className="text-xs font-display text-white tracking-wide">
+                <Text className="text-[17px] font-sans-bold text-white">
                   {activeJoinRequest?.status === 'rejected' || activeJoinRequest?.status === 'waitlisted'
-                    ? 'Resubmit Application with Updated Details'
-                    : 'Send Join Request to Teacher'}
+                    ? 'Send again with updated details'
+                    : 'Send join request'}
                 </Text>
                 {activeJoinRequest?.status === 'rejected' || activeJoinRequest?.status === 'waitlisted' ? (
                   <RotateCcw size={14} color="#ffffff" />

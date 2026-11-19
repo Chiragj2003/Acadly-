@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,10 +9,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { X, Check, FileText } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { type Student360Profile } from '@/types/database';
+import { openSubmissionFile } from '@/lib/openStudyMaterial';
 
 // 1. Dual Mode Modal
 interface DualModeModalProps {
@@ -398,11 +400,17 @@ export const ExamMarksModal: React.FC<ExamMarksModalProps> = ({
   );
 };
 
-// 4. Grading Modal
+// 4. Grading Modal — Soft Desk full-screen grading (matches the "Grade submission" board)
 interface GradingModalProps {
   visible: boolean;
   onClose: () => void;
   submissionId: string | null;
+  studentName?: string;
+  assignmentTitle?: string;
+  submittedAt?: string;
+  fileUrl?: string;
+  /** The assignment's real maximum; no more hard-coded "out of 25". */
+  maxMarks?: number;
   initialScore?: number;
   initialFeedback?: string;
   aiScore?: number | null;
@@ -415,105 +423,168 @@ export const GradingModal: React.FC<GradingModalProps> = ({
   visible,
   onClose,
   submissionId,
-  initialScore = 23,
-  initialFeedback = 'Well attempted derivation steps.',
+  studentName,
+  assignmentTitle,
+  submittedAt,
+  fileUrl,
+  maxMarks,
+  initialScore,
+  initialFeedback,
   aiScore,
   aiFeedback,
   aiStatus,
   onGrade,
 }) => {
-  const [score, setScore] = useState(
-    aiStatus === 'pending_review' && aiScore !== null && aiScore !== undefined
-      ? aiScore.toString()
-      : initialScore.toString()
-  );
-  const [feedback, setFeedback] = useState(
-    aiStatus === 'pending_review' && aiFeedback
-      ? aiFeedback
-      : initialFeedback
-  );
+  const hasAi = aiStatus === 'pending_review' && aiScore !== null && aiScore !== undefined;
+  const [score, setScore] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  // Reset for every submission (previously the first submission's values stuck).
+  useEffect(() => {
+    setScore(initialScore !== undefined && initialScore !== null ? String(initialScore) : '');
+    setFeedback(initialFeedback ?? '');
+  }, [submissionId, initialScore, initialFeedback]);
+
+  const clamp = (n: number) => Math.max(0, maxMarks ? Math.min(maxMarks, n) : n);
+  const step = (d: number) => setScore((prev) => String(clamp((Number(prev) || 0) + d)));
 
   const handleConfirm = async () => {
     if (!submissionId) return;
-    const num = Math.max(0, parseInt(score, 10) || 0);
-    await onGrade(submissionId, num, feedback);
-    onClose();
+    if (score.trim() === '' || Number.isNaN(Number(score))) {
+      Alert.alert('Marks needed', 'Enter the marks before saving.');
+      return;
+    }
+    setSaving(true);
+    try {
+      await onGrade(submissionId, clamp(Number(score)), feedback.trim());
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   };
 
+  const initials = (studentName || '?')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join('');
+
   return (
-    <Modal visible={visible} transparent animationType="slide">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        className="flex-1 justify-end bg-black/50"
-      >
-        <View className="bg-white rounded-t-3xl p-6 gap-3.5 max-h-[85%] border-t border-slate-200">
-          <View className="flex-row items-center justify-between">
-            <Text className="text-base font-display text-slate-900">Grade Student Homework</Text>
-            <TouchableOpacity onPress={onClose}>
-              <X size={20} color="#6E6A63" />
-            </TouchableOpacity>
+    <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 bg-paper">
+        <View className="px-5 pt-12 pb-2 flex-row items-center justify-between">
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            onPress={onClose}
+            className="w-12 h-12 rounded-full bg-white items-center justify-center"
+          >
+            <X size={20} color="#1C1C1E" />
+          </TouchableOpacity>
+          <Text className="font-sans-bold text-ink text-sm">Grade submission</Text>
+          <View className="w-12" />
+        </View>
+
+        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, gap: 14, paddingBottom: 40 }}>
+          <View className="flex-row items-center gap-3">
+            <View className="w-12 h-12 rounded-full bg-pastel-sky items-center justify-center">
+              <Text className="font-display text-ink">{initials}</Text>
+            </View>
+            <View className="flex-1 min-w-0">
+              <Text className="font-display text-ink text-[22px]" numberOfLines={1}>
+                {studentName || 'Student'}
+              </Text>
+              <Text className="font-sans text-muted text-[13px]" numberOfLines={1}>
+                {[assignmentTitle, submittedAt].filter(Boolean).join(' · ')}
+              </Text>
+            </View>
           </View>
 
-          <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} className="gap-3.5" contentContainerStyle={{ paddingBottom: 60 }}>
-            {/* AI Suggestion Box if available */}
-            {aiStatus === 'pending_review' && aiScore !== null && aiScore !== undefined && (
-              <View className="bg-indigo-50 border border-indigo-200 rounded-2xl p-3.5 gap-2">
-                <View className="flex-row items-center justify-between">
-                  <Text className="text-xs font-display text-indigo-950">
-                    🤖 Gemini Evaluation Suggestion
-                  </Text>
-                  <Text className="text-[10px] font-sans-bold text-indigo-700 bg-white px-2 py-0.5 rounded-full border border-indigo-100">
-                    Pending Teacher Review
-                  </Text>
-                </View>
-
-                <Text className="text-xs text-indigo-900 font-sans-semibold">
-                  Suggested Score: <Text className="font-display text-indigo-600">{aiScore} / 25</Text>
-                </Text>
-
-                {aiFeedback ? (
-                  <Text className="text-[11px] text-indigo-800 italic bg-white/70 p-2 rounded-xl border border-indigo-100">
-                    "{aiFeedback}"
-                  </Text>
-                ) : null}
-
-                <Text className="text-[10px] text-indigo-600">
-                  Privacy guaranteed: Zero student PII was shared with AI. Review or edit above inputs before approving.
-                </Text>
-              </View>
-            )}
-
-            <View>
-              <Text className="text-xs font-sans-bold text-slate-700 mb-1">Marks Awarded (out of 25)</Text>
-              <TextInput
-                placeholder="24"
-                keyboardType="numeric"
-                value={score}
-                onChangeText={setScore}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 font-sans-bold"
-              />
-            </View>
-
-            <View>
-              <Text className="text-xs font-sans-bold text-slate-700 mb-1">Teacher Feedback / Observations</Text>
-              <TextInput
-                placeholder="Add teacher feedback or step correction..."
-                placeholderTextColor="#8C877E"
-                value={feedback}
-                onChangeText={setFeedback}
-                multiline
-                numberOfLines={3}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800"
-              />
-            </View>
-
+          {fileUrl ? (
             <TouchableOpacity
-              onPress={handleConfirm}
-              className="bg-emerald-600 py-3 rounded-2xl items-center shadow-xs mt-2 mb-4"
+              accessibilityRole="button"
+              onPress={() => openSubmissionFile(fileUrl)}
+              className="bg-white rounded-3xl p-4 flex-row items-center gap-3"
             >
-              <Text className="text-xs font-sans-bold text-white">Approve Grade & Publish to Student ✅</Text>
+              <View className="w-11 h-11 rounded-2xl bg-paper items-center justify-center">
+                <FileText size={20} color="#1C1C1E" />
+              </View>
+              <Text className="flex-1 font-sans-bold text-ink text-[15px]">Open answer sheet</Text>
             </TouchableOpacity>
-          </ScrollView>
+          ) : null}
+
+          {hasAi ? (
+            <View className="bg-pastel-lilac rounded-3xl p-4 gap-1.5">
+              <Text className="font-sans-bold text-[#3A2466] text-[13px]">
+                Suggested by Acadly · {aiScore}
+                {maxMarks ? ` / ${maxMarks}` : ''}
+              </Text>
+              {aiFeedback ? <Text className="font-serif-medium text-ink text-[17px] leading-6">{aiFeedback}</Text> : null}
+              <Text className="font-sans text-[#3A2466] text-xs">A suggestion only — you decide the final mark.</Text>
+              <TouchableOpacity
+                accessibilityRole="button"
+                onPress={() => {
+                  setScore(String(aiScore));
+                  if (aiFeedback) setFeedback(aiFeedback);
+                }}
+                className="self-start mt-1 h-9 px-3.5 rounded-full bg-white justify-center"
+              >
+                <Text className="font-sans-bold text-ink text-sm">Use suggestion</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+
+          <View className="bg-white rounded-3xl p-4 gap-3">
+            <View className="flex-row items-center justify-between">
+              <Text className="font-sans-bold text-ink text-[15px]">Score</Text>
+              <View className="flex-row items-center gap-2">
+                <TouchableOpacity accessibilityRole="button" accessibilityLabel="Decrease score" onPress={() => step(-1)} className="w-11 h-11 rounded-full bg-paper items-center justify-center">
+                  <Text className="font-display text-ink text-xl">−</Text>
+                </TouchableOpacity>
+                <TextInput
+                  accessibilityLabel="Score"
+                  value={score}
+                  onChangeText={setScore}
+                  keyboardType="numeric"
+                  placeholder="—"
+                  placeholderTextColor="#8C877E"
+                  className="w-16 text-center font-serif text-ink text-[28px]"
+                />
+                {maxMarks ? <Text className="font-sans text-muted text-[15px]">/ {maxMarks}</Text> : null}
+                <TouchableOpacity accessibilityRole="button" accessibilityLabel="Increase score" onPress={() => step(1)} className="w-11 h-11 rounded-full bg-paper items-center justify-center">
+                  <Text className="font-display text-ink text-xl">+</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <Text className="font-sans-bold text-muted text-xs">Note for {studentName?.split(' ')[0] || 'the student'}</Text>
+            <TextInput
+              accessibilityLabel="Feedback"
+              value={feedback}
+              onChangeText={setFeedback}
+              placeholder="What went well, what to fix"
+              placeholderTextColor="#8C877E"
+              multiline
+              className="bg-paper rounded-2xl px-3.5 py-3 font-sans text-ink text-[15px] min-h-[88px]"
+              textAlignVertical="top"
+            />
+          </View>
+        </ScrollView>
+
+        <View className="px-5 pb-8 pt-2 flex-row gap-2.5">
+          <TouchableOpacity accessibilityRole="button" onPress={onClose} className="h-14 px-6 rounded-full bg-white items-center justify-center">
+            <Text className="font-sans-bold text-ink text-base">Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityState={{ busy: saving, disabled: saving }}
+            disabled={saving}
+            onPress={handleConfirm}
+            className={`flex-1 h-14 rounded-full bg-ink items-center justify-center ${saving ? 'opacity-60' : ''}`}
+          >
+            {saving ? <ActivityIndicator color="#FFFFFF" /> : <Text className="font-sans-bold text-white text-[17px]">Save grade</Text>}
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </Modal>

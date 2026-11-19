@@ -7,11 +7,14 @@ import {
 } from '@/hooks/queries/useAssignmentQueries';
 import { useUploadMaterial } from '@/hooks/queries/useMaterialQueries';
 import { notifyHomeworkPublished } from '@/services/notificationService';
+import { batchNotifyAbsentParents } from '@/services/attendanceService';
 import { type Student360Profile } from '@/types/database';
 import { type AttendanceStatus } from '@/components/ui';
 import { type InteractiveQuestion } from '@/components/academic';
 
 interface UseTeacherActionsParams {
+  /** Send one batched alert to parents of absent students after saving. */
+  notifyParentsOfAbsence?: boolean;
   selectedBatchId: string;
   activeBatchName: string;
   activeInstituteId?: string;
@@ -33,6 +36,7 @@ interface UseTeacherActionsParams {
 }
 
 export function useTeacherActions({
+  notifyParentsOfAbsence = false,
   selectedBatchId,
   activeBatchName,
   activeInstituteId,
@@ -84,9 +88,18 @@ export function useTeacherActions({
         records,
       });
 
+      // The "Tell parents" switch used to be cosmetic; now it sends the batched alert.
+      const absentCount = records.filter((r) => r.status === 'A').length;
+      let notified = 0;
+      if (notifyParentsOfAbsence && absentCount > 0) {
+        const res = await batchNotifyAbsentParents(selectedBatchId, todayStr, ctx.instituteId).catch(() => null);
+        notified = res?.notifiedCount ?? 0;
+      }
+
       Alert.alert(
-        'Attendance Committed ✅',
-        `Roll call for ${activeBatchName} (${records.length} students) has been successfully saved to database.`
+        'Roll call saved',
+        `${activeBatchName}: ${records.length} students.` +
+          (notifyParentsOfAbsence && absentCount > 0 ? ` ${notified} parent${notified === 1 ? '' : 's'} notified.` : '')
       );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';

@@ -86,22 +86,12 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View className="flex-1 bg-black/50 justify-end">
-        <View className="bg-white dark:bg-slate-900 rounded-t-3xl p-5 max-h-[85%] border-t border-slate-200 dark:border-slate-800 gap-3">
-          <View className="flex-row items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-            <View className="flex-row items-center gap-2">
-              <View className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 items-center justify-center">
-                <Bell size={16} color="#1C1C1E" />
-              </View>
-              <View>
-                <Text className="text-base font-display text-slate-900 dark:text-slate-100">
-                  Notification Center
-                </Text>
-                <Text className="text-[11px] text-slate-500">
-                  Academic, homework and attendance alerts
-                </Text>
-              </View>
-            </View>
+      <View className="flex-1 bg-black/40 justify-end">
+        <View className="bg-paper rounded-t-[28px] px-5 pt-5 pb-2 max-h-[92%] gap-4">
+          <View className="flex-row items-center justify-between">
+            <Text accessibilityRole="header" className="text-[30px] leading-[34px] font-display text-ink">
+              Notifications
+            </Text>
 
             <View className="flex-row items-center gap-2">
               {notifications.some((n) => !n.read_at) && (
@@ -151,21 +141,17 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
                 return (
                   <View
                     key={n.id}
-                    className={`p-3.5 rounded-2xl border ${
-                      isUnread
-                        ? 'bg-blue-50/70 border-blue-200 dark:bg-blue-950/40 dark:border-blue-800'
-                        : 'bg-white border-slate-200/80 dark:bg-slate-800 dark:border-slate-700'
-                    }`}
+                    className="p-4 rounded-3xl bg-white"
                   >
                     <View className="flex-row items-center justify-between mb-1">
-                      <Text className="text-xs font-sans-bold text-slate-900 dark:text-slate-100">
+                      <Text className={`flex-1 pr-2 text-[15px] text-ink ${isUnread ? 'font-sans-bold' : 'font-sans'}`}>
                         {n.title}
                       </Text>
                       {isUnread && (
-                        <View className="w-2 h-2 rounded-full bg-blue-600" />
+                        <View accessibilityLabel="Unread" className="w-2.5 h-2.5 rounded-full bg-rose-600" />
                       )}
                     </View>
-                    <Text className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    <Text className="text-[13px] font-sans text-muted leading-[18px]">
                       {n.body}
                     </Text>
                     <View className="flex-row items-center gap-1 mt-2">

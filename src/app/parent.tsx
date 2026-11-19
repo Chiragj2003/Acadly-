@@ -27,6 +27,7 @@ import {
   ParentProfileTab,
   LinkChildModal,
 } from '@/components/screens/parent';
+import { ParentReport } from '@/components/screens/parent/ParentReport';
 
 export default function ParentScreen() {
   const { isAuthorized, isLoading } = useRoleGuard(['parent', 'admin']);
@@ -160,7 +161,11 @@ export default function ParentScreen() {
         />
       )}
 
-      {activeTab === 'fees_reports' && (
+      {activeTab === 'fees_reports' && !FEATURE_FEES && (
+        <ParentReport child={selectedChild} onLinkChild={() => setIsLinkChildModalOpen(true)} onDownload={handleDownloadReport} />
+      )}
+
+      {activeTab === 'fees_reports' && FEATURE_FEES && (
         <ParentFeesTab
           selectedChild={selectedChild}
           studentFees={studentFees}
@@ -175,6 +180,9 @@ export default function ParentScreen() {
       {activeTab === 'profile' && (
         <ParentProfileTab
           userEmail={user?.email}
+          userName={user?.full_name}
+          childrenList={childrenList}
+          onLinkChild={() => setIsLinkChildModalOpen(true)}
           selectedChild={selectedChild}
           onLogout={handleLogout}
         />

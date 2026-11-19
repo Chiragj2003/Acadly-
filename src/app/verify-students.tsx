@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { UserCheck, RefreshCw } from 'lucide-react-native';
+import { View, Text, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { ChevronLeft, RefreshCw } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { ScreenWrapper, ListLoadingSkeleton, ListEmptyState, ListErrorState } from '@/components/ui';
+import { ScreenWrapper, ListLoadingSkeleton, ListErrorState, DisplayTitle, Mascot } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useRoleGuard } from '@/hooks/useRoleGuard';
 import {
@@ -39,7 +39,7 @@ export default function VerifyStudentsScreen() {
 
   const [selectedRequest, setSelectedRequest] = useState<JoinRequestRow | null>(null);
   const [selectedBatchId, setSelectedBatchId] = useState<string>('');
-  const [selectedFeePlan, setSelectedFeePlan] = useState<string>('Standard Monthly (₹3,500/mo)');
+  const [selectedFeePlan, setSelectedFeePlan] = useState<string>('');
   const [modalVisible, setModalVisible] = useState(false);
   const [rejectModalVisible, setRejectModalVisible] = useState(false);
   const [rejectReason, setRejectReason] = useState('Seat capacity reached for current intake');
@@ -143,65 +143,64 @@ export default function VerifyStudentsScreen() {
     }
   };
 
+  const tones = ['pink', 'sky', 'mint', 'lilac'] as const;
+
   return (
-    <ScreenWrapper
-      scrollable={false}
-      headerProps={{
-        title: 'Student Verification Queue',
-        instituteName: activeInstitute?.name || 'Classroom Portal',
-        onBackPress: () => router.back(),
-        rightAction: (
-          <TouchableOpacity onPress={() => refetchRequests()} className="p-1">
-            <RefreshCw size={18} color="#1C1C1E" />
-          </TouchableOpacity>
-        ),
-      }}
-    >
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 140 }}
-        contentContainerClassName="gap-3.5"
-      >
-        <View className="bg-blue-600 rounded-3xl p-5 shadow-xs">
-          <View className="flex-row items-center gap-2 mb-1">
-            <UserCheck size={18} color="#93C5FD" />
-            <Text className="text-sm font-display text-white">Student Admission Desk</Text>
-          </View>
-          <Text className="text-xs text-blue-100 leading-relaxed">
-            Review incoming student registration applications, assign batches, and verify enrolled
-            profiles.
+    <ScreenWrapper contentContainerClassName="gap-4 px-5 pt-3">
+      <View className="flex-row items-center justify-between h-12">
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+          onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+          className="w-12 h-12 rounded-full bg-white items-center justify-center"
+        >
+          <ChevronLeft size={22} color="#1C1C1E" />
+        </TouchableOpacity>
+        <Text className="font-sans-bold text-ink text-sm">
+          {pendingRequests.length > 0 ? `${pendingRequests.length} waiting` : 'All clear'}
+        </Text>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Refresh"
+          onPress={() => refetchRequests()}
+          className="w-12 h-12 rounded-full bg-white items-center justify-center"
+        >
+          <RefreshCw size={18} color="#1C1C1E" />
+        </TouchableOpacity>
+      </View>
+
+      <DisplayTitle center>{pendingRequests.length > 0 ? 'New join requests' : 'You’re all caught up.'}</DisplayTitle>
+
+      {isRequestsLoading && <ListLoadingSkeleton count={2} height={240} />}
+
+      {isRequestsError && (
+        <ListErrorState
+          title="Couldn’t load requests"
+          message={requestsError instanceof Error ? requestsError.message : 'Please try again.'}
+          onRetry={() => refetchRequests()}
+        />
+      )}
+
+      {!isRequestsLoading && !isRequestsError && pendingRequests.length === 0 && (
+        <View className="items-center gap-4 py-6">
+          <Mascot mood="celebrating" size="xl" />
+          <Text className="font-sans text-slate-600 text-[15px] text-center px-6">
+            New requests appear here when students use your join code.
           </Text>
         </View>
+      )}
 
-        {isRequestsLoading && <ListLoadingSkeleton count={3} />}
-
-        {isRequestsError && (
-          <ListErrorState
-            title="Failed to Load Queue"
-            message={requestsError instanceof Error ? requestsError.message : 'Please try again.'}
-            onRetry={() => refetchRequests()}
-          />
-        )}
-
-        {!isRequestsLoading && !isRequestsError && pendingRequests.length === 0 && (
-          <ListEmptyState
-            title="All Caught Up!"
-            message="No students currently pending admission verification in this institute."
-            actionLabel="Refresh Roster"
-            onAction={() => refetchRequests()}
-          />
-        )}
-
-        {pendingRequests.map((req) => (
-          <VerifyRequestItem
-            key={req.id}
-            request={req}
-            onApprove={openApprovalModal}
-            onWaitlist={openWaitlistModal}
-            onReject={openRejectModal}
-          />
-        ))}
-      </ScrollView>
+      {pendingRequests.map((req, i) => (
+        <VerifyRequestItem
+          key={req.id}
+          request={req}
+          hero={i === 0}
+          tone={tones[i % tones.length]}
+          onApprove={openApprovalModal}
+          onWaitlist={openWaitlistModal}
+          onReject={openRejectModal}
+        />
+      ))}
 
       <ApproveStudentModal
         visible={modalVisible}

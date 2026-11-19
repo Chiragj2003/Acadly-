@@ -1,229 +1,161 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Switch, Alert, Share, ActivityIndicator } from 'react-native';
-import { Home, LogOut, FileDown, Download, Trash2 } from 'lucide-react-native';
-import { Badge, LanguageSwitcher } from '@/components/ui';
-import { exportStudentReportCardPDF } from '@/services/reportCardService';
+import { View, Text, TouchableOpacity, Alert, Share, ActivityIndicator } from 'react-native';
+import { LogOut, Download, Trash2, Plus } from 'lucide-react-native';
+import { LanguageSwitcher } from '@/components/ui';
 import { exportUserData, requestAccountDeletion } from '@/services/accountService';
 import { type ChildStudent } from '@/stores/useChildStore';
 
 interface ParentProfileTabProps {
   userEmail?: string;
+  userName?: string;
   selectedChild?: ChildStudent | null;
+  childrenList?: ChildStudent[];
+  onLinkChild?: () => void;
   onLogout: () => void;
 }
 
+const CHILD_TONES = ['bg-pastel-pink', 'bg-pastel-lilac', 'bg-pastel-sky', 'bg-pastel-mint'];
+
+const initialsOf = (name: string) =>
+  name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join('');
+
+/** Soft Desk parent account: you, your linked children, data and sign out. */
 export const ParentProfileTab: React.FC<ParentProfileTabProps> = ({
   userEmail,
-  selectedChild,
+  userName,
+  childrenList = [],
+  onLinkChild,
   onLogout,
 }) => {
-  const [smsAlerts, setSmsAlerts] = useState(true);
-  const [waDailyDigest, setWaDailyDigest] = useState(true);
-  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [isExportingData, setIsExportingData] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const handleDownloadReportCard = async () => {
-    if (!selectedChild) {
-      Alert.alert('No Child Selected', 'Please link or select a child first.');
-      return;
-    }
-
-    setIsExportingPdf(true);
-    try {
-      await exportStudentReportCardPDF({
-        studentName: selectedChild.full_name,
-        rollNumber: selectedChild.admission_number,
-        batchName: selectedChild.batch_name || 'Enrolled Batch',
-        instituteName: 'Acadly Academy Hub',
-        overallAttendanceRate: 94,
-        grade: selectedChild.grade || 'Class 12',
-        board: 'CBSE',
-        results: [
-          {
-            examTitle: 'Quarterly Physics & Chemistry Review',
-            subject: 'Physics',
-            marksObtained: 92,
-            maxMarks: 100,
-            percentage: 92,
-            grade: 'A+',
-            remarks: 'Exemplary performance across theoretical and practical questions.',
-          },
-        ],
-        teacherRemarks: [
-          'Excellent attendance and punctuality in online morning lectures.',
-          'Consistently completes weekly assignments with high precision.',
-        ],
-      });
-    } finally {
-      setIsExportingPdf(false);
-    }
-  };
 
   const handleExportData = async () => {
     setIsExportingData(true);
     try {
       const data = await exportUserData();
-      const jsonStr = JSON.stringify(data, null, 2);
-      await Share.share({
-        message: jsonStr,
-        title: 'Acadly_Parent_Data_Export.json',
-      });
+      await Share.share({ message: JSON.stringify(data, null, 2), title: 'Acadly_Parent_Data_Export.json' });
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Export failed';
-      Alert.alert('Export Error', msg);
+      Alert.alert('Export failed', err instanceof Error ? err.message : 'Please try again.');
     } finally {
       setIsExportingData(false);
     }
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Parent Account & Data? ⚠️',
-      'This will permanently anonymize your account profile, remove child links, and stop all notifications in compliance with app store privacy policies. This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Permanently Delete',
-          style: 'destructive',
-          onPress: async () => {
-            setIsDeleting(true);
-            try {
-              await requestAccountDeletion();
-              Alert.alert('Account Deletion Complete', 'Your account has been deleted.');
-              onLogout();
-            } catch (err: unknown) {
-              const msg = err instanceof Error ? err.message : 'Deletion failed';
-              Alert.alert('Error', msg);
-            } finally {
-              setIsDeleting(false);
-            }
-          },
+    Alert.alert('Delete your account?', 'This removes your profile and child links and stops all notifications. It can’t be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          setIsDeleting(true);
+          try {
+            await requestAccountDeletion();
+            onLogout();
+          } catch (err: unknown) {
+            Alert.alert('Couldn’t delete', err instanceof Error ? err.message : 'Please try again.');
+          } finally {
+            setIsDeleting(false);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
-    <View className="gap-3.5">
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
-        <View className="flex-row items-center gap-3.5">
-          <View className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
-            <Home size={28} color="#1C1C1E" />
-          </View>
-          <View className="flex-1 min-w-0">
-            <Text className="text-lg font-display text-slate-900">Primary Guardian</Text>
-            <Text className="text-xs text-slate-500">Verified Parent Portal</Text>
-            <Badge label="Free Parent Access" variant="success" />
-          </View>
+    <View className="gap-5">
+      <View className="bg-white rounded-3xl px-4 py-3.5 flex-row items-center gap-3.5">
+        <View className="w-14 h-14 rounded-full bg-pastel-peach items-center justify-center">
+          <Text className="font-display text-ink text-xl">{initialsOf(userName || userEmail || 'P') || 'P'}</Text>
         </View>
-
-        <View className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 gap-2">
-          <View className="flex-row justify-between">
-            <Text className="text-xs text-slate-500">Registered Email:</Text>
-            <Text className="text-xs font-sans-bold text-slate-800">
-              {userEmail || 'parent@tuition.app'}
+        <View className="flex-1 min-w-0">
+          <Text className="font-sans-bold text-ink text-[17px]" numberOfLines={1}>
+            {userName || 'Parent'}
+          </Text>
+          {userEmail ? (
+            <Text className="font-sans text-muted text-[13px]" numberOfLines={1}>
+              {userEmail}
             </Text>
-          </View>
-          <View className="flex-row justify-between">
-            <Text className="text-xs text-slate-500">Account Type:</Text>
-            <Text className="text-xs font-sans-bold text-blue-600">Parent / Guardian (Free)</Text>
-          </View>
-          {selectedChild && (
-            <View className="flex-row justify-between pt-1 border-t border-slate-200">
-              <Text className="text-xs text-slate-500">Active Ward:</Text>
-              <Text className="text-xs font-sans-bold text-slate-900">{selectedChild.full_name}</Text>
-            </View>
-          )}
-        </View>
-
-        {/* Academic Documents & PDF Export */}
-        <View className="gap-2 pt-2 border-t border-slate-100">
-          <Text className="text-xs font-sans-bold text-slate-500 uppercase tracking-wider">
-            Ward Academic Documents
-          </Text>
-
-          <TouchableOpacity
-            onPress={handleDownloadReportCard}
-            disabled={isExportingPdf}
-            className="bg-blue-50 border border-blue-200 p-3 rounded-2xl flex-row items-center justify-between active:scale-98"
-          >
-            <View className="flex-row items-center gap-2">
-              <FileDown size={16} color="#1C1C1E" />
-              <Text className="text-xs font-sans-bold text-blue-900">
-                Download {selectedChild ? `${selectedChild.full_name}'s ` : ''}Report Card (PDF)
-              </Text>
-            </View>
-            {isExportingPdf ? <ActivityIndicator size="small" color="#1C1C1E" /> : null}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={handleExportData}
-            disabled={isExportingData}
-            className="bg-slate-50 border border-slate-200 p-3 rounded-2xl flex-row items-center justify-between active:scale-98"
-          >
-            <View className="flex-row items-center gap-2">
-              <Download size={16} color="#4A463F" />
-              <Text className="text-xs font-sans-bold text-slate-700">Export Parent Account Records (JSON)</Text>
-            </View>
-            {isExportingData ? <ActivityIndicator size="small" color="#4A463F" /> : null}
-          </TouchableOpacity>
-        </View>
-
-        {/* Notification Preferences */}
-        <View className="gap-2 pt-2 border-t border-slate-100">
-          <Text className="text-xs font-sans-bold text-slate-500 uppercase tracking-wider">
-            Notification Preferences
-          </Text>
-
-          <View className="flex-row items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
-            <View className="flex-1 pr-2">
-              <Text className="text-xs font-sans-bold text-slate-800">Batched Attendance Alerts</Text>
-              <Text className="text-[11px] text-slate-500">Receive in-app alerts when roll call is committed</Text>
-            </View>
-            <Switch
-              value={waDailyDigest}
-              onValueChange={setWaDailyDigest}
-              trackColor={{ false: '#D8D3CA', true: '#1C1C1E' }}
-            />
-          </View>
-
-          <View className="flex-row items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
-            <View className="flex-1 pr-2">
-              <Text className="text-xs font-sans-bold text-slate-800">Academic Score Updates</Text>
-              <Text className="text-[11px] text-slate-500">Instant notification when new test results are published</Text>
-            </View>
-            <Switch
-              value={smsAlerts}
-              onValueChange={setSmsAlerts}
-              trackColor={{ false: '#D8D3CA', true: '#1C1C1E' }}
-            />
-          </View>
-        </View>
-
-        {/* App Language Switcher */}
-        <LanguageSwitcher className="mt-3 mb-1" />
-
-        {/* Account Deletion & Sign Out */}
-        <View className="gap-2 pt-2 border-t border-slate-100">
-          <TouchableOpacity
-            onPress={handleDeleteAccount}
-            disabled={isDeleting}
-            className="p-3 rounded-2xl flex-row items-center justify-center gap-2 active:scale-98"
-          >
-            <Trash2 size={14} color="#dc2626" />
-            <Text className="text-xs font-sans-bold text-rose-600">Delete Account & Data</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={onLogout}
-            className="bg-rose-50 border border-rose-200 p-3.5 rounded-2xl flex-row items-center justify-center gap-2 active:scale-98"
-          >
-            <LogOut size={16} color="#e11d48" />
-            <Text className="text-xs font-sans-bold text-rose-700">Sign Out of Parent Portal</Text>
-          </TouchableOpacity>
+          ) : null}
         </View>
       </View>
+
+      <View className="gap-2">
+        <Text className="font-sans-bold text-muted text-[13px] px-1.5">Linked children</Text>
+        <View className="bg-white rounded-3xl px-4 py-1">
+          {childrenList.map((c, i) => (
+            <View key={c.id} className="flex-row items-center gap-3 min-h-[62px] border-b border-hairline">
+              <View className={`w-10 h-10 rounded-full items-center justify-center ${CHILD_TONES[i % CHILD_TONES.length]}`}>
+                <Text className="font-display text-ink text-[13px]">{initialsOf(c.full_name)}</Text>
+              </View>
+              <View className="flex-1 min-w-0">
+                <Text className="font-sans-bold text-ink text-[15px]" numberOfLines={1}>
+                  {c.full_name}
+                </Text>
+                {c.batch_name ? (
+                  <Text className="font-sans text-muted text-xs" numberOfLines={1}>
+                    {c.batch_name}
+                  </Text>
+                ) : null}
+              </View>
+            </View>
+          ))}
+          {onLinkChild ? (
+            <TouchableOpacity accessibilityRole="button" onPress={onLinkChild} className="flex-row items-center gap-3 min-h-[56px]">
+              <View className="w-10 h-10 rounded-full border-[1.5px] border-dashed border-slate-400 items-center justify-center">
+                <Plus size={18} color="#1C1C1E" />
+              </View>
+              <Text className="font-sans-bold text-ink text-[15px]">Link a child</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+        <Text className="font-sans text-muted text-xs leading-[17px] px-1.5">
+          Only the institute can remove a link. Contact them if something looks wrong.
+        </Text>
+      </View>
+
+      <View className="gap-2">
+        <Text className="font-sans-bold text-muted text-[13px] px-1.5">Language</Text>
+        <LanguageSwitcher />
+      </View>
+
+      <View className="bg-white rounded-3xl px-4">
+        <TouchableOpacity
+          accessibilityRole="button"
+          onPress={handleExportData}
+          disabled={isExportingData}
+          className="flex-row items-center gap-3 min-h-[56px] border-b border-hairline"
+        >
+          <View className="w-9 h-9 rounded-full bg-paper items-center justify-center">
+            <Download size={17} color="#1C1C1E" />
+          </View>
+          <Text className="flex-1 font-sans-semibold text-ink text-[15px]">Download my data</Text>
+          {isExportingData ? <ActivityIndicator size="small" color="#1C1C1E" /> : null}
+        </TouchableOpacity>
+        <TouchableOpacity
+          accessibilityRole="button"
+          onPress={handleDeleteAccount}
+          disabled={isDeleting}
+          className="flex-row items-center gap-3 min-h-[56px]"
+        >
+          <View className="w-9 h-9 rounded-full bg-paper items-center justify-center">
+            <Trash2 size={17} color="#B42318" />
+          </View>
+          <Text className="flex-1 font-sans-semibold text-ink text-[15px]">Delete account</Text>
+          {isDeleting ? <ActivityIndicator size="small" color="#1C1C1E" /> : null}
+        </TouchableOpacity>
+      </View>
+
+      <TouchableOpacity accessibilityRole="button" onPress={onLogout} className="self-center min-h-[44px] flex-row items-center gap-2 px-4">
+        <LogOut size={16} color="#B42318" />
+        <Text className="font-sans-bold text-rose-700 text-[15px]">Sign out</Text>
+      </TouchableOpacity>
     </View>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Share, Alert, ActivityIndicator } from 'react-native';
-import { GraduationCap, Share2, LogOut, FileDown, Download, Trash2 } from 'lucide-react-native';
+import { Share2, LogOut, FileDown, Download, Trash2 } from 'lucide-react-native';
 import { LanguageSwitcher } from '@/components/ui';
 import { exportUserData, requestAccountDeletion } from '@/services/accountService';
 
@@ -14,6 +14,27 @@ interface StudentProfileSectionProps {
   overallAttendance?: number;
   onSignOut: () => void;
 }
+
+/** Settings row in the account card. */
+const Row: React.FC<{ label: string; value?: string; onPress: () => void; busy?: boolean; last?: boolean; icon: React.ReactNode }> = ({
+  label,
+  value,
+  onPress,
+  busy,
+  last,
+  icon,
+}) => (
+  <TouchableOpacity
+    accessibilityRole="button"
+    onPress={onPress}
+    disabled={busy}
+    className={`flex-row items-center gap-3 min-h-[56px] ${last ? '' : 'border-b border-hairline'}`}
+  >
+    <View className="w-9 h-9 rounded-full bg-paper items-center justify-center">{icon}</View>
+    <Text className="flex-1 font-sans-semibold text-ink text-[15px]">{label}</Text>
+    {busy ? <ActivityIndicator size="small" color="#1C1C1E" /> : value ? <Text className="font-sans text-muted text-sm">{value}</Text> : null}
+  </TouchableOpacity>
+);
 
 export const StudentProfileSection: React.FC<StudentProfileSectionProps> = ({
   name,
@@ -93,91 +114,80 @@ export const StudentProfileSection: React.FC<StudentProfileSectionProps> = ({
     );
   };
 
+  const initials = name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join('');
+
   return (
-    <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
-      <View className="flex-row items-center gap-3">
-        <View className="w-14 h-14 rounded-2xl bg-blue-100 border border-blue-200 items-center justify-center">
-          <GraduationCap size={28} color="#1C1C1E" />
+    <View className="gap-5">
+      {/* Who you are */}
+      <View className="items-center gap-2">
+        <View className="w-[92px] h-[92px] rounded-full bg-pastel-pink border-[3px] border-white items-center justify-center">
+          <Text className="font-display text-ink text-[32px]">{initials || 'S'}</Text>
         </View>
-        <View className="flex-1">
-          <Text className="text-base font-display text-slate-900">{name}</Text>
-          <Text className="text-xs text-slate-500">{email}</Text>
-          <Text className="text-[11px] text-blue-600 font-sans-bold mt-0.5">{batchName}</Text>
+        <Text className="font-display text-ink text-[28px]">{name}</Text>
+        {email ? <Text className="font-sans text-muted text-sm">{email}</Text> : null}
+      </View>
+
+      {/* My class */}
+      <View className="gap-2">
+        <Text className="font-sans-bold text-muted text-[13px] px-1.5">My class</Text>
+        <View className="bg-white rounded-3xl px-4 py-3 flex-row items-center gap-3">
+          <View className="w-10 h-10 rounded-2xl bg-pastel-sky items-center justify-center">
+            <Text className="font-display text-ink">{(batchName || 'A').charAt(0)}</Text>
+          </View>
+          <View className="flex-1 min-w-0">
+            <Text className="font-sans-bold text-ink text-[15px]" numberOfLines={1}>
+              {batchName}
+            </Text>
+            {rollNumber ? <Text className="font-sans text-muted text-xs">Roll {rollNumber}</Text> : null}
+          </View>
+          <View className="px-2.5 py-1 rounded-xl bg-pastel-mint">
+            <Text className="font-sans-bold text-ink text-xs">Active</Text>
+          </View>
         </View>
       </View>
 
-      {/* Parent Link Code Card */}
-      <View className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 gap-2">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-xs font-sans-bold text-slate-600 uppercase">Parent Link Code</Text>
+      {/* Invite a parent */}
+      <View className="bg-pastel-lilac border-[1.5px] border-ink rounded-3xl px-4 py-4 flex-row items-center gap-3">
+        <View className="flex-1 gap-1">
+          <Text className="font-sans-bold text-[#3A2466] text-[13px]">Invite a parent</Text>
+          <Text className="font-serif text-ink text-[26px] tracking-wide">{parentLinkCode || '—'}</Text>
+          <Text className="font-sans text-[#3A2466] text-xs leading-4">
+            {parentLinkCode ? 'They enter this in the Acadly parent app.' : 'Your code appears once your institute approves you.'}
+          </Text>
+        </View>
+        {parentLinkCode ? (
           <TouchableOpacity
+            accessibilityRole="button"
             onPress={handleShareCode}
-            className="flex-row items-center gap-1 bg-white border border-slate-200 px-2 py-1 rounded-lg"
+            className="h-11 px-4 rounded-full bg-ink flex-row items-center gap-1.5"
           >
-            <Share2 size={12} color="#1C1C1E" />
-            <Text className="text-[11px] font-sans-bold text-blue-600">Share with Parent</Text>
+            <Share2 size={14} color="#FFFFFF" />
+            <Text className="font-sans-bold text-white text-sm">Share</Text>
           </TouchableOpacity>
-        </View>
-        <Text className="text-lg font-display text-slate-900 tracking-wider">
-          {parentLinkCode || 'Not available yet'}
-        </Text>
-        <Text className="text-[11px] text-slate-500">
-          Your parent or guardian enters this code in their Acadly Parent Portal to view your daily attendance and term report cards.
-        </Text>
+        ) : null}
       </View>
 
-      {/* Data Export & Report Card Actions */}
-      <View className="gap-2 pt-2 border-t border-slate-100">
-        <Text className="text-xs font-sans-bold text-slate-500 uppercase tracking-wider">
-          Academic Documents & Data
-        </Text>
-
-        <TouchableOpacity
-          onPress={handleDownloadReportCard}
-          disabled={isExportingPdf}
-          className="bg-blue-50 border border-blue-200 p-3 rounded-2xl flex-row items-center justify-between active:scale-98"
-        >
-          <View className="flex-row items-center gap-2">
-            <FileDown size={16} color="#1C1C1E" />
-            <Text className="text-xs font-sans-bold text-blue-900">Download Term Report Card (PDF)</Text>
-          </View>
-          {isExportingPdf ? <ActivityIndicator size="small" color="#1C1C1E" /> : null}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={handleExportData}
-          disabled={isExportingData}
-          className="bg-slate-50 border border-slate-200 p-3 rounded-2xl flex-row items-center justify-between active:scale-98"
-        >
-          <View className="flex-row items-center gap-2">
-            <Download size={16} color="#4A463F" />
-            <Text className="text-xs font-sans-bold text-slate-700">Export My Academic Records (JSON)</Text>
-          </View>
-          {isExportingData ? <ActivityIndicator size="small" color="#4A463F" /> : null}
-        </TouchableOpacity>
+      {/* Settings */}
+      <View className="gap-2">
+        <Text className="font-sans-bold text-muted text-[13px] px-1.5">Language</Text>
+        <LanguageSwitcher />
       </View>
 
-      <LanguageSwitcher className="mt-1" />
-
-      {/* Account Deletion & Sign Out */}
-      <View className="gap-2 pt-2 border-t border-slate-100">
-        <TouchableOpacity
-          onPress={handleDeleteAccount}
-          disabled={isDeleting}
-          className="p-3 rounded-2xl flex-row items-center justify-center gap-2 active:scale-98"
-        >
-          <Trash2 size={14} color="#dc2626" />
-          <Text className="text-xs font-sans-bold text-rose-600">Delete Account & Data</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={onSignOut}
-          className="bg-rose-50 border border-rose-200 py-3 rounded-2xl flex-row items-center justify-center gap-2 active:scale-98"
-        >
-          <LogOut size={16} color="#be123c" />
-          <Text className="text-xs font-sans-bold text-rose-700">Sign Out of Student Portal</Text>
-        </TouchableOpacity>
+      <View className="bg-white rounded-3xl px-4">
+        <Row label="Report card" value="Soon" onPress={handleDownloadReportCard} busy={isExportingPdf} icon={<FileDown size={17} color="#1C1C1E" />} />
+        <Row label="Download my data" onPress={handleExportData} busy={isExportingData} icon={<Download size={17} color="#1C1C1E" />} />
+        <Row label="Delete account" onPress={handleDeleteAccount} busy={isDeleting} last icon={<Trash2 size={17} color="#B42318" />} />
       </View>
+
+      <TouchableOpacity accessibilityRole="button" onPress={onSignOut} className="self-center min-h-[44px] flex-row items-center gap-2 px-4">
+        <LogOut size={16} color="#B42318" />
+        <Text className="font-sans-bold text-rose-700 text-[15px]">Sign out</Text>
+      </TouchableOpacity>
     </View>
   );
 };

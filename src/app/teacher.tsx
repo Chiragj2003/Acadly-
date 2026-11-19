@@ -117,6 +117,7 @@ export default function TeacherScreen() {
   const { data: submissions = [] } = useBatchSubmissions(selectedBatchId || undefined);
 
   const [localAttendance, setLocalAttendance] = useState<Record<string, AttendanceStatus>>({});
+  const [waParentPing, setWaParentPing] = useState(true);
   const [localFeeOverrides, setLocalFeeOverrides] = useState<Record<string, string>>({});
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
@@ -140,6 +141,7 @@ export default function TeacherScreen() {
     handleAddLecture,
     handleGradeSubmission,
   } = useTeacherActions({
+    notifyParentsOfAbsence: waParentPing,
     selectedBatchId,
     activeBatchName: activeBatch.name,
     activeInstituteId: activeInstitute?.id,
@@ -153,7 +155,6 @@ export default function TeacherScreen() {
 
   // Tab & UI state
   const [activeTab, setActiveTab] = useState<'home' | 'roster' | 'publish' | 'exams_chat' | 'profile'>('home');
-  const [waParentPing, setWaParentPing] = useState(true);
   const [selectedCorrectionRecord, setSelectedCorrectionRecord] = useState<AttendanceRecord | null>(null);
 
   // Local Modal States
@@ -324,6 +325,7 @@ export default function TeacherScreen() {
           batchId={selectedBatchId}
           students={studentsRoster}
           localAttendance={localAttendance}
+          savedRecords={dbAttendance ?? []}
           isLoading={isAttendanceLoading}
           isSyncing={isSyncing}
           waParentPing={waParentPing}
@@ -337,6 +339,8 @@ export default function TeacherScreen() {
 
       {activeTab === 'publish' && (
         <TeacherPublishTab
+          batchName={activeBatch.name}
+          onOpenMarksEntry={() => setMarksEntryOpen(true)}
           submissions={submissions}
           assignments={assignments}
           onOpenInteractiveDpp={() => setIsInteractiveDppOpen(true)}
@@ -398,6 +402,7 @@ export default function TeacherScreen() {
         isScheduleEditorOpen={isScheduleEditorOpen}
         onCloseScheduleEditor={() => setScheduleEditorOpen(false)}
         gradingSubmission={gradingSubmission}
+        gradingAssignment={assignments.find((a) => a.id === gradingSubmission?.assignment_id)}
         onCloseGrading={() => setGradingSubmission(null)}
         onGradeSubmission={handleGradeSubmission}
         isCreateAssignmentOpen={isCreateAssignmentOpen}

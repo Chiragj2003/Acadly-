@@ -1,17 +1,9 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  Modal,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-} from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Modal, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator } from 'react-native';
 import { X } from 'lucide-react-native';
+import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { ChildStudent } from '@/context/ChildContext';
+import { DisplayTitle, Eyebrow } from '@/components/ui';
 
 interface LinkChildModalProps {
   visible: boolean;
@@ -19,76 +11,84 @@ interface LinkChildModalProps {
   onLinkChild: (code: string) => Promise<{ success: boolean; child?: ChildStudent; error?: string }>;
 }
 
-export const LinkChildModal: React.FC<LinkChildModalProps> = ({
-  visible,
-  onClose,
-  onLinkChild,
-}) => {
-  const [childCodeInput, setChildCodeInput] = useState('');
-  const [isLinkingChild, setIsLinkingChild] = useState(false);
+/** Decorative: two phones joined by a dotted line. */
+const LinkArt = () => (
+  <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" className="items-center my-3">
+    <Svg width={200} height={150} viewBox="0 0 200 150">
+      <Rect x={20} y={40} width={74} height={96} rx={18} fill="#F6C6DD" stroke="#1C1C1E" strokeWidth={1.5} />
+      <Rect x={106} y={22} width={74} height={114} rx={18} fill="#C9DCF4" stroke="#1C1C1E" strokeWidth={1.5} />
+      <Circle cx={57} cy={72} r={12} fill="#FFFFFF" stroke="#1C1C1E" strokeWidth={1.5} />
+      <Circle cx={143} cy={58} r={14} fill="#FFFFFF" stroke="#1C1C1E" strokeWidth={1.5} />
+      <Path d="M72 108h56" stroke="#1C1C1E" strokeWidth={1.5} strokeDasharray="4 5" strokeLinecap="round" />
+      <Circle cx={100} cy={108} r={9} fill="#3DBE6B" stroke="#1C1C1E" strokeWidth={1.5} />
+    </Svg>
+  </View>
+);
+
+/** Soft Desk "Link a child": one code field and one black pill. */
+export const LinkChildModal: React.FC<LinkChildModalProps> = ({ visible, onClose, onLinkChild }) => {
+  const [code, setCode] = useState('');
+  const [isLinking, setIsLinking] = useState(false);
 
   const handleSubmit = async () => {
-    if (!childCodeInput.trim()) {
-      Alert.alert('Required', 'Please enter a Student Link Code or registered phone number.');
+    if (!code.trim()) {
+      Alert.alert('Code needed', 'Enter the code from your child’s Acadly app.');
       return;
     }
-    setIsLinkingChild(true);
-    const res = await onLinkChild(childCodeInput.trim());
-    setIsLinkingChild(false);
+    setIsLinking(true);
+    const res = await onLinkChild(code.trim());
+    setIsLinking(false);
 
     if (res.success && res.child) {
       onClose();
-      setChildCodeInput('');
-      Alert.alert('Child Linked', `Successfully connected ${res.child.full_name} to your parent portal.`);
+      setCode('');
+      Alert.alert('Linked', `${res.child.full_name} is now on your Acadly.`);
     } else {
-      Alert.alert('Not Found', res.error || 'Could not verify student code. Please check with the tuition teacher.');
+      Alert.alert('Couldn’t link', res.error || 'Check the code with your child or their teacher.');
     }
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 24 : 0}
-        className="flex-1 justify-end bg-black/50"
-      >
-        <View className="bg-white rounded-t-3xl p-6 gap-3.5 max-h-[85%] border-t border-slate-200">
-          <View className="flex-row items-center justify-between">
-            <Text className="text-base font-display text-slate-900">Link Another Child</Text>
-            <TouchableOpacity onPress={onClose}>
-              <X size={20} color="#6E6A63" />
+    <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 bg-paper">
+        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingTop: 48, flexGrow: 1 }}>
+          <View className="flex-row justify-end">
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Close" onPress={onClose} className="w-11 h-11 items-end justify-center">
+              <X size={24} color="#1C1C1E" />
             </TouchableOpacity>
           </View>
 
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ gap: 14, paddingBottom: 36 }}
+          <Eyebrow center className="mt-2">Add a child</Eyebrow>
+          <DisplayTitle center className="mt-2">Enter the code{'\n'}from your child&apos;s app</DisplayTitle>
+          <Text className="font-sans text-slate-600 text-[15px] leading-[21px] text-center mt-2.5 px-4">
+            Your child finds it under Account → Invite a parent. Their institute may also link you automatically.
+          </Text>
+
+          <LinkArt />
+
+          <Text className="font-sans-bold text-muted text-[13px] px-1.5 mb-2">Student code</Text>
+          <TextInput
+            accessibilityLabel="Student code"
+            value={code}
+            onChangeText={(v) => setCode(v.toUpperCase())}
+            autoCapitalize="characters"
+            autoCorrect={false}
+            placeholder="STU-XXXX"
+            placeholderTextColor="#8C877E"
+            className="h-[62px] rounded-[22px] bg-white border-[1.5px] border-ink text-center font-serif text-ink text-[26px] tracking-widest"
+          />
+
+          <View className="flex-1 min-h-[24px]" />
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isLinking, busy: isLinking }}
+            disabled={isLinking}
+            onPress={handleSubmit}
+            className={`min-h-[56px] rounded-full bg-ink items-center justify-center ${isLinking ? 'opacity-60' : ''}`}
           >
-            <Text className="text-xs text-slate-500 leading-relaxed">
-              Enter your ward's unique Student Link Code (provided by their tuition teacher, e.g. STU-AMELIA-902) or the student's registered mobile number.
-            </Text>
-
-            <TextInput
-              placeholder="e.g. STU-AMELIA-902 or 9823044551"
-              placeholderTextColor="#8C877E"
-              value={childCodeInput}
-              onChangeText={setChildCodeInput}
-              autoCapitalize="characters"
-              className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-sans-bold"
-            />
-
-            <TouchableOpacity
-              onPress={handleSubmit}
-              disabled={isLinkingChild}
-              className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-1 active:scale-98"
-            >
-              <Text className="text-xs font-sans-bold text-white">
-                {isLinkingChild ? 'Verifying Student Code...' : 'Verify & Link Child'}
-              </Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
+            {isLinking ? <ActivityIndicator color="#FFFFFF" /> : <Text className="font-sans-bold text-white text-[17px]">Link child</Text>}
+          </TouchableOpacity>
+        </ScrollView>
       </KeyboardAvoidingView>
     </Modal>
   );

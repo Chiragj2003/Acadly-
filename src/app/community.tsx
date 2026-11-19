@@ -163,16 +163,16 @@ export default function PinterestCommunityScreen() {
             {activeTab === 'doubts' ? (
               <TouchableOpacity
                 onPress={() => setIsAsking(true)}
-                className="bg-blue-600 px-3 py-1.5 rounded-xl flex-row items-center gap-1 active:scale-95 shadow-xs"
+                className="bg-ink h-11 px-4 rounded-full flex-row items-center gap-1.5 active:opacity-90"
               >
                 <Plus size={14} color="white" />
-                <Text className="text-xs font-sans-bold text-white">Ask Doubt</Text>
+                <Text className="text-sm font-sans-bold text-white">Ask a doubt</Text>
               </TouchableOpacity>
             ) : (
               (userRole === 'teacher' || userRole === 'admin') && (
                 <TouchableOpacity
                   onPress={() => setIsUploadingPdf(true)}
-                  className="bg-blue-600 px-3 py-1.5 rounded-xl flex-row items-center gap-1 active:scale-95 shadow-xs"
+                  className="bg-ink h-11 px-4 rounded-full flex-row items-center gap-1.5 active:opacity-90"
                 >
                   <Upload size={14} color="white" />
                   <Text className="text-xs font-sans-bold text-white">Upload PDF</Text>
@@ -247,12 +247,21 @@ export default function PinterestCommunityScreen() {
             <FlashList
               data={filteredPosts}
               keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
+              renderItem={({ item, index }) => (
                 <CommunityPostItem
                   post={item}
+                  hero={index === 0 && !item.hasTeacherAnswer}
                   onUpvote={handleUpvote}
                   onOpenComments={(post) =>
-                    Alert.alert('Discussion', `Viewing discussion for: ${post.title}`)
+                    // Show the real replies (this used to be a placeholder alert).
+                    Alert.alert(
+                      post.title,
+                      post.comments.length === 0
+                        ? 'No replies yet.'
+                        : post.comments
+                            .map((c) => `${c.author}${c.role === 'teacher' ? ' (teacher)' : ''}: ${c.text}`)
+                            .join('\n\n')
+                    )
                   }
                 />
               )}

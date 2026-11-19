@@ -2,9 +2,50 @@ import 'react-native-url-polyfill/auto';
 import * as SecureStore from 'expo-secure-store';
 import { createClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const configuredUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+
+const PRIVATE_HOST = /^(localhost|127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)$/;
+
+/**
+ * In development, a local Supabase URL (localhost or a LAN IP) is pointed at the
+ * machine that is running Metro. Hard-coding a LAN IP in .env broke sign-in every
+ * time the Wi-Fi network (and so the PC's IP) changed.
+ */
+export function resolveDevSupabaseUrl(url: string, devHost: string | null | undefined): string {
+  try {
+    const parsed = new URL(url);
+    if (!devHost || !PRIVATE_HOST.test(parsed.hostname) || !PRIVATE_HOST.test(devHost)) return url;
+    parsed.hostname = devHost;
+    return parsed.toString().replace(/\/$/, '');
+  } catch {
+    return url;
+  }
+}
+
+const getDevHost = (): string | null => {
+  if (typeof __DEV__ === 'undefined' || !__DEV__) return null;
+  if (Platform?.OS === 'web') {
+    return typeof window !== 'undefined' ? window.location.hostname : null;
+  }
+  const hostUri = Constants.expoConfig?.hostUri ?? '';
+  return hostUri ? hostUri.split(':')[0] : null;
+};
+
+const supabaseUrl = configuredUrl ? resolveDevSupabaseUrl(configuredUrl, getDevHost()) : configuredUrl;
+
+/** True when the app talks to a Supabase running on a developer machine. */
+export const isLocalSupabase = (() => {
+  try {
+    return Boolean(supabaseUrl && PRIVATE_HOST.test(new URL(supabaseUrl).hostname));
+  } catch {
+    return false;
+  }
+})();
+
+export const supabaseEndpoint = supabaseUrl ?? '';
 
 if (!supabaseUrl || !supabaseKey) {
   throw new Error(

@@ -11,7 +11,7 @@ import {
   type InteractiveQuestion,
 } from '@/components/academic';
 import { type PDFDocumentContent } from '@/services/dummyPdfService';
-import { type AttendanceRecord, type Submission, type Student360Profile } from '@/types/database';
+import { type AttendanceRecord, type Assignment, type Submission, type Student360Profile } from '@/types/database';
 import {
   DualModeModal,
   UploadPdfModal,
@@ -59,6 +59,8 @@ interface TeacherScreenModalsProps {
 
   // Grading
   gradingSubmission: Submission | null;
+  /** Assignment for the submission being graded (title and real max marks). */
+  gradingAssignment?: Assignment;
   onCloseGrading: () => void;
   onGradeSubmission: (submissionId: string, score: number, feedback: string) => Promise<void>;
 
@@ -130,6 +132,7 @@ export const TeacherScreenModals: React.FC<TeacherScreenModalsProps> = ({
   onCloseScheduleEditor,
 
   gradingSubmission,
+  gradingAssignment,
   onCloseGrading,
   onGradeSubmission,
 
@@ -207,8 +210,13 @@ export const TeacherScreenModals: React.FC<TeacherScreenModalsProps> = ({
         visible={Boolean(gradingSubmission)}
         onClose={onCloseGrading}
         submissionId={gradingSubmission?.id || null}
-        initialScore={gradingSubmission?.marks_obtained || 23}
-        initialFeedback={gradingSubmission?.feedback || 'Well attempted derivation steps.'}
+        studentName={gradingSubmission?.student_name}
+        fileUrl={gradingSubmission?.file_url}
+        submittedAt={gradingSubmission?.submitted_at ? new Date(gradingSubmission.submitted_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : undefined}
+        assignmentTitle={gradingAssignment?.title}
+        maxMarks={gradingAssignment?.total_marks ?? gradingAssignment?.max_marks}
+        initialScore={gradingSubmission?.marks_obtained ?? gradingSubmission?.score ?? undefined}
+        initialFeedback={gradingSubmission?.feedback ?? ''}
         aiScore={gradingSubmission?.ai_score}
         aiFeedback={gradingSubmission?.ai_feedback}
         aiStatus={gradingSubmission?.ai_status}

@@ -40,9 +40,9 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
               <TouchableOpacity
                 key={idx}
                 onPress={() => setInputText(chip)}
-                className="bg-white border border-slate-200 px-2.5 py-1 rounded-xl active:scale-95"
+                className="bg-white h-[38px] px-3.5 rounded-full justify-center active:opacity-80"
               >
-                <Text className="text-[10px] font-sans-bold text-slate-600">{chip}</Text>
+                <Text className="text-[13px] font-sans-bold text-ink">{chip}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -70,13 +70,19 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
       )}
 
       {/* Input Dock */}
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-2 flex-row items-center gap-2 shadow-xs mb-2">
+      <View className="flex-row items-center gap-2 mb-2">
+       <View
+        style={{ shadowColor: '#1C1C1E', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.06, shadowRadius: 18, elevation: 3 }}
+        className="flex-1 bg-white rounded-full pl-1.5 pr-3 min-h-[54px] flex-row items-center gap-1.5"
+       >
         <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Attach a file"
           activeOpacity={0.88}
           onPress={onPickAttachment}
-          className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-200 items-center justify-center active:scale-95"
+          className="w-[42px] h-[42px] rounded-full items-center justify-center"
         >
-          <Paperclip size={18} color="#6E6A63" />
+          <Paperclip size={19} color="#1C1C1E" />
         </TouchableOpacity>
 
         <TextInput
@@ -89,19 +95,23 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
           value={inputText}
           onChangeText={setInputText}
           multiline
-          className="flex-1 max-h-24 text-xs font-sans-bold text-slate-800 px-2 py-1"
+          accessibilityLabel="Message"
+          className="flex-1 max-h-24 text-[15px] font-sans text-ink py-2"
         />
+       </View>
 
         <TouchableOpacity
           activeOpacity={0.88}
           onPress={onSend}
           disabled={!inputText.trim() && !stagedAttachment}
-          className={`w-10 h-10 rounded-2xl items-center justify-center shadow-xs active:scale-95 ${
-            inputText.trim() || stagedAttachment ? 'bg-blue-600' : 'bg-slate-100'
+          accessibilityRole="button"
+          accessibilityLabel="Send"
+          className={`w-[54px] h-[54px] rounded-full items-center justify-center ${
+            inputText.trim() || stagedAttachment ? 'bg-ink' : 'bg-white'
           }`}
         >
           <Send
-            size={16}
+            size={20}
             color={inputText.trim() || stagedAttachment ? '#ffffff' : '#8C877E'}
           />
         </TouchableOpacity>
