@@ -222,7 +222,7 @@ assert(teacherTsx.includes('contentContainerStyle={{ paddingBottom: 60 }}'), 'Te
 console.log('\n--- 10. TEACHER ATTENDANCE & BATCH SETTINGS AUDIT ---');
 assert(!teacherTsx.includes('markBatchAllPresent'), 'Mark All Present button is eliminated from teacher roll call (attendance simplified)');
 assert(teacherTsx.includes('min-w-[36px]') && (teacherTsx.includes('rollNumber') || teacherTsx.includes('roll_number')), 'Student roll number container auto-sizes to prevent text cutoff');
-assert(teacherTsx.includes('directorySearchQuery') && teacherTsx.includes('directoryFeeFilter'), 'Teacher settings includes searchable student directory with fee tracking');
+assert(teacherTsx.includes('Search students') && teacherTsx.includes('setFeeFilter'), 'Teacher settings includes searchable student directory with fee tracking');
 assert((teacherTsx.includes('batchesList') || teacherTsx.includes('TEACHER_BATCHES')) && teacherTsx.includes('setSelectedBatchId'), 'Teacher settings allows switching active batch and timings');
 
 // 11. Audit Dynamic Data & Identity Synchronization
