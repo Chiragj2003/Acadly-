@@ -1,5 +1,4 @@
-export * from './TeacherBatchFocus';
-export * from './TeacherHomeTab';
+﻿export * from './TeacherBatchFocus';
 export * from './TeacherAttendanceTab';
 export * from './TeacherPublishTab';
 export * from './TeacherExamsChatTab';

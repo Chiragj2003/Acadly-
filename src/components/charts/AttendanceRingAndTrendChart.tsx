@@ -29,14 +29,14 @@ export const AttendanceRingAndTrendChart: React.FC<AttendanceRingAndTrendChartPr
   const trendPoints = "10,50 35,45 60,30 85,38 110,22 135,15";
 
   return (
-    <View className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs mb-4">
+    <View className="bg-white border border-hairline rounded-3xl p-5 mb-4">
       <View className="flex-row items-center justify-between mb-4">
         <View>
           <Text className="text-base font-display text-slate-900">Attendance Consistency</Text>
           <Text className="text-xs text-slate-600">Monthly ring + 6-month trend</Text>
         </View>
-        <View className="bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-          <Text className="text-[10px] font-sans-bold text-emerald-700">
+        <View className="bg-pastel-mint-soft px-2.5 py-1 rounded-full border border-pastel-mint">
+          <Text className="text-xs font-sans-bold text-emerald-700">
             {effectiveRate >= 90 ? 'Target 90%+ Met' : `${effectiveRate}% Current`}
           </Text>
         </View>
@@ -71,13 +71,13 @@ export const AttendanceRingAndTrendChart: React.FC<AttendanceRingAndTrendChartPr
           </Svg>
           <View className="absolute items-center">
             <Text className="text-xl font-display text-slate-900">{effectiveRate}%</Text>
-            <Text className="text-[9px] font-sans-bold text-slate-600 uppercase">Rate</Text>
+            <Text className="text-xs font-sans-bold text-slate-600">Rate</Text>
           </View>
         </View>
 
         {/* 6-Month Trend Curve */}
-        <View className="flex-1 bg-slate-50 rounded-2xl p-3 border border-slate-200/80">
-          <Text className="text-[10px] font-sans-bold text-slate-600 uppercase mb-1">
+        <View className="flex-1 bg-slate-50 rounded-2xl p-3 border border-hairline">
+          <Text className="text-xs font-sans-bold text-slate-600 mb-1">
             6-Month Attendance Streak
           </Text>
           <Svg width="100%" height={60} viewBox="0 0 145 60">
@@ -98,17 +98,17 @@ export const AttendanceRingAndTrendChart: React.FC<AttendanceRingAndTrendChartPr
 
       {/* Stats Counter Trio */}
       <View className="flex-row gap-2">
-        <View className="flex-1 bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 items-center">
+        <View className="flex-1 bg-pastel-mint-soft border border-pastel-mint rounded-xl p-2.5 items-center">
           <Text className="text-xs font-sans-bold text-emerald-800">Present</Text>
           <Text className="text-base font-display text-emerald-900">{presentCount} Days</Text>
         </View>
 
-        <View className="flex-1 bg-amber-50 border border-amber-200 rounded-xl p-2.5 items-center">
+        <View className="flex-1 bg-pastel-butter-soft border border-pastel-butter rounded-xl p-2.5 items-center">
           <Text className="text-xs font-sans-bold text-amber-800">Late</Text>
           <Text className="text-base font-display text-amber-900">{lateCount} Days</Text>
         </View>
 
-        <View className="flex-1 bg-rose-50 border border-rose-200 rounded-xl p-2.5 items-center">
+        <View className="flex-1 bg-pastel-pink-soft border border-pastel-pink rounded-xl p-2.5 items-center">
           <Text className="text-xs font-sans-bold text-rose-800">Absent</Text>
           <Text className="text-base font-display text-rose-900">{absentCount} Day</Text>
         </View>

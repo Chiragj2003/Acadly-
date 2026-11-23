@@ -51,14 +51,14 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
 
       {/* Staged Attachment Preview */}
       {stagedAttachment && (
-        <View className="bg-blue-50 border border-blue-200 p-2.5 rounded-2xl flex-row items-center justify-between shadow-xs">
+        <View className="bg-blue-50 border border-blue-200 p-2.5 rounded-2xl flex-row items-center justify-between">
           <View className="flex-row items-center gap-2 flex-1 pr-2">
             <FileText size={16} color="#1C1C1E" />
             <View className="flex-1">
               <Text className="text-xs font-sans-bold text-slate-800" numberOfLines={1}>
                 {stagedAttachment.name}
               </Text>
-              <Text className="text-[10px] text-slate-500">
+              <Text className="text-xs text-slate-500">
                 {stagedAttachment.type.toUpperCase()} • {stagedAttachment.size}
               </Text>
             </View>

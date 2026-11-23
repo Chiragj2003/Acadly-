@@ -16,7 +16,7 @@ export const StudentAttendanceSection: React.FC<StudentAttendanceSectionProps> =
 
   if (isLoading) {
     return (
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs items-center">
+      <View className="bg-white border border-hairline rounded-3xl p-5 items-center">
         <ActivityIndicator size="small" color="#1C1C1E" />
         <Text className="text-xs text-slate-400 mt-2">Computing attendance records...</Text>
       </View>
@@ -28,7 +28,7 @@ export const StudentAttendanceSection: React.FC<StudentAttendanceSectionProps> =
   }
 
   return (
-    <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
+    <View className="bg-white border border-hairline rounded-3xl p-5 gap-3.5">
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
           <CalendarCheck size={18} color="#1C1C1E" />
@@ -36,15 +36,15 @@ export const StudentAttendanceSection: React.FC<StudentAttendanceSectionProps> =
         </View>
 
         {trend.streak > 0 && (
-          <View className="bg-amber-100 px-2.5 py-1 rounded-full flex-row items-center gap-1 border border-amber-200">
+          <View className="bg-pastel-butter px-2.5 py-1 rounded-full flex-row items-center gap-1 border border-pastel-butter">
             <Flame size={12} color="#d97706" />
-            <Text className="text-[10px] font-display text-amber-800">{trend.streak} Day Streak</Text>
+            <Text className="text-xs font-display text-amber-800">{trend.streak} Day Streak</Text>
           </View>
         )}
       </View>
 
       {/* Aggregate KPI */}
-      <View className="flex-row items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+      <View className="flex-row items-center justify-between bg-slate-50 p-4 rounded-2xl border border-hairline">
         <View>
           <Text className="text-xs font-sans-bold text-slate-500">Overall Rate</Text>
           <Text className="text-2xl font-display text-blue-700 mt-0.5">
@@ -53,15 +53,15 @@ export const StudentAttendanceSection: React.FC<StudentAttendanceSectionProps> =
         </View>
         <View className="flex-row gap-3">
           <View className="items-center">
-            <Text className="text-[10px] font-sans-bold text-emerald-600">Present</Text>
+            <Text className="text-xs font-sans-bold text-emerald-600">Present</Text>
             <Text className="text-sm font-display text-slate-800">{trend.presentCount}</Text>
           </View>
           <View className="items-center">
-            <Text className="text-[10px] font-sans-bold text-rose-600">Absent</Text>
+            <Text className="text-xs font-sans-bold text-rose-600">Absent</Text>
             <Text className="text-sm font-display text-slate-800">{trend.absentCount}</Text>
           </View>
           <View className="items-center">
-            <Text className="text-[10px] font-sans-bold text-amber-600">Late</Text>
+            <Text className="text-xs font-sans-bold text-amber-600">Late</Text>
             <Text className="text-sm font-display text-slate-800">{trend.lateCount}</Text>
           </View>
         </View>
@@ -70,7 +70,7 @@ export const StudentAttendanceSection: React.FC<StudentAttendanceSectionProps> =
       {/* Recent History Grid */}
       {trend.recentRecords.length > 0 && (
         <View className="gap-2 pt-1">
-          <Text className="text-xs font-sans-bold text-slate-600 uppercase tracking-wider">
+          <Text className="text-xs font-sans-bold text-slate-600">
             Recent Class Records
           </Text>
           <View className="flex-row flex-wrap gap-2">

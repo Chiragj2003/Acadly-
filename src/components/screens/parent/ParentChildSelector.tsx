@@ -17,9 +17,9 @@ export const ParentChildSelector: React.FC<ParentChildSelectorProps> = ({
   onOpenLinkModal,
 }) => {
   return (
-    <View className="bg-white border border-slate-200/90 rounded-3xl p-4 shadow-xs">
+    <View className="bg-white border border-hairline rounded-3xl p-4">
       <View className="flex-row items-center justify-between mb-2.5">
-        <Text className="text-xs font-sans-bold text-slate-500 uppercase tracking-wider">
+        <Text className="text-xs font-sans-bold text-slate-500">
           Enrolled Children ({childrenList.length})
         </Text>
         <TouchableOpacity
@@ -62,7 +62,7 @@ export const ParentChildSelector: React.FC<ParentChildSelectorProps> = ({
                   <Text className="text-xs font-sans-bold text-slate-900" numberOfLines={1}>
                     {c.full_name}
                   </Text>
-                  <Text className="text-[10px] text-slate-500" numberOfLines={1}>
+                  <Text className="text-xs text-slate-500" numberOfLines={1}>
                     {c.batch_name}
                   </Text>
                 </View>

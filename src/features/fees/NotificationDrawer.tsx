@@ -136,7 +136,7 @@ export const NotificationDrawer: React.FC = () => {
                   <Text className="text-xs text-on-surface-variant leading-snug">
                     {item.message}
                   </Text>
-                  <Text className="text-[10px] text-on-surface-variant font-sans mt-1">
+                  <Text className="text-xs text-on-surface-variant font-sans mt-1">
                     {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </Text>
                 </View>

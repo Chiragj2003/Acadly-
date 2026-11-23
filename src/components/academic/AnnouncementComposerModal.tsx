@@ -108,14 +108,14 @@ export const AnnouncementComposerModal: React.FC<AnnouncementComposerModalProps>
 
             {/* Priority Selector */}
             <View className="flex-row items-center gap-2">
-              <Text className="text-[11px] font-sans-bold text-slate-500 uppercase">Priority:</Text>
+              <Text className="text-[11px] font-sans-bold text-slate-500">Priority:</Text>
               <TouchableOpacity
                 onPress={() => setPriority('normal')}
                 className={`px-3 py-1 rounded-full border ${
                   priority === 'normal' ? 'bg-blue-50 border-blue-400' : 'bg-slate-50 border-slate-200'
                 }`}
               >
-                <Text className={`text-[10px] font-sans-bold ${priority === 'normal' ? 'text-blue-700' : 'text-slate-600'}`}>
+                <Text className={`text-xs font-sans-bold ${priority ==='normal' ?'text-blue-700' :'text-slate-600'}`}>
                   Normal
                 </Text>
               </TouchableOpacity>
@@ -125,7 +125,7 @@ export const AnnouncementComposerModal: React.FC<AnnouncementComposerModalProps>
                   priority === 'urgent' ? 'bg-rose-50 border-rose-400' : 'bg-slate-50 border-slate-200'
                 }`}
               >
-                <Text className={`text-[10px] font-sans-bold ${priority === 'urgent' ? 'text-rose-700' : 'text-slate-600'}`}>
+                <Text className={`text-xs font-sans-bold ${priority ==='urgent' ?'text-rose-700' :'text-slate-600'}`}>
                   Urgent ⚡
                 </Text>
               </TouchableOpacity>
@@ -162,7 +162,7 @@ export const AnnouncementComposerModal: React.FC<AnnouncementComposerModalProps>
             <TouchableOpacity
               onPress={handlePost}
               disabled={postMutation.isPending}
-              className="bg-blue-600 py-3 rounded-2xl items-center flex-row justify-center gap-1.5 shadow-xs active:scale-98"
+              className="bg-blue-600 py-3 rounded-2xl items-center flex-row justify-center gap-1.5 active:scale-98"
             >
               {postMutation.isPending ? (
                 <ActivityIndicator size="small" color="#ffffff" />

@@ -64,7 +64,7 @@ export const ApproveStudentModal: React.FC<ApproveStudentModalProps> = ({
           {isBatchesLoading ? (
             <ActivityIndicator size="small" color="#1C1C1E" className="my-2" />
           ) : batches.length === 0 ? (
-            <View className="p-3 bg-amber-50 border border-amber-200 rounded-xl mb-4">
+            <View className="p-3 bg-pastel-butter-soft border border-pastel-butter rounded-xl mb-4">
               <Text className="text-xs text-amber-800">
                 No active batches created in institute. Please create a batch first.
               </Text>
@@ -91,7 +91,7 @@ export const ApproveStudentModal: React.FC<ApproveStudentModalProps> = ({
                     >
                       {b.name}
                     </Text>
-                    <Text className="text-[10px] text-slate-500">
+                    <Text className="text-xs text-slate-500">
                       {b.subject || 'All Subjects'} • {b.student_count ?? 0} Students
                     </Text>
                   </TouchableOpacity>
@@ -130,8 +130,8 @@ export const ApproveStudentModal: React.FC<ApproveStudentModalProps> = ({
           <TouchableOpacity
             onPress={onConfirmApprove}
             disabled={isPending || batches.length === 0}
-            className={`bg-blue-600 py-3 rounded-2xl items-center shadow-xs active:scale-98 ${
-              isPending || batches.length === 0 ? 'opacity-60' : ''
+            className={`bg-blue-600 py-3 rounded-2xl items-center active:scale-98 ${
+              isPending || batches.length === 0 ?'opacity-60' :''
             }`}
           >
             {isPending ? (

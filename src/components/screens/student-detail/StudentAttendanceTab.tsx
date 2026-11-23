@@ -12,9 +12,9 @@ export const StudentAttendanceTab: React.FC<StudentAttendanceTabProps> = ({ stud
     <View className="gap-3.5">
       <AttendanceRingAndTrendChart percentage={student.overallAttendance || 0} />
 
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs">
+      <View className="bg-white border border-hairline rounded-3xl p-5">
         <Text className="text-sm font-sans-bold text-slate-900 mb-3">Roll Call Status</Text>
-        <View className="p-3 bg-slate-50 border border-slate-200/80 rounded-2xl">
+        <View className="p-3 bg-slate-50 border border-hairline rounded-2xl">
           <Text className="text-xs text-slate-700 font-sans">
             Overall Attendance Rate: <Text className="font-display text-blue-600">{student.overallAttendance}%</Text>
           </Text>

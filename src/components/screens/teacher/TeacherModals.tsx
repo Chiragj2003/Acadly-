@@ -245,7 +245,7 @@ export const UploadPdfModal: React.FC<UploadPdfModalProps> = ({
                       category === cat.id ? 'bg-blue-600 border-blue-600' : 'bg-slate-50 border-slate-200'
                     }`}
                   >
-                    <Text className={`text-[10px] font-sans-bold ${category === cat.id ? 'text-white' : 'text-slate-700'}`}>
+                    <Text className={`text-xs font-sans-bold ${category === cat.id ?'text-white' :'text-slate-700'}`}>
                       {cat.label}
                     </Text>
                   </TouchableOpacity>
@@ -269,7 +269,7 @@ export const UploadPdfModal: React.FC<UploadPdfModalProps> = ({
             <TouchableOpacity
               onPress={handleSubmit}
               disabled={isSubmitting}
-              className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-2 mb-4"
+              className="bg-blue-600 py-3 rounded-2xl items-center mt-2 mb-4"
             >
               <Text className="text-xs font-sans-bold text-white">
                 {isSubmitting ? 'Uploading PDF...' : 'Publish PDF to Batch'}
@@ -371,7 +371,7 @@ export const ExamMarksModal: React.FC<ExamMarksModalProps> = ({
                 >
                   <View className="flex-1 pr-2">
                     <Text className="text-xs font-sans-bold text-slate-800">{st.name}</Text>
-                    <Text className="text-[10px] text-slate-500 font-sans-semibold">{st.rollNumber}</Text>
+                    <Text className="text-xs text-slate-500 font-sans-semibold">{st.rollNumber}</Text>
                   </View>
 
                   <View className="w-20">
@@ -389,7 +389,7 @@ export const ExamMarksModal: React.FC<ExamMarksModalProps> = ({
 
             <TouchableOpacity
               onPress={handleSave}
-              className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mb-4"
+              className="bg-blue-600 py-3 rounded-2xl items-center mb-4"
             >
               <Text className="text-xs font-sans-bold text-white">Save Marks & Compute Ranks</Text>
             </TouchableOpacity>
@@ -704,7 +704,7 @@ export const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({
 
             <TouchableOpacity
               onPress={handleSubmit}
-              className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-2 mb-4"
+              className="bg-blue-600 py-3 rounded-2xl items-center mt-2 mb-4"
             >
               <Text className="text-xs font-sans-bold text-white">Publish Assignment to Batch</Text>
             </TouchableOpacity>
@@ -801,7 +801,7 @@ export const AddLectureModal: React.FC<AddLectureModalProps> = ({
 
             <TouchableOpacity
               onPress={handleSubmit}
-              className="bg-blue-600 py-3 rounded-2xl items-center shadow-xs mt-2 mb-4"
+              className="bg-blue-600 py-3 rounded-2xl items-center mt-2 mb-4"
             >
               <Text className="text-xs font-sans-bold text-white">Publish Video Lecture</Text>
             </TouchableOpacity>

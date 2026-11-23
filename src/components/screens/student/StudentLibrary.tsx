@@ -35,7 +35,7 @@ const Cover: React.FC<{ item: PDFMaterialItem; index: number }> = ({ item, index
       <Text className="font-serif text-ink text-sm leading-4" numberOfLines={4}>
         {item.title}
       </Text>
-      {item.subject ? <Text className="font-sans-bold text-ink text-[9px] uppercase">{item.subject}</Text> : null}
+      {item.subject ? <Text className="font-sans-bold text-ink text-xs">{item.subject}</Text> : null}
     </View>
     <Text className="font-sans-semibold text-ink text-xs leading-4" numberOfLines={2}>
       {item.title}
@@ -72,7 +72,7 @@ export const StudentLibrary: React.FC<StudentLibraryProps> = ({ instituteId, bat
           <Text className="font-serif text-ink text-sm leading-4" numberOfLines={4}>
             {latest.title}
           </Text>
-          {latest.subject ? <Text className="font-sans-bold text-ink text-[9px] uppercase">{latest.subject}</Text> : null}
+          {latest.subject ? <Text className="font-sans-bold text-ink text-xs">{latest.subject}</Text> : null}
         </View>
         <View className="flex-1 min-w-0 gap-1">
           <Text className="font-sans-semibold text-muted text-[13px]">Newest from your teachers</Text>

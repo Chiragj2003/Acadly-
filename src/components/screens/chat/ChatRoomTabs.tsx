@@ -55,7 +55,7 @@ export const ChatRoomTabs: React.FC<ChatRoomTabsProps> = ({
 
                 {room.unreadCount > 0 && !isSelected && (
                   <View className="bg-rose-500 w-4 h-4 rounded-full items-center justify-center">
-                    <Text className="text-[9px] font-display text-white">
+                    <Text className="text-xs font-display text-white">
                       {room.unreadCount}
                     </Text>
                   </View>

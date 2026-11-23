@@ -55,7 +55,8 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
       className="flex-1"
       contentContainerClassName={contentContainerClassName}
       contentContainerStyle={[
-        footer ? { paddingBottom: 120 } : { paddingBottom: Math.max(32, insets.bottom + 16) },
+        // Floating tab bar is ~72px tall plus its bottom offset; leave room so the last row clears it.
+        footer ? { paddingBottom: 140 + insets.bottom } : { paddingBottom: Math.max(32, insets.bottom + 16) },
         contentContainerStyle,
       ]}
       showsVerticalScrollIndicator={false}

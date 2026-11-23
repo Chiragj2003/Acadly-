@@ -155,7 +155,7 @@ export default function PinterestCommunityScreen() {
             </TouchableOpacity>
             <View>
               <Text className="text-base font-display text-slate-900">Academic Forum & Library</Text>
-              <Text className="text-[10px] text-slate-500">Peer discussions & shared study files</Text>
+              <Text className="text-xs text-slate-500">Peer discussions & shared study files</Text>
             </View>
           </View>
 
@@ -285,7 +285,7 @@ export default function PinterestCommunityScreen() {
               data={pdfMaterials.slice(0, 30)}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
-                <View className="bg-white border border-slate-200 rounded-2xl p-3.5 mb-2.5 flex-row items-center justify-between shadow-xs">
+                <View className="bg-white border border-slate-200 rounded-2xl p-3.5 mb-2.5 flex-row items-center justify-between">
                   <View className="flex-1 mr-2">
                     <Text className="text-xs font-sans-bold text-slate-900">{item.title}</Text>
                     <Text className="text-[11px] text-slate-500">
@@ -293,7 +293,7 @@ export default function PinterestCommunityScreen() {
                     </Text>
                   </View>
                   <View className="bg-blue-50 px-2 py-1 rounded-lg border border-blue-200">
-                    <Text className="text-[10px] font-sans-bold text-blue-700">PDF</Text>
+                    <Text className="text-xs font-sans-bold text-blue-700">PDF</Text>
                   </View>
                 </View>
               )}

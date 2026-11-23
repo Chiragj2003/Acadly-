@@ -75,7 +75,7 @@ export const LinkChildModal: React.FC<LinkChildModalProps> = ({ visible, onClose
             autoCorrect={false}
             placeholder="STU-XXXX"
             placeholderTextColor="#8C877E"
-            className="h-[62px] rounded-[22px] bg-white border-[1.5px] border-ink text-center font-serif text-ink text-[26px] tracking-widest"
+            className="h-[62px] rounded-[22px] bg-white border-[1.5px] border-ink text-center font-serif text-ink text-[26px]"
           />
 
           <View className="flex-1 min-h-[24px]" />

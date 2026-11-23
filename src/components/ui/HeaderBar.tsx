@@ -1,8 +1,6 @@
 import React from 'react';
-import { View, Text, Pressable, Platform, StyleSheet } from 'react-native';
-import { Bell, ChevronDown, ArrowLeft, User, LogOut, Languages } from 'lucide-react-native';
-import { useTranslation } from 'react-i18next';
-import { setAppLanguage } from '@/i18n';
+import { View, Text, Pressable } from 'react-native';
+import { Bell, ChevronDown, ArrowLeft, User, LogOut } from 'lucide-react-native';
 
 export interface HeaderBarProps {
   title: string;
@@ -35,14 +33,6 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   variant = 'default',
   className = '',
 }) => {
-  const { i18n } = useTranslation();
-  const isHindi = i18n.language ? i18n.language.startsWith('hi') : false;
-
-  const handleToggleLanguage = async () => {
-    const nextLang = isHindi ? 'en' : 'hi';
-    await setAppLanguage(nextLang);
-  };
-
   return (
     <View
       style={{ height: 64 }}
@@ -88,7 +78,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           </Text>
 
           {instituteSubtitle && (
-            <Text className="text-[10px] font-sans text-slate-500" numberOfLines={1}>
+            <Text className="text-xs font-sans text-slate-500" numberOfLines={1}>
               {instituteSubtitle}
             </Text>
           )}
@@ -96,20 +86,9 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
       </View>
 
       {/* Right Action Icons Zone */}
+      {/* Kept to two or three round buttons so the title has room on a phone.
+          Language and sign out live in each role's Profile / Account screen. */}
       <View className="flex-row items-center gap-2 shrink-0">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Toggle app language"
-          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-          onPress={handleToggleLanguage}
-          className="h-11 px-3 rounded-full bg-white flex-row items-center gap-1.5 active:opacity-80"
-        >
-          <Languages size={14} color="#1C1C1E" />
-          <Text className="text-xs font-sans-bold text-ink">
-            {isHindi ? 'हिन्दी' : 'EN'}
-          </Text>
-        </Pressable>
-
         {rightAction}
 
         {onNotificationPress && (
@@ -134,8 +113,8 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
             onPress={onProfilePress}
             className={`w-11 h-11 rounded-full border-2 border-white items-center justify-center active:opacity-80 ${
-              variant === 'student' ? 'bg-pastel-pink' : variant === 'calm' ? 'bg-pastel-sky' : 'bg-pastel-peach'
-            }`}
+ variant === 'student'? 'bg-pastel-pink' : variant === 'calm' ? 'bg-pastel-sky' : 'bg-pastel-peach'
+ }`}
           >
             {profileInitials ? (
               <Text className="text-sm font-display text-ink">

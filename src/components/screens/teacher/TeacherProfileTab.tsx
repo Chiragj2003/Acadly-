@@ -1,27 +1,7 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  Linking,
-} from 'react-native';
-import {
-  Users,
-  Search,
-  X,
-  ShieldCheck,
-  AlertTriangle,
-  Phone,
-  ChevronRight,
-  Share2,
-  Clock,
-  Check,
-  Calendar,
-  LogOut,
-} from 'lucide-react-native';
-import { FlashList } from '@shopify/flash-list';
-import { Badge, LanguageSwitcher } from '@/components/ui';
+import { View, Text, Pressable, TextInput, Linking } from 'react-native';
+import { Search, X, Phone, ChevronRight, Share2, Calendar, LogOut, Check, Repeat } from 'lucide-react-native';
+import { LanguageSwitcher, SectionTitle, Avatar, ListRow, initialsOf } from '@/components/ui';
 import { type Student360Profile } from '@/types/database';
 import { type BatchItemDisplay } from './TeacherBatchFocus';
 
@@ -43,11 +23,27 @@ interface TeacherProfileTabProps {
   onShareTeacherCode: () => void;
   onOpenDualMode: () => void;
   onOpenScheduleEditor: () => void;
-  onUpdateFeeStatus: (studentId: string, status: string) => void;
+  /** No longer used: fee status is read-only here (the old toggle only changed local state). */
+  onUpdateFeeStatus?: (studentId: string, status: string) => void;
   onViewStudentDetail: (studentId: string) => void;
   onLogout: () => void;
 }
 
+type FeeFilter = 'all' | 'paid' | 'due';
+const AVATAR_TONES = ['pink', 'sky', 'peach', 'mint', 'lilac', 'butter'] as const;
+
+const isPaid = (status: string) => status.toLowerCase().includes('paid');
+
+/** White grouped card, the same container the student and parent accounts use. */
+const Group: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <View className="bg-white rounded-3xl px-4 py-1">{children}</View>
+);
+
+const RowIcon: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <View className="w-9 h-9 rounded-full bg-paper items-center justify-center">{children}</View>
+);
+
+/** Teacher account: share code, batches, student directory, settings. */
 export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
   teacherProfile,
   teacherMode,
@@ -59,338 +55,238 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
   onShareTeacherCode,
   onOpenDualMode,
   onOpenScheduleEditor,
-  onUpdateFeeStatus,
   onViewStudentDetail,
   onLogout,
 }) => {
-  const [directorySearchQuery, setDirectorySearchQuery] = useState('');
-  const [directoryFeeFilter, setDirectoryFeeFilter] = useState<'all' | 'paid' | 'pending'>('all');
+  const [query, setQuery] = useState('');
+  const [feeFilter, setFeeFilter] = useState<FeeFilter>('all');
 
-  const filteredStudents = studentsRoster.filter((st) => {
-    const matchesSearch =
-      st.name.toLowerCase().includes(directorySearchQuery.toLowerCase()) ||
-      st.rollNumber.toLowerCase().includes(directorySearchQuery.toLowerCase()) ||
-      st.batchName.toLowerCase().includes(directorySearchQuery.toLowerCase());
+  const feeOf = (st: Student360Profile) => localFeeOverrides[st.id] || st.feeStatus || '';
+  const paidCount = studentsRoster.filter((st) => isPaid(feeOf(st))).length;
+  const dueCount = studentsRoster.length - paidCount;
 
-    const effectiveFee = localFeeOverrides[st.id] || st.feeStatus;
-    const isPaid = effectiveFee.toLowerCase().includes('paid');
-    if (directoryFeeFilter === 'paid') return matchesSearch && isPaid;
-    if (directoryFeeFilter === 'pending') return matchesSearch && !isPaid;
-    return matchesSearch;
+  const q = query.trim().toLowerCase();
+  const students = studentsRoster.filter((st) => {
+    const matches =
+      !q ||
+      st.name.toLowerCase().includes(q) ||
+      (st.rollNumber || '').toLowerCase().includes(q) ||
+      (st.batchName || '').toLowerCase().includes(q);
+    if (!matches) return false;
+    if (feeFilter === 'paid') return isPaid(feeOf(st));
+    if (feeFilter === 'due') return !isPaid(feeOf(st));
+    return true;
   });
 
-  const paidCount = studentsRoster.filter((st) =>
-    (localFeeOverrides[st.id] || st.feeStatus).toLowerCase().includes('paid')
-  ).length;
-  const pendingCount = studentsRoster.filter(
-    (st) => !(localFeeOverrides[st.id] || st.feeStatus).toLowerCase().includes('paid')
-  ).length;
+  const filters: { id: FeeFilter; label: string }[] = [
+    { id: 'all', label: `All ${studentsRoster.length}` },
+    { id: 'paid', label: `Paid ${paidCount}` },
+    { id: 'due', label: `Fee due ${dueCount}` },
+  ];
 
   return (
-    <View className="gap-4">
-      {/* Teacher Identity & Profile Card */}
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
-        <View className="flex-row items-center gap-3.5">
-          <View className="w-14 h-14 rounded-2xl bg-blue-600 items-center justify-center shadow-xs">
-            <Text className="text-xl font-display text-white">
-              {teacherProfile.fullName
-                .split(' ')
-                .map((n) => n[0])
-                .join('')
-                .slice(0, 2)}
-            </Text>
-          </View>
-          <View className="flex-1 min-w-0">
-            <Text className="text-base font-display text-slate-900" numberOfLines={1}>
-              {teacherProfile.fullName}
-            </Text>
-            <Text className="text-xs text-slate-500 font-sans">{teacherProfile.qualification}</Text>
-            <View className="flex-row items-center gap-2 mt-1">
-              <View className="bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
-                <Text className="text-[10px] font-sans-bold text-blue-700">
-                  {teacherMode === 'solo' ? 'Solo Tutor' : 'Institute Faculty'}
-                </Text>
-              </View>
-              <View className="bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
-                <Text className="text-[10px] font-sans-bold text-emerald-700">
-                  ₹{teacherProfile.monthlyFeeRate.toLocaleString()}/mo per pupil
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* Teacher Code Card */}
-        <View className="bg-slate-50 border border-slate-200 rounded-2xl p-3 flex-row items-center justify-between">
-          <View>
-            <Text className="text-[10px] font-sans-bold text-slate-600 uppercase tracking-wider">
-              Batch Enrollment Code
-            </Text>
-            <Text className="text-sm font-display text-blue-600 font-mono">
-              {teacherProfile.teacherCode}
-            </Text>
-          </View>
-          <View className="flex-row gap-1.5">
-            <TouchableOpacity
-              onPress={onShareTeacherCode}
-              className="bg-blue-600 px-3 py-1.5 rounded-xl active:scale-95 flex-row items-center gap-1.5 shadow-xs"
-            >
-              <Share2 size={13} color="#ffffff" />
-              <Text className="text-xs font-sans-bold text-white">Share Code</Text>
-            </TouchableOpacity>
-          </View>
+    <View className="gap-6 pb-6">
+      {/* Who you are */}
+      <View className="flex-row items-center gap-3.5">
+        <Avatar initials={initialsOf(teacherProfile.fullName) || 'T'} tone="sky" size={60} />
+        <View className="flex-1 min-w-0">
+          <Text className="font-display text-ink text-[24px] leading-[28px]" numberOfLines={1}>
+            {teacherProfile.fullName}
+          </Text>
+          <Text className="font-sans text-muted text-sm" numberOfLines={1}>
+            {[teacherMode === 'solo' ? 'Teaches on their own' : 'Teaches at an institute', teacherProfile.qualification]
+              .filter(Boolean)
+              .join(' · ')}
+          </Text>
         </View>
       </View>
 
-      {/* Active Batch & Timing Settings */}
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center gap-2">
-            <Clock size={16} color="#1C1C1E" />
-            <Text className="text-sm font-sans-bold text-slate-900">Active Batch & Schedule</Text>
-          </View>
-          <Badge label={`${batchesList.length} Batches`} variant="info" />
+      {/* Signature: the code students use to join you, set large like a ticket */}
+      <View className="bg-pastel-sky border-[1.5px] border-ink rounded-[30px] p-5 gap-4">
+        <View className="gap-1">
+          <Text className="font-sans-bold text-ink text-[13px]">Your join code</Text>
+          <Text
+            selectable
+            accessibilityLabel={`Join code ${teacherProfile.teacherCode.split('').join(' ')}`}
+            className="font-display text-ink text-[34px] leading-[38px] tracking-[2px]"
+            numberOfLines={1}
+            adjustsFontSizeToFit
+          >
+            {teacherProfile.teacherCode || '—'}
+          </Text>
+          <Text className="font-sans text-ink/70 text-[13px] leading-[18px]">
+            Students enter this in Acadly to send you a join request.
+          </Text>
         </View>
-        <Text className="text-xs text-slate-500 leading-relaxed">
-          Select which batch you want to manage, or manage recurring timetable schedules.
-        </Text>
-
-        <TouchableOpacity
-          onPress={onOpenScheduleEditor}
-          className="bg-blue-50 border border-blue-200 p-3 rounded-2xl flex-row items-center justify-between active:scale-98"
+        <Pressable
+          accessibilityRole="button"
+          onPress={onShareTeacherCode}
+          className="self-start h-12 px-5 rounded-full bg-ink flex-row items-center gap-2 active:opacity-90"
         >
-          <View className="flex-row items-center gap-2">
-            <Calendar size={15} color="#1C1C1E" />
-            <Text className="text-xs font-sans-bold text-blue-900">Manage Batch Timetable / Schedule</Text>
-          </View>
-          <ChevronRight size={15} color="#1C1C1E" />
-        </TouchableOpacity>
-
-        <View className="gap-2 mt-1">
-          {batchesList.map((batch) => {
-            const isSelected = selectedBatchId === batch.id;
-            return (
-              <TouchableOpacity
-                key={batch.id}
-                onPress={() => onSelectBatch(batch.id)}
-                className={`p-3.5 rounded-2xl border flex-row items-center justify-between ${
-                  isSelected
-                    ? 'bg-blue-50/70 border-blue-600'
-                    : 'bg-slate-50 border-slate-200/80'
-                } active:scale-98`}
-              >
-                <View className="flex-1 pr-2">
-                  <View className="flex-row items-center gap-2 mb-0.5">
-                    <Text className={`text-xs font-sans-bold ${isSelected ? 'text-blue-950' : 'text-slate-900'}`}>
-                      {batch.name}
-                    </Text>
-                    {isSelected && (
-                      <View className="bg-blue-600 px-1.5 py-0.2 rounded">
-                        <Text className="text-[9px] font-sans-bold text-white">Active Focus</Text>
-                      </View>
-                    )}
-                  </View>
-                  <Text className="text-[11px] text-slate-500">{batch.subject} • {batch.room}</Text>
-                  <Text className="text-[10px] font-sans-semibold text-slate-600 mt-1">
-                    🕒 {batch.time} • {batch.count} Pupils
-                  </Text>
-                </View>
-
-                <View
-                  className={`w-6 h-6 rounded-full border items-center justify-center ${
-                    isSelected ? 'bg-blue-600 border-blue-600' : 'border-slate-300 bg-white'
-                  }`}
-                >
-                  {isSelected && <Check size={13} color="#ffffff" strokeWidth={3} />}
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+          <Share2 size={16} color="#FFFFFF" />
+          <Text className="font-sans-bold text-white text-[15px]">Share code</Text>
+        </Pressable>
       </View>
 
-      {/* Searchable Student Directory with Fee Status & Contact */}
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center gap-2">
-            <Users size={16} color="#1C1C1E" />
-            <Text className="text-sm font-sans-bold text-slate-900">Student Directory & Fee Tracker</Text>
-          </View>
-          <Text className="text-xs font-sans-bold text-slate-500">{filteredStudents.length} Students</Text>
-        </View>
-
-        {/* Search Bar */}
-        <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 gap-2">
-          <Search size={15} color="#8C877E" />
-          <TextInput
-            placeholder="Search pupil by name or roll number..."
-            placeholderTextColor="#8C877E"
-            value={directorySearchQuery}
-            onChangeText={setDirectorySearchQuery}
-            className="flex-1 text-xs text-slate-800 font-sans p-0"
-          />
-          {directorySearchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setDirectorySearchQuery('')}>
-              <X size={14} color="#8C877E" />
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Fee Status Filter Tabs */}
-        <View className="flex-row gap-1.5">
-          {[
-            { id: 'all', label: `All (${studentsRoster.length})` },
-            { id: 'paid', label: `Paid (${paidCount})` },
-            { id: 'pending', label: `Pending (${pendingCount})` },
-          ].map((tab) => {
-            const isActive = directoryFeeFilter === tab.id;
+      {/* Batches */}
+      <View className="gap-3">
+        <SectionTitle>Your batches</SectionTitle>
+        <Group>
+          {batchesList.map((batch) => {
+            const selected = batch.id === selectedBatchId;
             return (
-              <TouchableOpacity
-                key={tab.id}
-                onPress={() => setDirectoryFeeFilter(tab.id as any)}
-                className={`px-3 py-1.5 rounded-xl border ${
-                  isActive
-                    ? 'bg-slate-900 border-slate-900'
-                    : 'bg-slate-50 border-slate-200'
-                } active:scale-95`}
+              <ListRow
+                key={batch.id}
+                title={batch.name}
+                subtitle={[batch.time, `${batch.count} students`, batch.room].filter(Boolean).join(' · ')}
+                onPress={() => onSelectBatch(batch.id)}
+                trailing={
+                  <View
+                    accessibilityLabel={selected ? 'Selected batch' : undefined}
+                    className={`w-7 h-7 rounded-full items-center justify-center ${selected ? 'bg-ink' : 'border-[1.5px] border-slate-300'}`}
+                  >
+                    {selected ? <Check size={14} color="#FFFFFF" strokeWidth={3} /> : null}
+                  </View>
+                }
+              />
+            );
+          })}
+          <ListRow
+            title="Edit timetable"
+            subtitle="Days, times and rooms for each batch"
+            leading={
+              <RowIcon>
+                <Calendar size={17} color="#1C1C1E" />
+              </RowIcon>
+            }
+            trailing={<ChevronRight size={18} color="#6E6A63" />}
+            onPress={onOpenScheduleEditor}
+            last
+          />
+        </Group>
+      </View>
+
+      {/* Students */}
+      <View className="gap-3">
+        <SectionTitle>Students</SectionTitle>
+
+        <View className="flex-row items-center bg-white rounded-full px-4 h-12 gap-2">
+          <Search size={17} color="#6E6A63" />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Search by name, roll no. or batch"
+            placeholderTextColor="#8C877E"
+            accessibilityLabel="Search students"
+            className="flex-1 font-sans text-ink text-[15px] p-0"
+          />
+          {query ? (
+            <Pressable accessibilityRole="button" accessibilityLabel="Clear search" onPress={() => setQuery('')} hitSlop={8}>
+              <X size={16} color="#6E6A63" />
+            </Pressable>
+          ) : null}
+        </View>
+
+        <View className="flex-row gap-2">
+          {filters.map((f) => {
+            const active = feeFilter === f.id;
+            return (
+              <Pressable
+                key={f.id}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}
+                onPress={() => setFeeFilter(f.id)}
+                className={`h-10 px-4 rounded-full items-center justify-center ${active ? 'bg-ink' : 'bg-white'}`}
               >
-                <Text className={`text-xs font-sans-bold ${isActive ? 'text-white' : 'text-slate-600'}`}>
-                  {tab.label}
-                </Text>
-              </TouchableOpacity>
+                <Text className={`font-sans-bold text-sm ${active ? 'text-white' : 'text-ink'}`}>{f.label}</Text>
+              </Pressable>
             );
           })}
         </View>
 
-        {/* Student Cards List with FlashList */}
-        {filteredStudents.length === 0 ? (
-          <View className="py-8 items-center justify-center">
-            <Text className="text-xs text-slate-500 font-sans-semibold">No students match your filter.</Text>
+        {students.length === 0 ? (
+          <View className="bg-white rounded-3xl px-5 py-6 items-center gap-1">
+            <Text className="font-sans-bold text-ink text-[15px]">
+              {studentsRoster.length === 0 ? 'No students in this batch yet' : 'No students match'}
+            </Text>
+            <Text className="font-sans text-muted text-[13px] text-center">
+              {studentsRoster.length === 0
+                ? 'Share your join code. Approved students show up here.'
+                : 'Try another name or clear the filter.'}
+            </Text>
           </View>
         ) : (
-          <View style={{ minHeight: Math.min(filteredStudents.length * 110, 480) }}>
-            <FlashList
-              data={filteredStudents}
-              keyExtractor={(st) => st.id}
-              scrollEnabled={filteredStudents.length > 4}
-              renderItem={({ item: st }) => {
-                const effectiveStatus = localFeeOverrides[st.id] || st.feeStatus;
-                const isFeePaid = effectiveStatus.toLowerCase().includes('paid');
-                const roll = st.rollNumber
-                  ? st.rollNumber.replace('ROLL-', '#').replace('STU-', '#')
-                  : '#--';
-
-                return (
-                  <View className="p-3.5 mb-2.5 rounded-2xl bg-slate-50 border border-slate-200/80 gap-2.5">
-                    <View className="flex-row items-start justify-between">
-                      <TouchableOpacity
-                        onPress={() => onViewStudentDetail(st.id)}
-                        className="flex-row items-center gap-2.5 flex-1 min-w-0"
-                      >
-                        <View className="min-w-[36px] h-8 px-1.5 rounded-xl bg-white border border-slate-200 items-center justify-center shrink-0">
-                          <Text className="text-[11px] font-sans-bold text-blue-600 font-mono" numberOfLines={1}>
-                            {roll}
-                          </Text>
-                        </View>
-                        <View className="flex-1 min-w-0">
-                          <Text className="text-xs font-sans-bold text-slate-900" numberOfLines={1}>
-                            {st.name}
-                          </Text>
-                          <Text className="text-[11px] text-slate-500" numberOfLines={1}>
-                            {st.batchName} • {st.grade}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-
-                      {/* Fee Status Badge */}
-                      <TouchableOpacity
-                        onPress={() => {
-                          const newStatus = isFeePaid ? 'Fee Pending (₹3,500)' : 'Fee Paid (Verified)';
-                          onUpdateFeeStatus(st.id, newStatus);
-                        }}
-                        className={`px-2.5 py-1 rounded-xl border flex-row items-center gap-1 active:scale-95 ${
-                          isFeePaid
-                            ? 'bg-emerald-50 border-emerald-200'
-                            : 'bg-amber-50 border-amber-200'
-                        }`}
-                      >
-                        {isFeePaid ? (
-                          <ShieldCheck size={12} color="#059669" />
-                        ) : (
-                          <AlertTriangle size={12} color="#d97706" />
-                        )}
-                        <Text
-                          className={`text-[10px] font-sans-bold ${
-                            isFeePaid ? 'text-emerald-700' : 'text-amber-700'
-                          }`}
-                        >
-                          {isFeePaid ? 'Fee Paid' : 'Pending ₹3,500'}
-                        </Text>
-                      </TouchableOpacity>
+          <Group>
+            {students.map((st, i) => {
+              const paid = isPaid(feeOf(st));
+              const meta = [
+                st.rollNumber,
+                st.overallAttendance > 0 ? `${st.overallAttendance}% attendance` : null,
+              ]
+                .filter(Boolean)
+                .join(' · ');
+              return (
+                <View key={st.id} className={`flex-row items-center gap-3 min-h-[64px] ${i === students.length - 1 ? '' : 'border-b border-hairline'}`}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Open ${st.name}`}
+                    onPress={() => onViewStudentDetail(st.id)}
+                    className="flex-1 min-w-0 flex-row items-center gap-3 py-2 active:opacity-70"
+                  >
+                    <Avatar initials={initialsOf(st.name)} tone={AVATAR_TONES[i % AVATAR_TONES.length]} size={40} />
+                    <View className="flex-1 min-w-0">
+                      <Text className="font-sans-bold text-ink text-[15px]" numberOfLines={1}>
+                        {st.name}
+                      </Text>
+                      <Text className="font-sans text-muted text-xs" numberOfLines={1}>
+                        {meta || st.batchName}
+                      </Text>
                     </View>
-
-                    {/* Chips: Attendance & Rank & Action */}
-                    <View className="flex-row items-center justify-between pt-1 border-t border-slate-200/60">
-                      <View className="flex-row items-center gap-2">
-                        <Text className="text-[10px] font-sans-bold text-slate-600 bg-white px-2 py-0.5 rounded-md border border-slate-200">
-                          {st.overallAttendance}% Attendance
-                        </Text>
-                        <Text className="text-[10px] font-sans-bold text-slate-600 bg-white px-2 py-0.5 rounded-md border border-slate-200">
-                          Rank #{st.rank}
-                        </Text>
-                      </View>
-
-                      <View className="flex-row items-center gap-1.5">
-                        {st.guardianPhone && (
-                          <TouchableOpacity
-                            onPress={() => Linking.openURL(`tel:${st.guardianPhone}`)}
-                            className="w-7 h-7 rounded-xl bg-white border border-slate-200 items-center justify-center active:scale-90"
-                          >
-                            <Phone size={12} color="#1C1C1E" />
-                          </TouchableOpacity>
-                        )}
-                        <TouchableOpacity
-                          onPress={() => onViewStudentDetail(st.id)}
-                          className="bg-white border border-slate-200 px-2.5 py-1 rounded-xl flex-row items-center gap-1 active:scale-95"
-                        >
-                          <Text className="text-[11px] font-sans-bold text-slate-700">360° Profile</Text>
-                          <ChevronRight size={12} color="#6E6A63" />
-                        </TouchableOpacity>
-                      </View>
-                    </View>
+                  </Pressable>
+                  <View className={`px-2.5 py-1 rounded-xl ${paid ? 'bg-pastel-mint' : 'bg-pastel-butter'}`}>
+                    <Text className="font-sans-bold text-ink text-xs">{paid ? 'Paid' : 'Fee due'}</Text>
                   </View>
-                );
-              }}
-            />
-          </View>
+                  {st.guardianPhone ? (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`Call ${st.name}'s parent`}
+                      onPress={() => Linking.openURL(`tel:${st.guardianPhone}`)}
+                      className="w-10 h-10 rounded-full bg-paper items-center justify-center active:opacity-70"
+                    >
+                      <Phone size={16} color="#1C1C1E" />
+                    </Pressable>
+                  ) : null}
+                </View>
+              );
+            })}
+          </Group>
         )}
       </View>
 
-      {/* Mode Switch Card */}
-      <TouchableOpacity
-        onPress={onOpenDualMode}
-        className="bg-blue-50/70 border border-blue-200 p-4 rounded-3xl flex-row items-center justify-between active:scale-98"
-      >
-        <View className="flex-1 pr-2">
-          <Text className="text-xs font-sans-bold text-blue-900">Switch Account Mode</Text>
-          <Text className="text-[11px] text-blue-700 mt-0.5">
-            Currently: {teacherMode === 'solo' ? 'Independent Solo Tutor' : 'Connected to Coaching Center'}
-          </Text>
-        </View>
-        <ChevronRight size={16} color="#1C1C1E" />
-      </TouchableOpacity>
+      {/* Settings */}
+      <View className="gap-3">
+        <SectionTitle>Settings</SectionTitle>
+        <Group>
+          <ListRow
+            title="Teaching mode"
+            subtitle={teacherMode === 'solo' ? 'On my own' : 'At an institute'}
+            leading={
+              <RowIcon>
+                <Repeat size={17} color="#1C1C1E" />
+              </RowIcon>
+            }
+            trailing={<ChevronRight size={18} color="#6E6A63" />}
+            onPress={onOpenDualMode}
+            last
+          />
+        </Group>
+        <LanguageSwitcher />
+      </View>
 
-      {/* Language Selector */}
-      <LanguageSwitcher className="mb-4" />
-
-      {/* Sign Out Button */}
-      <TouchableOpacity
-        onPress={onLogout}
-        className="bg-rose-50 border border-rose-200 p-4 rounded-3xl flex-row items-center justify-center gap-2 active:scale-98 mb-6"
-      >
-        <LogOut size={16} color="#e11d48" />
-        <Text className="text-xs font-sans-bold text-rose-700">Sign Out of Teacher Desk</Text>
-      </TouchableOpacity>
+      <Pressable accessibilityRole="button" onPress={onLogout} className="self-center min-h-[44px] flex-row items-center gap-2 px-4">
+        <LogOut size={16} color="#B42318" />
+        <Text className="font-sans-bold text-rose-700 text-[15px]">Sign out</Text>
+      </Pressable>
     </View>
   );
 };

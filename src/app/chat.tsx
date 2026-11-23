@@ -160,11 +160,11 @@ export default function ChatScreen() {
 
         {/* PINNED ANNOUNCEMENT BANNER */}
         {activeRoom?.pinnedMessage && (
-          <View className="bg-amber-50 border border-amber-200 rounded-2xl p-3 mb-3 flex-row items-start gap-2 shadow-xs">
+          <View className="bg-pastel-butter-soft border border-pastel-butter rounded-2xl p-3 mb-3 flex-row items-start gap-2">
             <Text className="text-base">📌</Text>
             <View className="flex-1">
               <View className="flex-row items-center justify-between">
-                <Text className="text-[10px] font-sans-bold text-amber-900 uppercase tracking-wider">
+                <Text className="text-xs font-sans-bold text-amber-900">
                   Pinned by {activeRoom.pinnedMessage.senderName}
                 </Text>
                 {isTeacher && (

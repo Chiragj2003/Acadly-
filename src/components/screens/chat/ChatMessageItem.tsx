@@ -49,8 +49,8 @@ export const ChatMessageItem = React.memo(function ChatMessageItem({
               }`}
             >
               <Text
-                className={`text-[9px] font-sans-bold ${
-                  message.senderRole === 'teacher' ? 'text-blue-800' : 'text-emerald-800'
+                className={`text-xs font-sans-bold ${
+                  message.senderRole ==='teacher' ?'text-blue-800' :'text-emerald-800'
                 }`}
               >
                 {message.senderRole === 'teacher' ? 'Faculty' : 'Student'}
@@ -90,8 +90,8 @@ export const ChatMessageItem = React.memo(function ChatMessageItem({
                   {message.attachmentName}
                 </Text>
                 <Text
-                  className={`text-[10px] ${
-                    isMine ? 'text-white/80' : 'text-slate-500'
+                  className={`text-xs ${
+                    isMine ?'text-white/80' :'text-slate-500'
                   }`}
                 >
                   {message.attachmentType?.toUpperCase()} • {message.attachmentSize || '1.4 MB'}
@@ -110,8 +110,8 @@ export const ChatMessageItem = React.memo(function ChatMessageItem({
 
           <View className="flex-row items-center justify-end gap-1.5 mt-1.5">
             <Text
-              className={`text-[9px] font-sans ${
-                isMine ? 'text-white/80' : 'text-slate-500'
+              className={`text-xs font-sans ${
+                isMine ?'text-white/80' :'text-slate-500'
               }`}
             >
               {message.timeFormatted}

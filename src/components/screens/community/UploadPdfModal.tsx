@@ -127,13 +127,13 @@ export const UploadPdfModal: React.FC<UploadPdfModalProps> = ({
               <Text className="text-xs font-sans-bold text-slate-700">
                 {pickedFile ? pickedFile.name : 'Select PDF from Device'}
               </Text>
-              <Text className="text-[10px] text-slate-400">PDF documents up to 20 MB</Text>
+              <Text className="text-xs text-slate-400">PDF documents up to 20 MB</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={handleUpload}
               disabled={loading || !pickedFile}
-              className="mt-3 bg-blue-600 py-3 rounded-2xl items-center flex-row justify-center gap-2 shadow-xs active:scale-98"
+              className="mt-3 bg-blue-600 py-3 rounded-2xl items-center flex-row justify-center gap-2 active:scale-98"
             >
               <Upload size={15} color="white" />
               <Text className="text-xs font-sans-bold text-white">

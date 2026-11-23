@@ -38,17 +38,17 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <View className="flex-1 bg-slate-50 dark:bg-slate-900 items-center justify-center p-6">
-          <View className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 w-full max-w-sm items-center shadow-lg gap-4">
-            <View className="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 items-center justify-center">
+        <View className="flex-1 bg-slate-50 items-center justify-center p-6">
+          <View className="bg-white border border-slate-200 rounded-3xl p-6 w-full max-w-sm items-center shadow-lg gap-4">
+            <View className="w-14 h-14 rounded-2xl bg-pastel-pink-soft border border-pastel-pink items-center justify-center">
               <AlertTriangle size={28} color="#E11D48" />
             </View>
 
             <View className="items-center gap-1">
-              <Text className="text-base font-display text-slate-900 dark:text-slate-100 text-center">
+              <Text className="text-base font-display text-slate-900 text-center">
                 Something unexpected occurred
               </Text>
-              <Text className="text-xs text-slate-600 dark:text-slate-400 text-center leading-relaxed">
+              <Text className="text-xs text-slate-600 text-center leading-relaxed">
                 Acadly encountered an unexpected condition. Your records are safely saved on the server.
               </Text>
             </View>

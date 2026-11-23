@@ -1,7 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { Clock, Check } from 'lucide-react-native';
+import { View, Text, Pressable, ScrollView } from 'react-native';
 
 export interface BatchItemDisplay {
   id: string;
@@ -16,70 +14,41 @@ interface TeacherBatchFocusProps {
   batches: BatchItemDisplay[];
   selectedBatchId: string;
   onSelectBatch: (id: string) => void;
-  currentBatch: BatchItemDisplay;
+  /** Kept for API compatibility. */
+  currentBatch?: BatchItemDisplay;
 }
 
-export const TeacherBatchFocus: React.FC<TeacherBatchFocusProps> = ({
-  batches,
-  selectedBatchId,
-  onSelectBatch,
-  currentBatch,
-}) => {
-  const { t } = useTranslation();
-  return (
-    <View className="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-xs">
-      <View className="flex-row items-center justify-between mb-2 px-1">
-        <View className="flex-row items-center gap-1.5">
-          <Clock size={13} color="#1C1C1E" />
-          <Text className="text-xs font-display text-slate-800 uppercase tracking-wider">
-            {t('teacher.activeBatches', 'Active Batches')} • {t('teacher.batchFocus', 'Batch & Schedule Focus')}
+/**
+ * Batch switcher: one horizontal row of pills (black = the batch every tab is showing).
+ * Bleeds to the screen edges so long batch names scroll instead of wrapping.
+ */
+export const TeacherBatchFocus: React.FC<TeacherBatchFocusProps> = ({ batches, selectedBatchId, onSelectBatch }) => (
+  <ScrollView
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    className="-mx-5"
+    contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}
+    accessibilityRole="tablist"
+  >
+    {batches.map((b) => {
+      const selected = selectedBatchId === b.id;
+      return (
+        <Pressable
+          key={b.id}
+          accessibilityRole="tab"
+          accessibilityState={{ selected }}
+          accessibilityLabel={`${b.name}, ${b.count} students`}
+          onPress={() => onSelectBatch(b.id)}
+          className={`h-11 px-4 rounded-full flex-row items-center gap-2 ${selected ? 'bg-ink' : 'bg-white'}`}
+        >
+          <Text className={`font-sans-bold text-sm ${selected ? 'text-white' : 'text-ink'}`} numberOfLines={1}>
+            {b.name.split(' • ')[0]}
           </Text>
-        </View>
-        <View className="bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
-          <Text className="text-[10px] font-sans-bold text-blue-700">
-            {currentBatch.time}
-          </Text>
-        </View>
-      </View>
-
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View className="flex-row gap-2">
-          {batches.map((b) => {
-            const isSelected = selectedBatchId === b.id;
-            return (
-              <TouchableOpacity
-                key={b.id}
-                activeOpacity={0.85}
-                onPress={() => onSelectBatch(b.id)}
-                className={`px-3 py-2 rounded-xl border flex-row items-center gap-2 ${
-                  isSelected
-                    ? 'bg-blue-600 border-blue-600 shadow-xs'
-                    : 'bg-slate-50 border-slate-200'
-                }`}
-              >
-                <View className="items-start">
-                  <Text
-                    className={`text-xs font-display ${
-                      isSelected ? 'text-white' : 'text-slate-800'
-                    }`}
-                    numberOfLines={1}
-                  >
-                    {b.name.split(' • ')[0]}
-                  </Text>
-                  <Text
-                    className={`text-[10px] ${
-                      isSelected ? 'text-blue-100 font-sans' : 'text-slate-500'
-                    }`}
-                  >
-                    {b.time.split(' - ')[0]} • {b.count} Students
-                  </Text>
-                </View>
-                {isSelected && <Check size={14} color="#FFFFFF" />}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </ScrollView>
-    </View>
-  );
-};
+          <View className={`min-w-[24px] h-6 px-1.5 rounded-full items-center justify-center ${selected ? 'bg-white/20' : 'bg-paper'}`}>
+            <Text className={`font-sans-bold text-xs ${selected ? 'text-white' : 'text-ink'}`}>{b.count}</Text>
+          </View>
+        </Pressable>
+      );
+    })}
+  </ScrollView>
+);

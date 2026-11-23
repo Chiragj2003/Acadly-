@@ -16,7 +16,7 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
 
   if (isLoading) {
     return (
-      <View className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs">
+      <View className="bg-white border border-slate-200 rounded-3xl p-5">
         <Text className="text-xs text-slate-400">Loading academic results & mastery...</Text>
       </View>
     );
@@ -24,7 +24,7 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
 
   if (error) {
     return (
-      <View className="bg-rose-50 border border-rose-200 rounded-3xl p-5">
+      <View className="bg-pastel-pink-soft border border-pastel-pink rounded-3xl p-5">
         <Text className="text-xs font-sans-bold text-rose-800">Failed to load examination results</Text>
         <Text className="text-[11px] text-rose-600 mt-1">{(error as Error).message}</Text>
         <TouchableOpacity
@@ -39,7 +39,7 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
 
   if (!report || report.recentResults.length === 0) {
     return (
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-xs items-center justify-center">
+      <View className="bg-white border border-hairline rounded-3xl p-6 items-center justify-center">
         <Award size={36} color="#8C877E" />
         <Text className="text-sm font-sans-bold text-slate-800 mt-2">No Examination Records Yet</Text>
         <Text className="text-xs text-slate-400 text-center mt-1">
@@ -52,7 +52,7 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
   return (
     <View className="gap-3.5">
       {/* Overview Card */}
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
+      <View className="bg-white border border-hairline rounded-3xl p-5 gap-3">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
             <Award size={18} color="#1C1C1E" />
@@ -66,7 +66,7 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
         </View>
 
         {/* Aggregate Stats */}
-        <View className="flex-row items-center justify-between bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+        <View className="flex-row items-center justify-between bg-slate-50 p-3.5 rounded-2xl border border-hairline">
           <View>
             <Text className="text-xs font-sans-bold text-slate-700">Cumulative Average</Text>
             <Text className="text-xl font-display text-blue-700 mt-0.5">
@@ -84,7 +84,7 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
         {/* Subject Mastery Progress Bars */}
         {report.subjectMastery.length > 0 && (
           <View className="gap-2.5 pt-1">
-            <Text className="text-xs font-sans-bold text-slate-600 uppercase tracking-wider">
+            <Text className="text-xs font-sans-bold text-slate-600">
               Subject Breakdown
             </Text>
             {report.subjectMastery.map((sub) => {
@@ -103,7 +103,7 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
                     <Text className="text-xs font-sans-bold text-slate-800">{sub.subject}</Text>
                     <View className="flex-row items-center gap-1.5">
                       <View className={`px-2 py-0.5 rounded-full border ${badgeVariant}`}>
-                        <Text className="text-[10px] font-sans-bold">{sub.masteryLevel}</Text>
+                        <Text className="text-xs font-sans-bold">{sub.masteryLevel}</Text>
                       </View>
                       <Text className="text-xs font-display text-slate-900">
                         {sub.averagePercentage}%
@@ -128,8 +128,8 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
       </View>
 
       {/* Recent Examinations List */}
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
-        <Text className="text-xs font-sans-bold text-slate-600 uppercase tracking-wider">
+      <View className="bg-white border border-hairline rounded-3xl p-5 gap-3">
+        <Text className="text-xs font-sans-bold text-slate-600">
           Recent Exam Performances
         </Text>
 
@@ -139,7 +139,7 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
             return (
               <View
                 key={exam.resultId}
-                className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 gap-2"
+                className="bg-slate-50 border border-hairline rounded-2xl p-3.5 gap-2"
               >
                 <View className="flex-row items-center justify-between">
                   <View className="flex-1 mr-2">
@@ -158,8 +158,8 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
                       }`}
                     >
                       <Text
-                        className={`text-[10px] font-sans-bold ${
-                          isPassing ? 'text-emerald-800' : 'text-rose-800'
+                        className={`text-xs font-sans-bold ${
+                          isPassing ?'text-emerald-800' :'text-rose-800'
                         }`}
                       >
                         {exam.grade || (isPassing ? 'PASS' : 'FAIL')} ({exam.percentage}%)

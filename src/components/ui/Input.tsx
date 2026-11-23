@@ -43,10 +43,10 @@ export const Input: React.FC<InputProps> = ({
       {(label || rightLabel) && (
         <View className="flex-row items-center justify-between">
           {label && (
-            <Text className="text-sm font-sans-bold text-slate-800 dark:text-slate-200">{label}</Text>
+            <Text className="text-sm font-sans-bold text-slate-800">{label}</Text>
           )}
           {rightLabel && (
-            <Text className="text-xs text-slate-500 dark:text-slate-400 font-sans">{rightLabel}</Text>
+            <Text className="text-xs text-slate-500 font-sans">{rightLabel}</Text>
           )}
         </View>
       )}
@@ -54,15 +54,15 @@ export const Input: React.FC<InputProps> = ({
       <View
         className={`flex-row items-center rounded-2xl overflow-hidden min-h-[52px] ${
           error
-            ? 'bg-rose-50 border border-rose-300 dark:bg-rose-950/40 dark:border-rose-800'
+            ?'bg-rose-50 border border-pastel-pink'
             : isFocused
-            ? 'bg-white border-[1.5px] border-ink'
-            : 'bg-white border-[1.5px] border-transparent'
+            ?'bg-white border-[1.5px] border-ink'
+            :'bg-white border-[1.5px] border-transparent'
         }`}
       >
         {showPhonePrefix && (
-          <View className="flex-row items-center px-3 py-3 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700">
-            <Text className="text-sm font-sans-bold text-slate-900 dark:text-slate-100">🇮🇳 +91</Text>
+          <View className="flex-row items-center px-3 py-3 bg-slate-50 border-r border-slate-200">
+            <Text className="text-sm font-sans-bold text-slate-900">🇮🇳 +91</Text>
           </View>
         )}
 
@@ -75,7 +75,7 @@ export const Input: React.FC<InputProps> = ({
         <TextInput
           placeholderTextColor="#6E6A63"
           accessibilityLabel={textInputProps.accessibilityLabel || label || 'Input field'}
-          className="flex-1 py-3 px-3.5 text-sm text-slate-900 dark:text-slate-100 font-sans min-h-[44px]"
+          className="flex-1 py-3 px-3.5 text-sm text-slate-900 font-sans min-h-[44px]"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           secureTextEntry={shouldSecureText}

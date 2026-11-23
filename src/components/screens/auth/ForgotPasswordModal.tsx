@@ -64,7 +64,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
           <TouchableOpacity
             onPress={onSubmit}
             disabled={loading || !email.trim()}
-            className="bg-blue-600 py-3.5 rounded-2xl items-center shadow-xs active:scale-98"
+            className="bg-blue-600 py-3.5 rounded-2xl items-center active:scale-98"
           >
             {loading ? (
               <ActivityIndicator size="small" color="white" />

@@ -456,20 +456,20 @@ export const AssignmentsModule: React.FC<AssignmentsModuleProps> = ({ batchId, s
                   {sub.status === 'graded' && sub.score !== undefined && sub.score !== null ? (
                     <View className="items-end">
                       <Text className="text-base font-display text-blue-600">{sub.score} Marks</Text>
-                      <Text className="text-[10px] text-emerald-600 font-sans-bold">Evaluated</Text>
+                      <Text className="text-xs text-emerald-600 font-sans-bold">Evaluated</Text>
                     </View>
                   ) : sub.ai_status === 'pending_review' ? (
                     <View className="items-end">
-                      <View className="bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md flex-row items-center gap-1">
+                      <View className="bg-pastel-butter-soft border border-pastel-butter px-2 py-0.5 rounded-md flex-row items-center gap-1">
                         <Bot size={11} color="#D97706" />
-                        <Text className="text-[10px] font-sans-bold text-amber-800">
+                        <Text className="text-xs font-sans-bold text-amber-800">
                           AI-checked, awaiting teacher review
                         </Text>
                       </View>
                     </View>
                   ) : (
                     <View className="items-end">
-                      <Text className="text-[10px] text-slate-500 font-sans-semibold">Under Evaluation</Text>
+                      <Text className="text-xs text-slate-500 font-sans-semibold">Under Evaluation</Text>
                     </View>
                   )}
                 </View>
@@ -483,21 +483,21 @@ export const AssignmentsModule: React.FC<AssignmentsModuleProps> = ({ batchId, s
                 {(userRole === 'teacher' || userRole === 'admin') && (
                   <View className="gap-2 pt-2 border-t border-slate-100">
                     {sub.ai_status === 'pending_review' && sub.ai_score !== undefined && sub.ai_score !== null && (
-                      <View className="bg-indigo-50 border border-indigo-200 p-2.5 rounded-xl flex-row items-center justify-between">
+                      <View className="bg-pastel-lilac-soft border border-pastel-lilac p-2.5 rounded-xl flex-row items-center justify-between">
                         <View className="flex-1 mr-2">
                           <View className="flex-row items-center gap-1">
                             <Sparkles size={11} color="#4F46E5" />
-                            <Text className="text-[10px] font-sans-bold text-indigo-950">
+                            <Text className="text-xs font-sans-bold text-indigo-950">
                               Gemini Suggestion: {sub.ai_score} Marks
                             </Text>
                           </View>
                           {sub.ai_feedback ? (
-                            <Text className="text-[10px] text-indigo-700 italic mt-0.5" numberOfLines={1}>
+                            <Text className="text-xs text-indigo-700 italic mt-0.5" numberOfLines={1}>
                               "{sub.ai_feedback}"
                             </Text>
                           ) : null}
                         </View>
-                        <Text className="text-[9px] font-sans-bold text-indigo-600 bg-white px-2 py-0.5 rounded-full border border-indigo-100">
+                        <Text className="text-xs font-sans-bold text-indigo-600 bg-white px-2 py-0.5 rounded-full border border-pastel-lilac">
                           Pending Approval
                         </Text>
                       </View>
@@ -508,8 +508,8 @@ export const AssignmentsModule: React.FC<AssignmentsModuleProps> = ({ batchId, s
                         <TouchableOpacity
                           disabled={gradeWithAiMutation.isPending}
                           onPress={() => handleRequestAiGrading(sub.id)}
-                          className={`px-2.5 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 flex-row items-center gap-1 active:scale-95 ${
-                            gradeWithAiMutation.isPending ? 'opacity-50' : ''
+                          className={`px-2.5 py-1.5 rounded-xl bg-pastel-lilac-soft border border-pastel-lilac flex-row items-center gap-1 active:scale-95 ${
+                            gradeWithAiMutation.isPending ?'opacity-50' :''
                           }`}
                         >
                           <Sparkles size={12} color="#4F46E5" />
@@ -687,19 +687,19 @@ export const AssignmentsModule: React.FC<AssignmentsModuleProps> = ({ batchId, s
             </View>
 
             {/* Privacy & Quota Helper Banner */}
-            <View className="bg-indigo-50 border border-indigo-200 p-2.5 rounded-xl gap-1">
+            <View className="bg-pastel-lilac-soft border border-pastel-lilac p-2.5 rounded-xl gap-1">
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center gap-1.5">
                   <ShieldCheck size={13} color="#4338CA" />
-                  <Text className="text-[10px] font-sans-bold text-indigo-900">
+                  <Text className="text-xs font-sans-bold text-indigo-900">
                     AI Assistance (Optional)
                   </Text>
                 </View>
-                <Text className="text-[9px] font-sans-semibold text-indigo-700">
+                <Text className="text-xs font-sans-semibold text-indigo-700">
                   Quota: {aiQuota?.remaining ?? 25}/25 left
                 </Text>
               </View>
-              <Text className="text-[10px] text-indigo-700">
+              <Text className="text-xs text-indigo-700">
                 Acadly uses Gemini to suggest scores from rubrics. No student PII is shared. The final grade is always yours.
               </Text>
               {gradingSubId && (
@@ -713,7 +713,7 @@ export const AssignmentsModule: React.FC<AssignmentsModuleProps> = ({ batchId, s
                   ) : (
                     <>
                       <Sparkles size={11} color="#FFFFFF" />
-                      <Text className="text-[10px] font-sans-bold text-white">
+                      <Text className="text-xs font-sans-bold text-white">
                         Fetch Gemini Evaluation Suggestion
                       </Text>
                     </>
@@ -806,33 +806,33 @@ export const AssignmentsModule: React.FC<AssignmentsModuleProps> = ({ batchId, s
                 {/* Metrics Cards */}
                 <View className="flex-row gap-3">
                   <View className="flex-1 bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/80">
-                    <Text className="text-[11px] text-slate-400 font-sans-bold uppercase">Submissions</Text>
+                    <Text className="text-[11px] text-slate-400 font-sans-bold">Submissions</Text>
                     <Text className="text-xl font-display text-white mt-1">
                       {activeQuizAnalytics.submittedCount}
                     </Text>
-                    <Text className="text-[10px] text-slate-500 mt-0.5">Students Completed</Text>
+                    <Text className="text-xs text-slate-500 mt-0.5">Students Completed</Text>
                   </View>
 
                   <View className="flex-1 bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/80">
-                    <Text className="text-[11px] text-slate-400 font-sans-bold uppercase">Average Score</Text>
+                    <Text className="text-[11px] text-slate-400 font-sans-bold">Average Score</Text>
                     <Text className="text-xl font-display text-purple-400 mt-1">
                       {activeQuizAnalytics.averageScore}
                     </Text>
-                    <Text className="text-[10px] text-slate-500 mt-0.5">Batch Mean</Text>
+                    <Text className="text-xs text-slate-500 mt-0.5">Batch Mean</Text>
                   </View>
 
                   <View className="flex-1 bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/80">
-                    <Text className="text-[11px] text-slate-400 font-sans-bold uppercase">Pass Rate</Text>
+                    <Text className="text-[11px] text-slate-400 font-sans-bold">Pass Rate</Text>
                     <Text className="text-xl font-display text-emerald-400 mt-1">
                       {activeQuizAnalytics.passRate}%
                     </Text>
-                    <Text className="text-[10px] text-slate-500 mt-0.5">≥40% Threshold</Text>
+                    <Text className="text-xs text-slate-500 mt-0.5">≥40% Threshold</Text>
                   </View>
                 </View>
 
                 {/* Per-Question Accuracy Breakdown */}
                 <View className="gap-3">
-                  <Text className="text-xs font-sans-bold uppercase tracking-wider text-slate-400">
+                  <Text className="text-xs font-sans-bold text-slate-400">
                     Per-Question Performance
                   </Text>
 

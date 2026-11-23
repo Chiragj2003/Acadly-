@@ -139,7 +139,7 @@ export const OnboardingWalkthroughModal: React.FC<OnboardingWalkthroughModalProp
   return (
     <Modal visible={isOpen} transparent animationType="fade">
       <View className="flex-1 bg-black/60 items-center justify-center p-4">
-        <View className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-sm shadow-xl gap-4">
+        <View className="bg-white border border-slate-200 rounded-3xl p-6 w-full max-w-sm shadow-xl gap-4">
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-1.5">
               {steps.map((_, i) => (
@@ -147,8 +147,8 @@ export const OnboardingWalkthroughModal: React.FC<OnboardingWalkthroughModalProp
                   key={i}
                   className={`h-1.5 rounded-full transition-all ${
                     i === currentStep
-                      ? 'w-6 bg-blue-600'
-                      : 'w-2 bg-slate-200 dark:bg-slate-700'
+                      ?'w-6 bg-blue-600'
+                      :'w-2 bg-slate-200'
                   }`}
                 />
               ))}
@@ -158,33 +158,33 @@ export const OnboardingWalkthroughModal: React.FC<OnboardingWalkthroughModalProp
               accessibilityRole="button"
               accessibilityLabel="Skip Walkthrough"
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 items-center justify-center"
+              className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center"
             >
               <X size={16} color="#6E6A63" />
             </TouchableOpacity>
           </View>
 
           <View className="items-center py-4 gap-3">
-            <View className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 items-center justify-center">
+            <View className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
               {step.icon('#1C1C1E')}
             </View>
-            <Text className="text-lg font-display text-slate-900 dark:text-slate-100 text-center">
+            <Text className="text-lg font-display text-slate-900 text-center">
               {step.title}
             </Text>
-            <Text className="text-xs text-slate-600 dark:text-slate-400 text-center leading-relaxed">
+            <Text className="text-xs text-slate-600 text-center leading-relaxed">
               {step.description}
             </Text>
           </View>
 
-          <View className="flex-row items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <View className="flex-row items-center gap-2 pt-2 border-t border-slate-100">
             {currentStep > 0 && (
               <TouchableOpacity
                 onPress={() => setCurrentStep(currentStep - 1)}
                 accessibilityRole="button"
                 accessibilityLabel="Previous Step"
-                className="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 items-center justify-center min-h-[44px]"
+                className="px-4 py-3 rounded-xl border border-slate-200 items-center justify-center min-h-[44px]"
               >
-                <Text className="text-xs font-sans-bold text-slate-700 dark:text-slate-300">Back</Text>
+                <Text className="text-xs font-sans-bold text-slate-700">Back</Text>
               </TouchableOpacity>
             )}
 

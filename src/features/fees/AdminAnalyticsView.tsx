@@ -34,7 +34,7 @@ export const AdminAnalyticsView: React.FC = () => {
       <Card elevation="lowest" className="p-4 gap-3">
         <View className="flex-row items-center justify-between">
           <View>
-            <Text className="text-xs font-sans-bold text-on-surface-variant uppercase tracking-wider">
+            <Text className="text-xs font-sans-bold text-on-surface-variant">
               Institute Revenue Realization
             </Text>
             <Text className="text-xl font-sans-bold text-on-surface mt-0.5">
@@ -73,7 +73,7 @@ export const AdminAnalyticsView: React.FC = () => {
       {/* Attendance & Faculty Roll Metrics */}
       <Card elevation="lowest" className="p-4 gap-2.5">
         <View className="flex-row items-center justify-between">
-          <Text className="text-xs font-sans-bold text-on-surface-variant uppercase tracking-wider">
+          <Text className="text-xs font-sans-bold text-on-surface-variant">
             Daily Academic Operations
           </Text>
           <Badge label="Kota Campus" variant="info" />
@@ -99,14 +99,14 @@ export const AdminAnalyticsView: React.FC = () => {
 
       {/* Official Audit Report Exports */}
       <View className="gap-2">
-        <Text className="text-xs font-sans-bold text-on-surface-variant uppercase tracking-wider px-1">
+        <Text className="text-xs font-sans-bold text-on-surface-variant px-1">
           Generate Institutional Reports
         </Text>
 
         <View className="gap-2">
           <Pressable
             onPress={() => handleExportReport('Daily_Attendance_Audit')}
-            className="p-3.5 rounded-2xl bg-surface-container-lowest border border-black/5 flex-row items-center justify-between shadow-xs active:bg-surface-container-high"
+            className="p-3.5 rounded-2xl bg-surface-container-lowest border border-black/5 flex-row items-center justify-between active:bg-surface-container-high"
           >
             <View className="flex-row items-center gap-3">
               <View className="w-8 h-8 rounded-lg bg-surface-container items-center justify-center">
@@ -122,7 +122,7 @@ export const AdminAnalyticsView: React.FC = () => {
 
           <Pressable
             onPress={() => handleExportReport('Batch_Fee_Collections_Ledger')}
-            className="p-3.5 rounded-2xl bg-surface-container-lowest border border-black/5 flex-row items-center justify-between shadow-xs active:bg-surface-container-high"
+            className="p-3.5 rounded-2xl bg-surface-container-lowest border border-black/5 flex-row items-center justify-between active:bg-surface-container-high"
           >
             <View className="flex-row items-center gap-3">
               <View className="w-8 h-8 rounded-lg bg-surface-container items-center justify-center">
@@ -138,7 +138,7 @@ export const AdminAnalyticsView: React.FC = () => {
 
           <Pressable
             onPress={() => handleExportReport('Student_AIR_Mock_Scores')}
-            className="p-3.5 rounded-2xl bg-surface-container-lowest border border-black/5 flex-row items-center justify-between shadow-xs active:bg-surface-container-high"
+            className="p-3.5 rounded-2xl bg-surface-container-lowest border border-black/5 flex-row items-center justify-between active:bg-surface-container-high"
           >
             <View className="flex-row items-center gap-3">
               <View className="w-8 h-8 rounded-lg bg-surface-container items-center justify-center">

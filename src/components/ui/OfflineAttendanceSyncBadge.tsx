@@ -31,7 +31,7 @@ export const OfflineAttendanceSyncBadge: React.FC = () => {
   };
 
   return (
-    <View className="bg-amber-500 border border-amber-600 rounded-2xl p-3 flex-row items-center justify-between shadow-xs mb-3">
+    <View className="bg-amber-500 border border-amber-600 rounded-2xl p-3 flex-row items-center justify-between mb-3">
       <View className="flex-row items-center gap-2 flex-1 mr-2">
         <CloudOff size={18} color="white" />
         <View className="flex-1">

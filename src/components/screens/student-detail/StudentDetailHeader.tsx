@@ -15,7 +15,7 @@ export const StudentDetailHeader: React.FC<StudentDetailHeaderProps> = ({
   onMessageGuardian,
 }) => {
   return (
-    <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs">
+    <View className="bg-white border border-hairline rounded-3xl p-5">
       <View className="flex-row items-center justify-between mb-3">
         <View className="flex-row items-center gap-3">
           <View className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
@@ -30,7 +30,7 @@ export const StudentDetailHeader: React.FC<StudentDetailHeaderProps> = ({
         </View>
 
         {student.rank > 0 && (
-          <View className="bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+          <View className="bg-pastel-butter-soft px-3 py-1 rounded-full border border-pastel-butter">
             <Text className="text-[11px] font-sans-bold text-amber-800">
               Rank #{student.rank} ({student.percentile}%ile)
             </Text>
@@ -39,8 +39,8 @@ export const StudentDetailHeader: React.FC<StudentDetailHeaderProps> = ({
       </View>
 
       {/* Parent Link Code Strip */}
-      <View className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 mb-3 flex-row items-center justify-between">
-        <Text className="text-[11px] font-sans-bold text-slate-500 uppercase tracking-wider">
+      <View className="bg-slate-50 p-2.5 rounded-xl border border-hairline mb-3 flex-row items-center justify-between">
+        <Text className="text-[11px] font-sans-bold text-slate-500">
           Parent Link Code:
         </Text>
         <Text className="text-xs font-mono font-sans-bold text-blue-600">
@@ -53,7 +53,7 @@ export const StudentDetailHeader: React.FC<StudentDetailHeaderProps> = ({
         <TouchableOpacity
           activeOpacity={0.88}
           onPress={onCallGuardian}
-          className="flex-1 py-2.5 rounded-xl bg-blue-600 flex-row items-center justify-center gap-1.5 shadow-xs active:scale-98"
+          className="flex-1 py-2.5 rounded-xl bg-blue-600 flex-row items-center justify-center gap-1.5 active:scale-98"
         >
           <Phone size={13} color="#ffffff" />
           <Text className="text-xs font-sans-bold text-white">

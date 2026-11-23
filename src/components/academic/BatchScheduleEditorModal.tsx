@@ -191,7 +191,7 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
           <ScrollView className="py-3" keyboardShouldPersistTaps="handled">
             {isEditing ? (
               <View className="gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                <Text className="text-xs font-sans-bold text-slate-700 uppercase">
+                <Text className="text-xs font-sans-bold text-slate-700">
                   {editingId ? 'Edit Schedule Slot' : `Add Slot for ${selectedDay}`}
                 </Text>
 
@@ -314,7 +314,7 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
                   daySlots.map((slot) => (
                     <View
                       key={slot.id}
-                      className="bg-white border border-slate-200 rounded-2xl p-3.5 flex-row items-center justify-between shadow-xs"
+                      className="bg-white border border-slate-200 rounded-2xl p-3.5 flex-row items-center justify-between"
                     >
                       <View className="flex-1 mr-2">
                         <View className="flex-row items-center gap-2 mb-1">
@@ -322,9 +322,9 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
                             {slot.subject_name}
                           </Text>
                           {slot.is_live && (
-                            <View className="bg-red-100 px-1.5 py-0.5 rounded flex-row items-center gap-1">
+                            <View className="bg-pastel-pink px-1.5 py-0.5 rounded flex-row items-center gap-1">
                               <Radio size={10} color="#dc2626" />
-                              <Text className="text-[10px] font-sans-bold text-red-600">LIVE</Text>
+                              <Text className="text-xs font-sans-bold text-red-600">LIVE</Text>
                             </View>
                           )}
                         </View>
@@ -358,7 +358,7 @@ export const BatchScheduleEditorModal: React.FC<BatchScheduleEditorModalProps> =
                         </TouchableOpacity>
                         <TouchableOpacity
                           onPress={() => handleDelete(slot.id)}
-                          className="p-1 bg-red-50 rounded-lg"
+                          className="p-1 bg-pastel-pink-soft rounded-lg"
                         >
                           <Trash2 size={14} color="#dc2626" />
                         </TouchableOpacity>

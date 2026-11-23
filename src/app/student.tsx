@@ -26,6 +26,7 @@ import { StudentProfileSection } from '@/components/screens/student/StudentProfi
 import { StudentResultsCard } from '@/components/academic/StudentResultsCard';
 import { StudentAnnouncementFeed } from '@/components/academic/StudentAnnouncementFeed';
 import { AssignmentsModule } from '@/components/academic/AssignmentsModule';
+import { confirmAction } from '@/lib/confirm';
 
 export default function PinterestStudentScreen() {
   const { t } = useTranslation();
@@ -49,23 +50,16 @@ export default function PinterestStudentScreen() {
 
   const studentName = user?.full_name || t('student.defaultName', 'Student');
 
-  const handleSignOut = () => {
-    Alert.alert(
-      t('common.signOut', 'Sign Out'),
-      t('student.signOutPrompt', 'Are you sure you want to log out of the Student Portal?'),
-      [
-        { text: t('common.cancel', 'Cancel'), style: 'cancel' },
-        {
-          text: t('common.signOut', 'Sign Out'),
-          style: 'destructive',
-          onPress: async () => {
-            await signOut();
-            router.replace('/auth');
-          },
-        },
-      ]
+  const handleSignOut = () =>
+    confirmAction(
+      t('common.signOut', 'Sign out'),
+      t('student.signOutPrompt', 'Sign out of Acadly on this device?'),
+      t('common.signOut', 'Sign out'),
+      async () => {
+        await signOut();
+        router.replace('/auth');
+      }
     );
-  };
 
   const tabs: TabItem[] = [
     { key: 'home', label: t('student.today', 'Today'), icon: (color, size) => <Home color={color} size={size} /> },

@@ -31,20 +31,20 @@ export const SubjectRadarOrBarChart: React.FC<SubjectRadarOrBarChartProps> = ({
   const avg = Math.round(safeData.reduce((acc, curr) => acc + curr.percentage, 0) / safeData.length);
 
   return (
-    <View className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs mb-4">
+    <View className="bg-white border border-hairline rounded-3xl p-5 mb-4">
       <View className="flex-row items-center justify-between mb-3">
         <View>
           <Text className="text-base font-display text-slate-900">{title}</Text>
           <Text className="text-xs text-slate-600">Based on quizzes, assignments & unit tests</Text>
         </View>
         <View className="bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
-          <Text className="text-[10px] font-sans-bold text-blue-700">Avg {avg}% ⭐</Text>
+          <Text className="text-xs font-sans-bold text-blue-700">Avg {avg}% ⭐</Text>
         </View>
       </View>
 
       <View className="gap-3 mt-1">
         {safeData.map((item) => (
-          <View key={item.subject} className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
+          <View key={item.subject} className="bg-slate-50 p-3 rounded-2xl border border-hairline">
             <View className="flex-row items-center justify-between mb-1.5">
               <View className="flex-row items-center gap-2">
                 <Text className="text-lg">{item.emoji}</Text>
@@ -57,7 +57,7 @@ export const SubjectRadarOrBarChart: React.FC<SubjectRadarOrBarChartProps> = ({
                   style={{ backgroundColor: item.bgLight, borderColor: item.color }}
                   className="px-2 py-0.5 rounded-md border"
                 >
-                  <Text style={{ color: item.color }} className="text-[9px] font-sans-bold uppercase">
+                  <Text style={{ color: item.color }} className="text-xs font-sans-bold">
                     {item.status}
                   </Text>
                 </View>

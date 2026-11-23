@@ -25,6 +25,7 @@ import { useStudentCount } from '@/hooks/queries/useStudentQueries';
 import { useBatches, useCreateBatch } from '@/hooks/queries/useBatchQueries';
 import { AdminCreateBatchModal } from '@/components/screens/admin/AdminCreateBatchModal';
 import { FEATURE_FEES } from '@/config/features';
+import { confirmAction } from '@/lib/confirm';
 
 type AdminTab = 'home' | 'batches' | 'requests' | 'profile';
 
@@ -52,19 +53,11 @@ export default function AdminScreen() {
   const pendingJoinCount = joinRequests.filter((r) => r.status === 'pending').length;
   const liveBatches = batches.filter((b) => b.status !== 'archived' && !b.is_archived);
 
-  const handleLogout = () => {
-    Alert.alert('Sign out', 'Sign out of the institute console?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Sign out',
-        style: 'destructive',
-        onPress: async () => {
-          await signOut();
-          router.replace('/auth');
-        },
-      },
-    ]);
-  };
+  const handleLogout = () =>
+    confirmAction('Sign out', 'Sign out of Acadly on this device?', 'Sign out', async () => {
+      await signOut();
+      router.replace('/auth');
+    });
 
   // Saves to the database. The old handler only added the batch to local state
   // (it vanished on reload) and filled blanks with invented subject/room/time.

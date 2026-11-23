@@ -102,7 +102,7 @@ export const SubjectMascotCard: React.FC<SubjectMascotCardProps> = ({
       activeOpacity={0.88}
       onPress={onPress}
       style={{ backgroundColor: subject.bgColor, borderColor: subject.borderColor }}
-      className="p-4 rounded-[26px] border-2 shadow-xs mb-3"
+      className="p-4 rounded-[26px] border-2 mb-3"
     >
       {/* Top bar with Mascot Tag and Mini Eyes */}
       <View className="flex-row items-center justify-between mb-2.5">
@@ -115,7 +115,7 @@ export const SubjectMascotCard: React.FC<SubjectMascotCardProps> = ({
         </View>
 
         <View style={{ backgroundColor: subject.badgeBg }} className="px-2.5 py-1 rounded-full">
-          <Text style={{ color: subject.textColor }} className="text-[10px] font-sans-bold uppercase tracking-wider">
+          <Text style={{ color: subject.textColor }} className="text-xs font-sans-bold">
             {subject.name}
           </Text>
         </View>
@@ -133,7 +133,7 @@ export const SubjectMascotCard: React.FC<SubjectMascotCardProps> = ({
         </View>
 
         {/* Big Cute Mascot Face */}
-        <View className="w-14 h-14 bg-white/80 rounded-2xl items-center justify-center border border-black/5 shadow-xs">
+        <View className="w-14 h-14 bg-white/80 rounded-2xl items-center justify-center border border-black/5">
           <Text className="text-3xl">{subject.mascotEmoji}</Text>
         </View>
       </View>
@@ -153,7 +153,7 @@ export const SubjectMascotCard: React.FC<SubjectMascotCardProps> = ({
 
         <TouchableOpacity
           onPress={onPlayPress || onPress}
-          className="w-8 h-8 rounded-full bg-white border border-black/10 items-center justify-center shadow-xs"
+          className="w-8 h-8 rounded-full bg-white border border-black/10 items-center justify-center"
         >
           <ArrowRight size={14} color="#1C1C1E" />
         </TouchableOpacity>

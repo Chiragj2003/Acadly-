@@ -28,6 +28,7 @@ import {
   LinkChildModal,
 } from '@/components/screens/parent';
 import { ParentReport } from '@/components/screens/parent/ParentReport';
+import { confirmAction } from '@/lib/confirm';
 
 export default function ParentScreen() {
   const { isAuthorized, isLoading } = useRoleGuard(['parent', 'admin']);
@@ -47,19 +48,11 @@ export default function ParentScreen() {
   const [activeTab, setActiveTab] = useState<'home' | 'children' | 'fees_reports' | 'profile'>('home');
   const [isLinkChildModalOpen, setIsLinkChildModalOpen] = useState(false);
 
-  const handleLogout = () => {
-    Alert.alert('Sign Out 🚪', 'Are you sure you want to sign out from the Parent Portal?', [
-      {
-        text: 'Sign Out',
-        style: 'destructive',
-        onPress: async () => {
-          await signOut();
-          router.replace('/auth');
-        },
-      },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  };
+  const handleLogout = () =>
+    confirmAction('Sign out', 'Sign out of Acadly on this device?', 'Sign out', async () => {
+      await signOut();
+      router.replace('/auth');
+    });
 
   const handleDownloadInvoice = async () => {
     const doc = DUMMY_PDF_CATALOG[0];
@@ -121,8 +114,7 @@ export default function ParentScreen() {
         instituteName: currentInstitute?.name || '',
         profileInitials: initials,
         onNotificationPress: openNotificationDrawer,
-        onProfilePress: handleLogout,
-        onLogoutPress: handleLogout,
+        onProfilePress: () => setActiveTab('profile'),
         hasUnreadNotifications: unreadCount > 0,
       }}
       contentContainerClassName="gap-5 px-5 py-3"

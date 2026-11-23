@@ -97,17 +97,17 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
               {notifications.some((n) => !n.read_at) && (
                 <TouchableOpacity
                   onPress={handleMarkAllRead}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 flex-row items-center gap-1"
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-100 flex-row items-center gap-1"
                 >
                   <CheckCheck size={12} color="#4A463F" />
-                  <Text className="text-[10px] font-sans-bold text-slate-700 dark:text-slate-300">
+                  <Text className="text-xs font-sans-bold text-slate-700">
                     Mark Read
                   </Text>
                 </TouchableOpacity>
               )}
               <TouchableOpacity
                 onPress={onClose}
-                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 items-center justify-center"
+                className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center"
               >
                 <X size={16} color="#6E6A63" />
               </TouchableOpacity>
@@ -156,7 +156,7 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
                     </Text>
                     <View className="flex-row items-center gap-1 mt-2">
                       <Clock size={10} color="#8C877E" />
-                      <Text className="text-[10px] text-slate-500 font-sans">
+                      <Text className="text-xs text-slate-500 font-sans">
                         {new Date(n.created_at).toLocaleDateString([], {
                           month: 'short',
                           day: 'numeric',

@@ -140,7 +140,7 @@ export const TeacherMarksEntryModal: React.FC<TeacherMarksEntryModalProps> = ({
           <ScrollView className="py-3" keyboardShouldPersistTaps="handled">
             {/* Exam Metadata */}
             <View className="bg-slate-50 p-4 rounded-2xl border border-slate-200 gap-3 mb-4">
-              <Text className="text-xs font-sans-bold text-slate-700 uppercase">Exam Details</Text>
+              <Text className="text-xs font-sans-bold text-slate-700">Exam Details</Text>
 
               <View>
                 <Text className="text-[11px] font-sans-semibold text-slate-600 mb-1">Title</Text>
@@ -199,18 +199,18 @@ export const TeacherMarksEntryModal: React.FC<TeacherMarksEntryModalProps> = ({
                 return (
                   <View
                     key={s.id}
-                    className="bg-white border border-slate-200 rounded-2xl p-3 mb-2 flex-row items-center justify-between shadow-xs"
+                    className="bg-white border border-slate-200 rounded-2xl p-3 mb-2 flex-row items-center justify-between"
                   >
                     <View className="flex-1 mr-3">
                       <View className="flex-row items-center gap-1.5">
                         <Text className="text-xs font-sans-bold text-slate-800">{s.name}</Text>
-                        <Text className="text-[10px] text-slate-400">Roll: {s.rollNumber}</Text>
+                        <Text className="text-xs text-slate-400">Roll: {s.rollNumber}</Text>
                       </View>
                       <TextInput
                         value={remarksMap[s.id] || ''}
                         onChangeText={(r) => setRemarksMap((prev) => ({ ...prev, [s.id]: r }))}
                         placeholder="Faculty remark / feedback..."
-                        className="text-[10px] text-slate-500 mt-1 py-0.5"
+                        className="text-xs text-slate-500 mt-1 py-0.5"
                       />
                     </View>
 
@@ -224,8 +224,8 @@ export const TeacherMarksEntryModal: React.FC<TeacherMarksEntryModalProps> = ({
                         }`}
                       >
                         <Text
-                          className={`text-[10px] font-sans-bold ${
-                            isAbsent ? 'text-white' : 'text-slate-600'
+                          className={`text-xs font-sans-bold ${
+                            isAbsent ?'text-white' :'text-slate-600'
                           }`}
                         >
                           Absent
@@ -257,8 +257,8 @@ export const TeacherMarksEntryModal: React.FC<TeacherMarksEntryModalProps> = ({
               <TouchableOpacity
                 onPress={handleSave}
                 disabled={recordMutation.isPending || students.length === 0}
-                className={`py-3.5 rounded-2xl items-center shadow-xs ${
-                  students.length === 0 ? 'bg-slate-300' : 'bg-blue-600'
+                className={`py-3.5 rounded-2xl items-center ${
+                  students.length === 0 ?'bg-slate-300' :'bg-blue-600'
                 }`}
               >
                 <Text className="text-xs font-sans-bold text-white">

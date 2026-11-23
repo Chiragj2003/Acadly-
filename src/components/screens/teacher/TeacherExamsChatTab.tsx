@@ -22,7 +22,7 @@ export const TeacherExamsChatTab: React.FC<TeacherExamsChatTabProps> = ({
   return (
     <View className="gap-3.5">
       {/* Record Test Marks Banner */}
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
+      <View className="bg-white border border-hairline rounded-3xl p-5 gap-3">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
             <Award size={18} color="#d97706" />
@@ -43,7 +43,7 @@ export const TeacherExamsChatTab: React.FC<TeacherExamsChatTabProps> = ({
       </View>
 
       {/* Batch Group Real-Time Chat Card */}
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
+      <View className="bg-white border border-hairline rounded-3xl p-5 gap-3">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2.5">
             <View className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
@@ -57,8 +57,8 @@ export const TeacherExamsChatTab: React.FC<TeacherExamsChatTabProps> = ({
           <Badge label="Realtime" variant="success" />
         </View>
 
-        <View className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
-          <Text className="text-[10px] font-sans-bold text-slate-600 uppercase tracking-wider mb-1">
+        <View className="bg-slate-50 p-3 rounded-2xl border border-hairline">
+          <Text className="text-xs font-sans-bold text-slate-600 mb-1">
             Pinned Class Announcement
           </Text>
           <Text className="text-xs text-slate-800 font-sans-semibold">
@@ -68,7 +68,7 @@ export const TeacherExamsChatTab: React.FC<TeacherExamsChatTabProps> = ({
 
         <TouchableOpacity
           onPress={onOpenChat}
-          className="bg-blue-600 py-3 rounded-2xl items-center flex-row justify-center gap-2 shadow-xs active:scale-98"
+          className="bg-blue-600 py-3 rounded-2xl items-center flex-row justify-center gap-2 active:scale-98"
         >
           <MessageSquare size={14} color="#ffffff" />
           <Text className="text-xs font-sans-bold text-white">Open Batch Chat Room →</Text>
@@ -76,7 +76,7 @@ export const TeacherExamsChatTab: React.FC<TeacherExamsChatTabProps> = ({
       </View>
 
       {/* Direct Student Messages */}
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
+      <View className="bg-white border border-hairline rounded-3xl p-5 gap-3">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
             <Users size={16} color="#1C1C1E" />
@@ -90,15 +90,15 @@ export const TeacherExamsChatTab: React.FC<TeacherExamsChatTabProps> = ({
             <TouchableOpacity
               key={st.id}
               onPress={onOpenChat}
-              className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex-row items-center justify-between active:scale-98"
+              className="p-3 rounded-2xl bg-slate-50 border border-hairline flex-row items-center justify-between active:scale-98"
             >
               <View className="flex-1 pr-2">
                 <View className="flex-row items-center gap-2 mb-0.5">
                   <Text className="text-xs font-sans-bold text-slate-900">{st.name}</Text>
-                  <Text className="text-[10px] text-slate-500 font-sans-semibold">{st.rollNumber}</Text>
+                  <Text className="text-xs text-slate-500 font-sans-semibold">{st.rollNumber}</Text>
                   {idx === 0 && (
-                    <View className="bg-rose-100 px-1.5 py-0.2 rounded border border-rose-200">
-                      <Text className="text-[9px] font-sans-bold text-rose-800">PDF Doubt</Text>
+                    <View className="bg-pastel-pink px-1.5 py-0.2 rounded border border-pastel-pink">
+                      <Text className="text-xs font-sans-bold text-rose-800">PDF Doubt</Text>
                     </View>
                   )}
                 </View>
@@ -108,7 +108,7 @@ export const TeacherExamsChatTab: React.FC<TeacherExamsChatTabProps> = ({
                     : 'Sir, which reference book for Rotational Mechanics?'}
                 </Text>
               </View>
-              <Text className="text-[10px] font-sans-semibold text-blue-600">Open Chat</Text>
+              <Text className="text-xs font-sans-semibold text-blue-600">Open Chat</Text>
             </TouchableOpacity>
           ))}
         </View>

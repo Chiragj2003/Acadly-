@@ -166,7 +166,7 @@ export const StudyMaterialsViewer: React.FC = () => {
         {(userRole === 'teacher' || userRole === 'admin') && (
           <TouchableOpacity
             onPress={() => setIsUploadOpen(true)}
-            className="flex-row items-center gap-1.5 bg-blue-600 px-3 py-1.5 rounded-xl shadow-xs active:scale-95"
+            className="flex-row items-center gap-1.5 bg-blue-600 px-3 py-1.5 rounded-xl active:scale-95"
           >
             <Upload size={13} color="#FFFFFF" />
             <Text className="text-xs font-sans-bold text-white">Upload Notes</Text>
@@ -203,7 +203,7 @@ export const StudyMaterialsViewer: React.FC = () => {
             return (
               <View
                 key={item.id}
-                className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs"
+                className="bg-white border border-hairline rounded-2xl p-4"
               >
                 <View className="flex-row items-start justify-between gap-3">
                   <View className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 items-center justify-center shrink-0">
@@ -213,7 +213,7 @@ export const StudyMaterialsViewer: React.FC = () => {
                   <View className="flex-1 min-w-0">
                     <View className="flex-row items-center gap-2 mb-1">
                       <Badge label={item.subject || 'Physics'} variant="info" />
-                      <Text className="text-[10px] text-slate-400 font-sans-bold">
+                      <Text className="text-xs text-slate-400 font-sans-bold">
                         {item.fileSizeBytes || '1.8 MB'}
                       </Text>
                     </View>
@@ -332,13 +332,13 @@ export const StudyMaterialsViewer: React.FC = () => {
                   <Text className="text-xs font-sans-bold text-slate-900 mt-1" numberOfLines={1}>
                     {selectedFile.name}
                   </Text>
-                  <Text className="text-[10px] text-slate-500">{selectedFile.sizeFormatted}</Text>
+                  <Text className="text-xs text-slate-500">{selectedFile.sizeFormatted}</Text>
                 </View>
               ) : (
                 <View className="items-center">
                   <Upload size={24} color="#6E6A63" />
                   <Text className="text-xs font-sans-bold text-slate-700 mt-1">Tap to select PDF</Text>
-                  <Text className="text-[10px] text-slate-400">PDF documents up to 20 MB</Text>
+                  <Text className="text-xs text-slate-400">PDF documents up to 20 MB</Text>
                 </View>
               )}
             </TouchableOpacity>

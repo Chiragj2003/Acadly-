@@ -41,7 +41,7 @@ const floatingShadow = {
 
 const CountBadge: React.FC<{ count: number }> = ({ count }) => (
   <View className="absolute -top-1 -right-2.5 bg-rose-600 rounded-full min-w-[16px] h-4 px-1 items-center justify-center border-2 border-white">
-    <Text className="text-[9px] font-sans-bold text-white leading-none">{count > 9 ? '9+' : count}</Text>
+    <Text className="text-xs font-sans-bold text-white leading-none">{count > 9 ? '9+' : count}</Text>
   </View>
 );
 

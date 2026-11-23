@@ -24,14 +24,14 @@ export const FeeCollectionBarChart: React.FC = () => {
   const svgWidth = DEFAULT_FEES.length * barGroupWidth + 40;
 
   return (
-    <View className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs mb-4">
+    <View className="bg-white border border-hairline rounded-3xl p-5 mb-4">
       <View className="flex-row items-center justify-between mb-3">
         <View>
           <Text className="text-base font-display text-slate-900">Fee Recovery & Dues Trend</Text>
           <Text className="text-xs text-slate-600">Monthly collection vs. outstanding balance</Text>
         </View>
-        <View className="bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-          <Text className="text-[10px] font-sans-bold text-emerald-800">88.4% Recovery</Text>
+        <View className="bg-pastel-mint-soft px-2.5 py-1 rounded-full border border-pastel-mint">
+          <Text className="text-xs font-sans-bold text-emerald-800">88.4% Recovery</Text>
         </View>
       </View>
 
@@ -48,7 +48,7 @@ export const FeeCollectionBarChart: React.FC = () => {
       </View>
 
       {/* SVG Bar Chart */}
-      <View className="items-center bg-slate-50 rounded-2xl p-2 border border-slate-200/80">
+      <View className="items-center bg-slate-50 rounded-2xl p-2 border border-hairline">
         <Svg height={chartHeight + 35} width={svgWidth}>
           {[0, 100, 200, 300].map((val) => {
             const y = chartHeight - (val / maxVal) * chartHeight + 10;

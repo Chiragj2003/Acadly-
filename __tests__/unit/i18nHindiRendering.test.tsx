@@ -13,14 +13,14 @@ describe('i18n Hindi Rendering & English Literal Purge', () => {
   });
 
   it('renders LanguageSwitcher in Hindi mode with active Hindi label', async () => {
-    const { getByText, queryByText } = await render(<LanguageSwitcher />);
+    const { getByText, getByLabelText } = await render(<LanguageSwitcher />);
 
-    // Hindi translation active indicator must be present
-    expect(getByText('हिन्दी सक्रिय है')).toBeTruthy();
+    // The row label is translated
     expect(getByText('ऐप की भाषा')).toBeTruthy();
 
-    // The English active string must be absent
-    expect(queryByText('English is active')).toBeNull();
+    // The Hindi option is the selected one; English is not
+    expect(getByLabelText('हिन्दी में बदलें').props.accessibilityState).toEqual(expect.objectContaining({ selected: true }));
+    expect(getByLabelText('Switch to English').props.accessibilityState).toEqual(expect.objectContaining({ selected: false }));
   });
 
   it('verifies that core academic, role, and attendance literals render in Hindi', () => {

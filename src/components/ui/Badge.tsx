@@ -31,32 +31,32 @@ const variantStyles: Record<
   { container: string; text: string; dotColor?: string }
 > = {
   pro: {
-    container: 'bg-indigo-50 border border-indigo-200/80',
+    container: 'bg-pastel-lilac-soft border border-pastel-lilac',
     text: 'text-indigo-900 font-sans-bold',
     dotColor: 'bg-indigo-600',
   },
   live: {
-    container: 'bg-rose-50 border border-rose-200/80',
+    container: 'bg-pastel-pink-soft border border-pastel-pink',
     text: 'text-rose-900 font-sans-bold',
     dotColor: 'bg-rose-600',
   },
   success: {
-    container: 'bg-emerald-50 border border-emerald-200/80',
+    container: 'bg-pastel-mint-soft border border-pastel-mint',
     text: 'text-emerald-900 font-sans-bold',
     dotColor: 'bg-emerald-600',
   },
   active: {
-    container: 'bg-emerald-50 border border-emerald-200/80',
+    container: 'bg-pastel-mint-soft border border-pastel-mint',
     text: 'text-emerald-900 font-sans-bold',
     dotColor: 'bg-emerald-600',
   },
   warning: {
-    container: 'bg-amber-50 border border-amber-200/80',
+    container: 'bg-pastel-butter-soft border border-pastel-butter',
     text: 'text-amber-900 font-sans-bold',
     dotColor: 'bg-amber-600',
   },
   due: {
-    container: 'bg-rose-50 border border-rose-200/80',
+    container: 'bg-pastel-pink-soft border border-pastel-pink',
     text: 'text-rose-900 font-sans-bold',
     dotColor: 'bg-rose-600',
   },
@@ -66,7 +66,7 @@ const variantStyles: Record<
     dotColor: 'bg-blue-600',
   },
   neutral: {
-    container: 'bg-slate-100 border border-slate-200/90',
+    container: 'bg-slate-100 border border-hairline',
     text: 'text-slate-800 font-sans-semibold',
     dotColor: 'bg-slate-500',
   },
@@ -81,12 +81,12 @@ const variantStyles: Record<
     dotColor: 'bg-blue-600',
   },
   negative: {
-    container: 'bg-rose-50 border border-rose-200/80',
+    container: 'bg-pastel-pink-soft border border-pastel-pink',
     text: 'text-rose-900 font-sans-bold',
     dotColor: 'bg-rose-600',
   },
   error: {
-    container: 'bg-rose-50 border border-rose-200/80',
+    container: 'bg-pastel-pink-soft border border-pastel-pink',
     text: 'text-rose-900 font-sans-bold',
     dotColor: 'bg-rose-600',
   },

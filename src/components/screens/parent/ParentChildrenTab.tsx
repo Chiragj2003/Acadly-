@@ -14,7 +14,7 @@ export const ParentChildrenTab: React.FC<ParentChildrenTabProps> = ({
 }) => {
   if (!selectedChild) {
     return (
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-6 items-center justify-center gap-2">
+      <View className="bg-white border border-hairline rounded-3xl p-6 items-center justify-center gap-2">
         <Text className="text-sm font-sans-bold text-slate-800">No Child Selected</Text>
         <Text className="text-xs text-slate-500">Link a child using their student code.</Text>
       </View>
@@ -23,7 +23,7 @@ export const ParentChildrenTab: React.FC<ParentChildrenTabProps> = ({
 
   return (
     <View className="gap-3.5">
-      <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
+      <View className="bg-white border border-hairline rounded-3xl p-5 gap-3.5">
         <View className="flex-row items-center justify-between">
           <Text className="text-sm font-sans-bold text-slate-900">Student Profile & Vitals</Text>
           <TouchableOpacity
@@ -34,7 +34,7 @@ export const ParentChildrenTab: React.FC<ParentChildrenTabProps> = ({
           </TouchableOpacity>
         </View>
 
-        <View className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 gap-2.5">
+        <View className="bg-slate-50 rounded-2xl p-4 border border-hairline gap-2.5">
           <View className="flex-row justify-between">
             <Text className="text-xs text-slate-500">Full Name:</Text>
             <Text className="text-xs font-sans-bold text-slate-800">{selectedChild.full_name}</Text>

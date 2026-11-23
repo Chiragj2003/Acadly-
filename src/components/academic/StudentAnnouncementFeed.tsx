@@ -18,13 +18,13 @@ export const StudentAnnouncementFeed: React.FC<StudentAnnouncementFeedProps> = (
   if (announcements.length === 0) return null;
 
   return (
-    <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
+    <View className="bg-white border border-hairline rounded-3xl p-5 gap-3">
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
           <Megaphone size={16} color="#1C1C1E" />
           <Text className="text-sm font-display text-slate-900">Institute & Batch Notices</Text>
         </View>
-        <Text className="text-[10px] font-sans-bold text-slate-400">Broadcasts</Text>
+        <Text className="text-xs font-sans-bold text-slate-400">Broadcasts</Text>
       </View>
 
       <View className="gap-2.5">
@@ -51,7 +51,7 @@ export const StudentAnnouncementFeed: React.FC<StudentAnnouncementFeedProps> = (
 
                 {item.is_read ? (
                   <View className="bg-slate-200/70 px-2 py-0.5 rounded-md">
-                    <Text className="text-[10px] font-sans-bold text-slate-600">Read</Text>
+                    <Text className="text-xs font-sans-bold text-slate-600">Read</Text>
                   </View>
                 ) : (
                   <TouchableOpacity
@@ -59,7 +59,7 @@ export const StudentAnnouncementFeed: React.FC<StudentAnnouncementFeedProps> = (
                     className="bg-blue-600 px-2 py-0.5 rounded-md flex-row items-center gap-0.5"
                   >
                     <Check size={10} color="#ffffff" />
-                    <Text className="text-[10px] font-sans-bold text-white">Mark Read</Text>
+                    <Text className="text-xs font-sans-bold text-white">Mark Read</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -70,11 +70,11 @@ export const StudentAnnouncementFeed: React.FC<StudentAnnouncementFeedProps> = (
                 {item.content}
               </Text>
 
-              <View className="flex-row items-center justify-between mt-2 pt-2 border-t border-slate-200/60">
-                <Text className="text-[10px] text-slate-500 font-sans">
+              <View className="flex-row items-center justify-between mt-2 pt-2 border-t border-hairline">
+                <Text className="text-xs text-slate-500 font-sans">
                   {item.author_name || 'Faculty Mentor'}
                 </Text>
-                <Text className="text-[10px] text-slate-500 font-sans">
+                <Text className="text-xs text-slate-500 font-sans">
                   {new Date(item.created_at).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',

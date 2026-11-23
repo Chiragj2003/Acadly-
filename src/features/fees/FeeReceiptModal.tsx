@@ -216,7 +216,7 @@ export const FeeReceiptModal: React.FC = () => {
                 <Text className="text-xs text-slate-500 text-center">
                   Central Campus • Center Code: {activeInstitute?.center_code || 'APX-9021'}
                 </Text>
-                <Text className="text-[10px] text-slate-400 font-mono mt-0.5">
+                <Text className="text-xs text-slate-400 font-mono mt-0.5">
                   GSTIN: 08AAACA9921K1ZO
                 </Text>
               </View>
@@ -224,18 +224,18 @@ export const FeeReceiptModal: React.FC = () => {
               {/* Receipt & Student Details */}
               <View className="flex-row items-start justify-between py-1">
                 <View className="gap-1">
-                  <Text className="text-[11px] text-slate-400 uppercase tracking-wider">Receipt No:</Text>
+                  <Text className="text-[11px] text-slate-400">Receipt No:</Text>
                   <Text className="text-xs font-mono font-sans-bold text-blue-600">
                     {selectedReceipt.receipt_number}
                   </Text>
-                  <Text className="text-[11px] text-slate-400 uppercase tracking-wider mt-1">Student:</Text>
+                  <Text className="text-[11px] text-slate-400 mt-1">Student:</Text>
                   <Text className="text-xs font-sans-bold text-slate-900">
                     {selectedReceipt.student_name}
                   </Text>
                 </View>
 
                 <View className="items-end gap-1">
-                  <Text className="text-[11px] text-slate-400 uppercase tracking-wider">Date:</Text>
+                  <Text className="text-[11px] text-slate-400">Date:</Text>
                   <Text className="text-xs font-sans-semibold text-slate-800">
                     {new Date(selectedReceipt.paid_at).toLocaleDateString('en-IN', {
                       day: '2-digit',
@@ -243,13 +243,13 @@ export const FeeReceiptModal: React.FC = () => {
                       year: 'numeric',
                     })}
                   </Text>
-                  <Text className="text-[11px] text-slate-400 uppercase tracking-wider mt-1">Status:</Text>
+                  <Text className="text-[11px] text-slate-400 mt-1">Status:</Text>
                   <Badge label="PAID & VERIFIED" variant="success" />
                 </View>
               </View>
 
               {/* Fee Breakdown Table */}
-              <View className="p-3.5 rounded-xl bg-white border border-slate-200/90 gap-2">
+              <View className="p-3.5 rounded-xl bg-white border border-hairline gap-2">
                 <View className="flex-row items-center justify-between">
                   <Text className="text-xs text-slate-500">Tuition & Academic Base:</Text>
                   <Text className="text-xs font-sans-semibold text-slate-800">{baseAmount}</Text>
@@ -271,11 +271,11 @@ export const FeeReceiptModal: React.FC = () => {
               <View className="flex-row items-center justify-between pt-1">
                 <View className="flex-row items-center gap-1.5">
                   <CheckCircle size={15} color="#059669" />
-                  <Text className="text-xs font-sans-bold text-emerald-800 uppercase tracking-wider">
+                  <Text className="text-xs font-sans-bold text-emerald-800">
                     Reconciled
                   </Text>
                 </View>
-                <Text className="text-[10px] text-slate-400 font-mono">
+                <Text className="text-xs text-slate-400 font-mono">
                   Txn: {selectedReceipt.razorpay_payment_id || 'UPI-GATEWAY'}
                 </Text>
               </View>
@@ -285,7 +285,7 @@ export const FeeReceiptModal: React.FC = () => {
             <View className="flex-row gap-2 pt-1 pb-4">
               <TouchableOpacity
                 onPress={handleDownloadPDF}
-                className="flex-1 bg-blue-600 py-3 rounded-2xl flex-row items-center justify-center gap-2 active:scale-98 shadow-xs"
+                className="flex-1 bg-blue-600 py-3 rounded-2xl flex-row items-center justify-center gap-2 active:scale-98"
               >
                 <Download size={15} color="#ffffff" />
                 <Text className="text-xs font-sans-bold text-white">Download GST PDF</Text>
@@ -293,7 +293,7 @@ export const FeeReceiptModal: React.FC = () => {
 
               <TouchableOpacity
                 onPress={handleShareWhatsApp}
-                className="bg-emerald-50 border border-emerald-200 px-4 py-3 rounded-2xl flex-row items-center justify-center gap-1.5 active:scale-98"
+                className="bg-pastel-mint-soft border border-pastel-mint px-4 py-3 rounded-2xl flex-row items-center justify-center gap-1.5 active:scale-98"
               >
                 <Share2 size={15} color="#059669" />
                 <Text className="text-xs font-sans-bold text-emerald-800">WhatsApp</Text>

@@ -76,7 +76,7 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
   return (
     <View className="gap-4">
       {/* 1. Teacher Code & Live Preview */}
-      <View className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs">
+      <View className="bg-white border border-slate-200 rounded-3xl p-5">
         <View className="flex-row items-center gap-2.5 mb-2">
           <View className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 items-center justify-center">
             <QrCode size={18} color="#1C1C1E" />
@@ -93,7 +93,7 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
           autoCapitalize="characters"
           value={teacherCode}
           onChangeText={setTeacherCode}
-          className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-sm font-display text-slate-800 tracking-wider mt-2 uppercase"
+          className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-sm font-display text-slate-800 mt-2"
         />
 
         {matchedTarget && (
@@ -104,17 +104,17 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
                 <Text className="text-xs font-display text-slate-800">{matchedTarget.name}</Text>
               </View>
               <View className="bg-white/90 px-2 py-0.5 rounded-md border border-blue-200/30">
-                <Text className="text-[10px] font-sans-bold text-blue-600">{matchedTarget.type}</Text>
+                <Text className="text-xs font-sans-bold text-blue-600">{matchedTarget.type}</Text>
               </View>
             </View>
             <Text className="text-[11px] text-slate-800/80 leading-snug">{matchedTarget.detail}</Text>
-            <Text className="text-[10px] font-sans-bold text-blue-600 mt-1">Fee: {matchedTarget.rate}</Text>
+            <Text className="text-xs font-sans-bold text-blue-600 mt-1">Fee: {matchedTarget.rate}</Text>
           </View>
         )}
       </View>
 
       {/* 2. Academic Profile */}
-      <View className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs gap-3">
+      <View className="bg-white border border-slate-200 rounded-3xl p-5 gap-3">
         <View className="flex-row items-center gap-2 mb-1">
           <GraduationCap size={16} color="#1C1C1E" />
           <Text className="text-sm font-display text-slate-800">Student Academic Profile</Text>
@@ -229,7 +229,7 @@ export const JoinFormFields: React.FC<JoinFormFieldsProps> = ({
       </View>
 
       {/* 3. Guardian & Emergency Contact */}
-      <View className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs gap-3">
+      <View className="bg-white border border-slate-200 rounded-3xl p-5 gap-3">
         <View className="flex-row items-center gap-2 mb-1">
           <Phone size={16} color="#1C1C1E" />
           <Text className="text-sm font-display text-slate-800">Guardian Contact & Bio</Text>

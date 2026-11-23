@@ -315,9 +315,9 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
           showsVerticalScrollIndicator={false}
         >
           {/* Metadata Card */}
-          <View className="bg-white border border-slate-200/90 rounded-2xl p-4 gap-3 shadow-xs mb-4">
+          <View className="bg-white border border-hairline rounded-2xl p-4 gap-3 mb-4">
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs font-sans-bold text-slate-600 uppercase tracking-wider">
+              <Text className="text-xs font-sans-bold text-slate-600">
                 1. Assignment Settings
               </Text>
               <Badge label={`${totalCalculatedMarks} Total Marks`} variant="primary" />
@@ -364,7 +364,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
           </View>
 
           {/* AI Quiz Draft Generator Card */}
-          <View className="bg-indigo-50/80 border border-indigo-200 rounded-2xl p-4 gap-3 shadow-xs mb-4">
+          <View className="bg-pastel-lilac-soft border border-pastel-lilac rounded-2xl p-4 gap-3 mb-4">
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={() => setIsAiPanelOpen(!isAiPanelOpen)}
@@ -378,7 +378,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
                   <Text className="text-xs font-display text-indigo-950">
                     Generate Quiz Draft with Gemini AI
                   </Text>
-                  <Text className="text-[10px] text-indigo-700 font-sans">
+                  <Text className="text-xs text-indigo-700 font-sans">
                     Upload or paste lecture notes to auto-generate draft MCQs
                   </Text>
                 </View>
@@ -391,7 +391,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
             </TouchableOpacity>
 
             {isAiPanelOpen && (
-              <View className="gap-2.5 pt-2 border-t border-indigo-200/70">
+              <View className="gap-2.5 pt-2 border-t border-pastel-lilac">
                 <View>
                   <Text className="text-[11px] font-sans-bold text-indigo-900 mb-1">
                     Topic / Concept Focus
@@ -401,7 +401,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
                     placeholderTextColor="#818CF8"
                     value={aiTopic}
                     onChangeText={setAiTopic}
-                    className="bg-white border border-indigo-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-sans"
+                    className="bg-white border border-pastel-lilac rounded-xl px-3 py-2 text-xs text-slate-800 font-sans"
                   />
                 </View>
 
@@ -416,7 +416,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
                     onChangeText={setAiNotes}
                     multiline
                     numberOfLines={4}
-                    className="bg-white border border-indigo-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-sans"
+                    className="bg-white border border-pastel-lilac rounded-xl px-3 py-2 text-xs text-slate-800 font-sans"
                   />
                 </View>
 
@@ -434,8 +434,8 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
                         }`}
                       >
                         <Text
-                          className={`text-[10px] font-sans-bold ${
-                            aiCount === cnt ? 'text-white' : 'text-indigo-800'
+                          className={`text-xs font-sans-bold ${
+                            aiCount === cnt ?'text-white' :'text-indigo-800'
                           }`}
                         >
                           {cnt}
@@ -446,16 +446,16 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
 
                   <View className="flex-row items-center gap-1">
                     <Sparkles size={11} color="#6366F1" />
-                    <Text className="text-[10px] text-indigo-800 font-sans-semibold">
+                    <Text className="text-xs text-indigo-800 font-sans-semibold">
                       Quota: {aiQuota?.remaining ?? 25}/25 left
                     </Text>
                   </View>
                 </View>
 
                 {/* Privacy Disclosure Banner */}
-                <View className="bg-indigo-100/60 p-2 rounded-xl flex-row items-center gap-1.5">
+                <View className="bg-pastel-lilac p-2 rounded-xl flex-row items-center gap-1.5">
                   <ShieldCheck size={13} color="#4338CA" />
-                  <Text className="text-[10px] text-indigo-900 font-sans flex-1">
+                  <Text className="text-xs text-indigo-900 font-sans flex-1">
                     Privacy Guaranteed: Gemini processes only academic notes. Zero student PII is transmitted.
                   </Text>
                 </View>
@@ -485,7 +485,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
 
           {/* Questions Section */}
           <View className="flex-row items-center justify-between mb-2.5 px-1">
-            <Text className="text-xs font-sans-bold text-slate-600 uppercase tracking-wider">
+            <Text className="text-xs font-sans-bold text-slate-600">
               2. Questions ({questions.length})
             </Text>
             <Text className="text-[11px] text-slate-500 font-sans">
@@ -497,7 +497,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
             {questions.map((q, qIndex) => (
               <View
                 key={q.id}
-                className="bg-white border border-slate-200/90 rounded-2xl p-4 gap-3 shadow-xs"
+                className="bg-white border border-hairline rounded-2xl p-4 gap-3"
               >
                 {/* Question Header */}
                 <View className="flex-row items-center justify-between">
@@ -506,7 +506,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
                       <Text className="text-xs font-display text-blue-700">{qIndex + 1}</Text>
                     </View>
                     <View className="bg-slate-100 px-2 py-0.5 rounded-md">
-                      <Text className="text-[10px] font-sans-bold text-slate-700 uppercase">
+                      <Text className="text-xs font-sans-bold text-slate-700">
                         {q.type.replace('_', ' ')}
                       </Text>
                     </View>
@@ -571,7 +571,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
                           )}
 
                           {isCorrect && (
-                            <Text className="text-[10px] font-sans-bold text-emerald-700">
+                            <Text className="text-xs font-sans-bold text-emerald-700">
                               Correct Key
                             </Text>
                           )}
@@ -584,7 +584,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
                 {/* Short Answer / Numerical */}
                 {q.type === 'short_answer' && (
                   <View className="bg-slate-50 border border-slate-200 p-2.5 rounded-xl gap-1">
-                    <Text className="text-[10px] font-sans-bold text-slate-500 uppercase">
+                    <Text className="text-xs font-sans-bold text-slate-500">
                       Expected Answer Key / Value
                     </Text>
                     <TextInput
@@ -611,7 +611,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={() => handleAddQuestion('mcq')}
-              className="flex-1 bg-white border border-slate-200 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95 shadow-xs"
+              className="flex-1 bg-white border border-slate-200 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95"
             >
               <Plus size={13} color="#1C1C1E" />
               <Text className="text-xs font-sans-bold text-blue-600">+ MCQ</Text>
@@ -620,7 +620,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={() => handleAddQuestion('true_false')}
-              className="flex-1 bg-white border border-slate-200 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95 shadow-xs"
+              className="flex-1 bg-white border border-slate-200 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95"
             >
               <Plus size={13} color="#059669" />
               <Text className="text-xs font-sans-bold text-emerald-600">+ True / False</Text>
@@ -629,7 +629,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={() => handleAddQuestion('short_answer')}
-              className="flex-1 bg-white border border-slate-200 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95 shadow-xs"
+              className="flex-1 bg-white border border-slate-200 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 active:scale-95"
             >
               <Plus size={13} color="#7C3AED" />
               <Text className="text-xs font-sans-bold text-purple-600">+ Numerical</Text>
@@ -641,7 +641,7 @@ export const InteractiveDppBuilderModal: React.FC<InteractiveDppBuilderModalProp
             activeOpacity={0.88}
             disabled={isSubmitting}
             onPress={handleConfirmPublish}
-            className="mt-6 bg-blue-600 py-3.5 rounded-2xl items-center shadow-xs active:scale-98"
+            className="mt-6 bg-blue-600 py-3.5 rounded-2xl items-center active:scale-98"
           >
             <Text className="text-xs font-display text-white tracking-wide">
               {isSubmitting ? 'Publishing Form...' : `Publish DPP Form (${questions.length} Questions) →`}

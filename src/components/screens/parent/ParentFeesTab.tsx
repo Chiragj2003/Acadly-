@@ -33,7 +33,7 @@ export const ParentFeesTab: React.FC<ParentFeesTabProps> = ({
       {FEATURE_FEES ? (
         <>
           {/* Tuition Fee Ledger Card */}
-          <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
+          <View className="bg-white border border-hairline rounded-3xl p-5 gap-3.5">
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
                 <Wallet size={18} color="#1C1C1E" />
@@ -42,7 +42,7 @@ export const ParentFeesTab: React.FC<ParentFeesTabProps> = ({
               <Badge label="Due in 12 Days" variant="warning" />
             </View>
 
-            <View className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 gap-2">
+            <View className="bg-slate-50 p-4 rounded-2xl border border-hairline gap-2">
               <View className="flex-row justify-between">
                 <Text className="text-xs text-slate-500">Academic Term Plan</Text>
                 <Text className="text-xs font-sans-bold text-slate-800">
@@ -65,7 +65,7 @@ export const ParentFeesTab: React.FC<ParentFeesTabProps> = ({
 
             <TouchableOpacity
               onPress={() => currentFee && onOpenRazorpay(currentFee)}
-              className="bg-blue-600 py-3 rounded-2xl flex-row items-center justify-center gap-2 shadow-xs active:scale-98"
+              className="bg-blue-600 py-3 rounded-2xl flex-row items-center justify-center gap-2 active:scale-98"
             >
               <CreditCard size={16} color="#ffffff" />
               <Text className="text-xs font-sans-bold text-white">Pay Online via UPI / Netbanking</Text>
@@ -73,7 +73,7 @@ export const ParentFeesTab: React.FC<ParentFeesTabProps> = ({
           </View>
 
           {/* Official Tax Invoices & Receipts */}
-          <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3">
+          <View className="bg-white border border-hairline rounded-3xl p-5 gap-3">
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
                 <FileText size={18} color="#059669" />
@@ -83,7 +83,7 @@ export const ParentFeesTab: React.FC<ParentFeesTabProps> = ({
             </View>
 
             {lastPayment && (
-              <View className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 flex-row items-center justify-between">
+              <View className="bg-slate-50 border border-hairline rounded-2xl p-3.5 flex-row items-center justify-between">
                 <View className="flex-row items-center gap-3 flex-1 pr-2">
                   <View className="w-10 h-10 rounded-xl bg-white border border-slate-200 items-center justify-center">
                     <FileText size={18} color="#1C1C1E" />
@@ -118,7 +118,7 @@ export const ParentFeesTab: React.FC<ParentFeesTabProps> = ({
         </>
       ) : (
         /* Progress Reports Mode */
-        <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs gap-3.5">
+        <View className="bg-white border border-hairline rounded-3xl p-5 gap-3.5">
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
               <Award size={18} color="#1C1C1E" />
@@ -127,7 +127,7 @@ export const ParentFeesTab: React.FC<ParentFeesTabProps> = ({
             <Badge label="Term 1 Evaluated" variant="success" />
           </View>
 
-          <View className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 gap-2.5">
+          <View className="bg-slate-50 p-4 rounded-2xl border border-hairline gap-2.5">
             <View className="flex-row justify-between">
               <Text className="text-xs text-slate-500">Student Name</Text>
               <Text className="text-xs font-sans-bold text-slate-800">{selectedChild?.full_name || 'Student'}</Text>
@@ -140,7 +140,7 @@ export const ParentFeesTab: React.FC<ParentFeesTabProps> = ({
 
           <TouchableOpacity
             onPress={onDownloadReport}
-            className="bg-blue-600 py-3 rounded-2xl flex-row items-center justify-center gap-2 shadow-xs active:scale-98"
+            className="bg-blue-600 py-3 rounded-2xl flex-row items-center justify-center gap-2 active:scale-98"
           >
             <Download size={16} color="#ffffff" />
             <Text className="text-xs font-sans-bold text-white">Download Term Report Card (PDF)</Text>

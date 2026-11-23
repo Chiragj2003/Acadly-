@@ -13,11 +13,11 @@ export const CuteProgressChart: React.FC = () => {
   ];
 
   return (
-    <View className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs mb-4">
+    <View className="bg-white border border-hairline rounded-3xl p-5 mb-4">
       {/* Header with Streak */}
       <View className="flex-row items-center justify-between mb-4">
         <View className="flex-row items-center gap-2">
-          <View className="w-9 h-9 rounded-2xl bg-amber-100 items-center justify-center border border-amber-200">
+          <View className="w-9 h-9 rounded-2xl bg-pastel-butter items-center justify-center border border-pastel-butter">
             <Flame size={18} color="#f59e0b" fill="#f59e0b" />
           </View>
           <View>
@@ -33,29 +33,29 @@ export const CuteProgressChart: React.FC = () => {
 
       {/* Metric Cards Mosaic (from Jacob's dashboard) */}
       <View className="flex-row gap-2.5 mb-5">
-        <View className="flex-1 bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 items-center">
+        <View className="flex-1 bg-slate-50 border border-hairline rounded-2xl p-3.5 items-center">
           <Text className="text-xs font-sans-semibold text-slate-500">Completed</Text>
           <Text className="text-2xl font-display text-slate-900 mt-0.5">48</Text>
-          <Text className="text-[10px] font-sans-bold text-emerald-600 mt-0.5">Lessons 📖</Text>
+          <Text className="text-xs font-sans-bold text-emerald-600 mt-0.5">Lessons 📖</Text>
         </View>
 
-        <View className="flex-1 bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 items-center">
+        <View className="flex-1 bg-slate-50 border border-hairline rounded-2xl p-3.5 items-center">
           <Text className="text-xs font-sans-semibold text-slate-500">Time Invested</Text>
           <Text className="text-2xl font-display text-slate-900 mt-0.5">14.5</Text>
-          <Text className="text-[10px] font-sans-bold text-blue-600 mt-0.5">Hours Studied</Text>
+          <Text className="text-xs font-sans-bold text-blue-600 mt-0.5">Hours Studied</Text>
         </View>
 
-        <View className="flex-1 bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 items-center">
+        <View className="flex-1 bg-slate-50 border border-hairline rounded-2xl p-3.5 items-center">
           <Text className="text-xs font-sans-semibold text-slate-500">Accuracy</Text>
           <Text className="text-2xl font-display text-slate-900 mt-0.5">94%</Text>
-          <Text className="text-[10px] font-sans-bold text-purple-600 mt-0.5">Quiz Score</Text>
+          <Text className="text-xs font-sans-bold text-purple-600 mt-0.5">Quiz Score</Text>
         </View>
       </View>
 
       {/* Pill Bar Chart inspired by Jacob's dashboard */}
-      <View className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80">
+      <View className="bg-slate-50 rounded-2xl p-4 border border-hairline">
         <View className="flex-row items-center justify-between mb-3">
-          <Text className="text-xs font-sans-bold text-slate-800 uppercase tracking-wider">
+          <Text className="text-xs font-sans-bold text-slate-800">
             Daily Study Rhythm
           </Text>
           <Text className="text-[11px] font-sans-semibold text-slate-500">Weekly Avg: 3.5h</Text>
@@ -64,7 +64,7 @@ export const CuteProgressChart: React.FC = () => {
         <View className="flex-row items-end justify-between h-28 pt-2 px-1">
           {weekData.map((item, idx) => (
             <View key={idx} className="items-center gap-1.5 flex-1">
-              <Text className={`text-[10px] font-sans-bold ${item.active ? 'text-blue-600' : 'text-slate-500'}`}>
+              <Text className={`text-xs font-sans-bold ${item.active ?'text-blue-600' :'text-slate-500'}`}>
                 {item.hours}h
               </Text>
               <View
@@ -83,7 +83,7 @@ export const CuteProgressChart: React.FC = () => {
       </View>
 
       {/* Stamp Card inspired by JuJuly Cafe */}
-      <View className="mt-4 pt-3 border-t border-slate-200/80 flex-row items-center justify-between">
+      <View className="mt-4 pt-3 border-t border-hairline flex-row items-center justify-between">
         <View className="flex-row items-center gap-1.5">
           <Sparkles size={14} color="#1C1C1E" />
           <Text className="text-xs font-sans-bold text-slate-800">Attendance Passport:</Text>

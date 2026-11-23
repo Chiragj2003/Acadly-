@@ -30,7 +30,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
               <Text className="text-xs font-sans-bold text-white" numberOfLines={1}>
                 {document.title}
               </Text>
-              <Text className="text-[10px] text-slate-300 font-sans" numberOfLines={1}>
+              <Text className="text-xs text-slate-300 font-sans" numberOfLines={1}>
                 {document.subject} • {document.author}
               </Text>
             </View>
@@ -39,7 +39,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
           <View className="flex-row items-center gap-2 shrink-0">
             <TouchableOpacity
               onPress={() => generateAndSharePDF(document)}
-              className="bg-blue-600 px-3 py-1.5 rounded-xl flex-row items-center gap-1.5 active:scale-95 shadow-xs"
+              className="bg-blue-600 px-3 py-1.5 rounded-xl flex-row items-center gap-1.5 active:scale-95"
             >
               <Download size={13} color="#FFFFFF" />
               <Text className="text-xs font-sans-bold text-white">Save PDF</Text>
@@ -75,7 +75,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
                 Author: <Text className="font-sans-semibold text-slate-500">{document.author}</Text>
               </Text>
               <Text className="text-[11px] font-sans-bold text-slate-700">
-                Type: <Text className="font-sans-semibold text-slate-500 uppercase">{document.category}</Text>
+                Type: <Text className="font-sans-semibold text-slate-500">{document.category}</Text>
               </Text>
             </View>
           </View>
@@ -83,7 +83,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
           {/* Document Sections */}
           <View className="gap-4">
             {document.sections.map((sec, idx) => (
-              <View key={idx} className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 gap-2.5">
+              <View key={idx} className="bg-slate-50 border border-hairline rounded-2xl p-4 gap-2.5">
                 <View className="flex-row items-center gap-2">
                   <View className="w-6 h-6 rounded-lg bg-blue-100 items-center justify-center">
                     <Text className="text-xs font-display text-blue-700">{idx + 1}</Text>

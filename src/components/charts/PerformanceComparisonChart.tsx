@@ -66,7 +66,7 @@ export const PerformanceComparisonChart: React.FC<PerformanceComparisonChartProp
     .join(' ');
 
   return (
-    <View className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs mb-3">
+    <View className="bg-white border border-hairline rounded-3xl p-5 mb-3">
       {/* Title & Legend */}
       <View className="mb-3">
         <Text className="text-base font-display text-slate-900">{title}</Text>
@@ -90,7 +90,7 @@ export const PerformanceComparisonChart: React.FC<PerformanceComparisonChartProp
       </View>
 
       {/* SVG Performance Chart Canvas */}
-      <View className="items-center bg-slate-50/70 rounded-2xl p-2.5 border border-slate-200/80 overflow-hidden">
+      <View className="items-center bg-slate-50/70 rounded-2xl p-2.5 border border-hairline overflow-hidden">
         <Svg height={chartHeight + 35} width="100%" viewBox={`0 0 ${svgWidth} ${chartHeight + 35}`}>
           <Defs>
             <LinearGradient id="studentFill" x1="0" y1="0" x2="0" y2="1">
@@ -203,37 +203,37 @@ export const PerformanceComparisonChart: React.FC<PerformanceComparisonChartProp
       {/* Snapshot Vitals Footer - 100% Calculated from Live Data */}
       <View className="flex-row items-center justify-between mt-3 pt-3 border-t border-slate-100">
         <View className="items-center flex-1 px-1">
-          <Text className="text-[10px] font-sans-bold text-slate-400 uppercase tracking-wider">
+          <Text className="text-xs font-sans-bold text-slate-400">
             Latest Score
           </Text>
           <Text className="text-sm font-display text-slate-900 mt-0.5">
             {latestTest.studentScore}/{latestTest.maxScore}
           </Text>
-          <Text className="text-[10px] font-sans-bold text-blue-600">{studentPct}% Mark</Text>
+          <Text className="text-xs font-sans-bold text-blue-600">{studentPct}% Mark</Text>
         </View>
 
         <View className="w-[1px] h-7 bg-slate-200" />
 
         <View className="items-center flex-1 px-1">
-          <Text className="text-[10px] font-sans-bold text-slate-400 uppercase tracking-wider">
+          <Text className="text-xs font-sans-bold text-slate-400">
             Vs. Batch Avg
           </Text>
           <Text className={`text-sm font-display mt-0.5 ${avgGap >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
             {avgGap >= 0 ? `+${avgGap}` : avgGap} pts
           </Text>
-          <Text className="text-[10px] font-sans-semibold text-slate-500">Above Average</Text>
+          <Text className="text-xs font-sans-semibold text-slate-500">Above Average</Text>
         </View>
 
         <View className="w-[1px] h-7 bg-slate-200" />
 
         <View className="items-center flex-1 px-1">
-          <Text className="text-[10px] font-sans-bold text-slate-400 uppercase tracking-wider">
+          <Text className="text-xs font-sans-bold text-slate-400">
             Gap to Topper
           </Text>
           <Text className={`text-sm font-display mt-0.5 ${topperGap >= 0 ? 'text-emerald-600' : 'text-amber-600'}`}>
             {topperGap >= 0 ? 'Tied #1' : `${topperGap} pts`}
           </Text>
-          <Text className="text-[10px] font-sans-semibold text-slate-500">Top 5% Cohort</Text>
+          <Text className="text-xs font-sans-semibold text-slate-500">Top 5% Cohort</Text>
         </View>
       </View>
     </View>

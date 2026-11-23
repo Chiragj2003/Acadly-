@@ -75,7 +75,7 @@ export const RazorpayCheckoutModal: React.FC = () => {
 
             {/* Payment Method Selector */}
             <View className="gap-2">
-              <Text className="text-xs font-sans-bold text-on-surface-variant uppercase tracking-wider px-1">
+              <Text className="text-xs font-sans-bold text-on-surface-variant px-1">
                 Select Payment Mode
               </Text>
 

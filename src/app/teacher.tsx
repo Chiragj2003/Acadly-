@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, Alert, ActivityIndicator, Share } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
@@ -34,7 +34,6 @@ import { type PDFDocumentContent } from '@/services/dummyPdfService';
 import { type AttendanceRecord, type Submission } from '@/types/database';
 import {
   TeacherBatchFocus,
-  TeacherHomeTab,
   TeacherAttendanceTab,
   TeacherPublishTab,
   TeacherExamsChatTab,
@@ -43,6 +42,7 @@ import {
   useTeacherActions,
 } from '@/components/screens/teacher';
 import { TeacherToday } from '@/components/screens/teacher/TeacherToday';
+import { confirmAction } from '@/lib/confirm';
 
 export default function TeacherScreen() {
   const { t } = useTranslation();
@@ -187,23 +187,16 @@ export default function TeacherScreen() {
     setLocalAttendance((prev) => ({ ...prev, [studentId]: status }));
   }, []);
 
-  const handleLogout = () => {
-    Alert.alert(
-      t('common.signOut', 'Sign Out 🚪'),
-      t('teacher.signOutPrompt', 'Are you sure you want to sign out from the Teacher Desk?'),
-      [
-        {
-          text: t('common.signOut', 'Sign Out'),
-          style: 'destructive',
-          onPress: async () => {
-            await signOut();
-            router.replace('/auth');
-          },
-        },
-        { text: t('common.cancel', 'Cancel'), style: 'cancel' },
-      ]
+  const handleLogout = () =>
+    confirmAction(
+      t('common.signOut', 'Sign out'),
+      t('teacher.signOutPrompt', 'Sign out of Acadly on this device?'),
+      t('common.signOut', 'Sign out'),
+      async () => {
+        await signOut();
+        router.replace('/auth');
+      }
     );
-  };
 
   const papersToGrade = submissions.filter((sub) => sub.status === 'submitted').length;
 
@@ -258,8 +251,7 @@ export default function TeacherScreen() {
         variant: 'calm',
         profileInitials: initials,
         onNotificationPress: () => setIsNotificationOpen(true),
-        onProfilePress: handleLogout,
-        onLogoutPress: handleLogout,
+        onProfilePress: () => setActiveTab('profile'),
       }}
       contentContainerClassName="gap-5 px-5 py-3"
       footer={
@@ -275,6 +267,15 @@ export default function TeacherScreen() {
         />
       }
     >
+      {/* Batch switcher sits on top of every tab except Profile (which lists batches itself). */}
+      {activeTab !== 'profile' && batchesList.length > 1 && (
+        <TeacherBatchFocus
+          batches={batchesList}
+          selectedBatchId={selectedBatchId}
+          onSelectBatch={handleSelectBatch}
+        />
+      )}
+
       {activeTab === 'home' && (
         <TeacherToday
           firstName={(user?.full_name || '').split(' ')[0] || t('teacher.there', 'there')}
@@ -292,30 +293,6 @@ export default function TeacherScreen() {
           onGrade={() => setActiveTab('publish')}
           onReviewRequests={() => router.push('/verify-students')}
           onOpenDoubts={() => router.push('/community')}
-        />
-      )}
-
-      <TeacherBatchFocus
-        batches={batchesList}
-        selectedBatchId={selectedBatchId}
-        onSelectBatch={handleSelectBatch}
-        currentBatch={activeBatch}
-      />
-
-      {activeTab === 'home' && (
-        <TeacherHomeTab
-          teacherMode={teacherMode}
-          teacherProfile={teacherProfile}
-          pendingJoinCount={pendingJoinCount}
-          onOpenDualMode={() => setIsDualModeOpen(true)}
-          onCopyTeacherCode={shareTeacherCode}
-          onShareTeacherCode={shareTeacherCode}
-          onReviewPending={() => router.push('/verify-students')}
-          onNavigateTab={setActiveTab}
-          onOpenCreateDpp={() => setIsCreateAssignmentOpen(true)}
-          onOpenMarksEntry={() => setMarksEntryOpen(true)}
-          onOpenChat={() => router.push('/chat')}
-          onOpenAnnouncement={() => setIsAnnouncementOpen(true)}
         />
       )}
 

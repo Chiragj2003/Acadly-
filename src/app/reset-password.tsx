@@ -106,13 +106,13 @@ export default function ResetPasswordScreen() {
         </View>
 
         {errorMsg && (
-          <View className="p-3.5 rounded-xl bg-red-50 border border-red-200 mb-5">
+          <View className="p-3.5 rounded-xl bg-pastel-pink-soft border border-pastel-pink mb-5">
             <Text className="text-xs font-sans-bold text-red-700">{errorMsg}</Text>
           </View>
         )}
 
         {isSuccess && (
-          <View className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 mb-5 flex-row items-center gap-2">
+          <View className="p-3.5 rounded-xl bg-pastel-mint-soft border border-pastel-mint mb-5 flex-row items-center gap-2">
             <CheckCircle2 size={16} color="#059669" />
             <Text className="text-xs font-sans-bold text-emerald-800">
               Password successfully updated! Redirecting...
@@ -122,7 +122,7 @@ export default function ResetPasswordScreen() {
 
         <View className="gap-4 mb-6">
           <View>
-            <Text className="text-xs font-sans-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+            <Text className="text-xs font-sans-bold text-slate-700 mb-1.5">
               New Password
             </Text>
             <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3">
@@ -143,7 +143,7 @@ export default function ResetPasswordScreen() {
           </View>
 
           <View>
-            <Text className="text-xs font-sans-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+            <Text className="text-xs font-sans-bold text-slate-700 mb-1.5">
               Confirm New Password
             </Text>
             <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3">
