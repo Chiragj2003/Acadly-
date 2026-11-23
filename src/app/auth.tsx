@@ -7,10 +7,16 @@ import { type UserRole } from '@/types/database';
 import { RoleSelector } from '@/components/screens/auth/RoleSelector';
 import { DisplayTitle, Eyebrow } from '@/components/ui';
 
+const greeting = () => {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+};
+
 /**
- * Sign-in, screen 1 of 2: "Who's using Acadly today?"
- * The chosen role shapes sign-up (what we ask for); where a user lands after
- * signing in always comes from their server-granted role.
+ * Sign-in, screen 1 of 2: greeting + "Who's using Acadly today?" role picker.
+ * Screen 2 (/sign-in) is email + password. Role details are set up inside the app.
  */
 export default function ChooseRoleScreen() {
   const { t } = useTranslation();
@@ -36,10 +42,8 @@ export default function ChooseRoleScreen() {
         </View>
 
         <View className="mt-6 mb-6 gap-2">
+          <Eyebrow center className="text-[15px]">{greeting()}</Eyebrow>
           <DisplayTitle center>{t('auth.whoTitle', 'Who’s using\nAcadly today?')}</DisplayTitle>
-          <Eyebrow center className="text-[15px] leading-[21px] px-4">
-            {t('auth.whoSubtitle', 'You can add more roles later — a teacher can also run their own tuition.')}
-          </Eyebrow>
         </View>
 
         <RoleSelector selectedRole={role} onSelectRole={setRole} />
@@ -48,20 +52,11 @@ export default function ChooseRoleScreen() {
       <View className="px-5 gap-2">
         <Pressable
           accessibilityRole="button"
-          onPress={() => router.push({ pathname: '/sign-in', params: { role, mode: 'signup' } })}
+          onPress={() => router.push({ pathname: '/sign-in', params: { role } })}
           className="min-h-[56px] rounded-full bg-ink items-center justify-center active:opacity-90"
         >
           <Text className="font-sans-bold text-white text-[17px]">
             {t('auth.continueAs', 'Continue as {{role}}', { role: roleLabel[role] })}
-          </Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.push({ pathname: '/sign-in', params: { role, mode: 'signin' } })}
-          className="min-h-[48px] items-center justify-center"
-        >
-          <Text className="font-sans-bold text-ink text-[15px]">
-            {t('auth.haveAccount', 'I already have an account')}
           </Text>
         </Pressable>
       </View>

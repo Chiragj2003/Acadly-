@@ -32,13 +32,19 @@ export interface AuthContextType {
   loading: boolean;
   signIn: (identifier: string, password?: string, role?: UserRole) => Promise<{ success: boolean; role?: UserRole; error?: string }>;
   signInWithGoogle: (role: UserRole) => Promise<{ success: boolean; error?: string }>;
+  /** Name + email + password. When email confirmation is on, a 6-digit code is emailed. */
   signUp: (
     fullName: string,
     email: string,
+    password: string
+  ) => Promise<{ success: boolean; role?: UserRole; needsOtp?: boolean; error?: string }>;
+  verifySignUpOtp: (email: string, code: string) => Promise<{ success: boolean; role?: UserRole; error?: string }>;
+  resendSignUpOtp: (email: string) => Promise<{ success: boolean; error?: string }>;
+  /** In-app role setup after sign-in: create a tuition, join as teacher, or link a child. */
+  completeRoleSetup: (
     role: UserRole,
-    password?: string,
-    onboarding?: SignUpOnboarding
-  ) => Promise<{ success: boolean; role?: UserRole; needsEmailConfirmation?: boolean; error?: string }>;
+    details: SignUpOnboarding
+  ) => Promise<{ success: boolean; role?: UserRole; error?: string }>;
   sendPasswordReset: (email: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   switchRole: (role: UserRole) => void;
@@ -76,9 +82,38 @@ export const roleFromClaims = (appMetadata: Record<string, unknown> | undefined)
   return role && VALID_ROLES.includes(role) ? role : 'student';
 };
 
+export const BACKEND_NOT_SET_UP_MESSAGE = isLocalSupabase
+  ? 'The local Acadly database is empty. Run "npx supabase db reset" to create the tables and demo accounts.'
+  : 'Acadly’s database isn’t set up yet. Run supabase/hosted_setup.sql in your Supabase project’s SQL Editor, then try again.';
+
+/** PostgREST codes for "table / function not found": the schema was never applied. */
+const isMissingSchemaError = (code?: string, message?: string) =>
+  code === 'PGRST205' ||
+  code === 'PGRST202' ||
+  code === '42P01' ||
+  /could not find the (table|function)/i.test(message || '');
+
+/**
+ * True when the database has Acadly's tables. With RLS an anonymous read returns an
+ * empty list when the table exists, and a PGRST205 error when it doesn't.
+ * Network errors count as "unknown" (true) so they surface as connection problems instead.
+ */
+export const isBackendSetUp = async (): Promise<boolean> => {
+  if (!isSupabaseConfigured) return false;
+  try {
+    const { error } = await supabase.from('institutes').select('id').limit(1);
+    return !(error && isMissingSchemaError(error.code, error.message));
+  } catch {
+    return true;
+  }
+};
+
 /** Human message for auth failures, including the common "local server is down" case. */
 export const describeAuthError = (message: string | undefined): string => {
   const msg = (message || '').toLowerCase();
+  if (isMissingSchemaError(undefined, msg) || msg.includes('database error saving new user')) {
+    return BACKEND_NOT_SET_UP_MESSAGE;
+  }
   if (msg.includes('invalid login credentials')) {
     return 'That email and password don\u2019t match. Check them and try again.';
   }
@@ -300,6 +335,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error || !data.user) {
+        // "Wrong password" on an empty database is misleading: no accounts exist yet.
+        if (error?.message?.toLowerCase().includes('invalid login credentials') && !(await isBackendSetUp())) {
+          return { success: false, error: BACKEND_NOT_SET_UP_MESSAGE };
+        }
         return { success: false, error: describeAuthError(error?.message) };
       }
 
@@ -372,83 +411,131 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /** Re-reads the session so newly granted app_metadata (role / institute) applies. */
+  const refreshGrantedRole = async (): Promise<UserRole> => {
+    const { data: refreshed } = await supabase.auth.refreshSession();
+    await syncSessionUser();
+    return roleFromClaims(refreshed.session?.user.app_metadata);
+  };
+
   /**
-   * Secure Sign Up:
-   * - Accepts typed password (>= 6 chars required; no hardcoded fallback).
-   * - Enforces server-side role assignment via RPCs or trigger.
+   * Sign up with name, email and password only. Everyone starts as a student;
+   * teacher / institute / parent access is granted later inside the app (/setup).
    */
-  const signUp = async (
-    fullName: string,
-    email: string,
-    role: UserRole,
-    password?: string,
-    onboarding: SignUpOnboarding = {}
-  ) => {
+  const signUp = async (fullName: string, email: string, password: string) => {
     setLoading(true);
     try {
       if (!isSupabaseConfigured) {
         return { success: false, error: 'Database service is not configured.' };
       }
-
       const cleanEmail = email.trim().toLowerCase();
-      const userPassword = password ? password.trim() : '';
-
-      if (!userPassword || userPassword.length < 8) {
+      if (!fullName.trim()) return { success: false, error: 'Enter your full name.' };
+      if (!password || password.length < 8) {
         return { success: false, error: 'Use a password with at least 8 characters.' };
+      }
+      // Don't create a half-made auth user when the tables don't exist yet.
+      if (!(await isBackendSetUp())) {
+        return { success: false, error: BACKEND_NOT_SET_UP_MESSAGE };
       }
 
       const { data, error } = await supabase.auth.signUp({
         email: cleanEmail,
-        password: userPassword,
-        // Only the display name goes in user_metadata; roles are granted server-side.
+        password,
         options: { data: { full_name: fullName.trim() } },
       });
+      if (error) return { success: false, error: describeAuthError(error.message) };
 
-      if (error) {
-        return { success: false, error: describeAuthError(error.message) };
+      // Supabase returns a user with no identities when the email is already registered.
+      if (data.user?.identities && data.user.identities.length === 0) {
+        return { success: false, error: 'An account with this email already exists. Try signing in instead.' };
       }
-      if (!data.session) {
-        // Email confirmation is on: role setup runs after the first sign-in.
-        return { success: true, role: 'student' as UserRole, needsEmailConfirmation: true };
-      }
+      if (!data.session) return { success: true, needsOtp: true };
 
-      // Grant the requested role through the server functions that are allowed to.
-      let rpcError: string | null = null;
-      if (role === 'admin' && onboarding.instituteName) {
-        const code = onboarding.instituteName.replace(/[^A-Za-z0-9]/g, '').slice(0, 6).toUpperCase() +
-          Math.floor(100 + Math.random() * 900);
-        const { error: e } = await supabase.rpc('create_institute_and_admin', {
-          p_name: onboarding.instituteName.trim(),
-          p_center_code: code,
-          p_city: onboarding.instituteCity?.trim() || '',
-          p_phone: onboarding.institutePhone?.trim() || undefined,
-          p_subjects: onboarding.instituteSubjects ?? [],
-        });
-        rpcError = e?.message ?? null;
-      } else if (role === 'teacher' && onboarding.teacherInstituteCode) {
-        const { error: e } = await supabase.rpc('join_institute_as_teacher', {
-          p_code: onboarding.teacherInstituteCode.trim().toUpperCase(),
-          p_qualification: onboarding.teacherQualification || undefined,
-          p_specialization_subjects: onboarding.teacherSubjects ?? [],
-          p_experience_years: onboarding.teacherExperienceYears ?? 0,
-        });
-        rpcError = e?.message ?? null;
-      } else if (role === 'parent' && onboarding.parentStudentCode) {
-        const { error: e } = await supabase.rpc('link_child_by_code', {
-          p_student_code: onboarding.parentStudentCode.trim().toUpperCase(),
-        });
-        rpcError = e?.message ?? null;
-      }
-
-      // Pick up the new app_metadata (role / institute) granted by the RPC.
-      const { data: refreshed } = await supabase.auth.refreshSession();
       await syncSessionUser();
-      const grantedRole = roleFromClaims(refreshed.session?.user.app_metadata ?? data.session.user.app_metadata);
+      return { success: true, role: roleFromClaims(data.session.user.app_metadata) };
+    } catch (e: unknown) {
+      return { success: false, error: describeAuthError(e instanceof Error ? e.message : undefined) };
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      if (rpcError) {
-        return { success: true, role: grantedRole, error: rpcError };
+  /** Checks the 6-digit code from the sign-up email and signs the user in. */
+  const verifySignUpOtp = async (email: string, code: string) => {
+    setLoading(true);
+    try {
+      const token = code.replace(/\D/g, '');
+      if (token.length < 6) return { success: false, error: 'Enter the 6-digit code from your email.' };
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: email.trim().toLowerCase(),
+        token,
+        type: 'signup',
+      });
+      if (error || !data.session) {
+        const msg = (error?.message || '').toLowerCase();
+        return {
+          success: false,
+          error:
+            msg.includes('expired') || msg.includes('invalid')
+              ? 'That code is wrong or has expired. Check the email or send a new code.'
+              : describeAuthError(error?.message),
+        };
       }
-      return { success: true, role: grantedRole };
+      await syncSessionUser();
+      return { success: true, role: roleFromClaims(data.session.user.app_metadata) };
+    } catch (e: unknown) {
+      return { success: false, error: describeAuthError(e instanceof Error ? e.message : undefined) };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resendSignUpOtp = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resend({ type: 'signup', email: email.trim().toLowerCase() });
+      if (error) return { success: false, error: describeAuthError(error.message) };
+      return { success: true };
+    } catch (e: unknown) {
+      return { success: false, error: describeAuthError(e instanceof Error ? e.message : undefined) };
+    }
+  };
+
+  /** Grants teacher / institute / parent access through the server functions allowed to do it. */
+  const completeRoleSetup = async (role: UserRole, details: SignUpOnboarding) => {
+    setLoading(true);
+    try {
+      let rpcError: string | null = null;
+      if (role === 'admin') {
+        const name = details.instituteName?.trim();
+        if (!name) return { success: false, error: 'Enter the name of your tuition or institute.' };
+        const code =
+          name.replace(/[^A-Za-z0-9]/g, '').slice(0, 6).toUpperCase() + Math.floor(100 + Math.random() * 900);
+        const { error } = await supabase.rpc('create_institute_and_admin', {
+          p_name: name,
+          p_center_code: code,
+          p_city: details.instituteCity?.trim() || '',
+          p_phone: details.institutePhone?.trim() || undefined,
+          p_subjects: details.instituteSubjects ?? [],
+        });
+        rpcError = error?.message ?? null;
+      } else if (role === 'teacher') {
+        const code = details.teacherInstituteCode?.trim().toUpperCase();
+        if (!code) return { success: false, error: 'Enter the code your institute gave you.' };
+        const { error } = await supabase.rpc('join_institute_as_teacher', {
+          p_code: code,
+          p_qualification: details.teacherQualification || undefined,
+          p_specialization_subjects: details.teacherSubjects ?? [],
+          p_experience_years: details.teacherExperienceYears ?? 0,
+        });
+        rpcError = error?.message ?? null;
+      } else if (role === 'parent') {
+        const code = details.parentStudentCode?.trim().toUpperCase();
+        if (!code) return { success: false, error: 'Enter your child’s student code.' };
+        const { error } = await supabase.rpc('link_child_by_code', { p_student_code: code });
+        rpcError = error?.message ?? null;
+      }
+      if (rpcError) return { success: false, error: describeAuthError(rpcError) };
+      return { success: true, role: await refreshGrantedRole() };
     } catch (e: unknown) {
       return { success: false, error: describeAuthError(e instanceof Error ? e.message : undefined) };
     } finally {
@@ -625,6 +712,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signIn,
         signInWithGoogle,
         signUp,
+        verifySignUpOtp,
+        resendSignUpOtp,
+        completeRoleSetup,
         sendPasswordReset,
         signOut,
         switchRole,

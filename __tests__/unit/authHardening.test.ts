@@ -1,5 +1,5 @@
 import { resolveDevSupabaseUrl } from '@/lib/supabase';
-import { roleFromClaims, describeAuthError } from '@/context/AuthContext';
+import { roleFromClaims, describeAuthError, BACKEND_NOT_SET_UP_MESSAGE } from '@/context/AuthContext';
 
 describe('resolveDevSupabaseUrl', () => {
   it('points a stale LAN IP at the current dev machine', () => {
@@ -37,5 +37,11 @@ describe('describeAuthError', () => {
 
   it('explains network failures', () => {
     expect(describeAuthError('TypeError: Network request failed')).toMatch(/reach/);
+  });
+
+  it('says the database is not set up when tables or functions are missing', () => {
+    expect(describeAuthError("Could not find the table 'public.institutes' in the schema cache")).toBe(BACKEND_NOT_SET_UP_MESSAGE);
+    expect(describeAuthError('Could not find the function public.create_institute_and_admin')).toBe(BACKEND_NOT_SET_UP_MESSAGE);
+    expect(describeAuthError('Database error saving new user')).toBe(BACKEND_NOT_SET_UP_MESSAGE);
   });
 });
