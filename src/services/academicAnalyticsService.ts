@@ -149,6 +149,19 @@ export async function computeAttendanceTrend(
   };
 }
 
+/** Rank in the latest (by exam date) non-absent result; 0 when there is none. */
+function latestRank(
+  rows: { batch_rank?: number | null; is_absent?: boolean | null; examination?: unknown }[]
+): number {
+  const dateOf = (r: { examination?: unknown }) => {
+    const ex = Array.isArray(r.examination) ? r.examination[0] : r.examination;
+    return ex && typeof ex === 'object' && 'exam_date' in ex ? String((ex as { exam_date: string }).exam_date) : '';
+  };
+  const ranked = rows.filter((r) => !r.is_absent && (r.batch_rank ?? 0) > 0);
+  ranked.sort((a, b) => dateOf(b).localeCompare(dateOf(a)));
+  return ranked[0]?.batch_rank ?? 0;
+}
+
 /**
  * Compute subject mastery and comprehensive academic exam report for a student.
  */
@@ -279,7 +292,8 @@ export async function computeSubjectMastery(
   return {
     overallPercentage,
     totalExamsTaken: rawResults.length,
-    rankInBatch: rawResults[0]?.batch_rank || 1,
+    // Rank in the most recent test the student sat (0 = no ranked result yet; it used to default to 1).
+    rankInBatch: latestRank(rawResults),
     subjectMastery,
     recentResults,
   };

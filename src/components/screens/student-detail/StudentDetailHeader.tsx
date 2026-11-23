@@ -30,9 +30,11 @@ export const StudentDetailHeader: React.FC<StudentDetailHeaderProps> = ({
         </View>
 
         {student.rank > 0 && (
-          <View className="bg-pastel-butter-soft px-3 py-1 rounded-full border border-pastel-butter">
-            <Text className="text-[11px] font-sans-bold text-amber-800">
-              Rank #{student.rank} ({student.percentile}%ile)
+          <View className="bg-pastel-butter px-3 py-1 rounded-full">
+            <Text className="text-xs font-sans-bold text-ink">
+              {/* percentile carries the average test score from student_roster_stats */}
+              Rank {student.rank}
+              {student.percentile > 0 ? ` · avg ${student.percentile}%` : ''}
             </Text>
           </View>
         )}

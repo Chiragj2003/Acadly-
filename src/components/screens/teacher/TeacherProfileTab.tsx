@@ -62,8 +62,10 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
   const [feeFilter, setFeeFilter] = useState<FeeFilter>('all');
 
   const feeOf = (st: Student360Profile) => localFeeOverrides[st.id] || st.feeStatus || '';
+  // feeStatus is 'paid' | 'due' from the roster stats view, or '' when there is no fee record.
+  const isDue = (status: string) => status === 'due' || /pending|overdue|due/i.test(status);
   const paidCount = studentsRoster.filter((st) => isPaid(feeOf(st))).length;
-  const dueCount = studentsRoster.length - paidCount;
+  const dueCount = studentsRoster.filter((st) => isDue(feeOf(st))).length;
 
   const q = query.trim().toLowerCase();
   const students = studentsRoster.filter((st) => {
@@ -74,7 +76,7 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
       (st.batchName || '').toLowerCase().includes(q);
     if (!matches) return false;
     if (feeFilter === 'paid') return isPaid(feeOf(st));
-    if (feeFilter === 'due') return !isPaid(feeOf(st));
+    if (feeFilter === 'due') return isDue(feeOf(st));
     return true;
   });
 
@@ -218,10 +220,13 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
         ) : (
           <Group>
             {students.map((st, i) => {
-              const paid = isPaid(feeOf(st));
+              const fee = feeOf(st);
+              const paid = isPaid(fee);
+              const due = isDue(fee);
               const meta = [
                 st.rollNumber,
                 st.overallAttendance > 0 ? `${st.overallAttendance}% attendance` : null,
+                st.rank > 0 ? `rank ${st.rank}` : null,
               ]
                 .filter(Boolean)
                 .join(' · ');
@@ -243,9 +248,11 @@ export const TeacherProfileTab: React.FC<TeacherProfileTabProps> = ({
                       </Text>
                     </View>
                   </Pressable>
-                  <View className={`px-2.5 py-1 rounded-xl ${paid ? 'bg-pastel-mint' : 'bg-pastel-butter'}`}>
-                    <Text className="font-sans-bold text-ink text-xs">{paid ? 'Paid' : 'Fee due'}</Text>
-                  </View>
+                  {paid || due ? (
+                    <View className={`px-2.5 py-1 rounded-xl ${paid ? 'bg-pastel-mint' : 'bg-pastel-butter'}`}>
+                      <Text className="font-sans-bold text-ink text-xs">{paid ? 'Paid' : 'Fee due'}</Text>
+                    </View>
+                  ) : null}
                   {st.guardianPhone ? (
                     <Pressable
                       accessibilityRole="button"

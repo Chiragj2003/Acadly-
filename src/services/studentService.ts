@@ -26,7 +26,50 @@ export interface StudentListItem {
   overallAttendance?: number;
   rank?: number;
   percentile?: number;
+  /** From the student_roster_stats view (supabase/demo_data.sql). */
+  batch_name?: string;
+  avg_percentage?: number;
+  fee_status?: 'paid' | 'due' | null;
+  fee_due_amount?: number;
 }
+
+interface RosterStatsRow {
+  student_id: string;
+  batch_name: string | null;
+  attendance_pct: number | null;
+  latest_rank: number | null;
+  avg_percentage: number | null;
+  fee_status: 'paid' | 'due' | null;
+  fee_due_amount: number | null;
+}
+
+/**
+ * Adds real attendance %, latest test rank, batch name and fee status from the
+ * student_roster_stats view. If the view isn't installed yet the roster still loads,
+ * just without those numbers (previously they were always 0 / blank).
+ */
+const attachRosterStats = async (rows: StudentListItem[]): Promise<StudentListItem[]> => {
+  if (rows.length === 0) return rows;
+  const { data, error } = await supabase
+    .from('student_roster_stats' as never)
+    .select('student_id, batch_name, attendance_pct, latest_rank, avg_percentage, fee_status, fee_due_amount')
+    .in('student_id', rows.map((r) => r.id));
+  if (error || !data) return rows;
+  const byId = new Map((data as unknown as RosterStatsRow[]).map((s) => [s.student_id, s]));
+  return rows.map((r) => {
+    const s = byId.get(r.id);
+    if (!s) return r;
+    return {
+      ...r,
+      batch_name: s.batch_name ?? undefined,
+      overallAttendance: s.attendance_pct ?? undefined,
+      rank: s.latest_rank ?? undefined,
+      avg_percentage: s.avg_percentage ?? undefined,
+      fee_status: s.fee_status,
+      fee_due_amount: s.fee_due_amount ?? undefined,
+    };
+  });
+};
 
 /**
  * Fetch students roster for an institute with cursor-based pagination (limit 30).
@@ -82,7 +125,7 @@ export const getStudentsRoster = async (
   const rows = (data || []) as unknown as StudentListItem[];
   const nextCursor = rows.length === limit ? rows[rows.length - 1].created_at : null;
 
-  return { students: rows, nextCursor };
+  return { students: await attachRosterStats(rows), nextCursor };
 };
 
 /**
@@ -164,6 +207,8 @@ export const getStudent360Profile = async (
   if (error) {
     throw new Error(`Failed to load student profile: ${error.message}`);
   }
+  if (!data) return null;
 
-  return data as StudentListItem | null;
+  const [withStats] = await attachRosterStats([data as unknown as StudentListItem]);
+  return withStats;
 };

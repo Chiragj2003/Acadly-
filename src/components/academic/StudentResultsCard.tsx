@@ -58,11 +58,11 @@ export const StudentResultsCard: React.FC<StudentResultsCardProps> = ({
             <Award size={18} color="#1C1C1E" />
             <Text className="text-sm font-sans-bold text-slate-900">Academic Mastery & Results</Text>
           </View>
-          <View className="bg-blue-100 px-2.5 py-1 rounded-full border border-blue-200">
-            <Text className="text-[11px] font-sans-bold text-blue-800">
-              Rank #{report.rankInBatch || 1}
-            </Text>
-          </View>
+          {report.rankInBatch ? (
+            <View className="bg-pastel-sky px-2.5 py-1 rounded-full">
+              <Text className="text-xs font-sans-bold text-ink">Rank {report.rankInBatch}</Text>
+            </View>
+          ) : null}
         </View>
 
         {/* Aggregate Stats */}
